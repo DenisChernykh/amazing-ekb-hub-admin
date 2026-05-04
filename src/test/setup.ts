@@ -13,3 +13,14 @@ Object.defineProperty(window, 'matchMedia', {
     removeListener: vi.fn(),
   }),
 })
+
+class ResizeObserverMock implements ResizeObserver {
+  disconnect = vi.fn()
+  observe = vi.fn()
+  unobserve = vi.fn()
+}
+
+Object.defineProperty(window, 'ResizeObserver', {
+  configurable: true,
+  value: ResizeObserverMock,
+})

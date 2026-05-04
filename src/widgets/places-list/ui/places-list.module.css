@@ -1,0 +1,16 @@
+.title {
+  margin: 0;
+}
+
+.card :global(.ant-card-body) {
+  padding: 0;
+}
+
+.footer {
+  padding: 16px;
+  border-top: 1px solid var(--places-list-border);
+}
+
+.error {
+  margin: 16px;
+}

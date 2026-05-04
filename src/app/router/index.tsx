@@ -1,7 +1,23 @@
 import { DashboardPage } from '@/pages/dashboard/ui/dashboard-page'
 import { LoginPage } from '@/pages/login/ui/login-page'
-import { createBrowserRouter, Navigate } from 'react-router'
+import { PlacesPage } from '@/pages/places/ui/places-page'
+import { AdminShell } from '@/widgets/admin-shell/ui/admin-shell'
+import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 import { RequireAuth } from './require-auth'
+
+/**
+ * Дочерние protected routes, которые рендерятся внутри общего admin shell.
+ */
+export const protectedRouteChildren = [
+  {
+    path: '/',
+    element: <DashboardPage />,
+  },
+  {
+    path: '/places',
+    element: <PlacesPage />,
+  },
+] satisfies RouteObject[]
 
 /**
  * Browser router админки с публичным login и защищенным корневым маршрутом.
@@ -15,8 +31,8 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       {
-        path: '/',
-        element: <DashboardPage />,
+        element: <AdminShell />,
+        children: protectedRouteChildren,
       },
     ],
   },

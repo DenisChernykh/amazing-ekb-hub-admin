@@ -1,0 +1,84 @@
+import { useCurrentUser } from '@/entities/session/model/current-user'
+import { RoleTag } from '@/entities/session/ui/role-tag'
+import { LogoutButton } from '@/features/auth/logout/ui/logout-button'
+import { Flex, Layout, Menu, Space, Typography, theme } from 'antd'
+import type { CSSProperties } from 'react'
+import { Link, Outlet, useLocation } from 'react-router'
+import {
+  adminNavigationItems,
+  getSelectedNavigationKey,
+} from '../model/navigation'
+import styles from './admin-shell.module.css'
+
+const { Content, Header, Sider } = Layout
+
+type AdminShellVariables = CSSProperties & {
+  '--admin-shell-bg': string
+  '--admin-shell-border': string
+  '--admin-shell-surface': string
+}
+
+/**
+ * Общий protected shell админки с sidebar, header, session summary и content outlet.
+ *
+ * @remarks Требует `RequireAuth`, который предоставляет текущего пользователя через session context.
+ */
+export function AdminShell() {
+  const location = useLocation()
+  const user = useCurrentUser()
+  const { token } = theme.useToken()
+  const style: AdminShellVariables = {
+    '--admin-shell-bg': token.colorBgLayout,
+    '--admin-shell-border': token.colorBorderSecondary,
+    '--admin-shell-surface': token.colorBgContainer,
+  }
+
+  return (
+    <Layout className={styles.layout} style={style}>
+      <Sider
+        breakpoint="lg"
+        className={styles.sider}
+        collapsedWidth={0}
+        theme="light"
+        width={232}
+      >
+        <div className={styles.brand}>
+          <Typography.Title className={styles.brandTitle} level={4}>
+            Amazing EKB Hub
+          </Typography.Title>
+        </div>
+
+        <Menu
+          className={styles.menu}
+          items={adminNavigationItems.map((item) => ({
+            icon: item.icon,
+            key: item.key,
+            label: <Link to={item.path}>{item.label}</Link>,
+          }))}
+          mode="inline"
+          selectedKeys={[getSelectedNavigationKey(location.pathname)]}
+        />
+      </Sider>
+
+      <Layout className={styles.main}>
+        <Header className={styles.header}>
+          <Flex align="center" gap={16} justify="space-between" wrap>
+            <Typography.Title className={styles.brandTitle} level={3}>
+              Админка
+            </Typography.Title>
+
+            <Space wrap>
+              <RoleTag role={user.role} />
+              <Typography.Text strong>{user.email}</Typography.Text>
+              <LogoutButton />
+            </Space>
+          </Flex>
+        </Header>
+
+        <Content className={styles.content}>
+          <Outlet />
+        </Content>
+      </Layout>
+    </Layout>
+  )
+}

@@ -19,6 +19,12 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `shouldSkipRefresh` | `src/shared/api/client/api-client.ts`    | private    | Detects auth endpoints that must not trigger refresh retry. Promote only if another transport needs the same auth-loop rule.   |
 | `requestRefresh`    | `src/shared/api/client/api-client.ts`    | private    | Shares one in-flight refresh request between concurrent 401 responses. Keep transport-local unless another API client appears. |
 
+## Shared Number Helpers
+
+| Helper                 | Location                                          | Visibility | Contract                                                                        |
+| ---------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
+| `parsePositiveInteger` | `src/shared/lib/number/parse-positive-integer.ts` | exported   | Parses positive integer URL/form values and returns a caller-provided fallback. |
+
 ## Session Entity
 
 | Helper                      | Location                                  | Visibility | Contract                                                      |
@@ -28,11 +34,29 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `removeCurrentSession`      | `src/entities/session/api/session-api.ts` | exported   | Removes the current session query after logout.               |
 | `getRoleMeta`               | `src/entities/session/ui/role-meta.ts`    | exported   | Maps backend `Role` to localized Ant Design tag metadata.     |
 
+## Place Entity
+
+| Helper                 | Location                                  | Visibility | Contract                                                                              |
+| ---------------------- | ----------------------------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `usePlacesListQuery`   | `src/entities/place/model/place-hooks.ts` | exported   | Loads the public places list for the first read-only admin table with retry disabled. |
+| `getPlaceCategoryMeta` | `src/entities/place/ui/place-meta.ts`     | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                    |
+| `getPlaceStatusMeta`   | `src/entities/place/ui/place-meta.ts`     | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                      |
+
 ## Auth UI
 
 | Helper            | Location                                          | Visibility | Contract                                                                                                                                         |
 | ----------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `getRedirectPath` | `src/widgets/auth-login/ui/auth-login-screen.tsx` | private    | Converts React Router login state into a safe post-login redirect path. Promote to an auth routing helper if another login-like screen needs it. |
+
+## Places List Widget
+
+| Helper                              | Location                                              | Visibility | Contract                                                               |
+| ----------------------------------- | ----------------------------------------------------- | ---------- | ---------------------------------------------------------------------- |
+| `getSelectedNavigationKey`          | `src/widgets/admin-shell/model/navigation.ts`         | exported   | Maps the current pathname to the selected admin sidebar item.          |
+| `setDefaultAwareParam`              | `src/widgets/places-list/model/pagination.ts`         | private    | Writes pagination search params and removes values equal to defaults.  |
+| `getPlacesListPaginationFromSearch` | `src/widgets/places-list/model/pagination.ts`         | exported   | Reads `page` and `pageSize` from URL search params with safe defaults. |
+| `buildPlacesListPaginationSearch`   | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds default-aware URL search params after changing list pagination. |
+| `placesTableColumns`                | `src/widgets/places-list/ui/places-table-columns.tsx` | exported   | Defines read-only Ant Design table columns for `PlaceSummary` rows.    |
 
 ## API Error Internals
 

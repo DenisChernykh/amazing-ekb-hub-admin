@@ -1,11 +1,7 @@
 import { CurrentUserContext } from '@/entities/session/model/current-user'
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { AdminDashboard } from './admin-dashboard'
-
-vi.mock('@/features/auth/logout/ui/logout-button', () => ({
-  LogoutButton: () => <button>Выйти</button>,
-}))
 
 describe('AdminDashboard', () => {
   it('renders current user profile with localized role', () => {
@@ -21,7 +17,7 @@ describe('AdminDashboard', () => {
       </CurrentUserContext.Provider>,
     )
 
-    expect(screen.getByText('Amazing EKB Hub Admin')).toBeInTheDocument()
+    expect(screen.getByText('Обзор')).toBeInTheDocument()
     expect(screen.getAllByText('admin@amazing-ekb.ru')).toHaveLength(2)
     expect(screen.getAllByText('Администратор')).toHaveLength(2)
   })

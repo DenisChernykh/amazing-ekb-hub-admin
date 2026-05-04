@@ -1,0 +1,48 @@
+.layout {
+  min-height: 100vh;
+  background: var(--admin-shell-bg);
+}
+
+.sider {
+  background: var(--admin-shell-surface);
+  border-inline-end: 1px solid var(--admin-shell-border);
+}
+
+.brand {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--admin-shell-border);
+}
+
+.brandTitle {
+  margin: 0;
+}
+
+.menu {
+  border-inline-end: 0;
+}
+
+.main {
+  min-width: 0;
+}
+
+.header {
+  height: auto;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--admin-shell-border);
+  background: var(--admin-shell-surface);
+  line-height: normal;
+}
+
+.content {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+@media (max-width: 720px) {
+  .header,
+  .content {
+    padding: 20px;
+  }
+}
