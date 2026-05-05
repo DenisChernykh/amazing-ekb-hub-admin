@@ -48,15 +48,15 @@ Favorites реализованы на backend, но в публичном fronte
 
 ### Admin Content Management
 
-| API                                             | Возможность                                              | Auth    | Текущий UI coverage |
-| ----------------------------------------------- | -------------------------------------------------------- | ------- | ------------------- |
-| `POST /admin/places`                            | Создать место                                            | `admin` | Не покрыто admin UI |
-| `PATCH /admin/places/{placeId}`                 | Редактировать место                                      | `admin` | Не покрыто admin UI |
-| `PATCH /admin/places/{placeId}/status`          | Скрыть/опубликовать место через `active/hidden`          | `admin` | Не покрыто admin UI |
-| `POST /admin/places/{placeId}/photo`            | Загрузить или заменить cover-фото, JPEG/PNG/WebP до 5 MB | `admin` | Не покрыто admin UI |
-| `POST /admin/places/{placeId}/materials`        | Создать материал для места                               | `admin` | Не покрыто admin UI |
-| `PATCH /admin/materials/{materialId}`           | Редактировать материал                                   | `admin` | Не покрыто admin UI |
-| `PATCH /admin/places/{placeId}/pinned-material` | Назначить pinned material для блока “Начни отсюда”       | `admin` | Не покрыто admin UI |
+| API                                             | Возможность                                              | Auth    | Текущий UI coverage          |
+| ----------------------------------------------- | -------------------------------------------------------- | ------- | ---------------------------- |
+| `POST /admin/places`                            | Создать место                                            | `admin` | Есть create form в admin SPA |
+| `PATCH /admin/places/{placeId}`                 | Редактировать место                                      | `admin` | Не покрыто admin UI          |
+| `PATCH /admin/places/{placeId}/status`          | Скрыть/опубликовать место через `active/hidden`          | `admin` | Не покрыто admin UI          |
+| `POST /admin/places/{placeId}/photo`            | Загрузить или заменить cover-фото, JPEG/PNG/WebP до 5 MB | `admin` | Не покрыто admin UI          |
+| `POST /admin/places/{placeId}/materials`        | Создать материал для места                               | `admin` | Не покрыто admin UI          |
+| `PATCH /admin/materials/{materialId}`           | Редактировать материал                                   | `admin` | Не покрыто admin UI          |
+| `PATCH /admin/places/{placeId}/pinned-material` | Назначить pinned material для блока “Начни отсюда”       | `admin` | Не покрыто admin UI          |
 
 Backend уже закрывает обязательные admin-функции из MVP: create/update/hide place, create/update material, set pinned material, upload cover photo.
 
@@ -107,6 +107,7 @@ Backend уже закрывает обязательные admin-функции 
 - базовый dashboard placeholder с текущим пользователем;
 - admin shell с sidebar/header/navigation;
 - read-only route `/places` со списком активных мест через `GET /places`;
+- route `/places/new` с формой создания места через `POST /admin/places`;
 - FSD baseline: `app`, `pages`, `widgets`, `features`, `entities`, `shared`;
 - agent/coding docs: TSDoc, React rules, helper registry.
 
@@ -115,7 +116,6 @@ Backend уже закрывает обязательные admin-функции 
 - page titles, forbidden/empty/error standards для всех будущих разделов;
 - полноценный список мест для админа, включая `hidden`;
 - фильтры/поиск мест в админке;
-- форма создания места;
 - форма редактирования места;
 - действие публикации/скрытия места;
 - загрузка/замена cover-фото;
@@ -129,22 +129,22 @@ Backend уже закрывает обязательные admin-функции 
 
 ## Feature Gap Matrix
 
-| Feature                          | Backend                                                                     | Public frontend                                       | Admin SPA                              | Gap                                                                         |
-| -------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------- |
-| Cookie auth login/logout/session | Есть                                                                        | Частично/нужно сверить с новым cookie-only контрактом | Есть                                   | Для admin покрыто; public frontend может требовать sync                     |
-| Public places catalog            | Есть                                                                        | Частично есть                                         | Не требуется                           | Нет search/filter/sort UI                                                   |
-| Public place detail              | Есть                                                                        | Есть                                                  | Не требуется                           | Нет incremental “Показать еще”                                              |
-| Public cover photo               | Есть                                                                        | Есть                                                  | Не требуется                           | Нет отдельного fallback/error UX для битых фото                             |
-| Favorites                        | Есть                                                                        | Нет                                                   | Не требуется как admin фича            | Нужны favorite toggle и favorites page                                      |
-| Admin places list                | API можно читать через `GET /places`, но отдельного admin list endpoint нет | Не требуется                                          | Частично: read-only active places list | Нужен backend endpoint для просмотра hidden places                          |
-| Admin create place               | Есть                                                                        | Не требуется                                          | Нет                                    | Нужна форма создания                                                        |
-| Admin update place               | Есть                                                                        | Не требуется                                          | Нет                                    | Нужна форма редактирования                                                  |
-| Admin publish/hide place         | Есть                                                                        | Не требуется                                          | Нет                                    | Нужны status controls                                                       |
-| Admin cover upload               | Есть                                                                        | Не требуется                                          | Нет                                    | Нужен upload UI и preview                                                   |
-| Admin materials list             | Есть public list by place                                                   | Не требуется                                          | Нет                                    | Нужен admin materials tab; возможно нужен доступ к материалам hidden places |
-| Admin create/update material     | Есть                                                                        | Не требуется                                          | Нет                                    | Нужны формы материала                                                       |
-| Admin pinned material            | Есть                                                                        | Показывается в detail                                 | Нет                                    | Нужен selector/action в админке                                             |
-| Health/readiness                 | Есть                                                                        | Нет                                                   | Нет                                    | Опционально: service status widget                                          |
+| Feature                          | Backend                                                                     | Public frontend                                       | Admin SPA                                                        | Gap                                                                         |
+| -------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Cookie auth login/logout/session | Есть                                                                        | Частично/нужно сверить с новым cookie-only контрактом | Есть                                                             | Для admin покрыто; public frontend может требовать sync                     |
+| Public places catalog            | Есть                                                                        | Частично есть                                         | Не требуется                                                     | Нет search/filter/sort UI                                                   |
+| Public place detail              | Есть                                                                        | Есть                                                  | Не требуется                                                     | Нет incremental “Показать еще”                                              |
+| Public cover photo               | Есть                                                                        | Есть                                                  | Не требуется                                                     | Нет отдельного fallback/error UX для битых фото                             |
+| Favorites                        | Есть                                                                        | Нет                                                   | Не требуется как admin фича                                      | Нужны favorite toggle и favorites page                                      |
+| Admin places list                | API можно читать через `GET /places`, но отдельного admin list endpoint нет | Не требуется                                          | Частично: read-only active places list                           | Нужен backend endpoint для просмотра hidden places                          |
+| Admin create place               | Есть                                                                        | Не требуется                                          | Есть: route `/places/new`, AntD create form, validation feedback | Нужен runtime smoke с реальным backend                                      |
+| Admin update place               | Есть                                                                        | Не требуется                                          | Нет                                                              | Нужна форма редактирования                                                  |
+| Admin publish/hide place         | Есть                                                                        | Не требуется                                          | Нет                                                              | Нужны status controls                                                       |
+| Admin cover upload               | Есть                                                                        | Не требуется                                          | Нет                                                              | Нужен upload UI и preview                                                   |
+| Admin materials list             | Есть public list by place                                                   | Не требуется                                          | Нет                                                              | Нужен admin materials tab; возможно нужен доступ к материалам hidden places |
+| Admin create/update material     | Есть                                                                        | Не требуется                                          | Нет                                                              | Нужны формы материала                                                       |
+| Admin pinned material            | Есть                                                                        | Показывается в detail                                 | Нет                                                              | Нужен selector/action в админке                                             |
+| Health/readiness                 | Есть                                                                        | Нет                                                   | Нет                                                              | Опционально: service status widget                                          |
 
 ## Backend Gaps For Admin UX
 
@@ -180,7 +180,9 @@ Backend уже закрывает обязательные admin-функции 
 
 ### Phase 2: Place Editor
 
-- Добавить create/edit form для `title`, `summary`, `tags`, `category`, `popularityWeight`.
+- Status: create place slice done in admin SPA branch `codex/admin-create-place`; edit/status slices remain open.
+- Добавить create form для `title`, `summary`, `tags`, `category`, `popularityWeight`. Done: route `/places/new`, AntD Form, category options, create mutation bridge, list invalidation, success/error feedback.
+- Добавить edit form для `title`, `summary`, `tags`, `category`, `popularityWeight`.
 - Добавить status action `active/hidden`.
 - Подключить validation errors к AntD Form.
 

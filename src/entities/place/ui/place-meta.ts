@@ -1,5 +1,6 @@
 import type { PlaceCategory, PlaceStatus } from '@/shared/api/generated/model'
 import type { TagProps } from 'antd'
+import { PLACE_CATEGORY_VALUES } from '../model/place-categories'
 
 /**
  * UI-метаданные места для отображения в Ant Design компонентах.
@@ -53,3 +54,12 @@ export const getPlaceCategoryMeta = (category: PlaceCategory) =>
  * Возвращает локализованные UI-метаданные для backend-статуса места.
  */
 export const getPlaceStatusMeta = (status: PlaceStatus) => statusMeta[status]
+
+/**
+ * Возвращает категории мест в формате options для Ant Design controls.
+ */
+export const getPlaceCategoryOptions = () =>
+  PLACE_CATEGORY_VALUES.map((category) => ({
+    label: getPlaceCategoryMeta(category).label,
+    value: category,
+  }))

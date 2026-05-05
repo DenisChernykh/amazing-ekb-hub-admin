@@ -73,6 +73,10 @@ describe('PlacesList', () => {
     expect(screen.getByText('Бассейны')).toBeInTheDocument()
     expect(screen.getByText('Опубликовано')).toBeInTheDocument()
     expect(screen.getByText('Всего: 21')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Создать место' })).toHaveAttribute(
+      'href',
+      '/places/new',
+    )
   })
 
   it('renders normalized API error message', () => {

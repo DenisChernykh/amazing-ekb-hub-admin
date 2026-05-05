@@ -1,9 +1,10 @@
 import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceListResponse } from '@/shared/api/generated/model'
-import { Alert, Card, Flex, Pagination, Typography, theme } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Alert, Button, Card, Flex, Pagination, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
   buildPlacesListPaginationSearch,
   getPlacesListPaginationFromSearch,
@@ -48,7 +49,16 @@ export function PlacesList() {
           Места
         </Typography.Title>
 
-        <Typography.Text type="secondary">Всего: {data.total}</Typography.Text>
+        <Flex align="center" gap={12} wrap>
+          <Typography.Text type="secondary">
+            Всего: {data.total}
+          </Typography.Text>
+          <Link aria-label="Создать место" to="/places/new">
+            <Button icon={<PlusOutlined />} type="primary">
+              Создать место
+            </Button>
+          </Link>
+        </Flex>
       </Flex>
 
       <Card className={styles.card}>

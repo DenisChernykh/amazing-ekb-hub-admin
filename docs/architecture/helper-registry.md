@@ -36,11 +36,15 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Entity
 
-| Helper                 | Location                                  | Visibility | Contract                                                                              |
-| ---------------------- | ----------------------------------------- | ---------- | ------------------------------------------------------------------------------------- |
-| `usePlacesListQuery`   | `src/entities/place/model/place-hooks.ts` | exported   | Loads the public places list for the first read-only admin table with retry disabled. |
-| `getPlaceCategoryMeta` | `src/entities/place/ui/place-meta.ts`     | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                    |
-| `getPlaceStatusMeta`   | `src/entities/place/ui/place-meta.ts`     | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                      |
+| Helper                        | Location                                       | Visibility | Contract                                                                              |
+| ----------------------------- | ---------------------------------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `PLACE_CATEGORY_VALUES`       | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                  |
+| `useCreatePlaceMutation`      | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all places list query variants.     |
+| `invalidatePlacesListQueries` | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates public places list cache after admin place mutations.                     |
+| `usePlacesListQuery`          | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the public places list for the first read-only admin table with retry disabled. |
+| `getPlaceCategoryOptions`     | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                 |
+| `getPlaceCategoryMeta`        | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                    |
+| `getPlaceStatusMeta`          | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                      |
 
 ## Auth UI
 
