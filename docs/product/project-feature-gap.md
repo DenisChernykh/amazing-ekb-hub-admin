@@ -180,7 +180,7 @@ Backend уже закрывает обязательные admin-функции 
 
 ### Phase 2: Place Editor
 
-- Status: create place slice done in admin SPA branch `codex/admin-create-place`; edit/status slices remain open.
+- Status: create place slice done in admin `main`, commit `bbc4284`; edit/status slices remain open.
 - Добавить create form для `title`, `summary`, `tags`, `category`, `popularityWeight`. Done: route `/places/new`, AntD Form, category options, create mutation bridge, list invalidation, success/error feedback.
 - Добавить edit form для `title`, `summary`, `tags`, `category`, `popularityWeight`.
 - Добавить status action `active/hidden`.
