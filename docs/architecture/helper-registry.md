@@ -36,16 +36,19 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Entity
 
-| Helper                        | Location                                       | Visibility | Contract                                                                                 |
-| ----------------------------- | ---------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
-| `PLACE_CATEGORY_VALUES`       | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                     |
-| `useCreatePlaceMutation`      | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.  |
-| `invalidatePlacesListQueries` | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
-| `usePlacesListQuery`          | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list with retry disabled, including hidden places when requested. |
-| `useAdminPlaceDetailQuery`    | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                             |
-| `getPlaceCategoryOptions`     | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                    |
-| `getPlaceCategoryMeta`        | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                       |
-| `getPlaceStatusMeta`          | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                         |
+| Helper                            | Location                                       | Visibility | Contract                                                                                 |
+| --------------------------------- | ---------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
+| `PLACE_CATEGORY_VALUES`           | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                     |
+| `getPlaceStatusFromValue`         | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                        |
+| `useCreatePlaceMutation`          | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.  |
+| `useUpdatePlaceStatusMutation`    | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.        |
+| `invalidatePlacesListQueries`     | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
+| `invalidateAdminPlaceDetailQuery` | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                    |
+| `usePlacesListQuery`              | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list with retry disabled, including hidden places when requested. |
+| `useAdminPlaceDetailQuery`        | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                             |
+| `getPlaceCategoryOptions`         | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                    |
+| `getPlaceCategoryMeta`            | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                       |
+| `getPlaceStatusMeta`              | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                         |
 
 ## Auth UI
 
@@ -65,6 +68,12 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `buildPlacesListPaginationSearch`   | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds default-aware URL search params after changing list pagination.                          |
 | `buildPlacesListStatusSearch`       | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds URL search params after changing status filter and resets the page to default.           |
 | `placesTableColumns`                | `src/widgets/places-list/ui/places-table-columns.tsx` | exported   | Defines read-only Ant Design table columns for `PlaceSummary` rows with admin detail links.     |
+
+## Place Status Feature
+
+| Helper             | Location                                              | Visibility | Contract                                                                                    |
+| ------------------ | ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
+| `PlaceStatusPanel` | `src/features/place/status/ui/place-status-panel.tsx` | exported   | Renders admin publish/hide controls and submits status changes through the entity mutation. |
 
 ## API Error Internals
 

@@ -1,0 +1,142 @@
+import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
+import { getPlaceStatusFromValue } from '@/entities/place/model/place-status'
+import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
+import { normalizeApiError } from '@/shared/api/client/api-error'
+import type { PlaceStatus } from '@/shared/api/generated/model'
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
+import {
+  Alert,
+  App as AntdApp,
+  Button,
+  Card,
+  Flex,
+  Segmented,
+  Space,
+  Typography,
+} from 'antd'
+import type { ReactNode } from 'react'
+import { useState } from 'react'
+
+const statusHint: Record<PlaceStatus, string> = {
+  active: 'Место видно в публичном каталоге.',
+  hidden: 'Место скрыто из публичного каталога, но доступно в админке.',
+}
+
+const statusAction: Record<
+  PlaceStatus,
+  { icon: ReactNode; label: string; successMessage: string }
+> = {
+  active: {
+    icon: <EyeOutlined aria-hidden="true" />,
+    label: 'Опубликовать',
+    successMessage: 'Место опубликовано',
+  },
+  hidden: {
+    icon: <EyeInvisibleOutlined aria-hidden="true" />,
+    label: 'Скрыть',
+    successMessage: 'Место скрыто',
+  },
+}
+
+const statusOptions = [
+  {
+    label: (
+      <Space size={6}>
+        <EyeOutlined aria-hidden="true" />
+        <span>Опубликовано</span>
+      </Space>
+    ),
+    value: 'active',
+  },
+  {
+    label: (
+      <Space size={6}>
+        <EyeInvisibleOutlined aria-hidden="true" />
+        <span>Скрыто</span>
+      </Space>
+    ),
+    value: 'hidden',
+  },
+]
+
+type PlaceStatusPanelProps = {
+  placeId: string
+  status: PlaceStatus
+}
+
+/**
+ * Панель публикации или скрытия места в административной карточке.
+ *
+ * @remarks Требует AntD `App` provider; меняет backend-статус и обновляет admin list/detail кеши через entity mutation.
+ */
+export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
+  const { message } = AntdApp.useApp()
+  const [selectedStatus, setSelectedStatus] = useState<PlaceStatus>(status)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const selectedAction = statusAction[selectedStatus]
+  const isChanged = selectedStatus !== status
+  const updateStatusMutation = useUpdatePlaceStatusMutation({
+    onError: (error) => {
+      const apiError = normalizeApiError(error)
+      setErrorMessage(apiError.message)
+      void message.error(apiError.message)
+    },
+    onSuccess: (place) => {
+      setErrorMessage(null)
+      void message.success(statusAction[place.status].successMessage)
+    },
+  })
+
+  const handleStatusChange = (value: string | number) => {
+    const nextStatus = getPlaceStatusFromValue(value)
+
+    if (nextStatus) {
+      setErrorMessage(null)
+      setSelectedStatus(nextStatus)
+    }
+  }
+
+  const handleApply = () => {
+    setErrorMessage(null)
+    updateStatusMutation.mutate({
+      data: { status: selectedStatus },
+      pathParams: { placeId },
+    })
+  }
+
+  return (
+    <Card title="Публикация">
+      <Flex gap={16} vertical>
+        <Flex align="center" gap={8} wrap>
+          <Typography.Text type="secondary">Текущий статус:</Typography.Text>
+          <PlaceStatusTag status={status} />
+        </Flex>
+
+        <Segmented
+          disabled={updateStatusMutation.isPending}
+          onChange={handleStatusChange}
+          options={statusOptions}
+          value={selectedStatus}
+        />
+
+        <Typography.Text type="secondary">
+          {statusHint[selectedStatus]}
+        </Typography.Text>
+
+        {errorMessage && <Alert message={errorMessage} showIcon type="error" />}
+
+        <Flex justify="end">
+          <Button
+            disabled={!isChanged}
+            icon={selectedAction.icon}
+            loading={updateStatusMutation.isPending}
+            onClick={handleApply}
+            type="primary"
+          >
+            {selectedAction.label}
+          </Button>
+        </Flex>
+      </Flex>
+    </Card>
+  )
+}

@@ -1,6 +1,7 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
 import { PlaceCategoryTag } from '@/entities/place/ui/place-category-tag'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
+import { PlaceStatusPanel } from '@/features/place/status/ui/place-status-panel'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceDetail } from '@/shared/api/generated/model'
 import {
@@ -66,6 +67,12 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
           <Button>К списку мест</Button>
         </Link>
       </Flex>
+
+      <PlaceStatusPanel
+        key={`${place.id}:${place.status}`}
+        placeId={place.id}
+        status={place.status}
+      />
 
       <Card>
         <Descriptions column={1} bordered>

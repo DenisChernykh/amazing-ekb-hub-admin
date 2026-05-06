@@ -54,7 +54,7 @@ Favorites реализованы на backend, но в публичном fronte
 | `GET /admin/places/{placeId}`                   | Административная detail-карточка независимо от статуса   | `admin` | Есть read-only detail shell     |
 | `POST /admin/places`                            | Создать место                                            | `admin` | Есть create form в admin SPA    |
 | `PATCH /admin/places/{placeId}`                 | Редактировать место                                      | `admin` | Не покрыто admin UI             |
-| `PATCH /admin/places/{placeId}/status`          | Скрыть/опубликовать место через `active/hidden`          | `admin` | Не покрыто admin UI             |
+| `PATCH /admin/places/{placeId}/status`          | Скрыть/опубликовать место через `active/hidden`          | `admin` | Есть status panel на detail     |
 | `POST /admin/places/{placeId}/photo`            | Загрузить или заменить cover-фото, JPEG/PNG/WebP до 5 MB | `admin` | Не покрыто admin UI             |
 | `POST /admin/places/{placeId}/materials`        | Создать материал для места                               | `admin` | Не покрыто admin UI             |
 | `PATCH /admin/materials/{materialId}`           | Редактировать материал                                   | `admin` | Не покрыто admin UI             |
@@ -111,6 +111,7 @@ Backend уже закрывает обязательные admin-функции 
 - read-only route `/places` со списком мест через `GET /admin/places`, включая `hidden`;
 - URL-driven status filter для `/places`: all / active / hidden;
 - read-only route `/places/:placeId` через `GET /admin/places/{placeId}`;
+- status panel на `/places/:placeId` для публикации/скрытия места;
 - route `/places/new` с формой создания места через `POST /admin/places`;
 - FSD baseline: `app`, `pages`, `widgets`, `features`, `entities`, `shared`;
 - agent/coding docs: TSDoc, React rules, helper registry.
@@ -120,7 +121,6 @@ Backend уже закрывает обязательные admin-функции 
 - page titles, forbidden/empty/error standards для всех будущих разделов;
 - поиск и фильтр категории в админке;
 - форма редактирования места;
-- действие публикации/скрытия места;
 - загрузка/замена cover-фото;
 - список материалов места;
 - форма создания материала;
@@ -142,7 +142,7 @@ Backend уже закрывает обязательные admin-функции 
 | Admin places list                | Есть `GET /admin/places` и `GET /admin/places/{placeId}` | Не требуется                                          | Есть: admin list, status filter, read-only detail shell          | Нужны edit/status/photo/material actions на admin detail                    |
 | Admin create place               | Есть                                                     | Не требуется                                          | Есть: route `/places/new`, AntD create form, validation feedback | Нужен runtime smoke с реальным backend                                      |
 | Admin update place               | Есть                                                     | Не требуется                                          | Нет                                                              | Нужна форма редактирования                                                  |
-| Admin publish/hide place         | Есть                                                     | Не требуется                                          | Нет                                                              | Нужны status controls                                                       |
+| Admin publish/hide place         | Есть                                                     | Не требуется                                          | Есть: status panel на `/places/:placeId`                         | Нужен runtime smoke с реальным backend                                      |
 | Admin cover upload               | Есть                                                     | Не требуется                                          | Нет                                                              | Нужен upload UI и preview                                                   |
 | Admin materials list             | Есть public list by place                                | Не требуется                                          | Нет                                                              | Нужен admin materials tab; возможно нужен доступ к материалам hidden places |
 | Admin create/update material     | Есть                                                     | Не требуется                                          | Нет                                                              | Нужны формы материала                                                       |
@@ -175,10 +175,10 @@ Backend уже закрывает обязательные admin-функции 
 
 ### Phase 2: Place Editor
 
-- Status: create place slice done in admin `main`, commit `bbc4284`; edit/status slices remain open.
+- Status: create place slice done in admin `main`, commit `bbc4284`; status panel implemented in branch `codex/admin-place-status-panel`; edit slice remains open.
 - Добавить create form для `title`, `summary`, `tags`, `category`, `popularityWeight`. Done: route `/places/new`, AntD Form, category options, create mutation bridge, list invalidation, success/error feedback.
 - Добавить edit form для `title`, `summary`, `tags`, `category`, `popularityWeight`.
-- Добавить status action `active/hidden`.
+- Добавить status action `active/hidden`. Done: detail status panel with `EyeOutlined` / `EyeInvisibleOutlined`, explicit explanation, submit state, success/error feedback.
 - Подключить validation errors к AntD Form.
 
 ### Phase 3: Cover Photo

@@ -10,6 +10,16 @@ vi.mock('@/entities/place/model/place-hooks', () => ({
   useAdminPlaceDetailQuery: vi.fn(),
 }))
 
+vi.mock('@/features/place/status/ui/place-status-panel', () => ({
+  PlaceStatusPanel: ({
+    placeId,
+    status,
+  }: {
+    placeId: string
+    status: string
+  }) => <div>Place status panel: {`${placeId}:${status}`}</div>,
+}))
+
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const hiddenPlace: PlaceDetail = {
@@ -55,6 +65,9 @@ describe('PlaceDetailScreen', () => {
     expect(mockedUseAdminPlaceDetailQuery).toHaveBeenCalledWith('place-2')
     expect(
       screen.getByRole('heading', { name: 'Скрытый SPA' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Place status panel: place-2:hidden'),
     ).toBeInTheDocument()
     expect(screen.getByText('Скрыто')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()
