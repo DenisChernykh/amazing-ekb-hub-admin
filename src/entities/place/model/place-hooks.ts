@@ -1,9 +1,13 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
+import {
+  useGetAdminPlaceDetail,
+  useListAdminPlaces,
+} from '@/shared/api/generated/admin/admin'
 import type {
-  ListPlacesParams,
+  ListAdminPlacesParams,
+  PlaceDetail,
   PlaceListResponse,
 } from '@/shared/api/generated/model'
-import { useListPlaces } from '@/shared/api/generated/places/places'
 import type { UseQueryOptions } from '@tanstack/react-query'
 
 /**
@@ -17,18 +21,46 @@ export type PlacesListQueryOptions = Omit<
 >
 
 /**
- * Загружает публичный список мест для read-only admin таблицы.
+ * Безопасные options для запроса admin detail места без возможности заменить query key или query function.
+ */
+export type AdminPlaceDetailQueryOptions = Omit<
+  Partial<UseQueryOptions<PlaceDetail, ApiClientError, PlaceDetail>>,
+  'queryFn' | 'queryKey'
+>
+
+/**
+ * Загружает административный список мест для admin таблицы.
  *
- * @remarks Сейчас backend не предоставляет `GET /admin/places`, поэтому hook возвращает только то, что отдает публичный `GET /places`.
+ * @remarks Использует admin read endpoint, чтобы список мог показывать `hidden` places.
  */
 export function usePlacesListQuery(
-  params: ListPlacesParams,
+  params: ListAdminPlacesParams,
   options?: PlacesListQueryOptions,
 ) {
-  return useListPlaces(params, {
+  return useListAdminPlaces(params, {
     query: {
       retry: false,
       ...options,
     },
   })
+}
+
+/**
+ * Загружает административную detail-карточку места независимо от публичного статуса.
+ *
+ * @remarks UI получает entity-level hook и не импортирует generated admin hooks напрямую.
+ */
+export function useAdminPlaceDetailQuery(
+  placeId: string,
+  options?: AdminPlaceDetailQueryOptions,
+) {
+  return useGetAdminPlaceDetail(
+    { placeId },
+    {
+      query: {
+        retry: false,
+        ...options,
+      },
+    },
+  )
 }

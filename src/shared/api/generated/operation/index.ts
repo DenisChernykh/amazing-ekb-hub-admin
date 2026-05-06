@@ -10,6 +10,7 @@ export * from './authMeResponse';
 export * from './forbiddenResponse';
 export * from './healthLiveResponse';
 export * from './healthReadyResponse';
+export * from './listAdminPlacesParams';
 export * from './listPlaceMaterialsParams';
 export * from './listPlacesParams';
 export * from './materialListResponse';

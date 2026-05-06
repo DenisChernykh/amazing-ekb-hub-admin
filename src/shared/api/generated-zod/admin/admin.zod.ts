@@ -9,6 +9,57 @@ import * as zod from 'zod';
 
 
 /**
+ * Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
+ * @summary List admin places
+ */
+export const listAdminPlacesQueryPageDefault = 1;
+
+export const listAdminPlacesQueryPageSizeDefault = 20;
+export const listAdminPlacesQueryPageSizeMax = 100;
+
+
+
+export const ListAdminPlacesQueryParams = zod.strictObject({
+  "page": zod.number().min(1).default(listAdminPlacesQueryPageDefault).describe('Номер страницы пагинации. Минимальное значение `1`.'),
+  "pageSize": zod.number().min(1).max(listAdminPlacesQueryPageSizeMax).default(listAdminPlacesQueryPageSizeDefault).describe('Размер страницы. Допустимый диапазон от `1` до `100`.'),
+  "status": zod.enum(['active', 'hidden']).optional().describe('Фильтр по статусу места. Если параметр отсутствует, возвращаются все статусы.')
+})
+
+export const ListAdminPlaces200Response = zod.strictObject({
+  "items": zod.array(zod.strictObject({
+  "id": zod.string().describe('Идентификатор места.'),
+  "title": zod.string().describe('Название места.'),
+  "summary": zod.string().describe('Короткое описание для каталога.'),
+  "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
+  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
+  "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
+  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
+}).describe('Краткая карточка места, используемая в списках.')).describe('Элементы текущей страницы.'),
+  "total": zod.number().describe('Общее количество доступных элементов.'),
+  "page": zod.number().describe('Текущая страница.'),
+  "pageSize": zod.number().describe('Размер страницы.')
+}).describe('Пагинированный список мест.')
+
+export const ListAdminPlaces400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminPlaces401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminPlaces403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
  * Создаёт новое место в каталоге. Операция доступна только администратору.
  * @summary Create place
  */
@@ -46,6 +97,58 @@ export const CreatePlace401Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 export const CreatePlace403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Возвращает детальную карточку места для администратора независимо от публичного статуса места.
+ * @summary Get admin place details
+ */
+export const GetAdminPlaceDetailParams = zod.strictObject({
+  "placeId": zod.string().describe('Идентификатор места.')
+})
+
+export const GetAdminPlaceDetail200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор места.'),
+  "title": zod.string().describe('Название места.'),
+  "summary": zod.string().describe('Короткое описание для каталога.'),
+  "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
+  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
+  "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
+  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "pinnedMaterial": zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().describe('Заголовок материала.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал.')
+}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.'),
+  "counters": zod.strictObject({
+  "dzen": zod.number(),
+  "telegram": zod.number(),
+  "instagram": zod.number()
+}).describe('Количество материалов по платформам.')
+}).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
+
+export const GetAdminPlaceDetail401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetAdminPlaceDetail403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetAdminPlaceDetail404Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')

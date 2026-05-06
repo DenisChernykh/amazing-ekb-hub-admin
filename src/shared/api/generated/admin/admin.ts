@@ -6,13 +6,22 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
@@ -20,10 +29,13 @@ import type {
   CreatePlaceMaterialPathParameters,
   CreatePlaceRequest,
   ForbiddenResponse,
+  GetAdminPlaceDetailPathParameters,
+  ListAdminPlacesParams,
   Material,
   MaterialNotFoundResponse,
   NestErrorResponse,
   PlaceDetail,
+  PlaceListResponse,
   PlaceNotFoundResponse,
   PlacePhotoUploadRequest,
   PlaceSummary,
@@ -45,6 +57,100 @@ import type { ErrorType , BodyType } from '../../client/orval-mutator';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+/**
+ * Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
+ * @summary List admin places
+ */
+export const listAdminPlaces = (
+    params?: ListAdminPlacesParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceListResponse>(
+      {url: `/admin/places`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getListAdminPlacesQueryKey = (params?: ListAdminPlacesParams,) => {
+    return [
+    `/admin/places`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminPlacesQueryOptions = <TData = Awaited<ReturnType<typeof listAdminPlaces>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(params?: ListAdminPlacesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaces>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminPlacesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminPlaces>>> = ({ signal }) => listAdminPlaces(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaces>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListAdminPlacesQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminPlaces>>>
+export type ListAdminPlacesQueryError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useListAdminPlaces<TData = Awaited<ReturnType<typeof listAdminPlaces>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params: undefined |  ListAdminPlacesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaces>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminPlaces>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminPlaces>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminPlaces<TData = Awaited<ReturnType<typeof listAdminPlaces>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListAdminPlacesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaces>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminPlaces>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminPlaces>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminPlaces<TData = Awaited<ReturnType<typeof listAdminPlaces>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListAdminPlacesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaces>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List admin places
+ */
+
+export function useListAdminPlaces<TData = Awaited<ReturnType<typeof listAdminPlaces>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListAdminPlacesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaces>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListAdminPlacesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
 
 
 
@@ -113,6 +219,99 @@ export const useCreatePlace = <TError = ErrorType<ValidationErrorResponse | Unau
       return useMutation(getCreatePlaceMutationOptions(options), queryClient);
     }
     /**
+ * Возвращает детальную карточку места для администратора независимо от публичного статуса места.
+ * @summary Get admin place details
+ */
+export const getAdminPlaceDetail = (
+    { placeId }: GetAdminPlaceDetailPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceDetail>(
+      {url: `/admin/places/${encodeURIComponent(String(placeId))}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetAdminPlaceDetailQueryKey = ({ placeId }: GetAdminPlaceDetailPathParameters,) => {
+    return [
+    `/admin/places/${placeId}`
+    ] as const;
+    }
+
+
+export const getGetAdminPlaceDetailQueryOptions = <TData = Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>({ placeId }: GetAdminPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminPlaceDetailQueryKey({ placeId });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminPlaceDetail>>> = ({ signal }) => getAdminPlaceDetail({ placeId }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(placeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAdminPlaceDetailQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminPlaceDetail>>>
+export type GetAdminPlaceDetailQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>
+
+
+export function useGetAdminPlaceDetail<TData = Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ pathParams: GetAdminPlaceDetailPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminPlaceDetail>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminPlaceDetail>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminPlaceDetail<TData = Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ pathParams: GetAdminPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminPlaceDetail>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminPlaceDetail>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminPlaceDetail<TData = Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ pathParams: GetAdminPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get admin place details
+ */
+
+export function useGetAdminPlaceDetail<TData = Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ { placeId }: GetAdminPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAdminPlaceDetailQueryOptions({ placeId },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Частично обновляет место по идентификатору. Операция доступна только администратору.
  * @summary Update place
  */

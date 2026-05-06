@@ -1,6 +1,8 @@
-import { useCreatePlace } from '@/shared/api/generated/admin/admin'
+import {
+  getListAdminPlacesQueryKey,
+  useCreatePlace,
+} from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
-import { getListPlacesQueryKey } from '@/shared/api/generated/places/places'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -8,11 +10,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useCreatePlaceMutation } from './place-mutations'
 
 vi.mock('@/shared/api/generated/admin/admin', () => ({
+  getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   useCreatePlace: vi.fn(),
-}))
-
-vi.mock('@/shared/api/generated/places/places', () => ({
-  getListPlacesQueryKey: vi.fn(() => ['/places']),
 }))
 
 const mockedUseCreatePlace = vi.mocked(useCreatePlace)
@@ -28,12 +27,12 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('place mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlace.mockReset()
-    vi.mocked(getListPlacesQueryKey).mockReturnValue(['/places'])
+    vi.mocked(getListAdminPlacesQueryKey).mockReturnValue(['/admin/places'])
   })
 
   it('invalidates places list queries after creating a place', async () => {
     const queryClient = new QueryClient()
-    const queryKey = ['/places', { page: 1, pageSize: 10 }]
+    const queryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const createdPlace: PlaceSummary = {
       category: 'spa',
       coverImageUrl: null,

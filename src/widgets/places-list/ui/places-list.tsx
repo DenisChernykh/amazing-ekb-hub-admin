@@ -2,12 +2,24 @@ import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceListResponse } from '@/shared/api/generated/model'
 import { PlusOutlined } from '@ant-design/icons'
-import { Alert, Button, Card, Flex, Pagination, Typography, theme } from 'antd'
+import {
+  Alert,
+  Button,
+  Card,
+  Flex,
+  Pagination,
+  Segmented,
+  Typography,
+  theme,
+} from 'antd'
 import type { CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import {
   buildPlacesListPaginationSearch,
+  buildPlacesListStatusSearch,
   getPlacesListPaginationFromSearch,
+  getPlacesListStatusFromSearch,
+  getPlacesListStatusFromValue,
 } from '../model/pagination'
 import styles from './places-list.module.css'
 import { PlacesTable } from './places-table'
@@ -18,6 +30,12 @@ const emptyPlacesResponse: PlaceListResponse = {
   pageSize: 10,
   total: 0,
 }
+
+const statusFilterOptions = [
+  { label: 'Все', value: 'all' },
+  { label: 'Опубликованные', value: 'active' },
+  { label: 'Скрытые', value: 'hidden' },
+]
 
 type PlacesListVariables = CSSProperties & {
   '--places-list-border': string
@@ -30,7 +48,11 @@ export function PlacesList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { token } = theme.useToken()
   const pagination = getPlacesListPaginationFromSearch(searchParams)
-  const placesQuery = usePlacesListQuery(pagination)
+  const statusFilter = getPlacesListStatusFromSearch(searchParams)
+  const placesQuery = usePlacesListQuery({
+    ...pagination,
+    ...(statusFilter ? { status: statusFilter } : {}),
+  })
   const data = placesQuery.data ?? emptyPlacesResponse
   const style: PlacesListVariables = {
     '--places-list-border': token.colorBorderSecondary,
@@ -40,6 +62,10 @@ export function PlacesList() {
     setSearchParams(
       buildPlacesListPaginationSearch(searchParams, { page, pageSize }),
     )
+  }
+  const handleStatusChange = (value: string | number) => {
+    const status = getPlacesListStatusFromValue(value)
+    setSearchParams(buildPlacesListStatusSearch(searchParams, status))
   }
 
   return (
@@ -71,6 +97,14 @@ export function PlacesList() {
           />
         ) : (
           <>
+            <Flex className={styles.filters} justify="space-between" wrap>
+              <Segmented
+                onChange={handleStatusChange}
+                options={statusFilterOptions}
+                value={statusFilter ?? 'all'}
+              />
+            </Flex>
+
             <PlacesTable data={data} loading={placesQuery.isPending} />
 
             <Flex className={styles.footer} justify="end">

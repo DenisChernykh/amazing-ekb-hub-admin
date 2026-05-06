@@ -1,5 +1,6 @@
 import { DashboardPage } from '@/pages/dashboard/ui/dashboard-page'
 import { LoginPage } from '@/pages/login/ui/login-page'
+import { PlaceDetailPage } from '@/pages/place-detail/ui/place-detail-page'
 import { PlacesCreatePage } from '@/pages/places-create/ui/places-create-page'
 import { PlacesPage } from '@/pages/places/ui/places-page'
 import { AdminShell } from '@/widgets/admin-shell/ui/admin-shell'
@@ -17,6 +18,10 @@ export const protectedRouteChildren = [
   {
     path: '/places',
     element: <PlacesPage />,
+  },
+  {
+    path: '/places/:placeId',
+    element: <PlaceDetailPage />,
   },
   {
     path: '/places/new',

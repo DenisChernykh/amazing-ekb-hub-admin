@@ -33,9 +33,13 @@ export const adminNavigationItems = [
  * Возвращает выбранный пункт sidebar по текущему pathname.
  */
 export const getSelectedNavigationKey = (pathname: string) => {
-  const currentItem = adminNavigationItems.find(
-    (item) => item.path === pathname,
-  )
+  const currentItem = adminNavigationItems.find((item) => {
+    if (item.path === '/') {
+      return pathname === item.path
+    }
+
+    return pathname === item.path || pathname.startsWith(`${item.path}/`)
+  })
 
   return currentItem?.key ?? 'dashboard'
 }

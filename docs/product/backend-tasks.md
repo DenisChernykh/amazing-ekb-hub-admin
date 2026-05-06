@@ -4,13 +4,13 @@
 
 ## Admin Places Read Model
 
-**Status:** Передано в backend issue [#23](https://github.com/DenisChernykh/amazing-ekb-hub-backend/issues/23).
+**Status:** Реализовано в backend PR [#25](https://github.com/DenisChernykh/amazing-ekb-hub-backend/pull/25), backend issue [#23](https://github.com/DenisChernykh/amazing-ekb-hub-backend/issues/23) закрыт.
 
-**Frontend context:** первый экран `/places` в admin SPA временно читает публичный `GET /places`. Для read-only списка активных мест этого достаточно, но это не полноценный admin view.
+**Frontend context:** admin SPA должна читать список и detail мест через admin endpoints, чтобы hidden places не пропадали из управления.
 
 **Problem:** публичный `GET /places` предназначен для витрины и может отдавать только `active` места. После скрытия места через admin action оно может исчезнуть из публичного списка, и админка потеряет возможность найти и вернуть его обратно.
 
-**Backend task:** добавить admin read endpoints для мест.
+**Backend result:** добавлены admin read endpoints для мест.
 
 Минимальный contract:
 
@@ -36,4 +36,4 @@
 - generated frontend client после sync получает admin read methods;
 - текущие admin mutations `/admin/places/*` остаются совместимыми.
 
-**Frontend follow-up after backend:** переключить `usePlacesListQuery` с публичного `GET /places` на `GET /admin/places` и добавить status filter в admin UI.
+**Frontend follow-up after backend:** переключить `usePlacesListQuery` с публичного `GET /places` на `GET /admin/places`, добавить status filter в admin UI и использовать `GET /admin/places/{placeId}` для admin detail/edit/status/photo/material screens.
