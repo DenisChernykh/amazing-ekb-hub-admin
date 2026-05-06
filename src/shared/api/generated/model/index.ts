@@ -11,6 +11,7 @@ export * from './authLoginRequest';
 export * from './createMaterialRequest';
 export * from './createPlaceMaterialPathParameters';
 export * from './createPlaceRequest';
+export * from './getAdminPlaceDetailPathParameters';
 export * from './getPlaceCoverPhotoPathParameters';
 export * from './getPlaceDetailPathParameters';
 export * from './healthReadyResponseChecks';

@@ -2,6 +2,7 @@ import { PlaceCategoryTag } from '@/entities/place/ui/place-category-tag'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
 import type { PlaceSummary } from '@/shared/api/generated/model'
 import { Space, Tag, Typography, type TableProps } from 'antd'
+import { Link } from 'react-router'
 
 /**
  * Колонки таблицы мест для read-only admin списка.
@@ -10,8 +11,10 @@ export const placesTableColumns: TableProps<PlaceSummary>['columns'] = [
   {
     dataIndex: 'title',
     key: 'title',
-    render: (title: PlaceSummary['title']) => (
-      <Typography.Text strong>{title}</Typography.Text>
+    render: (title: PlaceSummary['title'], place) => (
+      <Link to={`/places/${place.id}`}>
+        <Typography.Text strong>{title}</Typography.Text>
+      </Link>
     ),
     title: 'Название',
   },

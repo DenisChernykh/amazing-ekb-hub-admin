@@ -6,6 +6,7 @@ describe('protectedRouteChildren', () => {
     expect(protectedRouteChildren.map((route) => route.path)).toEqual([
       '/',
       '/places',
+      '/places/:placeId',
       '/places/new',
     ])
   })

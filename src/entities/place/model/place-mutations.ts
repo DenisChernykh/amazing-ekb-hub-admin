@@ -1,7 +1,9 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
-import { useCreatePlace } from '@/shared/api/generated/admin/admin'
+import {
+  getListAdminPlacesQueryKey,
+  useCreatePlace,
+} from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
-import { getListPlacesQueryKey } from '@/shared/api/generated/places/places'
 import type { QueryClient } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -14,11 +16,11 @@ export type CreatePlaceMutationOptions = {
 }
 
 /**
- * Инвалидирует все варианты публичного списка мест после admin-мутаций.
+ * Инвалидирует все варианты административного списка мест после admin-мутаций.
  */
 export const invalidatePlacesListQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListPlacesQueryKey(),
+    queryKey: getListAdminPlacesQueryKey(),
   })
 }
 
