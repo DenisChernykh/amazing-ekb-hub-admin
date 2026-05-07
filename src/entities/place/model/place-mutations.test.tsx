@@ -1,20 +1,30 @@
 import {
+  getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
   useCreatePlace,
+  useUpdatePlaceStatus,
 } from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useCreatePlaceMutation } from './place-mutations'
+import {
+  useCreatePlaceMutation,
+  useUpdatePlaceStatusMutation,
+} from './place-mutations'
 
 vi.mock('@/shared/api/generated/admin/admin', () => ({
+  getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
+    `/admin/places/${placeId}`,
+  ]),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   useCreatePlace: vi.fn(),
+  useUpdatePlaceStatus: vi.fn(),
 }))
 
 const mockedUseCreatePlace = vi.mocked(useCreatePlace)
+const mockedUseUpdatePlaceStatus = vi.mocked(useUpdatePlaceStatus)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -27,6 +37,10 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('place mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlace.mockReset()
+    mockedUseUpdatePlaceStatus.mockReset()
+    vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
+      ({ placeId }) => [`/admin/places/${placeId}`],
+    )
     vi.mocked(getListAdminPlacesQueryKey).mockReturnValue(['/admin/places'])
   })
 
@@ -72,5 +86,52 @@ describe('place mutations', () => {
       queryClient.getQueryCache().find({ queryKey })?.state.isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(createdPlace)
+  })
+
+  it('invalidates places list and detail queries after updating status', async () => {
+    const queryClient = new QueryClient()
+    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/admin/places/place-2']
+    const updatedPlace: PlaceSummary = {
+      category: 'spa',
+      coverImageUrl: null,
+      id: 'place-2',
+      popularityWeight: 5,
+      status: 'active',
+      summary: 'SPA вернулся в каталог',
+      tags: ['spa'],
+      title: 'Скрытый SPA',
+    }
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
+    queryClient.setQueryData(detailQueryKey, updatedPlace)
+    mockedUseUpdatePlaceStatus.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUpdatePlaceStatus>)
+
+    renderHook(() => useUpdatePlaceStatusMutation({ onSuccess }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await mockedUseUpdatePlaceStatus.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
+      updatedPlace,
+      {
+        data: { status: 'active' },
+        pathParams: { placeId: 'place-2' },
+      },
+      undefined,
+      {} as never,
+    )
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
   })
 })

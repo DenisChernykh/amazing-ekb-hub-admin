@@ -1,3 +1,4 @@
+import { getPlaceStatusFromValue } from '@/entities/place/model/place-status'
 import type { PlaceStatus } from '@/shared/api/generated/model'
 import { parsePositiveInteger } from '@/shared/lib/number/parse-positive-integer'
 
@@ -63,13 +64,7 @@ export const getPlacesListPaginationFromSearch = (
  */
 export const getPlacesListStatusFromValue = (
   value: string | number | null,
-): PlacesListStatusFilter => {
-  if (value === 'active' || value === 'hidden') {
-    return value
-  }
-
-  return null
-}
+): PlacesListStatusFilter => getPlaceStatusFromValue(value)
 
 /**
  * Читает status из URL search params с fallback на all statuses.
