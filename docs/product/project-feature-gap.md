@@ -175,7 +175,7 @@ Backend уже закрывает обязательные admin-функции 
 
 ### Phase 2: Place Editor
 
-- Status: create place slice done in admin `main`, commit `bbc4284`; status panel implemented in branch `codex/admin-place-status-panel`; edit slice remains open.
+- Status: create place slice done in admin `main`, commits `bbc4284` and `2006c9f`; status panel is in draft admin PR [#3](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/3); edit slice remains open.
 - Добавить create form для `title`, `summary`, `tags`, `category`, `popularityWeight`. Done: route `/places/new`, AntD Form, category options, create mutation bridge, list invalidation, success/error feedback.
 - Добавить edit form для `title`, `summary`, `tags`, `category`, `popularityWeight`.
 - Добавить status action `active/hidden`. Done: detail status panel with `EyeOutlined` / `EyeInvisibleOutlined`, explicit explanation, submit state, success/error feedback.
