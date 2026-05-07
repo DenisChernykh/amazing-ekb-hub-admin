@@ -1,49 +1,18 @@
 import { useCreatePlaceMutation } from '@/entities/place/model/place-mutations'
-import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type {
-  CreatePlaceRequest,
-  PlaceCategory,
-} from '@/shared/api/generated/model'
 import {
-  App as AntdApp,
-  Button,
-  Flex,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-} from 'antd'
+  toCreatePlaceRequest,
+  type PlaceFormValues,
+} from '@/features/place/form/model/place-form'
+import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
+import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
+import { normalizeApiError } from '@/shared/api/client/api-error'
+import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useState } from 'react'
-import { CreatePlaceErrorAlert } from './create-place-error-alert'
-
-type CreatePlaceFormValues = {
-  category: PlaceCategory
-  popularityWeight?: number | null
-  summary: string
-  tags: string[]
-  title: string
-}
 
 type CreatePlaceFormProps = {
   onCancel: () => void
   onCreated: () => void
 }
-
-const categoryOptions = getPlaceCategoryOptions()
-
-const normalizeTags = (tags: string[] | undefined) =>
-  tags?.map((tag) => tag.trim()).filter(Boolean) ?? []
-
-const toCreatePlaceRequest = (
-  values: CreatePlaceFormValues,
-): CreatePlaceRequest => ({
-  category: values.category,
-  popularityWeight: values.popularityWeight ?? undefined,
-  summary: values.summary.trim(),
-  tags: normalizeTags(values.tags),
-  title: values.title.trim(),
-})
 
 /**
  * Ant Design форма создания места через entity-level admin mutation.
@@ -66,7 +35,7 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
     },
   })
 
-  const handleFinish = (values: CreatePlaceFormValues) => {
+  const handleFinish = (values: PlaceFormValues) => {
     setErrorMessages([])
     createPlaceMutation.mutate({
       data: toCreatePlaceRequest(values),
@@ -74,7 +43,7 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
   }
 
   return (
-    <Form<CreatePlaceFormValues>
+    <Form<PlaceFormValues>
       layout="vertical"
       name="create-place"
       onFinish={handleFinish}
@@ -82,53 +51,19 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
     >
       {Boolean(errorMessages.length) && (
         <Form.Item>
-          <CreatePlaceErrorAlert messages={errorMessages} />
+          <PlaceFormErrorAlert
+            messages={errorMessages}
+            title="Не удалось создать место"
+          />
         </Form.Item>
       )}
 
-      <Form.Item
-        label="Название"
-        name="title"
-        rules={[{ required: true, message: 'Введите название' }]}
-      >
-        <Input autoComplete="off" />
-      </Form.Item>
-
-      <Form.Item
-        label="Описание"
-        name="summary"
-        rules={[{ required: true, message: 'Введите описание' }]}
-      >
-        <Input.TextArea autoSize={{ maxRows: 6, minRows: 3 }} />
-      </Form.Item>
-
-      <Form.Item
-        label="Категория"
-        name="category"
-        rules={[{ required: true, message: 'Выберите категорию' }]}
-      >
-        <Select aria-label="Категория" options={categoryOptions} />
-      </Form.Item>
-
-      <Form.Item
-        label="Теги"
-        name="tags"
-        rules={[{ required: true, message: 'Добавьте хотя бы один тег' }]}
-      >
-        <Select
-          aria-label="Теги"
-          mode="tags"
-          placeholder="Добавьте теги"
-          tokenSeparators={[',']}
-        />
-      </Form.Item>
-
-      <Form.Item label="Вес популярности" name="popularityWeight">
-        <InputNumber min={0} precision={0} />
-      </Form.Item>
+      <PlaceFormFields disabled={createPlaceMutation.isPending} />
 
       <Flex gap={8} justify="end" wrap>
-        <Button onClick={onCancel}>Отмена</Button>
+        <Button disabled={createPlaceMutation.isPending} onClick={onCancel}>
+          Отмена
+        </Button>
         <Button
           aria-label="Создать"
           htmlType="submit"

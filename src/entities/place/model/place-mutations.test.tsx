@@ -2,6 +2,7 @@ import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
   useCreatePlace,
+  useUpdatePlace,
   useUpdatePlaceStatus,
 } from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
@@ -11,6 +12,7 @@ import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   useCreatePlaceMutation,
+  useUpdatePlaceMutation,
   useUpdatePlaceStatusMutation,
 } from './place-mutations'
 
@@ -20,10 +22,12 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   ]),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   useCreatePlace: vi.fn(),
+  useUpdatePlace: vi.fn(),
   useUpdatePlaceStatus: vi.fn(),
 }))
 
 const mockedUseCreatePlace = vi.mocked(useCreatePlace)
+const mockedUseUpdatePlace = vi.mocked(useUpdatePlace)
 const mockedUseUpdatePlaceStatus = vi.mocked(useUpdatePlaceStatus)
 
 const createWrapper = (queryClient: QueryClient) => {
@@ -37,6 +41,7 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('place mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlace.mockReset()
+    mockedUseUpdatePlace.mockReset()
     mockedUseUpdatePlaceStatus.mockReset()
     vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
       ({ placeId }) => [`/admin/places/${placeId}`],
@@ -119,6 +124,53 @@ describe('place mutations', () => {
       {
         data: { status: 'active' },
         pathParams: { placeId: 'place-2' },
+      },
+      undefined,
+      {} as never,
+    )
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
+  })
+
+  it('invalidates places list and detail queries after updating place fields', async () => {
+    const queryClient = new QueryClient()
+    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/admin/places/place-3']
+    const updatedPlace: PlaceSummary = {
+      category: 'cafe',
+      coverImageUrl: null,
+      id: 'place-3',
+      popularityWeight: 12,
+      status: 'active',
+      summary: 'Кофейня с мастер-классами',
+      tags: ['coffee'],
+      title: 'Новая кофейня',
+    }
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
+    queryClient.setQueryData(detailQueryKey, updatedPlace)
+    mockedUseUpdatePlace.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUpdatePlace>)
+
+    renderHook(() => useUpdatePlaceMutation({ onSuccess }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await mockedUseUpdatePlace.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
+      updatedPlace,
+      {
+        data: { title: 'Новая кофейня' },
+        pathParams: { placeId: 'place-3' },
       },
       undefined,
       {} as never,

@@ -7,6 +7,7 @@ describe('protectedRouteChildren', () => {
       '/',
       '/places',
       '/places/:placeId',
+      '/places/:placeId/edit',
       '/places/new',
     ])
   })

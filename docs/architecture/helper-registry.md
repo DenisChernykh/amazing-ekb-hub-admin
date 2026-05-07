@@ -41,6 +41,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `PLACE_CATEGORY_VALUES`           | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                     |
 | `getPlaceStatusFromValue`         | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                        |
 | `useCreatePlaceMutation`          | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.  |
+| `useUpdatePlaceMutation`          | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.  |
 | `useUpdatePlaceStatusMutation`    | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.        |
 | `invalidatePlacesListQueries`     | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
 | `invalidateAdminPlaceDetailQuery` | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                    |
@@ -68,6 +69,21 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `buildPlacesListPaginationSearch`   | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds default-aware URL search params after changing list pagination.                          |
 | `buildPlacesListStatusSearch`       | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds URL search params after changing status filter and resets the page to default.           |
 | `placesTableColumns`                | `src/widgets/places-list/ui/places-table-columns.tsx` | exported   | Defines read-only Ant Design table columns for `PlaceSummary` rows with admin detail links.     |
+
+## Place Form Feature
+
+| Helper                      | Location                                                | Visibility | Contract                                                                                        |
+| --------------------------- | ------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `PlaceFormValues`           | `src/features/place/form/model/place-form.ts`           | exported   | Defines create/edit place form values before conversion to generated API payloads.              |
+| `getPlaceFormInitialValues` | `src/features/place/form/model/place-form.ts`           | exported   | Maps admin `PlaceDetail` to form initial values.                                                |
+| `toCreatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Normalizes form values into `POST /admin/places` payload.                                       |
+| `toUpdatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only.   |
+| `hasPlaceFormChanges`       | `src/features/place/form/model/place-form.ts`           | exported   | Detects whether normalized form values differ from the loaded server values.                    |
+| `PlaceFormErrorAlert`       | `src/features/place/form/ui/place-form-error-alert.tsx` | exported   | Renders normalized create/edit place API errors without parsing backend field names.            |
+| `PlaceFormFields`           | `src/features/place/form/ui/place-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit place forms.                                   |
+| `EditPlaceForm`             | `src/features/place/edit/ui/edit-place-form.tsx`        | exported   | Edits place fields, tracks dirty state, and submits partial update payloads through the entity. |
+| `CreatePlaceForm`           | `src/features/place/create/ui/create-place-form.tsx`    | exported   | Creates places using the shared place form fields and create mutation bridge.                   |
+| `PlaceEditScreen`           | `src/widgets/place-edit/ui/place-edit-screen.tsx`       | exported   | Loads admin detail, hosts edit form, and blocks dirty in-app navigation.                        |
 
 ## Place Status Feature
 

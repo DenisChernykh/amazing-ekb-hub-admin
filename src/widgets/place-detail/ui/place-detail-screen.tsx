@@ -63,9 +63,14 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
       <Flex align="center" justify="space-between" wrap>
         <Typography.Title level={2}>{place.title}</Typography.Title>
 
-        <Link to="/places">
-          <Button>К списку мест</Button>
-        </Link>
+        <Space wrap>
+          <Link to={`/places/${place.id}/edit`}>
+            <Button type="primary">Редактировать</Button>
+          </Link>
+          <Link to="/places">
+            <Button>К списку мест</Button>
+          </Link>
+        </Space>
       </Flex>
 
       <PlaceStatusPanel
