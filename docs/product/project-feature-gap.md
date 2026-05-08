@@ -48,17 +48,17 @@ Favorites реализованы на backend, но в публичном fronte
 
 ### Admin Content Management
 
-| API                                             | Возможность                                              | Auth    | Текущий UI coverage             |
-| ----------------------------------------------- | -------------------------------------------------------- | ------- | ------------------------------- |
-| `GET /admin/places`                             | Административный список мест, включая `active/hidden`    | `admin` | Есть admin list + status filter |
-| `GET /admin/places/{placeId}`                   | Административная detail-карточка независимо от статуса   | `admin` | Есть read-only detail shell     |
-| `POST /admin/places`                            | Создать место                                            | `admin` | Есть create form в admin SPA    |
-| `PATCH /admin/places/{placeId}`                 | Редактировать место                                      | `admin` | Есть edit form в admin `main`   |
-| `PATCH /admin/places/{placeId}/status`          | Скрыть/опубликовать место через `active/hidden`          | `admin` | Есть status panel на detail     |
-| `POST /admin/places/{placeId}/photo`            | Загрузить или заменить cover-фото, JPEG/PNG/WebP до 5 MB | `admin` | Не покрыто admin UI             |
-| `POST /admin/places/{placeId}/materials`        | Создать материал для места                               | `admin` | Не покрыто admin UI             |
-| `PATCH /admin/materials/{materialId}`           | Редактировать материал                                   | `admin` | Не покрыто admin UI             |
-| `PATCH /admin/places/{placeId}/pinned-material` | Назначить pinned material для блока “Начни отсюда”       | `admin` | Не покрыто admin UI             |
+| API                                             | Возможность                                              | Auth    | Текущий UI coverage                            |
+| ----------------------------------------------- | -------------------------------------------------------- | ------- | ---------------------------------------------- |
+| `GET /admin/places`                             | Административный список мест, включая `active/hidden`    | `admin` | Есть admin list + status filter                |
+| `GET /admin/places/{placeId}`                   | Административная detail-карточка независимо от статуса   | `admin` | Есть read-only detail shell                    |
+| `POST /admin/places`                            | Создать место                                            | `admin` | Есть create form в admin SPA                   |
+| `PATCH /admin/places/{placeId}`                 | Редактировать место                                      | `admin` | Есть edit form в admin `main`                  |
+| `PATCH /admin/places/{placeId}/status`          | Скрыть/опубликовать место через `active/hidden`          | `admin` | Есть status panel на detail                    |
+| `POST /admin/places/{placeId}/photo`            | Загрузить или заменить cover-фото, JPEG/PNG/WebP до 5 MB | `admin` | Реализовано в ветке `codex/admin-cover-upload` |
+| `POST /admin/places/{placeId}/materials`        | Создать материал для места                               | `admin` | Не покрыто admin UI                            |
+| `PATCH /admin/materials/{materialId}`           | Редактировать материал                                   | `admin` | Не покрыто admin UI                            |
+| `PATCH /admin/places/{placeId}/pinned-material` | Назначить pinned material для блока “Начни отсюда”       | `admin` | Не покрыто admin UI                            |
 
 Backend уже закрывает обязательные admin-функции из MVP: create/update/hide place, create/update material, set pinned material, upload cover photo.
 
@@ -113,6 +113,7 @@ Backend уже закрывает обязательные admin-функции 
 - read-only route `/places/:placeId` через `GET /admin/places/{placeId}`;
 - status panel на `/places/:placeId` для публикации/скрытия места;
 - route `/places/:placeId/edit` с формой редактирования места через `PATCH /admin/places/{placeId}` в admin `main` через merged admin PR [#4](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/4);
+- cover upload panel на `/places/:placeId` в ветке `codex/admin-cover-upload`: preview текущего `coverImageUrl`, локальная валидация JPEG/PNG/WebP до 5 MB, `POST /admin/places/{placeId}/photo`, success/error feedback;
 - route `/places/new` с формой создания места через `POST /admin/places`;
 - FSD baseline: `app`, `pages`, `widgets`, `features`, `entities`, `shared`;
 - agent/coding docs: TSDoc, React rules, helper registry.
@@ -121,7 +122,7 @@ Backend уже закрывает обязательные admin-функции 
 
 - page titles, forbidden/empty/error standards для всех будущих разделов;
 - поиск и фильтр категории в админке;
-- загрузка/замена cover-фото;
+- runtime smoke загрузки/замены cover-фото с реальным backend;
 - список материалов места;
 - форма создания материала;
 - форма редактирования материала;
@@ -139,11 +140,11 @@ Backend уже закрывает обязательные admin-функции 
 | Public place detail              | Есть                                                     | Есть                                                  | Не требуется                                                                                                                                                          | Нет incremental “Показать еще”                                              |
 | Public cover photo               | Есть                                                     | Есть                                                  | Не требуется                                                                                                                                                          | Нет отдельного fallback/error UX для битых фото                             |
 | Favorites                        | Есть                                                     | Нет                                                   | Не требуется как admin фича                                                                                                                                           | Нужны favorite toggle и favorites page                                      |
-| Admin places list                | Есть `GET /admin/places` и `GET /admin/places/{placeId}` | Не требуется                                          | Есть: admin list, status filter, read-only detail shell                                                                                                               | Нужны photo/material actions на admin detail                                |
+| Admin places list                | Есть `GET /admin/places` и `GET /admin/places/{placeId}` | Не требуется                                          | Есть: admin list, status filter, read-only detail shell                                                                                                               | Нужны material actions на admin detail                                      |
 | Admin create place               | Есть                                                     | Не требуется                                          | Есть: route `/places/new`, AntD create form, validation feedback                                                                                                      | Нужен runtime smoke с реальным backend                                      |
 | Admin update place               | Есть                                                     | Не требуется                                          | Есть в admin `main` через merged admin PR [#4](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/4): route `/places/:placeId/edit`, dirty guard, diff PATCH | Нужен runtime smoke с реальным backend                                      |
 | Admin publish/hide place         | Есть                                                     | Не требуется                                          | Есть: status panel на `/places/:placeId` в admin `main`                                                                                                               | Нужен runtime smoke с реальным backend                                      |
-| Admin cover upload               | Есть                                                     | Не требуется                                          | Нет                                                                                                                                                                   | Нужен upload UI и preview                                                   |
+| Admin cover upload               | Есть                                                     | Не требуется                                          | Реализовано в ветке `codex/admin-cover-upload`: detail panel, preview, локальная file validation, cache invalidation                                                  | Нужен merge в `main` и runtime smoke                                        |
 | Admin materials list             | Есть public list by place                                | Не требуется                                          | Нет                                                                                                                                                                   | Нужен admin materials tab; возможно нужен доступ к материалам hidden places |
 | Admin create/update material     | Есть                                                     | Не требуется                                          | Нет                                                                                                                                                                   | Нужны формы материала                                                       |
 | Admin pinned material            | Есть                                                     | Показывается в detail                                 | Нет                                                                                                                                                                   | Нужен selector/action в админке                                             |
@@ -175,13 +176,15 @@ Backend уже закрывает обязательные admin-функции 
 
 ### Phase 2: Place Editor
 
-- Status: create, edit, and status slices are done in admin `main`; edit form landed via merged admin PR [#4](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/4). Cover upload remains open.
+- Status: create, edit, and status slices are done in admin `main`; edit form landed via merged admin PR [#4](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/4). Cover upload is implemented in branch `codex/admin-cover-upload`, merge remains open.
 - Добавить create form для `title`, `summary`, `tags`, `category`, `popularityWeight`. Done: route `/places/new`, AntD Form, category options, create mutation bridge, list invalidation, success/error feedback.
 - Добавить edit form для `title`, `summary`, `tags`, `category`, `popularityWeight`. Done in merged admin PR [#4](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/4): route `/places/:placeId/edit`, partial diff payload, reset to server values, dirty navigation blocker.
 - Добавить status action `active/hidden`. Done: detail status panel with `EyeOutlined` / `EyeInvisibleOutlined`, explicit explanation, submit state, success/error feedback.
 - Подключить validation errors к AntD Form.
 
 ### Phase 3: Cover Photo
+
+- Status: implemented in branch `codex/admin-cover-upload`; merge/runtime smoke remain open.
 
 - Добавить upload control для JPEG/PNG/WebP до 5 MB.
 - Показывать preview текущего `coverImageUrl`.

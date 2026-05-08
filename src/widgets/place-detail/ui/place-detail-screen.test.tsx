@@ -20,6 +20,29 @@ vi.mock('@/features/place/status/ui/place-status-panel', () => ({
   }) => <div>Place status panel: {`${placeId}:${status}`}</div>,
 }))
 
+vi.mock('@/features/place/cover/ui/place-cover-upload-panel', async () => {
+  const React = await vi.importActual<typeof import('react')>('react')
+
+  return {
+    PlaceCoverUploadPanel: ({
+      coverImageUrl,
+      placeId,
+    }: {
+      coverImageUrl: string | null
+      placeId: string
+    }) => {
+      const [initialPlaceId] = React.useState(placeId)
+
+      return (
+        <div>
+          Place cover upload panel:{' '}
+          {`${placeId}:${coverImageUrl}:initial:${initialPlaceId}`}
+        </div>
+      )
+    },
+  }
+})
+
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const hiddenPlace: PlaceDetail = {
@@ -39,10 +62,10 @@ const hiddenPlace: PlaceDetail = {
   title: 'Скрытый SPA',
 }
 
-const renderPlaceDetailScreen = () => {
-  render(
+const renderPlaceDetailScreen = (placeId = 'place-2') => {
+  return render(
     <MemoryRouter>
-      <PlaceDetailScreen placeId="place-2" />
+      <PlaceDetailScreen placeId={placeId} />
     </MemoryRouter>,
   )
 }
@@ -69,6 +92,11 @@ describe('PlaceDetailScreen', () => {
     expect(
       screen.getByText('Place status panel: place-2:hidden'),
     ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Place cover upload panel: place-2:null:initial:place-2',
+      ),
+    ).toBeInTheDocument()
     expect(screen.getByText('Скрыто')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()
     expect(
@@ -84,6 +112,48 @@ describe('PlaceDetailScreen', () => {
       'href',
       '/places/place-2/edit',
     )
+  })
+
+  it('remounts cover upload panel when place changes', () => {
+    const nextPlace: PlaceDetail = {
+      ...hiddenPlace,
+      coverImageUrl: '/places/place-3/photo',
+      id: 'place-3',
+      title: 'Новый SPA',
+    }
+    mockedUseAdminPlaceDetailQuery.mockReturnValue({
+      data: hiddenPlace,
+      error: null,
+      isError: false,
+      isPending: false,
+    } as ReturnType<typeof useAdminPlaceDetailQuery>)
+
+    const { rerender } = renderPlaceDetailScreen('place-2')
+
+    expect(
+      screen.getByText(
+        'Place cover upload panel: place-2:null:initial:place-2',
+      ),
+    ).toBeInTheDocument()
+
+    mockedUseAdminPlaceDetailQuery.mockReturnValue({
+      data: nextPlace,
+      error: null,
+      isError: false,
+      isPending: false,
+    } as ReturnType<typeof useAdminPlaceDetailQuery>)
+
+    rerender(
+      <MemoryRouter>
+        <PlaceDetailScreen placeId="place-3" />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByText(
+        'Place cover upload panel: place-3:/places/place-3/photo:initial:place-3',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('renders normalized API error message', () => {
