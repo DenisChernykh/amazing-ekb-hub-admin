@@ -81,6 +81,7 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
       />
 
       <PlaceCoverUploadPanel
+        key={place.id}
         coverImageUrl={place.coverImageUrl}
         placeId={place.id}
       />
