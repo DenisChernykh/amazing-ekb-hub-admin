@@ -20,6 +20,16 @@ vi.mock('@/features/place/status/ui/place-status-panel', () => ({
   }) => <div>Place status panel: {`${placeId}:${status}`}</div>,
 }))
 
+vi.mock('@/features/place/cover/ui/place-cover-upload-panel', () => ({
+  PlaceCoverUploadPanel: ({
+    coverImageUrl,
+    placeId,
+  }: {
+    coverImageUrl: string | null
+    placeId: string
+  }) => <div>Place cover upload panel: {`${placeId}:${coverImageUrl}`}</div>,
+}))
+
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const hiddenPlace: PlaceDetail = {
@@ -68,6 +78,9 @@ describe('PlaceDetailScreen', () => {
     ).toBeInTheDocument()
     expect(
       screen.getByText('Place status panel: place-2:hidden'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Place cover upload panel: place-2:null'),
     ).toBeInTheDocument()
     expect(screen.getByText('Скрыто')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()

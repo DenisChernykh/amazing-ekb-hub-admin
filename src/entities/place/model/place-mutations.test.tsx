@@ -4,6 +4,7 @@ import {
   useCreatePlace,
   useUpdatePlace,
   useUpdatePlaceStatus,
+  useUploadPlaceCoverPhoto,
 } from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -14,6 +15,7 @@ import {
   useCreatePlaceMutation,
   useUpdatePlaceMutation,
   useUpdatePlaceStatusMutation,
+  useUploadPlaceCoverPhotoMutation,
 } from './place-mutations'
 
 vi.mock('@/shared/api/generated/admin/admin', () => ({
@@ -22,11 +24,13 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   ]),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   useCreatePlace: vi.fn(),
+  useUploadPlaceCoverPhoto: vi.fn(),
   useUpdatePlace: vi.fn(),
   useUpdatePlaceStatus: vi.fn(),
 }))
 
 const mockedUseCreatePlace = vi.mocked(useCreatePlace)
+const mockedUseUploadPlaceCoverPhoto = vi.mocked(useUploadPlaceCoverPhoto)
 const mockedUseUpdatePlace = vi.mocked(useUpdatePlace)
 const mockedUseUpdatePlaceStatus = vi.mocked(useUpdatePlaceStatus)
 
@@ -41,6 +45,7 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('place mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlace.mockReset()
+    mockedUseUploadPlaceCoverPhoto.mockReset()
     mockedUseUpdatePlace.mockReset()
     mockedUseUpdatePlaceStatus.mockReset()
     vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
@@ -171,6 +176,54 @@ describe('place mutations', () => {
       {
         data: { title: 'Новая кофейня' },
         pathParams: { placeId: 'place-3' },
+      },
+      undefined,
+      {} as never,
+    )
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
+  })
+
+  it('invalidates places list and detail queries after uploading cover photo', async () => {
+    const queryClient = new QueryClient()
+    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/admin/places/place-4']
+    const updatedPlace: PlaceSummary = {
+      category: 'spa',
+      coverImageUrl: '/places/place-4/photo',
+      id: 'place-4',
+      popularityWeight: 8,
+      status: 'active',
+      summary: 'SPA с новым фото',
+      tags: ['spa'],
+      title: 'Фото SPA',
+    }
+    const file = new File(['cover'], 'cover.png', { type: 'image/png' })
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
+    queryClient.setQueryData(detailQueryKey, updatedPlace)
+    mockedUseUploadPlaceCoverPhoto.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUploadPlaceCoverPhoto>)
+
+    renderHook(() => useUploadPlaceCoverPhotoMutation({ onSuccess }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await mockedUseUploadPlaceCoverPhoto.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
+      updatedPlace,
+      {
+        data: { photo: file },
+        pathParams: { placeId: 'place-4' },
       },
       undefined,
       {} as never,

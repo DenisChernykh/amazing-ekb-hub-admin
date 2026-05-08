@@ -36,20 +36,21 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Entity
 
-| Helper                            | Location                                       | Visibility | Contract                                                                                 |
-| --------------------------------- | ---------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
-| `PLACE_CATEGORY_VALUES`           | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                     |
-| `getPlaceStatusFromValue`         | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                        |
-| `useCreatePlaceMutation`          | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.  |
-| `useUpdatePlaceMutation`          | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.  |
-| `useUpdatePlaceStatusMutation`    | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.        |
-| `invalidatePlacesListQueries`     | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
-| `invalidateAdminPlaceDetailQuery` | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                    |
-| `usePlacesListQuery`              | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list with retry disabled, including hidden places when requested. |
-| `useAdminPlaceDetailQuery`        | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                             |
-| `getPlaceCategoryOptions`         | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                    |
-| `getPlaceCategoryMeta`            | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                       |
-| `getPlaceStatusMeta`              | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                         |
+| Helper                             | Location                                       | Visibility | Contract                                                                                 |
+| ---------------------------------- | ---------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
+| `PLACE_CATEGORY_VALUES`            | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                     |
+| `getPlaceStatusFromValue`          | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                        |
+| `useCreatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.  |
+| `useUpdatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.  |
+| `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.        |
+| `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts`  | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.    |
+| `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
+| `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                    |
+| `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list with retry disabled, including hidden places when requested. |
+| `useAdminPlaceDetailQuery`         | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                             |
+| `getPlaceCategoryOptions`          | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                    |
+| `getPlaceCategoryMeta`             | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                       |
+| `getPlaceStatusMeta`               | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                         |
 
 ## Auth UI
 
@@ -90,6 +91,18 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | Helper             | Location                                              | Visibility | Contract                                                                                    |
 | ------------------ | ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
 | `PlaceStatusPanel` | `src/features/place/status/ui/place-status-panel.tsx` | exported   | Renders admin publish/hide controls and submits status changes through the entity mutation. |
+
+## Place Cover Feature
+
+| Helper                              | Location                                                     | Visibility | Contract                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------- |
+| `PLACE_COVER_UPLOAD_MAX_SIZE_BYTES` | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Defines backend-aligned cover photo size limit for UI validation.                               |
+| `PLACE_COVER_UPLOAD_MIME_TYPES`     | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Defines backend-aligned cover photo MIME allowlist.                                             |
+| `PLACE_COVER_UPLOAD_ACCEPT`         | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Formats the cover upload MIME allowlist for Ant Design Upload/input accept.                     |
+| `getPlaceCoverUploadError`          | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Returns a local validation error for unsupported cover upload files, or `null` for valid files. |
+| `PlaceCoverPreview`                 | `src/features/place/cover/ui/place-cover-preview.tsx`        | exported   | Renders selected cover preview, current cover image, or empty state.                            |
+| `PlaceCoverUploadActions`           | `src/features/place/cover/ui/place-cover-upload-actions.tsx` | exported   | Renders choose/upload/reset controls for the cover upload panel.                                |
+| `PlaceCoverUploadPanel`             | `src/features/place/cover/ui/place-cover-upload-panel.tsx`   | exported   | Renders current cover preview, local file validation, upload submit, and normalized API errors. |
 
 ## API Error Internals
 

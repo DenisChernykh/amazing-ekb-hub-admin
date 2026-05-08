@@ -1,6 +1,7 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
 import { PlaceCategoryTag } from '@/entities/place/ui/place-category-tag'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
+import { PlaceCoverUploadPanel } from '@/features/place/cover/ui/place-cover-upload-panel'
 import { PlaceStatusPanel } from '@/features/place/status/ui/place-status-panel'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceDetail } from '@/shared/api/generated/model'
@@ -77,6 +78,11 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
         key={`${place.id}:${place.status}`}
         placeId={place.id}
         status={place.status}
+      />
+
+      <PlaceCoverUploadPanel
+        coverImageUrl={place.coverImageUrl}
+        placeId={place.id}
       />
 
       <Card>

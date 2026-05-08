@@ -5,6 +5,7 @@ import {
   useCreatePlace,
   useUpdatePlace,
   useUpdatePlaceStatus,
+  useUploadPlaceCoverPhoto,
 } from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
 import type { QueryClient } from '@tanstack/react-query'
@@ -30,6 +31,14 @@ export type UpdatePlaceStatusMutationOptions = {
  * Callback-и для редактирования места через entity bridge.
  */
 export type UpdatePlaceMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (place: PlaceSummary) => Promise<void> | void
+}
+
+/**
+ * Callback-и для загрузки cover-фото места через entity bridge.
+ */
+export type UploadPlaceCoverPhotoMutationOptions = {
   onError?: (error: ApiClientError) => void
   onSuccess?: (place: PlaceSummary) => Promise<void> | void
 }
@@ -110,6 +119,33 @@ export function useUpdatePlaceMutation(options?: UpdatePlaceMutationOptions) {
   const queryClient = useQueryClient()
 
   return useUpdatePlace<ApiClientError>({
+    mutation: {
+      onError: options?.onError,
+      onSuccess: async (place, variables) => {
+        await Promise.all([
+          invalidatePlacesListQueries(queryClient),
+          invalidateAdminPlaceDetailQuery(
+            queryClient,
+            variables.pathParams.placeId,
+          ),
+        ])
+        await options?.onSuccess?.(place)
+      },
+    },
+  })
+}
+
+/**
+ * Загружает или заменяет cover-фото места и обновляет admin list/detail кеши.
+ *
+ * @remarks UI получает только entity-level hook и не импортирует generated admin hooks напрямую.
+ */
+export function useUploadPlaceCoverPhotoMutation(
+  options?: UploadPlaceCoverPhotoMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useUploadPlaceCoverPhoto<ApiClientError>({
     mutation: {
       onError: options?.onError,
       onSuccess: async (place, variables) => {
