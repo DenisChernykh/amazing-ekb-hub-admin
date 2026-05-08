@@ -43,6 +43,16 @@ vi.mock('@/features/place/cover/ui/place-cover-upload-panel', async () => {
   }
 })
 
+vi.mock('./place-materials-panel', () => ({
+  PlaceMaterialsPanel: ({
+    placeId,
+    placeStatus,
+  }: {
+    placeId: string
+    placeStatus: string
+  }) => <div>Place materials panel: {`${placeId}:${placeStatus}`}</div>,
+}))
+
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const hiddenPlace: PlaceDetail = {
@@ -96,6 +106,9 @@ describe('PlaceDetailScreen', () => {
       screen.getByText(
         'Place cover upload panel: place-2:null:initial:place-2',
       ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Place materials panel: place-2:hidden'),
     ).toBeInTheDocument()
     expect(screen.getByText('Скрыто')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()

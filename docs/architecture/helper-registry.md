@@ -52,6 +52,16 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `getPlaceCategoryMeta`             | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                       |
 | `getPlaceStatusMeta`               | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                         |
 
+## Material Entity
+
+| Helper                       | Location                                                | Visibility | Contract                                                                                            |
+| ---------------------------- | ------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------- |
+| `usePlaceMaterialsListQuery` | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the public materials read endpoint with retry disabled.               |
+| `getMaterialPlatformMeta`    | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                       |
+| `getMaterialTypeMeta`        | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                                   |
+| `formatMaterialDuration`     | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.                 |
+| `PlaceMaterialsPanel`        | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders read-only materials table on admin place detail and shows the hidden-place backend blocker. |
+
 ## Auth UI
 
 | Helper            | Location                                          | Visibility | Contract                                                                                                                                         |
