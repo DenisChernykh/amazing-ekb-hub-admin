@@ -80,6 +80,10 @@ describe('PlaceDetailScreen', () => {
       'href',
       '/places',
     )
+    expect(screen.getByRole('link', { name: 'Редактировать' })).toHaveAttribute(
+      'href',
+      '/places/place-2/edit',
+    )
   })
 
   it('renders normalized API error message', () => {

@@ -3,6 +3,7 @@ import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
   useCreatePlace,
+  useUpdatePlace,
   useUpdatePlaceStatus,
 } from '@/shared/api/generated/admin/admin'
 import type { PlaceSummary } from '@/shared/api/generated/model'
@@ -21,6 +22,14 @@ export type CreatePlaceMutationOptions = {
  * Callback-и для смены статуса места через entity bridge.
  */
 export type UpdatePlaceStatusMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (place: PlaceSummary) => Promise<void> | void
+}
+
+/**
+ * Callback-и для редактирования места через entity bridge.
+ */
+export type UpdatePlaceMutationOptions = {
   onError?: (error: ApiClientError) => void
   onSuccess?: (place: PlaceSummary) => Promise<void> | void
 }
@@ -76,6 +85,31 @@ export function useUpdatePlaceStatusMutation(
   const queryClient = useQueryClient()
 
   return useUpdatePlaceStatus<ApiClientError>({
+    mutation: {
+      onError: options?.onError,
+      onSuccess: async (place, variables) => {
+        await Promise.all([
+          invalidatePlacesListQueries(queryClient),
+          invalidateAdminPlaceDetailQuery(
+            queryClient,
+            variables.pathParams.placeId,
+          ),
+        ])
+        await options?.onSuccess?.(place)
+      },
+    },
+  })
+}
+
+/**
+ * Редактирует поля места через admin API и обновляет admin list/detail кеши.
+ *
+ * @remarks UI получает только entity-level hook и не импортирует generated admin hooks напрямую.
+ */
+export function useUpdatePlaceMutation(options?: UpdatePlaceMutationOptions) {
+  const queryClient = useQueryClient()
+
+  return useUpdatePlace<ApiClientError>({
     mutation: {
       onError: options?.onError,
       onSuccess: async (place, variables) => {
