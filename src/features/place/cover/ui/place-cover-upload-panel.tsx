@@ -63,8 +63,7 @@ export function PlaceCoverUploadPanel({
   })
 
   const handleBeforeUpload: UploadProps['beforeUpload'] = (file) => {
-    const nextFile = file as File
-    const validationError = getPlaceCoverUploadError(nextFile)
+    const validationError = getPlaceCoverUploadError(file)
 
     if (validationError) {
       setErrorMessages([validationError])
@@ -73,9 +72,9 @@ export function PlaceCoverUploadPanel({
     }
 
     clearPreviewUrl()
-    const objectUrl = URL.createObjectURL(nextFile)
+    const objectUrl = URL.createObjectURL(file)
     previewObjectUrlRef.current = objectUrl
-    setSelectedFile(nextFile)
+    setSelectedFile(file)
     setPreviewUrl(objectUrl)
     setErrorMessages([])
     return false
