@@ -15,6 +15,7 @@ export * from './getAdminPlaceDetailPathParameters';
 export * from './getPlaceCoverPhotoPathParameters';
 export * from './getPlaceDetailPathParameters';
 export * from './healthReadyResponseChecks';
+export * from './listAdminPlaceMaterialsPathParameters';
 export * from './listPlaceMaterialsPathParameters';
 export * from './listPlacesSort';
 export * from './material';

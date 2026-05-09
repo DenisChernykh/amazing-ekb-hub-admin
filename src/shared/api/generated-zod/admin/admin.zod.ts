@@ -63,14 +63,12 @@ export const ListAdminPlaces403Response = zod.strictObject({
  * Создаёт новое место в каталоге. Операция доступна только администратору.
  * @summary Create place
  */
-export const createPlaceBodyPopularityWeightDefault = 0;
-
 export const CreatePlaceBody = zod.strictObject({
   "title": zod.string().describe('Название места.'),
-  "summary": zod.string().describe('Короткое описание места.'),
-  "tags": zod.array(zod.string()).describe('Теги для поиска и фильтрации.'),
+  "summary": zod.string().optional().describe('Короткое описание места. Если поле не передано, backend сохранит пустую строку.'),
+  "tags": zod.array(zod.string()).optional().describe('Теги для поиска и фильтрации. Если поле не передано, backend сохранит пустой массив.'),
   "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
-  "popularityWeight": zod.number().default(createPlaceBodyPopularityWeightDefault).describe('Начальный вес популярности.')
+  "popularityWeight": zod.number().optional().describe('Начальный вес популярности. Если поле не передано, backend сохранит 0.')
 }).describe('Payload создания нового места.')
 
 export const CreatePlace201Response = zod.strictObject({
@@ -294,6 +292,55 @@ export const UploadPlaceCoverPhoto403Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 export const UploadPlaceCoverPhoto404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Возвращает до 100 материалов указанного места для администратора, включая скрытые места.
+ * @summary List admin place materials
+ */
+export const ListAdminPlaceMaterialsParams = zod.strictObject({
+  "placeId": zod.string().describe('Идентификатор места.')
+})
+
+export const ListAdminPlaceMaterialsQueryParams = zod.strictObject({
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).optional().describe('Фильтр по платформе публикации материала.')
+})
+
+export const ListAdminPlaceMaterials200Response = zod.strictObject({
+  "items": zod.array(zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().describe('Заголовок материала.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал.')
+}).describe('Материал, связанный с местом.')).describe('Материалы места в стабильном порядке отображения.')
+}).describe('Ограниченный список материалов места.')
+
+export const ListAdminPlaceMaterials400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminPlaceMaterials401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminPlaceMaterials403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminPlaceMaterials404Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')

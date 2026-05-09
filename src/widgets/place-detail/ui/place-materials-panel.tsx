@@ -6,12 +6,9 @@ import {
   getMaterialTypeMeta,
 } from '@/entities/material/ui/material-meta'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material, PlaceStatus } from '@/shared/api/generated/model'
+import type { Material } from '@/shared/api/generated/model'
 import type { TableColumnsType } from 'antd'
 import { Alert, Card, Empty, Table, Tag, Typography } from 'antd'
-
-const MATERIALS_BRIDGE_PAGE = 1
-const MATERIALS_BRIDGE_PAGE_SIZE = 100
 
 const materialColumns: TableColumnsType<Material> = [
   {
@@ -64,39 +61,15 @@ const materialColumns: TableColumnsType<Material> = [
  */
 export type PlaceMaterialsPanelProps = {
   placeId: string
-  placeStatus: PlaceStatus
 }
 
 /**
  * Показывает read-only список материалов места.
  *
- * @remarks Для `hidden` places запрос отключается, потому что текущий backend read endpoint материалов публичный и доступен только для `active` places.
+ * @remarks Загружает bounded список через admin endpoint, поэтому материалы hidden places доступны в админке.
  */
-export function PlaceMaterialsPanel({
-  placeId,
-  placeStatus,
-}: PlaceMaterialsPanelProps) {
-  const isMaterialsQueryEnabled = placeStatus === 'active'
-  const materialsQuery = usePlaceMaterialsListQuery(
-    placeId,
-    {
-      page: MATERIALS_BRIDGE_PAGE,
-      pageSize: MATERIALS_BRIDGE_PAGE_SIZE,
-    },
-    { enabled: isMaterialsQueryEnabled },
-  )
-
-  if (!isMaterialsQueryEnabled) {
-    return (
-      <Card title="Материалы">
-        <Alert
-          message="Материалы скрытого места пока недоступны в админке: backend отдает список материалов только для опубликованных мест."
-          showIcon
-          type="warning"
-        />
-      </Card>
-    )
-  }
+export function PlaceMaterialsPanel({ placeId }: PlaceMaterialsPanelProps) {
+  const materialsQuery = usePlaceMaterialsListQuery(placeId)
 
   if (materialsQuery.isError) {
     return (

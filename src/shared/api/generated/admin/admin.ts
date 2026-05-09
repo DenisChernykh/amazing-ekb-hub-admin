@@ -30,8 +30,11 @@ import type {
   CreatePlaceRequest,
   ForbiddenResponse,
   GetAdminPlaceDetailPathParameters,
+  ListAdminPlaceMaterialsParams,
+  ListAdminPlaceMaterialsPathParameters,
   ListAdminPlacesParams,
   Material,
+  MaterialListResponse,
   MaterialNotFoundResponse,
   NestErrorResponse,
   PlaceDetail,
@@ -509,6 +512,107 @@ export const useUploadPlaceCoverPhoto = <TError = ErrorType<ValidationErrorRespo
       return useMutation(getUploadPlaceCoverPhotoMutationOptions(options), queryClient);
     }
     /**
+ * Возвращает до 100 материалов указанного места для администратора, включая скрытые места.
+ * @summary List admin place materials
+ */
+export const listAdminPlaceMaterials = (
+    { placeId }: ListAdminPlaceMaterialsPathParameters,
+    params?: ListAdminPlaceMaterialsParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<MaterialListResponse>(
+      {url: `/admin/places/${encodeURIComponent(String(placeId))}/materials`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getListAdminPlaceMaterialsQueryKey = ({ placeId }: ListAdminPlaceMaterialsPathParameters,
+    params?: ListAdminPlaceMaterialsParams,) => {
+    return [
+    `/admin/places/${placeId}/materials`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminPlaceMaterialsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>({ placeId }: ListAdminPlaceMaterialsPathParameters,
+    params?: ListAdminPlaceMaterialsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminPlaceMaterialsQueryKey({ placeId },params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminPlaceMaterials>>> = ({ signal }) => listAdminPlaceMaterials({ placeId },params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(placeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListAdminPlaceMaterialsQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminPlaceMaterials>>>
+export type ListAdminPlaceMaterialsQueryError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>
+
+
+export function useListAdminPlaceMaterials<TData = Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ pathParams: ListAdminPlaceMaterialsPathParameters,
+    params: undefined |  ListAdminPlaceMaterialsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminPlaceMaterials>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminPlaceMaterials>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminPlaceMaterials<TData = Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ pathParams: ListAdminPlaceMaterialsPathParameters,
+    params?: ListAdminPlaceMaterialsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminPlaceMaterials>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminPlaceMaterials>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminPlaceMaterials<TData = Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ pathParams: ListAdminPlaceMaterialsPathParameters,
+    params?: ListAdminPlaceMaterialsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List admin place materials
+ */
+
+export function useListAdminPlaceMaterials<TData = Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ { placeId }: ListAdminPlaceMaterialsPathParameters,
+    params?: ListAdminPlaceMaterialsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceMaterials>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListAdminPlaceMaterialsQueryOptions({ placeId },params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Создаёт новый материал для указанного места. Операция доступна только администратору.
  * @summary Create material for place
  */
