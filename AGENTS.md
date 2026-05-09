@@ -53,6 +53,21 @@ This admin project is a real Amazing EKB Hub codebase used to practice a Vite SP
 4. Generated files must not be documented manually.
 5. Before finishing, check the changed exports against `docs/architecture/tsdoc-guidelines.md`.
 
+## Task Completion Ritual
+
+Use this ritual after a feature branch is merged or when the user asks to finish/close a completed slice. This is an AI-agent workflow, not end-user documentation.
+
+1. Check local state with `git status -sb` and confirm the expected branch, usually `main`, is clean.
+2. Check the merged PR status and record the PR number/link in any changed tracking docs.
+3. Update `docs/product/project-feature-gap.md`: move the completed slice from branch/PR status to done in `main`, add the merged PR link, and keep remaining gaps/blockers explicit.
+4. Update the Notion roadmap with the same status, merged PR link, and current follow-up blockers.
+5. Check relevant GitHub issues: close/update issues for completed work, leave real follow-ups open, and create/update backend/admin blocker issues when needed.
+6. Run the full final verification set from the Verification section on `main`.
+7. If docs or status files changed after merge, commit and push that small docs/status update separately.
+8. Before proposing the next slice, inspect open blockers and avoid choosing work that would require temporary architecture unless the user explicitly accepts that tradeoff.
+
+If the user asks to "repeat the ritual" or asks what the ritual is, explain these steps in chat first. Execute them only when the user asks to perform the post-merge/status update.
+
 ## Verification
 
 Run the narrowest meaningful checks while working, and before completion run:
