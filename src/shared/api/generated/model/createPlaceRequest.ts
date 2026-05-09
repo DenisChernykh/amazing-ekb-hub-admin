@@ -13,11 +13,11 @@ import type { PlaceCategory } from './placeCategory';
 export type CreatePlaceRequest = {
   /** Название места. */
   title: string;
-  /** Короткое описание места. */
-  summary: string;
-  /** Теги для поиска и фильтрации. */
-  tags: string[];
+  /** Короткое описание места. Если поле не передано, backend сохранит пустую строку. */
+  summary?: string;
+  /** Теги для поиска и фильтрации. Если поле не передано, backend сохранит пустой массив. */
+  tags?: string[];
   category: PlaceCategory;
-  /** Начальный вес популярности. */
+  /** Начальный вес популярности. Если поле не передано, backend сохранит 0. */
   popularityWeight?: number;
 };

@@ -104,23 +104,14 @@ export const GetPlaceCoverPhoto404Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 /**
- * Возвращает материалы, связанные с указанным местом, с пагинацией и фильтром по платформе.
+ * Возвращает до 100 материалов, связанных с указанным активным местом, с опциональным фильтром по платформе.
  * @summary List place materials
  */
 export const ListPlaceMaterialsParams = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места.')
 })
 
-export const listPlaceMaterialsQueryPageDefault = 1;
-
-export const listPlaceMaterialsQueryPageSizeDefault = 20;
-export const listPlaceMaterialsQueryPageSizeMax = 100;
-
-
-
 export const ListPlaceMaterialsQueryParams = zod.strictObject({
-  "page": zod.number().min(1).default(listPlaceMaterialsQueryPageDefault).describe('Номер страницы пагинации. Минимальное значение `1`.'),
-  "pageSize": zod.number().min(1).max(listPlaceMaterialsQueryPageSizeMax).default(listPlaceMaterialsQueryPageSizeDefault).describe('Размер страницы. Допустимый диапазон от `1` до `100`.'),
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).optional().describe('Фильтр по платформе публикации материала.')
 })
 
@@ -134,11 +125,8 @@ export const ListPlaceMaterials200Response = zod.strictObject({
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Публичная ссылка на материал.')
-}).describe('Материал, связанный с местом.')).describe('Элементы текущей страницы.'),
-  "total": zod.number().describe('Общее количество доступных элементов.'),
-  "page": zod.number().describe('Текущая страница.'),
-  "pageSize": zod.number().describe('Размер страницы.')
-}).describe('Пагинированный список материалов.')
+}).describe('Материал, связанный с местом.')).describe('Материалы места в стабильном порядке отображения.')
+}).describe('Ограниченный список материалов места.')
 
 export const ListPlaceMaterials400Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),

@@ -1,36 +1,36 @@
-import { useListPlaceMaterials } from '@/shared/api/generated/places/places'
+import { useListAdminPlaceMaterials } from '@/shared/api/generated/admin/admin'
 import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlaceMaterialsListQuery } from './material-hooks'
 
-vi.mock('@/shared/api/generated/places/places', () => ({
-  useListPlaceMaterials: vi.fn(),
+vi.mock('@/shared/api/generated/admin/admin', () => ({
+  useListAdminPlaceMaterials: vi.fn(),
 }))
 
-const mockedUseListPlaceMaterials = vi.mocked(useListPlaceMaterials)
+const mockedUseListAdminPlaceMaterials = vi.mocked(useListAdminPlaceMaterials)
 
 describe('material hooks', () => {
   beforeEach(() => {
-    mockedUseListPlaceMaterials.mockReset()
+    mockedUseListAdminPlaceMaterials.mockReset()
   })
 
   it('loads place materials through entity bridge with retry disabled', () => {
-    mockedUseListPlaceMaterials.mockReturnValue({
+    mockedUseListAdminPlaceMaterials.mockReturnValue({
       data: undefined,
       isPending: true,
-    } as unknown as ReturnType<typeof useListPlaceMaterials>)
+    } as unknown as ReturnType<typeof useListAdminPlaceMaterials>)
 
     renderHook(() =>
       usePlaceMaterialsListQuery(
         'place-1',
-        { page: 1, pageSize: 5, platform: 'telegram' },
+        { platform: 'telegram' },
         { enabled: true },
       ),
     )
 
-    expect(mockedUseListPlaceMaterials).toHaveBeenCalledWith(
+    expect(mockedUseListAdminPlaceMaterials).toHaveBeenCalledWith(
       { placeId: 'place-1' },
-      { page: 1, pageSize: 5, platform: 'telegram' },
+      { platform: 'telegram' },
       { query: { retry: false, enabled: true } },
     )
   })

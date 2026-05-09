@@ -1,9 +1,7 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
-import type {
-  ListPlaceMaterialsParams,
-  MaterialListResponse,
-} from '@/shared/api/generated/operation'
-import { useListPlaceMaterials } from '@/shared/api/generated/places/places'
+import { useListAdminPlaceMaterials } from '@/shared/api/generated/admin/admin'
+import type { MaterialListResponse } from '@/shared/api/generated/operation'
+import type { ListAdminPlaceMaterialsParams } from '@/shared/api/generated/operation/listAdminPlaceMaterialsParams'
 import type { UseQueryOptions } from '@tanstack/react-query'
 
 /**
@@ -17,16 +15,16 @@ export type PlaceMaterialsListQueryOptions = Omit<
 >
 
 /**
- * Загружает материалы места через entity-level bridge.
+ * Загружает admin-список материалов места через entity-level bridge.
  *
- * @remarks Сейчас backend предоставляет только публичный read endpoint, поэтому hidden places отключают запрос на уровне widget и показывают явный blocker.
+ * @remarks Использует admin endpoint, поэтому материалы доступны и для `active`, и для `hidden` places.
  */
 export function usePlaceMaterialsListQuery(
   placeId: string,
-  params: ListPlaceMaterialsParams,
+  params?: ListAdminPlaceMaterialsParams,
   options?: PlaceMaterialsListQueryOptions,
 ) {
-  return useListPlaceMaterials<MaterialListResponse, ApiClientError>(
+  return useListAdminPlaceMaterials<MaterialListResponse, ApiClientError>(
     { placeId },
     params,
     {

@@ -7,7 +7,7 @@
  */
 import type { Platform } from '../model/platform';
 
-export type ListPlaceMaterialsParams = {
+export type ListAdminPlaceMaterialsParams = {
 /**
  * Фильтр по платформе публикации материала.
  */

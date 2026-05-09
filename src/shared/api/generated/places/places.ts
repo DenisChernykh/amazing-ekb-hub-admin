@@ -323,7 +323,7 @@ export function useGetPlaceCoverPhoto<TData = Awaited<ReturnType<typeof getPlace
 
 
 /**
- * Возвращает материалы, связанные с указанным местом, с пагинацией и фильтром по платформе.
+ * Возвращает до 100 материалов, связанных с указанным активным местом, с опциональным фильтром по платформе.
  * @summary List place materials
  */
 export const listPlaceMaterials = (

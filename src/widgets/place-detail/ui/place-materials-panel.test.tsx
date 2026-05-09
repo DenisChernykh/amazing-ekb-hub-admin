@@ -24,9 +24,6 @@ const materialsResponse: MaterialListResponse = {
       url: 'https://t.me/amazing_ekb/321',
     },
   ],
-  page: 1,
-  pageSize: 100,
-  total: 1,
 }
 
 describe('PlaceMaterialsPanel', () => {
@@ -39,13 +36,9 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" placeStatus="active" />)
+    render(<PlaceMaterialsPanel placeId="place-1" />)
 
-    expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith(
-      'place-1',
-      { page: 1, pageSize: 100 },
-      { enabled: true },
-    )
+    expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith('place-1')
     expect(screen.getByText('Материалы')).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Обзор комплекса' }),
@@ -55,27 +48,19 @@ describe('PlaceMaterialsPanel', () => {
     expect(screen.getByText('2:05')).toBeInTheDocument()
   })
 
-  it('does not request public materials for hidden places and shows backend gap', () => {
+  it('loads hidden place materials through admin endpoint', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
-      data: undefined,
+      data: materialsResponse,
       error: null,
       isError: false,
       isFetching: false,
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" placeStatus="hidden" />)
+    render(<PlaceMaterialsPanel placeId="place-1" />)
 
-    expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith(
-      'place-1',
-      { page: 1, pageSize: 100 },
-      { enabled: false },
-    )
-    expect(
-      screen.getByText(
-        'Материалы скрытого места пока недоступны в админке: backend отдает список материалов только для опубликованных мест.',
-      ),
-    ).toBeInTheDocument()
+    expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith('place-1')
+    expect(screen.getByRole('link', { name: 'Обзор комплекса' })).toBeVisible()
   })
 
   it('renders normalized API error message', () => {
@@ -91,7 +76,7 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" placeStatus="active" />)
+    render(<PlaceMaterialsPanel placeId="place-1" />)
 
     expect(screen.getByText('Materials unavailable')).toBeInTheDocument()
   })
