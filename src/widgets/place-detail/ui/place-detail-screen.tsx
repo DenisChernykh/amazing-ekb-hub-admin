@@ -17,6 +17,7 @@ import {
   Typography,
 } from 'antd'
 import { Link } from 'react-router'
+import { PlaceMaterialsPanel } from './place-materials-panel'
 
 const formatCounters = (place: PlaceDetail) => [
   `telegram: ${place.counters.telegram}`,
@@ -86,6 +87,12 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
         placeId={place.id}
       />
 
+      <PlaceMaterialsPanel
+        key={`materials:${place.id}`}
+        placeId={place.id}
+        placeStatus={place.status}
+      />
+
       <Card>
         <Descriptions column={1} bordered>
           <Descriptions.Item label="Статус">
@@ -107,7 +114,7 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
           <Descriptions.Item label="Вес популярности">
             {place.popularityWeight}
           </Descriptions.Item>
-          <Descriptions.Item label="Материалы">
+          <Descriptions.Item label="Счетчики материалов">
             <Space size={[8, 4]} wrap>
               {formatCounters(place).map((counter) => (
                 <Typography.Text key={counter}>{counter}</Typography.Text>
