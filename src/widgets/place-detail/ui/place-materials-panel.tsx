@@ -1,6 +1,7 @@
 import { usePlaceMaterialsListQuery } from '@/entities/material/model/material-hooks'
 import {
   formatMaterialDuration,
+  formatMaterialPublishedDate,
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
 } from '@/entities/material/ui/material-meta'
@@ -11,9 +12,6 @@ import { Alert, Card, Empty, Table, Tag, Typography } from 'antd'
 
 const MATERIALS_BRIDGE_PAGE = 1
 const MATERIALS_BRIDGE_PAGE_SIZE = 100
-
-const formatMaterialDate = (publishedAt: string) =>
-  new Date(publishedAt).toISOString().slice(0, 10)
 
 const materialColumns: TableColumnsType<Material> = [
   {
@@ -49,7 +47,7 @@ const materialColumns: TableColumnsType<Material> = [
   {
     dataIndex: 'publishedAt',
     key: 'publishedAt',
-    render: (publishedAt: string) => formatMaterialDate(publishedAt),
+    render: (publishedAt: string) => formatMaterialPublishedDate(publishedAt),
     title: 'Опубликован',
   },
   {

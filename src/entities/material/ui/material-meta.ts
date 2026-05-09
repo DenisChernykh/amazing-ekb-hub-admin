@@ -74,3 +74,12 @@ export function formatMaterialDuration(durationSec: number | null) {
 
   return `${minutes}:${paddedSeconds}`
 }
+
+/**
+ * Форматирует дату публикации материала без UTC-нормализации.
+ *
+ * @remarks Backend принимает ISO datetime со смещением, поэтому UI сохраняет календарный день из исходной строки и не вызывает `toISOString()`.
+ */
+export function formatMaterialPublishedDate(publishedAt: string) {
+  return publishedAt.slice(0, 10)
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatMaterialDuration,
+  formatMaterialPublishedDate,
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
 } from './material-meta'
@@ -28,5 +29,14 @@ describe('material meta', () => {
     expect(formatMaterialDuration(null)).toBe('—')
     expect(formatMaterialDuration(75)).toBe('1:15')
     expect(formatMaterialDuration(3670)).toBe('1:01:10')
+  })
+
+  it('formats material publication date without UTC day shift', () => {
+    expect(formatMaterialPublishedDate('2026-03-20T00:30:00+03:00')).toBe(
+      '2026-03-20',
+    )
+    expect(formatMaterialPublishedDate('2026-03-20T10:30:00.000Z')).toBe(
+      '2026-03-20',
+    )
   })
 })
