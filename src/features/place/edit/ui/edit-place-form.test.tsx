@@ -188,6 +188,34 @@ describe('EditPlaceForm', () => {
     expect(onDirtyChange).toHaveBeenCalledWith(true)
   })
 
+  it('sends cleared optional summary and tags to update mutation', async () => {
+    const mutate = vi.fn()
+    mockedUseUpdatePlaceMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useUpdatePlaceMutation>)
+
+    renderEditPlaceForm()
+
+    fireEvent.change(screen.getByLabelText('Описание'), {
+      target: { value: '   ' },
+    })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Теги' }), {
+      target: { value: '' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith({
+        data: {
+          summary: '',
+          tags: [],
+        },
+        pathParams: { placeId: 'place-2' },
+      })
+    })
+  })
+
   it('resets values back to loaded server state', () => {
     mockedUseUpdatePlaceMutation.mockReturnValue({
       isPending: false,

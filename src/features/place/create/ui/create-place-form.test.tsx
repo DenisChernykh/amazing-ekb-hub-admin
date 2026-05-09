@@ -159,6 +159,35 @@ describe('CreatePlaceForm', () => {
     })
   })
 
+  it('submits create payload without summary and tags', async () => {
+    const mutate = vi.fn()
+    mockedUseCreatePlaceMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useCreatePlaceMutation>)
+
+    renderCreatePlaceForm()
+
+    fireEvent.change(screen.getByLabelText('Название'), {
+      target: { value: 'Тихий SPA' },
+    })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Категория' }), {
+      target: { value: 'spa' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith({
+        data: {
+          category: 'spa',
+          summary: '',
+          tags: [],
+          title: 'Тихий SPA',
+        },
+      })
+    })
+  })
+
   it('renders validation error messages from API response', async () => {
     mockedUseCreatePlaceMutation.mockImplementation(
       (options) =>

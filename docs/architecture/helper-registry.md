@@ -84,18 +84,18 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Form Feature
 
-| Helper                      | Location                                                | Visibility | Contract                                                                                        |
-| --------------------------- | ------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| `PlaceFormValues`           | `src/features/place/form/model/place-form.ts`           | exported   | Defines create/edit place form values before conversion to generated API payloads.              |
-| `getPlaceFormInitialValues` | `src/features/place/form/model/place-form.ts`           | exported   | Maps admin `PlaceDetail` to form initial values.                                                |
-| `toCreatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Normalizes form values into `POST /admin/places` payload.                                       |
-| `toUpdatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only.   |
-| `hasPlaceFormChanges`       | `src/features/place/form/model/place-form.ts`           | exported   | Detects whether normalized form values differ from the loaded server values.                    |
-| `PlaceFormErrorAlert`       | `src/features/place/form/ui/place-form-error-alert.tsx` | exported   | Renders normalized create/edit place API errors without parsing backend field names.            |
-| `PlaceFormFields`           | `src/features/place/form/ui/place-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit place forms.                                   |
-| `EditPlaceForm`             | `src/features/place/edit/ui/edit-place-form.tsx`        | exported   | Edits place fields, tracks dirty state, and submits partial update payloads through the entity. |
-| `CreatePlaceForm`           | `src/features/place/create/ui/create-place-form.tsx`    | exported   | Creates places using the shared place form fields and create mutation bridge.                   |
-| `PlaceEditScreen`           | `src/widgets/place-edit/ui/place-edit-screen.tsx`       | exported   | Loads admin detail, hosts edit form, and blocks dirty in-app navigation.                        |
+| Helper                      | Location                                                | Visibility | Contract                                                                                                                                               |
+| --------------------------- | ------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `PlaceFormValues`           | `src/features/place/form/model/place-form.ts`           | exported   | Defines create/edit place form values, including optional `summary`/`tags`, before conversion to generated API payloads.                               |
+| `getPlaceFormInitialValues` | `src/features/place/form/model/place-form.ts`           | exported   | Maps admin `PlaceDetail` to form initial values.                                                                                                       |
+| `toCreatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Normalizes form values into `POST /admin/places` payload, preserving empty optional `summary`/`tags` as `''` and `[]`.                                 |
+| `toUpdatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only, including explicit clears for optional `summary`/`tags`. |
+| `hasPlaceFormChanges`       | `src/features/place/form/model/place-form.ts`           | exported   | Detects whether normalized form values differ from the loaded server values.                                                                           |
+| `PlaceFormErrorAlert`       | `src/features/place/form/ui/place-form-error-alert.tsx` | exported   | Renders normalized create/edit place API errors without parsing backend field names.                                                                   |
+| `PlaceFormFields`           | `src/features/place/form/ui/place-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit place forms.                                                                                          |
+| `EditPlaceForm`             | `src/features/place/edit/ui/edit-place-form.tsx`        | exported   | Edits place fields, tracks dirty state, and submits partial update payloads through the entity.                                                        |
+| `CreatePlaceForm`           | `src/features/place/create/ui/create-place-form.tsx`    | exported   | Creates places using the shared place form fields and create mutation bridge.                                                                          |
+| `PlaceEditScreen`           | `src/widgets/place-edit/ui/place-edit-screen.tsx`       | exported   | Loads admin detail, hosts edit form, and blocks dirty in-app navigation.                                                                               |
 
 ## Place Status Feature
 

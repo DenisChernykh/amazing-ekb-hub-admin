@@ -29,11 +29,7 @@ export function PlaceFormFields({
         <Input autoComplete="off" disabled={disabled} />
       </Form.Item>
 
-      <Form.Item<PlaceFormValues>
-        label="Описание"
-        name="summary"
-        rules={[{ required: true, message: 'Введите описание' }]}
-      >
+      <Form.Item<PlaceFormValues> label="Описание" name="summary">
         <Input.TextArea
           autoSize={{ maxRows: 6, minRows: 3 }}
           disabled={disabled}
@@ -52,11 +48,7 @@ export function PlaceFormFields({
         />
       </Form.Item>
 
-      <Form.Item<PlaceFormValues>
-        label="Теги"
-        name="tags"
-        rules={[{ required: true, message: 'Добавьте хотя бы один тег' }]}
-      >
+      <Form.Item<PlaceFormValues> label="Теги" name="tags">
         <Select
           aria-label="Теги"
           disabled={disabled}
