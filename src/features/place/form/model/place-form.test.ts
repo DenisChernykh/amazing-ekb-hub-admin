@@ -53,6 +53,20 @@ describe('place form helpers', () => {
     })
   })
 
+  it('keeps empty optional summary and tags in create payload', () => {
+    const values: PlaceFormValues = {
+      category: 'spa',
+      title: '  Тихий SPA  ',
+    }
+
+    expect(toCreatePlaceRequest(values)).toEqual({
+      category: 'spa',
+      summary: '',
+      tags: [],
+      title: 'Тихий SPA',
+    })
+  })
+
   it('builds partial update payload only from changed normalized fields', () => {
     const initialValues = getPlaceFormInitialValues(place)
     const values: PlaceFormValues = {
@@ -83,5 +97,20 @@ describe('place form helpers', () => {
 
     expect(hasPlaceFormChanges(values, initialValues)).toBe(false)
     expect(toUpdatePlaceRequest(values, initialValues)).toEqual({})
+  })
+
+  it('builds update payload for cleared optional summary and tags', () => {
+    const initialValues = getPlaceFormInitialValues(place)
+    const values: PlaceFormValues = {
+      ...initialValues,
+      summary: '   ',
+      tags: [],
+    }
+
+    expect(hasPlaceFormChanges(values, initialValues)).toBe(true)
+    expect(toUpdatePlaceRequest(values, initialValues)).toEqual({
+      summary: '',
+      tags: [],
+    })
   })
 })

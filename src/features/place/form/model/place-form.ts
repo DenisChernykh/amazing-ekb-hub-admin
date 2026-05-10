@@ -7,12 +7,16 @@ import type {
 
 /**
  * Значения общей формы создания и редактирования места.
+ *
+ * @remarks `summary` и `tags` опциональны в UI и нормализуются в пустую строку
+ * и пустой массив перед отправкой, чтобы create/edit одинаково поддерживали
+ * незаполненные и явно очищенные поля.
  */
 export type PlaceFormValues = {
   category: PlaceCategory
   popularityWeight?: number | null
-  summary: string
-  tags: string[]
+  summary?: string
+  tags?: string[]
   title: string
 }
 
@@ -32,7 +36,7 @@ const normalizePlaceFormValues = (
 ): NormalizedPlaceFormValues => ({
   category: values.category,
   popularityWeight: values.popularityWeight ?? null,
-  summary: values.summary.trim(),
+  summary: (values.summary ?? '').trim(),
   tags: normalizeTags(values.tags),
   title: values.title.trim(),
 })
