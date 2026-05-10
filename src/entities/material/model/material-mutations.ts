@@ -2,8 +2,8 @@ import type { ApiClientError } from '@/shared/api/client/api-error'
 import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlaceMaterialsQueryKey,
+  updateMaterial,
   useCreatePlaceMaterial,
-  useUpdateMaterial,
 } from '@/shared/api/generated/admin/admin'
 import type {
   CreateMaterialRequest,
@@ -11,7 +11,7 @@ import type {
   UpdateMaterialRequest,
 } from '@/shared/api/generated/model'
 import type { QueryClient } from '@tanstack/react-query'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 /**
  * Callback-и для создания материала через entity bridge.
@@ -116,38 +116,16 @@ export function useUpdateMaterialMutation(
   options?: UpdateMaterialMutationOptions,
 ) {
   const queryClient = useQueryClient()
-  const mutation = useUpdateMaterial<ApiClientError>({
-    mutation: {
+
+  return useMutation<Material, ApiClientError, UpdateMaterialMutationVariables>(
+    {
+      mutationFn: ({ data, materialId }) =>
+        updateMaterial({ materialId }, data),
       onError: options?.onError,
+      onSuccess: async (material, variables) => {
+        await invalidateMaterialDependencies(queryClient, variables.placeId)
+        await options?.onSuccess?.(material)
+      },
     },
-  })
-
-  return {
-    ...mutation,
-    mutate: (variables: UpdateMaterialMutationVariables) => {
-      mutation.mutate(
-        {
-          data: variables.data,
-          pathParams: { materialId: variables.materialId },
-        },
-        {
-          onSuccess: async (material) => {
-            await invalidateMaterialDependencies(queryClient, variables.placeId)
-            await options?.onSuccess?.(material)
-          },
-        },
-      )
-    },
-    mutateAsync: async (variables: UpdateMaterialMutationVariables) => {
-      const material = await mutation.mutateAsync({
-        data: variables.data,
-        pathParams: { materialId: variables.materialId },
-      })
-
-      await invalidateMaterialDependencies(queryClient, variables.placeId)
-      await options?.onSuccess?.(material)
-
-      return material
-    },
-  }
+  )
 }

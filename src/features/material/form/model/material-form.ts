@@ -56,6 +56,10 @@ const serializePublishedAt = (publishedAt: Dayjs | null | undefined) => {
   return publishedAt.format('YYYY-MM-DDTHH:mm:ssZ')
 }
 
+const parsePublishedAtWallClock = (publishedAt: string) => {
+  return dayjs(publishedAt.slice(0, 19))
+}
+
 const normalizeMaterialFormValues = (
   values: MaterialFormValues,
 ): NormalizedMaterialFormValues => ({
@@ -84,7 +88,7 @@ export function getMaterialFormInitialValues(
   return {
     durationSec: material.durationSec,
     platform: material.platform,
-    publishedAt: dayjs(material.publishedAt),
+    publishedAt: parsePublishedAtWallClock(material.publishedAt),
     title: material.title,
     type: material.type,
     url: material.url,

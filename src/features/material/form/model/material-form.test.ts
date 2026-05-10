@@ -35,6 +35,17 @@ describe('material form helpers', () => {
     expect(initialValues.publishedAt?.format('YYYY-MM-DD')).toBe('2026-03-20')
   })
 
+  it('keeps source publishedAt wall-clock time in edit initial values', () => {
+    const initialValues = getMaterialFormInitialValues({
+      ...material,
+      publishedAt: '2026-03-19T22:30:00-03:00',
+    })
+
+    expect(initialValues.publishedAt?.format('YYYY-MM-DDTHH:mm')).toBe(
+      '2026-03-19T22:30',
+    )
+  })
+
   it('normalizes create payload and keeps selected local datetime', () => {
     const values: MaterialFormValues = {
       durationSec: undefined,

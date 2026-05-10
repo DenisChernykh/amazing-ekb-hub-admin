@@ -1,8 +1,8 @@
 import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlaceMaterialsQueryKey,
+  updateMaterial,
   useCreatePlaceMaterial,
-  useUpdateMaterial,
 } from '@/shared/api/generated/admin/admin'
 import type { Material } from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -21,12 +21,12 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }) => [
     `/admin/places/${placeId}/materials`,
   ]),
+  updateMaterial: vi.fn(),
   useCreatePlaceMaterial: vi.fn(),
-  useUpdateMaterial: vi.fn(),
 }))
 
 const mockedUseCreatePlaceMaterial = vi.mocked(useCreatePlaceMaterial)
-const mockedUseUpdateMaterial = vi.mocked(useUpdateMaterial)
+const mockedUpdateMaterial = vi.mocked(updateMaterial)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -50,7 +50,7 @@ const material: Material = {
 describe('material mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlaceMaterial.mockReset()
-    mockedUseUpdateMaterial.mockReset()
+    mockedUpdateMaterial.mockReset()
     vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
       ({ placeId }) => [`/admin/places/${placeId}`],
     )
@@ -108,13 +108,12 @@ describe('material mutations', () => {
     const materialsQueryKey = ['/admin/places/place-1/materials']
     const detailQueryKey = ['/admin/places/place-1']
     const onSuccess = vi.fn()
-    const generatedMutate = vi.fn()
     queryClient.setQueryData(materialsQueryKey, { items: [material] })
     queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
-    mockedUseUpdateMaterial.mockReturnValue({
-      isPending: false,
-      mutate: generatedMutate,
-    } as unknown as ReturnType<typeof useUpdateMaterial>)
+    mockedUpdateMaterial.mockResolvedValue({
+      ...material,
+      title: 'Новое название',
+    })
 
     const { result } = renderHook(
       () => useUpdateMaterialMutation({ onSuccess }),
@@ -123,27 +122,15 @@ describe('material mutations', () => {
       },
     )
 
-    result.current.mutate({
+    await result.current.mutateAsync({
       data: { title: 'Новое название' },
       materialId: 'material-1',
       placeId: 'place-1',
     })
 
-    expect(generatedMutate).toHaveBeenCalledWith(
-      {
-        data: { title: 'Новое название' },
-        pathParams: { materialId: 'material-1' },
-      },
-      expect.objectContaining({ onSuccess: expect.any(Function) }),
-    )
-
-    await generatedMutate.mock.calls[0]?.[1]?.onSuccess?.(
-      { ...material, title: 'Новое название' },
-      {
-        data: { title: 'Новое название' },
-        pathParams: { materialId: 'material-1' },
-      },
-      undefined,
+    expect(mockedUpdateMaterial).toHaveBeenCalledWith(
+      { materialId: 'material-1' },
+      { title: 'Новое название' },
     )
 
     expect(
