@@ -39,6 +39,24 @@ const materialTypeMeta: Record<MaterialType, MaterialMeta> = {
 }
 
 /**
+ * Runtime-значения платформ материалов в стабильном UI-порядке.
+ */
+export const MATERIAL_PLATFORM_VALUES = [
+  'telegram',
+  'dzen',
+  'instagram',
+] satisfies Platform[]
+
+/**
+ * Runtime-значения типов материалов в стабильном UI-порядке.
+ */
+export const MATERIAL_TYPE_VALUES = [
+  'post',
+  'reel',
+  'video',
+] satisfies MaterialType[]
+
+/**
  * Возвращает локализованные UI-метаданные платформы материала.
  */
 export function getMaterialPlatformMeta(platform: Platform) {
@@ -50,6 +68,26 @@ export function getMaterialPlatformMeta(platform: Platform) {
  */
 export function getMaterialTypeMeta(type: MaterialType) {
   return materialTypeMeta[type]
+}
+
+/**
+ * Возвращает options платформ материалов для Ant Design Select.
+ */
+export function getMaterialPlatformOptions() {
+  return MATERIAL_PLATFORM_VALUES.map((platform) => ({
+    label: getMaterialPlatformMeta(platform).label,
+    value: platform,
+  }))
+}
+
+/**
+ * Возвращает options типов материалов для Ant Design Select.
+ */
+export function getMaterialTypeOptions() {
+  return MATERIAL_TYPE_VALUES.map((type) => ({
+    label: getMaterialTypeMeta(type).label,
+    value: type,
+  }))
 }
 
 /**

@@ -5,12 +5,17 @@ import {
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
 } from '@/entities/material/ui/material-meta'
+import { CreateMaterialDrawer } from '@/features/material/create/ui/create-material-drawer'
+import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
 import type { TableColumnsType } from 'antd'
-import { Alert, Card, Empty, Table, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Empty, Table, Tag, Typography } from 'antd'
+import { useState } from 'react'
 
-const materialColumns: TableColumnsType<Material> = [
+const getMaterialColumns = (
+  onEdit: (material: Material) => void,
+): TableColumnsType<Material> => [
   {
     dataIndex: 'title',
     key: 'title',
@@ -54,6 +59,15 @@ const materialColumns: TableColumnsType<Material> = [
       formatMaterialDuration(durationSec),
     title: 'Длительность',
   },
+  {
+    key: 'actions',
+    render: (_value, material) => (
+      <Button onClick={() => onEdit(material)} type="link">
+        Редактировать
+      </Button>
+    ),
+    title: 'Действия',
+  },
 ]
 
 /**
@@ -64,39 +78,82 @@ export type PlaceMaterialsPanelProps = {
 }
 
 /**
- * Показывает read-only список материалов места.
+ * Показывает bounded список материалов места с create/edit drawer actions.
  *
  * @remarks Загружает bounded список через admin endpoint, поэтому материалы hidden places доступны в админке.
  */
 export function PlaceMaterialsPanel({ placeId }: PlaceMaterialsPanelProps) {
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
+  const addButton = (
+    <Button
+      onClick={() => {
+        setIsCreateOpen(true)
+      }}
+      type="primary"
+    >
+      Добавить материал
+    </Button>
+  )
 
   if (materialsQuery.isError) {
     return (
-      <Card title="Материалы">
-        <Alert
-          message={normalizeApiError(materialsQuery.error).message}
-          showIcon
-          type="error"
+      <>
+        <Card extra={addButton} title="Материалы">
+          <Alert
+            message={normalizeApiError(materialsQuery.error).message}
+            showIcon
+            type="error"
+          />
+        </Card>
+        <CreateMaterialDrawer
+          key={`create:${placeId}`}
+          onClose={() => {
+            setIsCreateOpen(false)
+          }}
+          open={isCreateOpen}
+          placeId={placeId}
         />
-      </Card>
+      </>
     )
   }
 
   const materials = materialsQuery.data?.items ?? []
 
   return (
-    <Card title="Материалы">
-      <Table
-        columns={materialColumns}
-        dataSource={materials}
-        loading={materialsQuery.isPending || materialsQuery.isFetching}
-        locale={{
-          emptyText: <Empty description="Материалов пока нет" />,
+    <>
+      <Card extra={addButton} title="Материалы">
+        <Table
+          columns={getMaterialColumns(setEditingMaterial)}
+          dataSource={materials}
+          loading={materialsQuery.isPending || materialsQuery.isFetching}
+          locale={{
+            emptyText: <Empty description="Материалов пока нет" />,
+          }}
+          pagination={false}
+          rowKey="id"
+        />
+      </Card>
+      <CreateMaterialDrawer
+        key={`create:${placeId}`}
+        onClose={() => {
+          setIsCreateOpen(false)
         }}
-        pagination={false}
-        rowKey="id"
+        open={isCreateOpen}
+        placeId={placeId}
       />
-    </Card>
+      {editingMaterial && (
+        <EditMaterialDrawer
+          key={editingMaterial.id}
+          material={editingMaterial}
+          onClose={() => {
+            setEditingMaterial(null)
+          }}
+          open={Boolean(editingMaterial)}
+          placeId={placeId}
+        />
+      )}
+    </>
   )
 }
