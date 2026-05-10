@@ -3,7 +3,9 @@ import {
   formatMaterialDuration,
   formatMaterialPublishedDate,
   getMaterialPlatformMeta,
+  getMaterialPlatformOptions,
   getMaterialTypeMeta,
+  getMaterialTypeOptions,
 } from './material-meta'
 
 describe('material meta', () => {
@@ -23,6 +25,19 @@ describe('material meta', () => {
     expect(getMaterialTypeMeta('post')).toMatchObject({ label: 'Пост' })
     expect(getMaterialTypeMeta('reel')).toMatchObject({ label: 'Reels' })
     expect(getMaterialTypeMeta('video')).toMatchObject({ label: 'Видео' })
+  })
+
+  it('returns material select options in stable order', () => {
+    expect(getMaterialPlatformOptions()).toEqual([
+      { label: 'Telegram', value: 'telegram' },
+      { label: 'Дзен', value: 'dzen' },
+      { label: 'Instagram', value: 'instagram' },
+    ])
+    expect(getMaterialTypeOptions()).toEqual([
+      { label: 'Пост', value: 'post' },
+      { label: 'Reels', value: 'reel' },
+      { label: 'Видео', value: 'video' },
+    ])
   })
 
   it('formats nullable material duration', () => {

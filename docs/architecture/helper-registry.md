@@ -54,14 +54,21 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Material Entity
 
-| Helper                        | Location                                                | Visibility | Contract                                                                                      |
-| ----------------------------- | ------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------- |
-| `usePlaceMaterialsListQuery`  | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint with retry disabled.  |
-| `getMaterialPlatformMeta`     | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                 |
-| `getMaterialTypeMeta`         | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                             |
-| `formatMaterialDuration`      | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.           |
-| `formatMaterialPublishedDate` | `src/entities/material/ui/material-meta.ts`             | exported   | Formats material publication date from source ISO date part without UTC day shifts.           |
-| `PlaceMaterialsPanel`         | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders the read-only bounded materials table on admin place detail, including hidden places. |
+| Helper                              | Location                                                | Visibility | Contract                                                                                           |
+| ----------------------------------- | ------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| `usePlaceMaterialsListQuery`        | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint with retry disabled.       |
+| `useCreatePlaceMaterialMutation`    | `src/entities/material/model/material-mutations.ts`     | exported   | Creates place material through admin API and invalidates bounded materials list plus admin detail. |
+| `useUpdateMaterialMutation`         | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material through admin API and invalidates bounded materials list plus admin detail.       |
+| `invalidatePlaceMaterialsListQuery` | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates one bounded admin materials list after material mutations.                             |
+| `MATERIAL_PLATFORM_VALUES`          | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material platforms in a stable order for UI controls.                             |
+| `MATERIAL_TYPE_VALUES`              | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material types in a stable order for UI controls.                                 |
+| `getMaterialPlatformMeta`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                      |
+| `getMaterialTypeMeta`               | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                                  |
+| `getMaterialPlatformOptions`        | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend platforms to localized Ant Design select options.                                     |
+| `getMaterialTypeOptions`            | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material types to localized Ant Design select options.                                |
+| `formatMaterialDuration`            | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.                |
+| `formatMaterialPublishedDate`       | `src/entities/material/ui/material-meta.ts`             | exported   | Formats material publication date from source ISO date part without UTC day shifts.                |
+| `PlaceMaterialsPanel`               | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit drawer actions.             |
 
 ## Auth UI
 
@@ -114,6 +121,22 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `PlaceCoverPreview`                 | `src/features/place/cover/ui/place-cover-preview.tsx`        | exported   | Renders selected cover preview, current cover image, or empty state.                            |
 | `PlaceCoverUploadActions`           | `src/features/place/cover/ui/place-cover-upload-actions.tsx` | exported   | Renders choose/upload/reset controls for the cover upload panel.                                |
 | `PlaceCoverUploadPanel`             | `src/features/place/cover/ui/place-cover-upload-panel.tsx`   | exported   | Renders current cover preview, local file validation, upload submit, and normalized API errors. |
+
+## Material Form Feature
+
+| Helper                         | Location                                                      | Visibility | Contract                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| `MaterialFormValues`           | `src/features/material/form/model/material-form.ts`           | exported   | Defines create/edit material form values before conversion to generated API payloads.                    |
+| `MaterialFormChangedField`     | `src/features/material/form/model/material-form.ts`           | exported   | Describes a normalized changed material field shown as an edit drawer diff chip.                         |
+| `getMaterialFormInitialValues` | `src/features/material/form/model/material-form.ts`           | exported   | Maps admin `Material` to form initial values.                                                            |
+| `toCreateMaterialRequest`      | `src/features/material/form/model/material-form.ts`           | exported   | Normalizes form values into `POST /admin/places/{placeId}/materials` payload with local offset datetime. |
+| `toUpdateMaterialRequest`      | `src/features/material/form/model/material-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/materials/{materialId}` payload from changed fields only.      |
+| `hasMaterialFormChanges`       | `src/features/material/form/model/material-form.ts`           | exported   | Detects whether normalized material form values differ from loaded server values.                        |
+| `getMaterialFormChangedFields` | `src/features/material/form/model/material-form.ts`           | exported   | Returns normalized changed field labels for edit drawer chips.                                           |
+| `MaterialFormErrorAlert`       | `src/features/material/form/ui/material-form-error-alert.tsx` | exported   | Renders normalized create/edit material API errors without parsing backend field names.                  |
+| `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit material forms.                                         |
+| `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`  | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.               |
+| `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`      | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.  |
 
 ## API Error Internals
 
