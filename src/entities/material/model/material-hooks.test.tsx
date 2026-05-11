@@ -14,7 +14,7 @@ describe('material hooks', () => {
     mockedUseListAdminPlaceMaterials.mockReset()
   })
 
-  it('loads place materials through entity bridge with retry disabled', () => {
+  it('loads place materials through entity bridge without overriding retry policy', () => {
     mockedUseListAdminPlaceMaterials.mockReturnValue({
       data: undefined,
       isPending: true,
@@ -31,7 +31,7 @@ describe('material hooks', () => {
     expect(mockedUseListAdminPlaceMaterials).toHaveBeenCalledWith(
       { placeId: 'place-1' },
       { platform: 'telegram' },
-      { query: { retry: false, enabled: true } },
+      { query: { enabled: true } },
     )
   })
 })

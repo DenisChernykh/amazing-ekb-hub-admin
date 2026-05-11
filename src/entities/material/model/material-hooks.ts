@@ -28,10 +28,7 @@ export function usePlaceMaterialsListQuery(
     { placeId },
     params,
     {
-      query: {
-        retry: false,
-        ...options,
-      },
+      query: options,
     },
   )
 }
