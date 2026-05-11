@@ -1,3 +1,4 @@
+import { getMaterialUrlValidationError } from '@/entities/material/model/material-url'
 import {
   getMaterialPlatformOptions,
   getMaterialTypeOptions,
@@ -81,8 +82,20 @@ export function MaterialFormFields({ disabled }: MaterialFormFieldsProps) {
         label="Ссылка"
         name="url"
         rules={[
-          { message: 'Введите ссылку', required: true },
-          { message: 'Введите корректную ссылку', type: 'url' },
+          { message: 'Введите ссылку', required: true, whitespace: true },
+          {
+            validator: async (_rule, value: unknown) => {
+              if (typeof value !== 'string') {
+                return
+              }
+
+              const validationError = getMaterialUrlValidationError(value)
+
+              if (validationError) {
+                throw new Error(validationError)
+              }
+            },
+          },
         ]}
       >
         <Input aria-label="Ссылка" disabled={disabled} />

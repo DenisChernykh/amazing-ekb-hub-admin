@@ -68,6 +68,19 @@ describe('material form helpers', () => {
     expect(request.publishedAt).toMatch(/^2026-03-20T00:30:00[+-]\d{2}:\d{2}$/)
   })
 
+  it('rejects unsafe material URLs before building create payload', () => {
+    const values: MaterialFormValues = {
+      durationSec: null,
+      platform: 'telegram',
+      publishedAt: dayjs('2026-03-20T00:30:00'),
+      title: 'Новый обзор',
+      type: 'post',
+      url: 'javascript://example.com/%0Aalert(1)',
+    }
+
+    expect(() => toCreateMaterialRequest(values)).toThrow('http или https')
+  })
+
   it('builds partial update payload only from changed normalized fields', () => {
     const initialValues = getMaterialFormInitialValues(material)
     const values: MaterialFormValues = {
@@ -81,6 +94,21 @@ describe('material form helpers', () => {
       durationSec: null,
       title: 'Обновленный обзор',
       url: 'https://t.me/amazing_ekb/999',
+    })
+  })
+
+  it('does not resubmit unchanged unsafe material URL in update payload', () => {
+    const initialValues = getMaterialFormInitialValues({
+      ...material,
+      url: 'javascript://example.com/%0Aalert(1)',
+    })
+    const values: MaterialFormValues = {
+      ...initialValues,
+      title: 'Обновленный обзор',
+    }
+
+    expect(toUpdateMaterialRequest(values, initialValues)).toEqual({
+      title: 'Обновленный обзор',
     })
   })
 

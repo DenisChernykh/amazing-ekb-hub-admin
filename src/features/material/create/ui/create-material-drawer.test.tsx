@@ -223,4 +223,34 @@ describe('CreateMaterialDrawer', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Новый материал' })).toBeVisible()
   })
+
+  it('blocks unsafe material URL before create mutation', async () => {
+    const mutate = vi.fn()
+    mockedUseCreatePlaceMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useCreatePlaceMaterialMutation>)
+
+    renderCreateDrawer()
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Платформа' }), {
+      target: { value: 'telegram' },
+    })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Тип' }), {
+      target: { value: 'post' },
+    })
+    fireEvent.change(screen.getByLabelText('Заголовок'), {
+      target: { value: 'Новый обзор' },
+    })
+    fireEvent.change(screen.getByLabelText('Момент публикации'), {
+      target: { value: '2026-03-20T00:30' },
+    })
+    fireEvent.change(screen.getByLabelText('Ссылка'), {
+      target: { value: 'javascript://example.com/%0Aalert(1)' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }))
+
+    expect(await screen.findByText(/http или https/)).toBeInTheDocument()
+    expect(mutate).not.toHaveBeenCalled()
+  })
 })

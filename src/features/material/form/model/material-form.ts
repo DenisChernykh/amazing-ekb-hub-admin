@@ -1,3 +1,4 @@
+import { normalizeMaterialUrl } from '@/entities/material/model/material-url'
 import type {
   CreateMaterialRequest,
   Material,
@@ -112,7 +113,7 @@ export function toCreateMaterialRequest(
     publishedAt: getRequiredValue(normalizedValues.publishedAt, 'publishedAt'),
     title: normalizedValues.title,
     type: getRequiredValue(normalizedValues.type, 'type'),
-    url: normalizedValues.url,
+    url: normalizeMaterialUrl(values.url),
   }
 }
 
@@ -153,7 +154,7 @@ export function toUpdateMaterialRequest(
   }
 
   if (normalizedValues.url !== normalizedInitialValues.url) {
-    request.url = normalizedValues.url
+    request.url = normalizeMaterialUrl(values.url)
   }
 
   return request
