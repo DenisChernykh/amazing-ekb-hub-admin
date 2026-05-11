@@ -2,17 +2,19 @@ import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
   useCreatePlace,
+  useSetPinnedMaterial,
   useUpdatePlace,
   useUpdatePlaceStatus,
   useUploadPlaceCoverPhoto,
 } from '@/shared/api/generated/admin/admin'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   useCreatePlaceMutation,
+  useSetPinnedMaterialMutation,
   useUpdatePlaceMutation,
   useUpdatePlaceStatusMutation,
   useUploadPlaceCoverPhotoMutation,
@@ -25,11 +27,13 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   useCreatePlace: vi.fn(),
   useUploadPlaceCoverPhoto: vi.fn(),
+  useSetPinnedMaterial: vi.fn(),
   useUpdatePlace: vi.fn(),
   useUpdatePlaceStatus: vi.fn(),
 }))
 
 const mockedUseCreatePlace = vi.mocked(useCreatePlace)
+const mockedUseSetPinnedMaterial = vi.mocked(useSetPinnedMaterial)
 const mockedUseUploadPlaceCoverPhoto = vi.mocked(useUploadPlaceCoverPhoto)
 const mockedUseUpdatePlace = vi.mocked(useUpdatePlace)
 const mockedUseUpdatePlaceStatus = vi.mocked(useUpdatePlaceStatus)
@@ -45,6 +49,7 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('place mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlace.mockReset()
+    mockedUseSetPinnedMaterial.mockReset()
     mockedUseUploadPlaceCoverPhoto.mockReset()
     mockedUseUpdatePlace.mockReset()
     mockedUseUpdatePlaceStatus.mockReset()
@@ -237,6 +242,68 @@ describe('place mutations', () => {
       queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
         .isInvalidated,
     ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
+  })
+
+  it('invalidates admin detail query after setting pinned material', async () => {
+    const queryClient = new QueryClient()
+    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/admin/places/place-5']
+    const updatedPlace: PlaceDetail = {
+      category: 'spa',
+      counters: {
+        dzen: 0,
+        instagram: 0,
+        telegram: 1,
+      },
+      coverImageUrl: null,
+      id: 'place-5',
+      pinnedMaterial: {
+        durationSec: null,
+        id: 'material-1',
+        placeId: 'place-5',
+        platform: 'telegram',
+        publishedAt: '2026-03-20T10:30:00+05:00',
+        title: 'Стартовый обзор',
+        type: 'post',
+        url: 'https://t.me/amazing_ekb/321',
+      },
+      popularityWeight: 8,
+      status: 'hidden',
+      summary: 'SPA со стартовым материалом',
+      tags: ['spa'],
+      title: 'Pinned SPA',
+    }
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
+    queryClient.setQueryData(detailQueryKey, updatedPlace)
+    mockedUseSetPinnedMaterial.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useSetPinnedMaterial>)
+
+    renderHook(() => useSetPinnedMaterialMutation({ onSuccess }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await mockedUseSetPinnedMaterial.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
+      updatedPlace,
+      {
+        data: { materialId: 'material-1' },
+        pathParams: { placeId: 'place-5' },
+      },
+      undefined,
+      {} as never,
+    )
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
+        .isInvalidated,
+    ).toBe(false)
     expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
   })
 })

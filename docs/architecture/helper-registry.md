@@ -44,6 +44,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useUpdatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.  |
 | `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.        |
 | `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts`  | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.    |
+| `useSetPinnedMaterialMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Sets a place pinned material through admin API and invalidates admin place detail cache. |
 | `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
 | `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                    |
 | `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list with retry disabled, including hidden places when requested. |
@@ -121,6 +122,13 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `PlaceCoverPreview`                 | `src/features/place/cover/ui/place-cover-preview.tsx`        | exported   | Renders selected cover preview, current cover image, or empty state.                            |
 | `PlaceCoverUploadActions`           | `src/features/place/cover/ui/place-cover-upload-actions.tsx` | exported   | Renders choose/upload/reset controls for the cover upload panel.                                |
 | `PlaceCoverUploadPanel`             | `src/features/place/cover/ui/place-cover-upload-panel.tsx`   | exported   | Renders current cover preview, local file validation, upload submit, and normalized API errors. |
+
+## Place Pinned Material Feature
+
+| Helper                       | Location                                                          | Visibility | Contract                                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| `toSetPinnedMaterialRequest` | `src/features/place/pinned-material/model/pinned-material.ts`     | exported   | Builds `PATCH /admin/places/{placeId}/pinned-material` payload or returns `null` for unsupported clear.        |
+| `PinnedMaterialPanel`        | `src/features/place/pinned-material/ui/pinned-material-panel.tsx` | exported   | Renders current pinned material and set/change selector using the already loaded bounded admin materials list. |
 
 ## Material Form Feature
 

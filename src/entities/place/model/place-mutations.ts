@@ -3,11 +3,12 @@ import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
   useCreatePlace,
+  useSetPinnedMaterial,
   useUpdatePlace,
   useUpdatePlaceStatus,
   useUploadPlaceCoverPhoto,
 } from '@/shared/api/generated/admin/admin'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
 import type { QueryClient } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -41,6 +42,14 @@ export type UpdatePlaceMutationOptions = {
 export type UploadPlaceCoverPhotoMutationOptions = {
   onError?: (error: ApiClientError) => void
   onSuccess?: (place: PlaceSummary) => Promise<void> | void
+}
+
+/**
+ * Callback-и для назначения закрепленного материала через entity bridge.
+ */
+export type SetPinnedMaterialMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (place: PlaceDetail) => Promise<void> | void
 }
 
 /**
@@ -156,6 +165,31 @@ export function useUploadPlaceCoverPhotoMutation(
             variables.pathParams.placeId,
           ),
         ])
+        await options?.onSuccess?.(place)
+      },
+    },
+  })
+}
+
+/**
+ * Назначает закрепленный материал места и обновляет admin detail кеш.
+ *
+ * @remarks UI получает только entity-level hook. Список мест и список материалов
+ * не инвалидируются, потому что текущие контракты не содержат изменяемого pinned state.
+ */
+export function useSetPinnedMaterialMutation(
+  options?: SetPinnedMaterialMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useSetPinnedMaterial<ApiClientError>({
+    mutation: {
+      onError: options?.onError,
+      onSuccess: async (place, variables) => {
+        await invalidateAdminPlaceDetailQuery(
+          queryClient,
+          variables.pathParams.placeId,
+        )
         await options?.onSuccess?.(place)
       },
     },

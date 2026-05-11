@@ -44,8 +44,16 @@ vi.mock('@/features/place/cover/ui/place-cover-upload-panel', async () => {
 })
 
 vi.mock('./place-materials-panel', () => ({
-  PlaceMaterialsPanel: ({ placeId }: { placeId: string }) => (
-    <div>Place materials panel: {placeId}</div>
+  PlaceMaterialsPanel: ({
+    pinnedMaterial,
+    placeId,
+  }: {
+    pinnedMaterial: PlaceDetail['pinnedMaterial']
+    placeId: string
+  }) => (
+    <div>
+      Place materials panel: {placeId}:{pinnedMaterial?.title ?? 'none'}
+    </div>
   ),
 }))
 
@@ -104,7 +112,7 @@ describe('PlaceDetailScreen', () => {
       ),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Place materials panel: place-2'),
+      screen.getByText('Place materials panel: place-2:none'),
     ).toBeInTheDocument()
     expect(screen.getByText('Скрыто')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()
@@ -162,6 +170,33 @@ describe('PlaceDetailScreen', () => {
       screen.getByText(
         'Place cover upload panel: place-3:/places/place-3/photo:initial:place-3',
       ),
+    ).toBeInTheDocument()
+  })
+
+  it('passes current pinned material to materials panel', () => {
+    mockedUseAdminPlaceDetailQuery.mockReturnValue({
+      data: {
+        ...hiddenPlace,
+        pinnedMaterial: {
+          durationSec: null,
+          id: 'material-1',
+          placeId: 'place-2',
+          platform: 'telegram',
+          publishedAt: '2026-03-20T10:30:00+05:00',
+          title: 'Стартовый обзор',
+          type: 'post',
+          url: 'https://t.me/amazing_ekb/321',
+        },
+      },
+      error: null,
+      isError: false,
+      isPending: false,
+    } as ReturnType<typeof useAdminPlaceDetailQuery>)
+
+    renderPlaceDetailScreen()
+
+    expect(
+      screen.getByText('Place materials panel: place-2:Стартовый обзор'),
     ).toBeInTheDocument()
   })
 

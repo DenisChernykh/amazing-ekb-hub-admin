@@ -7,6 +7,7 @@ import {
 } from '@/entities/material/ui/material-meta'
 import { CreateMaterialDrawer } from '@/features/material/create/ui/create-material-drawer'
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
+import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
 import type { TableColumnsType } from 'antd'
@@ -74,15 +75,19 @@ const getMaterialColumns = (
  * Props панели материалов места на admin detail screen.
  */
 export type PlaceMaterialsPanelProps = {
+  pinnedMaterial: Material | null
   placeId: string
 }
 
 /**
- * Показывает bounded список материалов места с create/edit drawer actions.
+ * Показывает selector закрепленного материала и bounded список материалов места с create/edit drawer actions.
  *
  * @remarks Загружает bounded список через admin endpoint, поэтому материалы hidden places доступны в админке.
  */
-export function PlaceMaterialsPanel({ placeId }: PlaceMaterialsPanelProps) {
+export function PlaceMaterialsPanel({
+  pinnedMaterial,
+  placeId,
+}: PlaceMaterialsPanelProps) {
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
@@ -100,6 +105,12 @@ export function PlaceMaterialsPanel({ placeId }: PlaceMaterialsPanelProps) {
   if (materialsQuery.isError) {
     return (
       <>
+        <PinnedMaterialPanel
+          key={`pinned:${placeId}:${pinnedMaterial?.id ?? 'none'}`}
+          materials={[]}
+          pinnedMaterial={pinnedMaterial}
+          placeId={placeId}
+        />
         <Card extra={addButton} title="Материалы">
           <Alert
             message={normalizeApiError(materialsQuery.error).message}
@@ -123,6 +134,12 @@ export function PlaceMaterialsPanel({ placeId }: PlaceMaterialsPanelProps) {
 
   return (
     <>
+      <PinnedMaterialPanel
+        key={`pinned:${placeId}:${pinnedMaterial?.id ?? 'none'}`}
+        materials={materials}
+        pinnedMaterial={pinnedMaterial}
+        placeId={placeId}
+      />
       <Card extra={addButton} title="Материалы">
         <Table
           columns={getMaterialColumns(setEditingMaterial)}
