@@ -36,28 +36,28 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Entity
 
-| Helper                             | Location                                       | Visibility | Contract                                                                                 |
-| ---------------------------------- | ---------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------- |
-| `PLACE_CATEGORY_VALUES`            | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                     |
-| `getPlaceStatusFromValue`          | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                        |
-| `useCreatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.  |
-| `useUpdatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.  |
-| `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.        |
-| `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts`  | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.    |
-| `useSetPinnedMaterialMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Sets a place pinned material through admin API and invalidates admin place detail cache. |
-| `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                         |
-| `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                    |
-| `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list with retry disabled, including hidden places when requested. |
-| `useAdminPlaceDetailQuery`         | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                             |
-| `getPlaceCategoryOptions`          | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                    |
-| `getPlaceCategoryMeta`             | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                       |
-| `getPlaceStatusMeta`               | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                         |
+| Helper                             | Location                                       | Visibility | Contract                                                                                        |
+| ---------------------------------- | ---------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `PLACE_CATEGORY_VALUES`            | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                            |
+| `getPlaceStatusFromValue`          | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                               |
+| `useCreatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.         |
+| `useUpdatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.         |
+| `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.               |
+| `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts`  | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.           |
+| `useSetPinnedMaterialMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Sets a place pinned material through admin API and invalidates admin place detail cache.        |
+| `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                                |
+| `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                           |
+| `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list through the admin endpoint, including hidden places when requested. |
+| `useAdminPlaceDetailQuery`         | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                                    |
+| `getPlaceCategoryOptions`          | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                           |
+| `getPlaceCategoryMeta`             | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                              |
+| `getPlaceStatusMeta`               | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                                |
 
 ## Material Entity
 
 | Helper                              | Location                                                | Visibility | Contract                                                                                           |
 | ----------------------------------- | ------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
-| `usePlaceMaterialsListQuery`        | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint with retry disabled.       |
+| `usePlaceMaterialsListQuery`        | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint.                           |
 | `useCreatePlaceMaterialMutation`    | `src/entities/material/model/material-mutations.ts`     | exported   | Creates place material through admin API and invalidates bounded materials list plus admin detail. |
 | `useUpdateMaterialMutation`         | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material through admin API and invalidates bounded materials list plus admin detail.       |
 | `invalidatePlaceMaterialsListQuery` | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates one bounded admin materials list after material mutations.                             |

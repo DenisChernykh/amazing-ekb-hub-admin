@@ -20,7 +20,7 @@ describe('place hooks', () => {
     mockedUseGetAdminPlaceDetail.mockReset()
   })
 
-  it('loads admin places through admin read endpoint with retry disabled', () => {
+  it('loads admin places through admin read endpoint without overriding retry policy', () => {
     mockedUseListAdminPlaces.mockReturnValue({
       data: undefined,
       isPending: true,
@@ -32,11 +32,11 @@ describe('place hooks', () => {
 
     expect(mockedUseListAdminPlaces).toHaveBeenCalledWith(
       { page: 1, pageSize: 10, status: 'hidden' },
-      { query: { retry: false } },
+      { query: undefined },
     )
   })
 
-  it('loads admin place detail through admin read endpoint with retry disabled', () => {
+  it('loads admin place detail through admin read endpoint without overriding retry policy', () => {
     mockedUseGetAdminPlaceDetail.mockReturnValue({
       data: undefined,
       isPending: true,
@@ -46,7 +46,7 @@ describe('place hooks', () => {
 
     expect(mockedUseGetAdminPlaceDetail).toHaveBeenCalledWith(
       { placeId: 'place-1' },
-      { query: { retry: false } },
+      { query: undefined },
     )
   })
 })

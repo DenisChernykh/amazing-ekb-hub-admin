@@ -1,11 +1,13 @@
 import {
   invalidateCurrentSession,
   removeCurrentSession,
-  useGeneratedCurrentSessionQuery,
-  useGeneratedLoginSession,
-  useGeneratedLogoutSession,
 } from '@/entities/session/api/session-api'
 import type { ApiClientError } from '@/shared/api/client/api-error'
+import {
+  useGetCurrentUser,
+  useLogin,
+  useLogout,
+} from '@/shared/api/generated/auth/auth'
 import type { AuthMeResponse } from '@/shared/api/generated/model'
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
@@ -32,7 +34,7 @@ type LogoutSessionOptions = {
  * Загружает текущую cookie-сессию и отключает retry для auth guard сценариев.
  */
 export function useCurrentSessionQuery(options?: CurrentSessionQueryOptions) {
-  return useGeneratedCurrentSessionQuery({
+  return useGetCurrentUser({
     query: {
       retry: false,
       ...options,
@@ -46,7 +48,7 @@ export function useCurrentSessionQuery(options?: CurrentSessionQueryOptions) {
 export function useLoginSession(options?: LoginSessionOptions) {
   const queryClient = useQueryClient()
 
-  return useGeneratedLoginSession({
+  return useLogin({
     mutation: {
       onError: options?.onError,
       onSuccess: async (session) => {
@@ -63,7 +65,7 @@ export function useLoginSession(options?: LoginSessionOptions) {
 export function useLogoutSession(options?: LogoutSessionOptions) {
   const queryClient = useQueryClient()
 
-  return useGeneratedLogoutSession({
+  return useLogout({
     mutation: {
       onError: options?.onError,
       onSuccess: async () => {

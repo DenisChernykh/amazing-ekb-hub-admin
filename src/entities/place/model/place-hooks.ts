@@ -38,10 +38,7 @@ export function usePlacesListQuery(
   options?: PlacesListQueryOptions,
 ) {
   return useListAdminPlaces(params, {
-    query: {
-      retry: false,
-      ...options,
-    },
+    query: options,
   })
 }
 
@@ -57,10 +54,7 @@ export function useAdminPlaceDetailQuery(
   return useGetAdminPlaceDetail(
     { placeId },
     {
-      query: {
-        retry: false,
-        ...options,
-      },
+      query: options,
     },
   )
 }
