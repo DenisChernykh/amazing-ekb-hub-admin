@@ -1,7 +1,9 @@
 import { usePlaceMaterialsListQuery } from '@/entities/material/model/material-hooks'
 import { CreateMaterialDrawer } from '@/features/material/create/ui/create-material-drawer'
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
+import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
 import { ApiClientError } from '@/shared/api/client/api-error'
+import type { Material } from '@/shared/api/generated/model'
 import type { MaterialListResponse } from '@/shared/api/generated/operation'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -37,9 +39,29 @@ vi.mock('@/features/material/edit/ui/edit-material-drawer', () => ({
   ),
 }))
 
+vi.mock('@/features/place/pinned-material/ui/pinned-material-panel', () => ({
+  PinnedMaterialPanel: vi.fn(
+    ({
+      materials,
+      pinnedMaterial,
+      placeId,
+    }: {
+      materials: Material[]
+      pinnedMaterial: Material | null
+      placeId: string
+    }) => (
+      <div>
+        pinned selector {placeId}:{pinnedMaterial?.title ?? 'none'}:
+        {materials.length}
+      </div>
+    ),
+  ),
+}))
+
 const mockedUsePlaceMaterialsListQuery = vi.mocked(usePlaceMaterialsListQuery)
 const mockedCreateMaterialDrawer = vi.mocked(CreateMaterialDrawer)
 const mockedEditMaterialDrawer = vi.mocked(EditMaterialDrawer)
+const mockedPinnedMaterialPanel = vi.mocked(PinnedMaterialPanel)
 
 const materialsResponse: MaterialListResponse = {
   items: [
@@ -56,11 +78,14 @@ const materialsResponse: MaterialListResponse = {
   ],
 }
 
+const pinnedMaterial = materialsResponse.items[0] ?? null
+
 describe('PlaceMaterialsPanel', () => {
   beforeEach(() => {
     mockedUsePlaceMaterialsListQuery.mockReset()
     mockedCreateMaterialDrawer.mockClear()
     mockedEditMaterialDrawer.mockClear()
+    mockedPinnedMaterialPanel.mockClear()
   })
 
   it('renders active place materials in a read-only table', () => {
@@ -72,9 +97,14 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" />)
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
 
     expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith('place-1')
+    expect(
+      screen.getByText('pinned selector place-1:Обзор комплекса:1'),
+    ).toBeInTheDocument()
     expect(screen.getByText('Материалы')).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Обзор комплекса' }),
@@ -93,7 +123,9 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" />)
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Добавить материал' }))
 
@@ -109,7 +141,9 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" />)
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Редактировать' }))
 
@@ -127,7 +161,7 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" />)
+    render(<PlaceMaterialsPanel pinnedMaterial={null} placeId="place-1" />)
 
     expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith('place-1')
     expect(screen.getByRole('link', { name: 'Обзор комплекса' })).toBeVisible()
@@ -146,8 +180,13 @@ describe('PlaceMaterialsPanel', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
 
-    render(<PlaceMaterialsPanel placeId="place-1" />)
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
 
     expect(screen.getByText('Materials unavailable')).toBeInTheDocument()
+    expect(
+      screen.getByText('pinned selector place-1:Обзор комплекса:0'),
+    ).toBeInTheDocument()
   })
 })

@@ -87,7 +87,11 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
         placeId={place.id}
       />
 
-      <PlaceMaterialsPanel key={`materials:${place.id}`} placeId={place.id} />
+      <PlaceMaterialsPanel
+        key={`materials:${place.id}`}
+        pinnedMaterial={place.pinnedMaterial}
+        placeId={place.id}
+      />
 
       <Card>
         <Descriptions column={1} bordered>
