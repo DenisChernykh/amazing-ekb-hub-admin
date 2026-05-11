@@ -1,4 +1,5 @@
 import { usePlaceMaterialsListQuery } from '@/entities/material/model/material-hooks'
+import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
 import {
   formatMaterialDuration,
   formatMaterialPublishedDate,
@@ -20,11 +21,19 @@ const getMaterialColumns = (
   {
     dataIndex: 'title',
     key: 'title',
-    render: (_value, material) => (
-      <Typography.Link href={material.url} rel="noreferrer" target="_blank">
-        {material.title}
-      </Typography.Link>
-    ),
+    render: (_value, material) => {
+      const materialUrl = material.url.trim()
+
+      if (!isSafeMaterialUrl(materialUrl)) {
+        return material.title
+      }
+
+      return (
+        <Typography.Link href={materialUrl} rel="noreferrer" target="_blank">
+          {material.title}
+        </Typography.Link>
+      )
+    },
     title: 'Материал',
   },
   {

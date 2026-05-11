@@ -114,6 +114,32 @@ describe('PlaceMaterialsPanel', () => {
     expect(screen.getByText('2:05')).toBeInTheDocument()
   })
 
+  it('renders unsafe material URLs as plain text', () => {
+    mockedUsePlaceMaterialsListQuery.mockReturnValue({
+      data: {
+        items: [
+          {
+            ...materialsResponse.items[0],
+            url: 'javascript://example.com/%0Aalert(1)',
+          },
+        ],
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
+
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
+
+    expect(screen.getByText('Обзор комплекса')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Обзор комплекса' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('opens create material drawer from panel action', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
       data: materialsResponse,
