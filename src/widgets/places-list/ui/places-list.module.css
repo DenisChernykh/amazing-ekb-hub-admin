@@ -16,6 +16,11 @@
   border-bottom: 1px solid var(--places-list-border);
 }
 
+.bulkToolbar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--places-list-border);
+}
+
 .error {
   margin: 16px;
 }

@@ -1,6 +1,16 @@
+import { useAppDispatch, useAppSelector } from '@/app/store-hooks'
 import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
+import {
+  bulkModerationActions,
+  selectBulkModerationIsRunning,
+  selectBulkModerationSelectedIds,
+} from '@/features/place/bulk-moderation/model/bulk-moderation-slice'
+import { BulkModerationToolbar } from '@/features/place/bulk-moderation/ui/bulk-moderation-toolbar'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PlaceListResponse } from '@/shared/api/generated/model'
+import type {
+  PlaceListResponse,
+  PlaceSummary,
+} from '@/shared/api/generated/model'
 import { PlusOutlined } from '@ant-design/icons'
 import {
   Alert,
@@ -9,6 +19,7 @@ import {
   Flex,
   Pagination,
   Segmented,
+  type TableProps,
   Typography,
   theme,
 } from 'antd'
@@ -42,13 +53,16 @@ type PlacesListVariables = CSSProperties & {
 }
 
 /**
- * Виджет read-only списка мест с URL-driven пагинацией.
+ * Виджет списка мест с URL-driven пагинацией и локальным bulk moderation workflow.
  */
 export function PlacesList() {
+  const dispatch = useAppDispatch()
   const [searchParams, setSearchParams] = useSearchParams()
   const { token } = theme.useToken()
   const pagination = getPlacesListPaginationFromSearch(searchParams)
   const statusFilter = getPlacesListStatusFromSearch(searchParams)
+  const selectedPlaceIds = useAppSelector(selectBulkModerationSelectedIds)
+  const isBulkModerationRunning = useAppSelector(selectBulkModerationIsRunning)
   const placesQuery = usePlacesListQuery({
     ...pagination,
     ...(statusFilter ? { status: statusFilter } : {}),
@@ -66,6 +80,28 @@ export function PlacesList() {
   const handleStatusChange = (value: string | number) => {
     const status = getPlacesListStatusFromValue(value)
     setSearchParams(buildPlacesListStatusSearch(searchParams, status))
+  }
+  const rowSelection: TableProps<PlaceSummary>['rowSelection'] = {
+    getCheckboxProps: () => ({
+      disabled: isBulkModerationRunning,
+    }),
+    onSelect: (place, selected) => {
+      dispatch(
+        selected
+          ? bulkModerationActions.selectPlace(place)
+          : bulkModerationActions.deselectPlace(place.id),
+      )
+    },
+    onSelectAll: (selected) => {
+      dispatch(
+        bulkModerationActions.setVisiblePlacesSelection({
+          places: data.items,
+          selectedIds: selected ? data.items.map((place) => place.id) : [],
+        }),
+      )
+    },
+    preserveSelectedRowKeys: true,
+    selectedRowKeys: selectedPlaceIds,
   }
 
   return (
@@ -105,7 +141,15 @@ export function PlacesList() {
               />
             </Flex>
 
-            <PlacesTable data={data} loading={placesQuery.isPending} />
+            <Flex className={styles.bulkToolbar}>
+              <BulkModerationToolbar />
+            </Flex>
+
+            <PlacesTable
+              data={data}
+              loading={placesQuery.isPending}
+              rowSelection={rowSelection}
+            />
 
             <Flex className={styles.footer} justify="end">
               <Pagination
