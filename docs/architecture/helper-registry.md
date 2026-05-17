@@ -25,6 +25,15 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | ---------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
 | `parsePositiveInteger` | `src/shared/lib/number/parse-positive-integer.ts` | exported   | Parses positive integer URL/form values and returns a caller-provided fallback. |
 
+## App State
+
+| Helper           | Location                 | Visibility | Contract                                                           |
+| ---------------- | ------------------------ | ---------- | ------------------------------------------------------------------ |
+| `createAppStore` | `src/app/store.ts`       | exported   | Creates an isolated Redux store instance for app runtime or tests. |
+| `store`          | `src/app/store.ts`       | exported   | Runtime Redux store used by `AppProviders`.                        |
+| `useAppDispatch` | `src/app/store-hooks.ts` | exported   | Typed Redux dispatch hook for app-level state changes.             |
+| `useAppSelector` | `src/app/store-hooks.ts` | exported   | Typed Redux selector hook for reading app-level state.             |
+
 ## Session Entity
 
 | Helper                      | Location                                  | Visibility | Contract                                                      |
@@ -113,6 +122,20 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | Helper             | Location                                              | Visibility | Contract                                                                                    |
 | ------------------ | ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
 | `PlaceStatusPanel` | `src/features/place/status/ui/place-status-panel.tsx` | exported   | Renders admin publish/hide controls and submits status changes through the entity mutation. |
+
+## Place Bulk Moderation Feature
+
+| Helper                               | Location                                                                    | Visibility | Contract                                                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `bulkModerationReducer`              | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Owns in-memory workflow state for bulk place moderation: selection, queue, progress, retry, and undo. |
+| `bulkModerationActions`              | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Action creators for local bulk moderation workflow transitions.                                       |
+| `selectBulkModerationSelectedIds`    | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Returns selected place ids for Ant Design table row selection.                                        |
+| `selectBulkModerationSelectedPlaces` | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Returns selected place snapshots in stable selection order.                                           |
+| `selectBulkModerationQueueItems`     | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Returns current operation queue items in stable order.                                                |
+| `selectBulkModerationFailedItems`    | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Returns failed queue items for retry actions.                                                         |
+| `selectBulkModerationSucceededItems` | `src/features/place/bulk-moderation/model/bulk-moderation-slice.ts`         | exported   | Returns succeeded queue items for undo actions.                                                       |
+| `BulkModerationToolbar`              | `src/features/place/bulk-moderation/ui/bulk-moderation-toolbar.tsx`         | exported   | Renders selected count and bulk publish/hide/reset actions over the places table.                     |
+| `BulkModerationProgressDrawer`       | `src/features/place/bulk-moderation/ui/bulk-moderation-progress-drawer.tsx` | exported   | Renders queue progress, partial errors, retry failed, and undo succeeded actions.                     |
 
 ## Place Cover Feature
 

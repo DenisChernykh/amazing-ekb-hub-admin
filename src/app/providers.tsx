@@ -5,7 +5,9 @@ import ruRU from 'antd/locale/ru_RU'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import type { ReactNode } from 'react'
+import { Provider as ReduxProvider } from 'react-redux'
 import { queryClient } from './query-client'
+import { store } from './store'
 
 dayjs.locale('ru')
 
@@ -14,16 +16,18 @@ type AppProvidersProps = {
 }
 
 /**
- * Подключает глобальные провайдеры Ant Design, React Query и devtools.
+ * Подключает глобальные провайдеры Ant Design, React Query, Redux и devtools.
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ConfigProvider locale={ruRU}>
       <AntdApp>
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        <ReduxProvider store={store}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </ReduxProvider>
       </AntdApp>
     </ConfigProvider>
   )
