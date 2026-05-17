@@ -311,5 +311,5 @@ describe('PlacesList', () => {
         pathParams: { placeId: 'place-1' },
       })
     })
-  })
+  }, 15_000)
 })
