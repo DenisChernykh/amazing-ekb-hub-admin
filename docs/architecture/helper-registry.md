@@ -54,6 +54,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.               |
 | `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts`  | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.           |
 | `useSetPinnedMaterialMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Sets a place pinned material through admin API and invalidates admin place detail cache.        |
+| `useClearPinnedMaterialMutation`   | `src/entities/place/model/place-mutations.ts`  | exported   | Clears a place pinned material through admin API and invalidates admin place detail cache.      |
 | `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                                |
 | `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                           |
 | `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list through the admin endpoint, including hidden places when requested. |
@@ -151,10 +152,10 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Pinned Material Feature
 
-| Helper                       | Location                                                          | Visibility | Contract                                                                                                       |
-| ---------------------------- | ----------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
-| `toSetPinnedMaterialRequest` | `src/features/place/pinned-material/model/pinned-material.ts`     | exported   | Builds `PATCH /admin/places/{placeId}/pinned-material` payload or returns `null` for unsupported clear.        |
-| `PinnedMaterialPanel`        | `src/features/place/pinned-material/ui/pinned-material-panel.tsx` | exported   | Renders current pinned material and set/change selector using the already loaded bounded admin materials list. |
+| Helper                       | Location                                                          | Visibility | Contract                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `toSetPinnedMaterialRequest` | `src/features/place/pinned-material/model/pinned-material.ts`     | exported   | Builds `PATCH /admin/places/{placeId}/pinned-material` payload or returns `null` for non-assign values.         |
+| `PinnedMaterialPanel`        | `src/features/place/pinned-material/ui/pinned-material-panel.tsx` | exported   | Renders current pinned material, set/change selector, and clear action using the loaded bounded materials list. |
 
 ## Material Form Feature
 

@@ -27,6 +27,7 @@ import type {
 import type {
   AuthLoginRequest,
   AuthMeResponse,
+  TooManyRequestsResponse,
   UnauthorizedResponse,
   ValidationErrorResponse
 } from '../model';
@@ -59,7 +60,7 @@ export const login = (
 
 
 
-export const getLoginMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse>,
+export const getLoginMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | TooManyRequestsResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: BodyType<AuthLoginRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: BodyType<AuthLoginRequest>}, TContext> => {
 
@@ -88,12 +89,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type LoginMutationResult = NonNullable<Awaited<ReturnType<typeof login>>>
     export type LoginMutationBody = BodyType<AuthLoginRequest>
-    export type LoginMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse>
+    export type LoginMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | TooManyRequestsResponse>
 
     /**
  * @summary Login
  */
-export const useLogin = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse>,
+export const useLogin = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | TooManyRequestsResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: BodyType<AuthLoginRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof login>>,
@@ -121,7 +122,7 @@ export const refreshTokens = (
 
 
 
-export const getRefreshTokensMutationOptions = <TError = ErrorType<UnauthorizedResponse>,
+export const getRefreshTokensMutationOptions = <TError = ErrorType<UnauthorizedResponse | TooManyRequestsResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshTokens>>, TError,void, TContext>, request?: SecondParameter<typeof apiMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof refreshTokens>>, TError,void, TContext> => {
 
@@ -150,12 +151,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type RefreshTokensMutationResult = NonNullable<Awaited<ReturnType<typeof refreshTokens>>>
 
-    export type RefreshTokensMutationError = ErrorType<UnauthorizedResponse>
+    export type RefreshTokensMutationError = ErrorType<UnauthorizedResponse | TooManyRequestsResponse>
 
     /**
  * @summary Refresh tokens
  */
-export const useRefreshTokens = <TError = ErrorType<UnauthorizedResponse>,
+export const useRefreshTokens = <TError = ErrorType<UnauthorizedResponse | TooManyRequestsResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshTokens>>, TError,void, TContext>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof refreshTokens>>,

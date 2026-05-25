@@ -39,11 +39,23 @@ export const Login401Response = zod.strictObject({
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
+export const Login429Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
 /**
  * Обновляет access/refresh HttpOnly cookies по валидной refresh cookie.
  * @summary Refresh tokens
  */
 export const RefreshTokens401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const RefreshTokens429Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')

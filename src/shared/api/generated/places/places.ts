@@ -28,8 +28,8 @@ import type {
   ListPlacesParams,
   MaterialListResponse,
   PlaceDetail,
-  PlaceListResponse,
   PlaceNotFoundResponse,
+  PublicPlaceListResponse,
   ValidationErrorResponse
 } from '../model';
 
@@ -51,7 +51,7 @@ export const listPlaces = (
 ) => {
 
 
-      return apiMutator<PlaceListResponse>(
+      return apiMutator<PublicPlaceListResponse>(
       {url: `/places`, method: 'GET',
         params, signal
     },

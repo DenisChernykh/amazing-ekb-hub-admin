@@ -11,8 +11,9 @@ import type { PageSizeParameter } from './pageSizeParameter';
 
 export type ListAdminPlacesParams = {
 /**
- * Номер страницы пагинации. Минимальное значение `1`.
+ * Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.
  * @minimum 1
+ * @maximum 1000
  */
 page?: PageParameter;
 /**

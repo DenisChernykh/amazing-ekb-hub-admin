@@ -6,15 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { Material } from './material';
-import type { PlaceDetailCounters } from './placeDetailCounters';
-import type { PlaceSummary } from './placeSummary';
+import type { PublicPlaceSummary } from './publicPlaceSummary';
 
 /**
  * Детальная карточка места с pinned material и счетчиками по платформам.
  */
-export type PlaceDetail = PlaceSummary & ({
+export type PlaceDetail = PublicPlaceSummary & ({
   /** Закреплённый материал места, если он назначен. */
   pinnedMaterial: Material | null;
-  /** Количество материалов по платформам. */
-  counters: PlaceDetailCounters;
 });

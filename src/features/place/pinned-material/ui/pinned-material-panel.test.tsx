@@ -1,4 +1,7 @@
-import { useSetPinnedMaterialMutation } from '@/entities/place/model/place-mutations'
+import {
+  useClearPinnedMaterialMutation,
+  useSetPinnedMaterialMutation,
+} from '@/entities/place/model/place-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import type { Material, PlaceDetail } from '@/shared/api/generated/model'
 import {
@@ -14,6 +17,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PinnedMaterialPanel } from './pinned-material-panel'
 
 vi.mock('@/entities/place/model/place-mutations', () => ({
+  useClearPinnedMaterialMutation: vi.fn(),
   useSetPinnedMaterialMutation: vi.fn(),
 }))
 
@@ -69,6 +73,9 @@ vi.mock('antd', async () => {
 const mockedUseSetPinnedMaterialMutation = vi.mocked(
   useSetPinnedMaterialMutation,
 )
+const mockedUseClearPinnedMaterialMutation = vi.mocked(
+  useClearPinnedMaterialMutation,
+)
 
 const materials: Material[] = [
   {
@@ -111,15 +118,22 @@ const updatedPlace: PlaceDetail = {
 }
 
 const renderPinnedMaterialPanel = ({
+  isClearPending = false,
   isPending = false,
   pinnedMaterial = materials[0] ?? null,
   placeId = 'place-1',
 }: {
+  isClearPending?: boolean
   isPending?: boolean
   pinnedMaterial?: Material | null
   placeId?: string
 } = {}) => {
+  const clearMutate = vi.fn()
   const mutate = vi.fn()
+  mockedUseClearPinnedMaterialMutation.mockReturnValue({
+    isPending: isClearPending,
+    mutate: clearMutate,
+  } as unknown as ReturnType<typeof useClearPinnedMaterialMutation>)
   mockedUseSetPinnedMaterialMutation.mockReturnValue({
     isPending,
     mutate,
@@ -135,13 +149,14 @@ const renderPinnedMaterialPanel = ({
     </AntdApp>,
   )
 
-  return { mutate }
+  return { clearMutate, mutate }
 }
 
 describe('PinnedMaterialPanel', () => {
   beforeEach(() => {
     messageError.mockReset()
     messageSuccess.mockReset()
+    mockedUseClearPinnedMaterialMutation.mockReset()
     mockedUseSetPinnedMaterialMutation.mockReset()
   })
 
@@ -151,6 +166,45 @@ describe('PinnedMaterialPanel', () => {
     expect(screen.getByText('Закрепленный материал')).toBeInTheDocument()
     expect(screen.getByText('Обзор комплекса')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Закрепить' })).toBeDisabled()
+  })
+
+  it('shows clear action only when a pinned material exists', () => {
+    mockedUseClearPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useClearPinnedMaterialMutation>)
+    mockedUseSetPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useSetPinnedMaterialMutation>)
+
+    const { rerender } = render(
+      <AntdApp>
+        <PinnedMaterialPanel
+          materials={materials}
+          pinnedMaterial={materials[0] ?? null}
+          placeId="place-1"
+        />
+      </AntdApp>,
+    )
+
+    expect(
+      screen.getByRole('button', { name: 'Снять закрепление' }),
+    ).toBeInTheDocument()
+
+    rerender(
+      <AntdApp>
+        <PinnedMaterialPanel
+          materials={materials}
+          pinnedMaterial={null}
+          placeId="place-1"
+        />
+      </AntdApp>,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: 'Снять закрепление' }),
+    ).not.toBeInTheDocument()
   })
 
   it('enables submit after selecting another material', () => {
@@ -179,6 +233,18 @@ describe('PinnedMaterialPanel', () => {
     })
   })
 
+  it('clears pinned material through entity mutation', async () => {
+    const { clearMutate } = renderPinnedMaterialPanel()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Снять закрепление' }))
+
+    await waitFor(() => {
+      expect(clearMutate).toHaveBeenCalledWith({
+        pathParams: { placeId: 'place-1' },
+      })
+    })
+  })
+
   it('keeps hidden place id in mutation variables', async () => {
     const { mutate } = renderPinnedMaterialPanel({ placeId: 'hidden-place' })
 
@@ -202,9 +268,26 @@ describe('PinnedMaterialPanel', () => {
     expect(screen.getByRole('button', { name: /Закрепить/ })).toHaveClass(
       'ant-btn-loading',
     )
+    expect(
+      screen.getByRole('button', { name: 'Снять закрепление' }),
+    ).toBeDisabled()
+  })
+
+  it('blocks set and clear actions while clear mutation is pending', () => {
+    renderPinnedMaterialPanel({ isClearPending: true })
+
+    expect(screen.getByRole('combobox', { name: 'Материал' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Закрепить' })).toBeDisabled()
+    expect(
+      screen.getByRole('button', { name: /Снять закрепление/ }),
+    ).toHaveClass('ant-btn-loading')
   })
 
   it('shows success message after mutation success', async () => {
+    mockedUseClearPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useClearPinnedMaterialMutation>)
     mockedUseSetPinnedMaterialMutation.mockImplementation(
       (options) =>
         ({
@@ -235,7 +318,43 @@ describe('PinnedMaterialPanel', () => {
     })
   })
 
+  it('shows success message after clear mutation success', async () => {
+    mockedUseSetPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useSetPinnedMaterialMutation>)
+    mockedUseClearPinnedMaterialMutation.mockImplementation(
+      (options) =>
+        ({
+          isPending: false,
+          mutate: () => {
+            options?.onSuccess?.({ ...updatedPlace, pinnedMaterial: null })
+          },
+        }) as unknown as ReturnType<typeof useClearPinnedMaterialMutation>,
+    )
+
+    render(
+      <AntdApp>
+        <PinnedMaterialPanel
+          materials={materials}
+          pinnedMaterial={materials[0] ?? null}
+          placeId="place-1"
+        />
+      </AntdApp>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Снять закрепление' }))
+
+    await waitFor(() => {
+      expect(messageSuccess).toHaveBeenCalledWith('Закрепление снято')
+    })
+  })
+
   it('renders normalized backend error in panel', async () => {
+    mockedUseClearPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useClearPinnedMaterialMutation>)
     mockedUseSetPinnedMaterialMutation.mockImplementation(
       (options) =>
         ({
@@ -276,5 +395,50 @@ describe('PinnedMaterialPanel', () => {
     expect(messageError).toHaveBeenCalledWith(
       'Pinned material must belong to the same place',
     )
+  })
+
+  it('renders normalized backend error after clear failure', async () => {
+    mockedUseSetPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useSetPinnedMaterialMutation>)
+    mockedUseClearPinnedMaterialMutation.mockImplementation(
+      (options) =>
+        ({
+          isPending: false,
+          mutate: () => {
+            options?.onError?.(
+              new ApiClientError({
+                kind: 'server',
+                message: 'Place is not available',
+                messages: ['Place is not available'],
+                status: 500,
+              }),
+            )
+          },
+        }) as unknown as ReturnType<typeof useClearPinnedMaterialMutation>,
+    )
+
+    render(
+      <AntdApp>
+        <PinnedMaterialPanel
+          materials={materials}
+          pinnedMaterial={materials[0] ?? null}
+          placeId="place-1"
+        />
+      </AntdApp>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Снять закрепление' }))
+
+    const alert = await screen.findByRole('alert')
+
+    expect(
+      within(alert).getByText('Place is not available'),
+    ).toBeInTheDocument()
+    expect(
+      within(alert).getByText('Не удалось снять закрепление'),
+    ).toBeInTheDocument()
+    expect(messageError).toHaveBeenCalledWith('Place is not available')
   })
 })
