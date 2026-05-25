@@ -23,6 +23,6 @@ export type CreateMaterialRequest = {
      * @nullable
      */
   durationSec?: number | null;
-  /** Публичная ссылка на материал. */
+  /** Публичная ссылка на материал. Допускаются только абсолютные http/https URL. */
   url: string;
 };

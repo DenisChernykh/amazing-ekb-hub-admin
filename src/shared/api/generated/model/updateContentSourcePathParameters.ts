@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-/**
- * Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.
- */
-export type PageParameter = number;
+export type UpdateContentSourcePathParameters = {
+ sourceId: string,
+ }

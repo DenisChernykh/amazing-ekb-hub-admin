@@ -9,7 +9,7 @@
 /**
  * Количество материалов по платформам.
  */
-export type PlaceDetailCounters = {
+export type PublicPlaceSummaryCounters = {
   dzen: number;
   telegram: number;
   instagram: number;

@@ -13,6 +13,7 @@ import * as zod from 'zod';
  * @summary List admin places
  */
 export const listAdminPlacesQueryPageDefault = 1;
+export const listAdminPlacesQueryPageMax = 1000;
 
 export const listAdminPlacesQueryPageSizeDefault = 20;
 export const listAdminPlacesQueryPageSizeMax = 100;
@@ -20,7 +21,7 @@ export const listAdminPlacesQueryPageSizeMax = 100;
 
 
 export const ListAdminPlacesQueryParams = zod.strictObject({
-  "page": zod.number().min(1).default(listAdminPlacesQueryPageDefault).describe('Номер страницы пагинации. Минимальное значение `1`.'),
+  "page": zod.number().min(1).max(listAdminPlacesQueryPageMax).default(listAdminPlacesQueryPageDefault).describe('Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.'),
   "pageSize": zod.number().min(1).max(listAdminPlacesQueryPageSizeMax).default(listAdminPlacesQueryPageSizeDefault).describe('Размер страницы. Допустимый диапазон от `1` до `100`.'),
   "status": zod.enum(['active', 'hidden']).optional().describe('Фильтр по статусу места. Если параметр отсутствует, возвращаются все статусы.')
 })
@@ -117,22 +118,23 @@ export const GetAdminPlaceDetail200Response = zod.strictObject({
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
-  "pinnedMaterial": zod.strictObject({
-  "id": zod.string().describe('Идентификатор материала.'),
-  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
-  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
-  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
-  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
-}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),
   "instagram": zod.number()
 }).describe('Количество материалов по платформам.')
-}).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
+}).describe('Краткая публичная карточка места со счетчиками материалов по платформам.').and(zod.strictObject({
+  "pinnedMaterial": zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
+}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.')
+})).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
 
 export const GetAdminPlaceDetail401Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
@@ -298,6 +300,260 @@ export const UploadPlaceCoverPhoto404Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 /**
+ * Возвращает до 100 пользовательских content sources. Источник — это управляемый канал/ресурс пользователя, а не случайная внешняя ссылка.
+ * @summary List admin content sources
+ */
+export const ListContentSourcesQueryParams = zod.strictObject({
+  "platform": zod.enum(['telegram', 'dzen', 'instagram', 'tiktok', 'vk', 'pinterest']).optional().describe('Фильтр по платформе источника.'),
+  "status": zod.enum(['active', 'disabled']).optional().describe('Фильтр по статусу источника.')
+})
+
+export const ListContentSources200Response = zod.strictObject({
+  "items": zod.array(zod.strictObject({
+  "id": zod.string().describe('Идентификатор content source.'),
+  "platform": zod.enum(['telegram', 'dzen', 'instagram', 'tiktok', 'vk', 'pinterest']).describe('Платформа пользовательского источника контента. Этот enum отделен от material `Platform`, чтобы будущие источники не меняли публичные счетчики материалов.'),
+  "displayName": zod.string().describe('Административное имя источника, отдельное от заголовков материалов.'),
+  "url": zod.url().describe('Публичный URL управляемого источника. Допускаются только абсолютные http\/https URL.'),
+  "externalId": zod.string().nullable().describe('Платформенный идентификатор источника, если известен.'),
+  "handle": zod.string().nullable().describe('Человекочитаемый handle источника, если он есть.'),
+  "channelId": zod.string().nullable().describe('Дополнительный channel id для платформ, где он отличается от externalId\/handle.'),
+  "status": zod.enum(['active', 'disabled']).describe('Статус пользовательского content source.'),
+  "lastImportedAt": zod.iso.datetime({"offset":true}).nullable().describe('Время последнего успешного импорта. В этом slice поле только возвращается API.'),
+  "lastCursor": zod.string().nullable().describe('Cursor последнего импорта. В этом slice поле только возвращается API.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания записи.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления записи.')
+}).describe('Пользовательский управляемый источник контента: Telegram-канал, Dzen-канал\/профиль или будущий platform resource.')).describe('Content sources в стабильном порядке.')
+}).describe('Ограниченный административный список пользовательских content sources.')
+
+export const ListContentSources400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListContentSources401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListContentSources403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Создает пользовательский content source для будущих импортов материалов.
+ * @summary Create content source
+ */
+export const CreateContentSourceBody = zod.strictObject({
+  "platform": zod.enum(['telegram', 'dzen', 'instagram', 'tiktok', 'vk', 'pinterest']).describe('Платформа пользовательского источника контента. Этот enum отделен от material `Platform`, чтобы будущие источники не меняли публичные счетчики материалов.'),
+  "displayName": zod.string().describe('Административное имя источника.'),
+  "url": zod.url().describe('Публичный URL источника. Допускаются только абсолютные http\/https URL.'),
+  "externalId": zod.string().nullish().describe('Платформенный идентификатор источника, если известен.'),
+  "handle": zod.string().nullish().describe('Человекочитаемый handle источника, если он есть.'),
+  "channelId": zod.string().nullish().describe('Дополнительный channel id для платформ, где он отличается от externalId\/handle.')
+}).describe('Payload создания пользовательского content source.')
+
+export const CreateContentSource201Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор content source.'),
+  "platform": zod.enum(['telegram', 'dzen', 'instagram', 'tiktok', 'vk', 'pinterest']).describe('Платформа пользовательского источника контента. Этот enum отделен от material `Platform`, чтобы будущие источники не меняли публичные счетчики материалов.'),
+  "displayName": zod.string().describe('Административное имя источника, отдельное от заголовков материалов.'),
+  "url": zod.url().describe('Публичный URL управляемого источника. Допускаются только абсолютные http\/https URL.'),
+  "externalId": zod.string().nullable().describe('Платформенный идентификатор источника, если известен.'),
+  "handle": zod.string().nullable().describe('Человекочитаемый handle источника, если он есть.'),
+  "channelId": zod.string().nullable().describe('Дополнительный channel id для платформ, где он отличается от externalId\/handle.'),
+  "status": zod.enum(['active', 'disabled']).describe('Статус пользовательского content source.'),
+  "lastImportedAt": zod.iso.datetime({"offset":true}).nullable().describe('Время последнего успешного импорта. В этом slice поле только возвращается API.'),
+  "lastCursor": zod.string().nullable().describe('Cursor последнего импорта. В этом slice поле только возвращается API.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания записи.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления записи.')
+}).describe('Пользовательский управляемый источник контента: Telegram-канал, Dzen-канал\/профиль или будущий platform resource.')
+
+export const CreateContentSource400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreateContentSource401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreateContentSource403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreateContentSource409Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Частично обновляет content source. Platform и import cursor-поля в этом endpoint не изменяются.
+ * @summary Update content source
+ */
+export const UpdateContentSourceParams = zod.strictObject({
+  "sourceId": zod.string().describe('Идентификатор content source.')
+})
+
+export const UpdateContentSourceBody = zod.strictObject({
+  "displayName": zod.string().optional().describe('Новое административное имя источника.'),
+  "url": zod.url().optional().describe('Новый публичный URL источника. Допускаются только абсолютные http\/https URL.'),
+  "externalId": zod.string().nullish().describe('Новый платформенный идентификатор или `null`, чтобы очистить поле.'),
+  "handle": zod.string().nullish().describe('Новый handle или `null`, чтобы очистить поле.'),
+  "channelId": zod.string().nullish().describe('Новый channel id или `null`, чтобы очистить поле.')
+}).describe('Payload частичного обновления content source. `platform`, `lastImportedAt` и `lastCursor` здесь не редактируются.')
+
+export const UpdateContentSource200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор content source.'),
+  "platform": zod.enum(['telegram', 'dzen', 'instagram', 'tiktok', 'vk', 'pinterest']).describe('Платформа пользовательского источника контента. Этот enum отделен от material `Platform`, чтобы будущие источники не меняли публичные счетчики материалов.'),
+  "displayName": zod.string().describe('Административное имя источника, отдельное от заголовков материалов.'),
+  "url": zod.url().describe('Публичный URL управляемого источника. Допускаются только абсолютные http\/https URL.'),
+  "externalId": zod.string().nullable().describe('Платформенный идентификатор источника, если известен.'),
+  "handle": zod.string().nullable().describe('Человекочитаемый handle источника, если он есть.'),
+  "channelId": zod.string().nullable().describe('Дополнительный channel id для платформ, где он отличается от externalId\/handle.'),
+  "status": zod.enum(['active', 'disabled']).describe('Статус пользовательского content source.'),
+  "lastImportedAt": zod.iso.datetime({"offset":true}).nullable().describe('Время последнего успешного импорта. В этом slice поле только возвращается API.'),
+  "lastCursor": zod.string().nullable().describe('Cursor последнего импорта. В этом slice поле только возвращается API.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания записи.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления записи.')
+}).describe('Пользовательский управляемый источник контента: Telegram-канал, Dzen-канал\/профиль или будущий platform resource.')
+
+export const UpdateContentSource400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSource401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSource403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSource404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSource409Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Переключает content source между `active` и `disabled` без удаления записи.
+ * @summary Update content source status
+ */
+export const UpdateContentSourceStatusParams = zod.strictObject({
+  "sourceId": zod.string().describe('Идентификатор content source.')
+})
+
+export const UpdateContentSourceStatusBody = zod.strictObject({
+  "status": zod.enum(['active', 'disabled']).describe('Статус пользовательского content source.')
+}).describe('Payload переключения статуса content source без удаления записи.')
+
+export const UpdateContentSourceStatus200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор content source.'),
+  "platform": zod.enum(['telegram', 'dzen', 'instagram', 'tiktok', 'vk', 'pinterest']).describe('Платформа пользовательского источника контента. Этот enum отделен от material `Platform`, чтобы будущие источники не меняли публичные счетчики материалов.'),
+  "displayName": zod.string().describe('Административное имя источника, отдельное от заголовков материалов.'),
+  "url": zod.url().describe('Публичный URL управляемого источника. Допускаются только абсолютные http\/https URL.'),
+  "externalId": zod.string().nullable().describe('Платформенный идентификатор источника, если известен.'),
+  "handle": zod.string().nullable().describe('Человекочитаемый handle источника, если он есть.'),
+  "channelId": zod.string().nullable().describe('Дополнительный channel id для платформ, где он отличается от externalId\/handle.'),
+  "status": zod.enum(['active', 'disabled']).describe('Статус пользовательского content source.'),
+  "lastImportedAt": zod.iso.datetime({"offset":true}).nullable().describe('Время последнего успешного импорта. В этом slice поле только возвращается API.'),
+  "lastCursor": zod.string().nullable().describe('Cursor последнего импорта. В этом slice поле только возвращается API.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания записи.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления записи.')
+}).describe('Пользовательский управляемый источник контента: Telegram-канал, Dzen-канал\/профиль или будущий platform resource.')
+
+export const UpdateContentSourceStatus400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSourceStatus401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSourceStatus403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdateContentSourceStatus404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Возвращает до 100 материалов общей библиотеки. Если передать `placeId`, каждый item содержит статус связи с этим местом.
+ * @summary List admin material library
+ */
+export const ListAdminMaterialLibraryQueryParams = zod.strictObject({
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).optional().describe('Фильтр по платформе публикации материала.'),
+  "placeId": zod.string().optional().describe('Идентификатор места, для которого нужно вернуть статус связи `placeLink`.')
+})
+
+export const ListAdminMaterialLibrary200Response = zod.strictObject({
+  "items": zod.array(zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал.'),
+  "placeLink": zod.enum(['active', 'hidden']).describe('Статус связи библиотечного материала с конкретным местом.').nullable().describe('Статус связи с `placeId` из query. Если `placeId` не передан или связи нет, возвращается `null`.')
+}).describe('Материал из общей библиотеки для административного интерфейса.')).describe('Материалы библиотеки.')
+}).describe('Ограниченный административный список материалов общей библиотеки.')
+
+export const ListAdminMaterialLibrary400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminMaterialLibrary401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminMaterialLibrary403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminMaterialLibrary404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
  * Возвращает до 100 материалов указанного места для администратора, включая скрытые места.
  * @summary List admin place materials
  */
@@ -315,10 +571,10 @@ export const ListAdminPlaceMaterials200Response = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Материал, связанный с местом.')).describe('Материалы места в стабильном порядке отображения.')
 }).describe('Ограниченный список материалов места.')
 
@@ -360,7 +616,7 @@ export const CreatePlaceMaterialBody = zod.strictObject({
   "title": zod.string().describe('Заголовок материала.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Момент публикации материала.'),
   "durationSec": zod.number().nullish().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Payload создания нового материала для места.')
 
 export const CreatePlaceMaterial201Response = zod.strictObject({
@@ -368,10 +624,10 @@ export const CreatePlaceMaterial201Response = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Материал, связанный с местом.')
 
 export const CreatePlaceMaterial400Response = zod.strictObject({
@@ -399,6 +655,124 @@ export const CreatePlaceMaterial404Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 /**
+ * Создает или реактивирует связь существующего библиотечного материала с местом. Повторный active-link запрос идемпотентен.
+ * @summary Link material to place
+ */
+export const LinkPlaceMaterialParams = zod.strictObject({
+  "placeId": zod.string().describe('Идентификатор места.'),
+  "materialId": zod.string().describe('Идентификатор материала.')
+})
+
+export const LinkPlaceMaterial200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
+}).describe('Материал, связанный с местом.')
+
+export const LinkPlaceMaterial401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const LinkPlaceMaterial403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const LinkPlaceMaterial404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Обновляет активную связь материала с местом: закрепление и ручной порядок отображения.
+ * @summary Update place-material link
+ */
+export const UpdatePlaceMaterialLinkParams = zod.strictObject({
+  "placeId": zod.string().describe('Идентификатор места.'),
+  "materialId": zod.string().describe('Идентификатор материала.')
+})
+
+export const updatePlaceMaterialLinkBodySortOrderMin = 0;
+
+
+
+export const UpdatePlaceMaterialLinkBody = zod.strictObject({
+  "isPinned": zod.boolean().optional().describe('Нужно ли закрепить материал в блоке “Начни отсюда”. Если `true`, backend снимет закрепление с других материалов этого места.'),
+  "sortOrder": zod.number().min(updatePlaceMaterialLinkBodySortOrderMin).optional().describe('Ручной порядок отображения в списках материалов места.')
+}).describe('Payload обновления активной связи материала с местом.')
+
+export const UpdatePlaceMaterialLink200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
+}).describe('Материал, связанный с местом.')
+
+export const UpdatePlaceMaterialLink400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceMaterialLink401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceMaterialLink403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceMaterialLink404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Скрывает активную связь материала с местом без удаления материала из общей библиотеки.
+ * @summary Hide place-material link
+ */
+export const HidePlaceMaterialLinkParams = zod.strictObject({
+  "placeId": zod.string().describe('Идентификатор места.'),
+  "materialId": zod.string().describe('Идентификатор материала.')
+})
+
+export const HidePlaceMaterialLink401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const HidePlaceMaterialLink403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const HidePlaceMaterialLink404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
  * Частично обновляет материал по идентификатору. Операция доступна только администратору.
  * @summary Update material
  */
@@ -412,7 +786,7 @@ export const UpdateMaterialBody = zod.strictObject({
   "title": zod.string().optional().describe('Новый заголовок материала.'),
   "publishedAt": zod.iso.datetime({"offset":true}).optional().describe('Новая дата публикации.'),
   "durationSec": zod.number().nullish().describe('Новая длительность в секундах.'),
-  "url": zod.url().optional().describe('Новая публичная ссылка на материал.')
+  "url": zod.url().optional().describe('Новая публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Payload частичного обновления материала.')
 
 export const UpdateMaterial200Response = zod.strictObject({
@@ -420,10 +794,10 @@ export const UpdateMaterial200Response = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Материал, связанный с местом.')
 
 export const UpdateMaterial400Response = zod.strictObject({
@@ -471,22 +845,23 @@ export const SetPinnedMaterial200Response = zod.strictObject({
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
-  "pinnedMaterial": zod.strictObject({
-  "id": zod.string().describe('Идентификатор материала.'),
-  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
-  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
-  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
-  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
-}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),
   "instagram": zod.number()
 }).describe('Количество материалов по платформам.')
-}).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
+}).describe('Краткая публичная карточка места со счетчиками материалов по платформам.').and(zod.strictObject({
+  "pinnedMaterial": zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
+}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.')
+})).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
 
 export const SetPinnedMaterial400Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
@@ -507,6 +882,59 @@ export const SetPinnedMaterial403Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 export const SetPinnedMaterial404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Снимает закреплённый материал с места. Операция доступна только администратору.
+ * @summary Clear pinned material for place
+ */
+export const ClearPinnedMaterialParams = zod.strictObject({
+  "placeId": zod.string().describe('Идентификатор места.')
+})
+
+export const ClearPinnedMaterial200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор места.'),
+  "title": zod.string().describe('Название места.'),
+  "summary": zod.string().describe('Короткое описание для каталога.'),
+  "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
+  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
+  "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
+  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "counters": zod.strictObject({
+  "dzen": zod.number(),
+  "telegram": zod.number(),
+  "instagram": zod.number()
+}).describe('Количество материалов по платформам.')
+}).describe('Краткая публичная карточка места со счетчиками материалов по платформам.').and(zod.strictObject({
+  "pinnedMaterial": zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
+}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.')
+})).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
+
+export const ClearPinnedMaterial401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ClearPinnedMaterial403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ClearPinnedMaterial404Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')

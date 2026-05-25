@@ -12,8 +12,9 @@ import type { PageSizeParameter } from './pageSizeParameter';
 
 export type ListPlacesParams = {
 /**
- * Номер страницы пагинации. Минимальное значение `1`.
+ * Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.
  * @minimum 1
+ * @maximum 1000
  */
 page?: PageParameter;
 /**
@@ -23,7 +24,8 @@ page?: PageParameter;
  */
 pageSize?: PageSizeParameter;
 /**
- * Полнотекстовый поиск по названию и описанию места.
+ * Полнотекстовый поиск по названию и описанию места. Максимум 100 символов.
+ * @maxLength 100
  */
 search?: string;
 /**

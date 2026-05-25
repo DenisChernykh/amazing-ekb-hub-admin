@@ -25,14 +25,25 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminMaterialLibraryListResponse,
+  ClearPinnedMaterialPathParameters,
+  ContentSource,
+  ContentSourceConflictResponse,
+  ContentSourceListResponse,
+  ContentSourceNotFoundResponse,
+  CreateContentSourceRequest,
   CreateMaterialRequest,
   CreatePlaceMaterialPathParameters,
   CreatePlaceRequest,
   ForbiddenResponse,
   GetAdminPlaceDetailPathParameters,
+  HidePlaceMaterialLinkPathParameters,
+  LinkPlaceMaterialPathParameters,
+  ListAdminMaterialLibraryParams,
   ListAdminPlaceMaterialsParams,
   ListAdminPlaceMaterialsPathParameters,
   ListAdminPlacesParams,
+  ListContentSourcesParams,
   Material,
   MaterialListResponse,
   MaterialNotFoundResponse,
@@ -45,8 +56,14 @@ import type {
   SetPinnedMaterialPathParameters,
   SetPinnedMaterialRequest,
   UnauthorizedResponse,
+  UpdateContentSourcePathParameters,
+  UpdateContentSourceRequest,
+  UpdateContentSourceStatusPathParameters,
+  UpdateContentSourceStatusRequest,
   UpdateMaterialPathParameters,
   UpdateMaterialRequest,
+  UpdatePlaceMaterialLinkPathParameters,
+  UpdatePlaceMaterialLinkRequest,
   UpdatePlacePathParameters,
   UpdatePlaceRequest,
   UpdatePlaceStatusPathParameters,
@@ -512,6 +529,388 @@ export const useUploadPlaceCoverPhoto = <TError = ErrorType<ValidationErrorRespo
       return useMutation(getUploadPlaceCoverPhotoMutationOptions(options), queryClient);
     }
     /**
+ * Возвращает до 100 пользовательских content sources. Источник — это управляемый канал/ресурс пользователя, а не случайная внешняя ссылка.
+ * @summary List admin content sources
+ */
+export const listContentSources = (
+    params?: ListContentSourcesParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<ContentSourceListResponse>(
+      {url: `/admin/content-sources`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getListContentSourcesQueryKey = (params?: ListContentSourcesParams,) => {
+    return [
+    `/admin/content-sources`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListContentSourcesQueryOptions = <TData = Awaited<ReturnType<typeof listContentSources>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(params?: ListContentSourcesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listContentSources>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListContentSourcesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listContentSources>>> = ({ signal }) => listContentSources(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listContentSources>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListContentSourcesQueryResult = NonNullable<Awaited<ReturnType<typeof listContentSources>>>
+export type ListContentSourcesQueryError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useListContentSources<TData = Awaited<ReturnType<typeof listContentSources>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params: undefined |  ListContentSourcesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listContentSources>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listContentSources>>,
+          TError,
+          Awaited<ReturnType<typeof listContentSources>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListContentSources<TData = Awaited<ReturnType<typeof listContentSources>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListContentSourcesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listContentSources>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listContentSources>>,
+          TError,
+          Awaited<ReturnType<typeof listContentSources>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListContentSources<TData = Awaited<ReturnType<typeof listContentSources>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListContentSourcesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listContentSources>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List admin content sources
+ */
+
+export function useListContentSources<TData = Awaited<ReturnType<typeof listContentSources>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListContentSourcesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listContentSources>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListContentSourcesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Создает пользовательский content source для будущих импортов материалов.
+ * @summary Create content source
+ */
+export const createContentSource = (
+    createContentSourceRequest: BodyType<CreateContentSourceRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<ContentSource>(
+      {url: `/admin/content-sources`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createContentSourceRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getCreateContentSourceMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContentSource>>, TError,{data: BodyType<CreateContentSourceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createContentSource>>, TError,{data: BodyType<CreateContentSourceRequest>}, TContext> => {
+
+const mutationKey = ['createContentSource'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createContentSource>>, {data: BodyType<CreateContentSourceRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createContentSource(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateContentSourceMutationResult = NonNullable<Awaited<ReturnType<typeof createContentSource>>>
+    export type CreateContentSourceMutationBody = BodyType<CreateContentSourceRequest>
+    export type CreateContentSourceMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceConflictResponse>
+
+    /**
+ * @summary Create content source
+ */
+export const useCreateContentSource = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContentSource>>, TError,{data: BodyType<CreateContentSourceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createContentSource>>,
+        TError,
+        {data: BodyType<CreateContentSourceRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateContentSourceMutationOptions(options), queryClient);
+    }
+    /**
+ * Частично обновляет content source. Platform и import cursor-поля в этом endpoint не изменяются.
+ * @summary Update content source
+ */
+export const updateContentSource = (
+    { sourceId }: UpdateContentSourcePathParameters,
+    updateContentSourceRequest: BodyType<UpdateContentSourceRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<ContentSource>(
+      {url: `/admin/content-sources/${encodeURIComponent(String(sourceId))}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateContentSourceRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getUpdateContentSourceMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | ContentSourceConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContentSource>>, TError,{pathParams: UpdateContentSourcePathParameters;data: BodyType<UpdateContentSourceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateContentSource>>, TError,{pathParams: UpdateContentSourcePathParameters;data: BodyType<UpdateContentSourceRequest>}, TContext> => {
+
+const mutationKey = ['updateContentSource'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContentSource>>, {pathParams: UpdateContentSourcePathParameters;data: BodyType<UpdateContentSourceRequest>}> = (props) => {
+          const {pathParams,data} = props ?? {};
+
+          return  updateContentSource(pathParams,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateContentSourceMutationResult = NonNullable<Awaited<ReturnType<typeof updateContentSource>>>
+    export type UpdateContentSourceMutationBody = BodyType<UpdateContentSourceRequest>
+    export type UpdateContentSourceMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | ContentSourceConflictResponse>
+
+    /**
+ * @summary Update content source
+ */
+export const useUpdateContentSource = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | ContentSourceConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContentSource>>, TError,{pathParams: UpdateContentSourcePathParameters;data: BodyType<UpdateContentSourceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateContentSource>>,
+        TError,
+        {pathParams: UpdateContentSourcePathParameters;data: BodyType<UpdateContentSourceRequest>},
+        TContext
+      > => {
+      return useMutation(getUpdateContentSourceMutationOptions(options), queryClient);
+    }
+    /**
+ * Переключает content source между `active` и `disabled` без удаления записи.
+ * @summary Update content source status
+ */
+export const updateContentSourceStatus = (
+    { sourceId }: UpdateContentSourceStatusPathParameters,
+    updateContentSourceStatusRequest: BodyType<UpdateContentSourceStatusRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<ContentSource>(
+      {url: `/admin/content-sources/${encodeURIComponent(String(sourceId))}/status`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateContentSourceStatusRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getUpdateContentSourceStatusMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContentSourceStatus>>, TError,{pathParams: UpdateContentSourceStatusPathParameters;data: BodyType<UpdateContentSourceStatusRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateContentSourceStatus>>, TError,{pathParams: UpdateContentSourceStatusPathParameters;data: BodyType<UpdateContentSourceStatusRequest>}, TContext> => {
+
+const mutationKey = ['updateContentSourceStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContentSourceStatus>>, {pathParams: UpdateContentSourceStatusPathParameters;data: BodyType<UpdateContentSourceStatusRequest>}> = (props) => {
+          const {pathParams,data} = props ?? {};
+
+          return  updateContentSourceStatus(pathParams,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateContentSourceStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateContentSourceStatus>>>
+    export type UpdateContentSourceStatusMutationBody = BodyType<UpdateContentSourceStatusRequest>
+    export type UpdateContentSourceStatusMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse>
+
+    /**
+ * @summary Update content source status
+ */
+export const useUpdateContentSourceStatus = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContentSourceStatus>>, TError,{pathParams: UpdateContentSourceStatusPathParameters;data: BodyType<UpdateContentSourceStatusRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateContentSourceStatus>>,
+        TError,
+        {pathParams: UpdateContentSourceStatusPathParameters;data: BodyType<UpdateContentSourceStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getUpdateContentSourceStatusMutationOptions(options), queryClient);
+    }
+    /**
+ * Возвращает до 100 материалов общей библиотеки. Если передать `placeId`, каждый item содержит статус связи с этим местом.
+ * @summary List admin material library
+ */
+export const listAdminMaterialLibrary = (
+    params?: ListAdminMaterialLibraryParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AdminMaterialLibraryListResponse>(
+      {url: `/admin/materials`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getListAdminMaterialLibraryQueryKey = (params?: ListAdminMaterialLibraryParams,) => {
+    return [
+    `/admin/materials`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAdminMaterialLibraryQueryOptions = <TData = Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(params?: ListAdminMaterialLibraryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminMaterialLibraryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminMaterialLibrary>>> = ({ signal }) => listAdminMaterialLibrary(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListAdminMaterialLibraryQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminMaterialLibrary>>>
+export type ListAdminMaterialLibraryQueryError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>
+
+
+export function useListAdminMaterialLibrary<TData = Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ params: undefined |  ListAdminMaterialLibraryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminMaterialLibrary>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminMaterialLibrary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminMaterialLibrary<TData = Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ params?: ListAdminMaterialLibraryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminMaterialLibrary>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminMaterialLibrary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminMaterialLibrary<TData = Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ params?: ListAdminMaterialLibraryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List admin material library
+ */
+
+export function useListAdminMaterialLibrary<TData = Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>>(
+ params?: ListAdminMaterialLibraryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminMaterialLibrary>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListAdminMaterialLibraryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * Возвращает до 100 материалов указанного места для администратора, включая скрытые места.
  * @summary List admin place materials
  */
@@ -678,6 +1077,195 @@ export const useCreatePlaceMaterial = <TError = ErrorType<ValidationErrorRespons
       return useMutation(getCreatePlaceMaterialMutationOptions(options), queryClient);
     }
     /**
+ * Создает или реактивирует связь существующего библиотечного материала с местом. Повторный active-link запрос идемпотентен.
+ * @summary Link material to place
+ */
+export const linkPlaceMaterial = (
+    { placeId, materialId }: LinkPlaceMaterialPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<Material>(
+      {url: `/admin/places/${encodeURIComponent(String(placeId))}/materials/${encodeURIComponent(String(materialId))}`, method: 'PUT', signal
+    },
+      options);
+    }
+
+
+
+export const getLinkPlaceMaterialMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkPlaceMaterial>>, TError,{pathParams: LinkPlaceMaterialPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof linkPlaceMaterial>>, TError,{pathParams: LinkPlaceMaterialPathParameters}, TContext> => {
+
+const mutationKey = ['linkPlaceMaterial'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof linkPlaceMaterial>>, {pathParams: LinkPlaceMaterialPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  linkPlaceMaterial(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LinkPlaceMaterialMutationResult = NonNullable<Awaited<ReturnType<typeof linkPlaceMaterial>>>
+
+    export type LinkPlaceMaterialMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>
+
+    /**
+ * @summary Link material to place
+ */
+export const useLinkPlaceMaterial = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkPlaceMaterial>>, TError,{pathParams: LinkPlaceMaterialPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof linkPlaceMaterial>>,
+        TError,
+        {pathParams: LinkPlaceMaterialPathParameters},
+        TContext
+      > => {
+      return useMutation(getLinkPlaceMaterialMutationOptions(options), queryClient);
+    }
+    /**
+ * Обновляет активную связь материала с местом: закрепление и ручной порядок отображения.
+ * @summary Update place-material link
+ */
+export const updatePlaceMaterialLink = (
+    { placeId, materialId }: UpdatePlaceMaterialLinkPathParameters,
+    updatePlaceMaterialLinkRequest: BodyType<UpdatePlaceMaterialLinkRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<Material>(
+      {url: `/admin/places/${encodeURIComponent(String(placeId))}/materials/${encodeURIComponent(String(materialId))}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updatePlaceMaterialLinkRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getUpdatePlaceMaterialLinkMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlaceMaterialLink>>, TError,{pathParams: UpdatePlaceMaterialLinkPathParameters;data: BodyType<UpdatePlaceMaterialLinkRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePlaceMaterialLink>>, TError,{pathParams: UpdatePlaceMaterialLinkPathParameters;data: BodyType<UpdatePlaceMaterialLinkRequest>}, TContext> => {
+
+const mutationKey = ['updatePlaceMaterialLink'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePlaceMaterialLink>>, {pathParams: UpdatePlaceMaterialLinkPathParameters;data: BodyType<UpdatePlaceMaterialLinkRequest>}> = (props) => {
+          const {pathParams,data} = props ?? {};
+
+          return  updatePlaceMaterialLink(pathParams,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePlaceMaterialLinkMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlaceMaterialLink>>>
+    export type UpdatePlaceMaterialLinkMutationBody = BodyType<UpdatePlaceMaterialLinkRequest>
+    export type UpdatePlaceMaterialLinkMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>
+
+    /**
+ * @summary Update place-material link
+ */
+export const useUpdatePlaceMaterialLink = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlaceMaterialLink>>, TError,{pathParams: UpdatePlaceMaterialLinkPathParameters;data: BodyType<UpdatePlaceMaterialLinkRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePlaceMaterialLink>>,
+        TError,
+        {pathParams: UpdatePlaceMaterialLinkPathParameters;data: BodyType<UpdatePlaceMaterialLinkRequest>},
+        TContext
+      > => {
+      return useMutation(getUpdatePlaceMaterialLinkMutationOptions(options), queryClient);
+    }
+    /**
+ * Скрывает активную связь материала с местом без удаления материала из общей библиотеки.
+ * @summary Hide place-material link
+ */
+export const hidePlaceMaterialLink = (
+    { placeId, materialId }: HidePlaceMaterialLinkPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<void>(
+      {url: `/admin/places/${encodeURIComponent(String(placeId))}/materials/${encodeURIComponent(String(materialId))}`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+export const getHidePlaceMaterialLinkMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hidePlaceMaterialLink>>, TError,{pathParams: HidePlaceMaterialLinkPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof hidePlaceMaterialLink>>, TError,{pathParams: HidePlaceMaterialLinkPathParameters}, TContext> => {
+
+const mutationKey = ['hidePlaceMaterialLink'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof hidePlaceMaterialLink>>, {pathParams: HidePlaceMaterialLinkPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  hidePlaceMaterialLink(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HidePlaceMaterialLinkMutationResult = NonNullable<Awaited<ReturnType<typeof hidePlaceMaterialLink>>>
+
+    export type HidePlaceMaterialLinkMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>
+
+    /**
+ * @summary Hide place-material link
+ */
+export const useHidePlaceMaterialLink = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hidePlaceMaterialLink>>, TError,{pathParams: HidePlaceMaterialLinkPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof hidePlaceMaterialLink>>,
+        TError,
+        {pathParams: HidePlaceMaterialLinkPathParameters},
+        TContext
+      > => {
+      return useMutation(getHidePlaceMaterialLinkMutationOptions(options), queryClient);
+    }
+    /**
  * Частично обновляет материал по идентификатору. Операция доступна только администратору.
  * @summary Update material
  */
@@ -806,4 +1394,66 @@ export const useSetPinnedMaterial = <TError = ErrorType<NestErrorResponse | Unau
         TContext
       > => {
       return useMutation(getSetPinnedMaterialMutationOptions(options), queryClient);
+    }
+    /**
+ * Снимает закреплённый материал с места. Операция доступна только администратору.
+ * @summary Clear pinned material for place
+ */
+export const clearPinnedMaterial = (
+    { placeId }: ClearPinnedMaterialPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceDetail>(
+      {url: `/admin/places/${encodeURIComponent(String(placeId))}/pinned-material`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+export const getClearPinnedMaterialMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof clearPinnedMaterial>>, TError,{pathParams: ClearPinnedMaterialPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof clearPinnedMaterial>>, TError,{pathParams: ClearPinnedMaterialPathParameters}, TContext> => {
+
+const mutationKey = ['clearPinnedMaterial'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof clearPinnedMaterial>>, {pathParams: ClearPinnedMaterialPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  clearPinnedMaterial(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClearPinnedMaterialMutationResult = NonNullable<Awaited<ReturnType<typeof clearPinnedMaterial>>>
+
+    export type ClearPinnedMaterialMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>
+
+    /**
+ * @summary Clear pinned material for place
+ */
+export const useClearPinnedMaterial = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof clearPinnedMaterial>>, TError,{pathParams: ClearPinnedMaterialPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof clearPinnedMaterial>>,
+        TError,
+        {pathParams: ClearPinnedMaterialPathParameters},
+        TContext
+      > => {
+      return useMutation(getClearPinnedMaterialMutationOptions(options), queryClient);
     }

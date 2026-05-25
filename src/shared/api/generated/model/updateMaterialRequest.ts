@@ -23,6 +23,6 @@ export type UpdateMaterialRequest = {
      * @nullable
      */
   durationSec?: number | null;
-  /** Новая публичная ссылка на материал. */
+  /** Новая публичная ссылка на материал. Допускаются только абсолютные http/https URL. */
   url?: string;
 };
