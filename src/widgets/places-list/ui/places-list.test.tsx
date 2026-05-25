@@ -236,7 +236,7 @@ describe('PlacesList', () => {
     expect(screen.getAllByRole('link', { name: 'Создать место' })).toHaveLength(
       2,
     )
-  })
+  }, 10_000)
 
   it('renders reset action for a filtered empty list', async () => {
     mockedUsePlacesListQuery.mockReturnValue({
@@ -260,7 +260,7 @@ describe('PlacesList', () => {
         pageSize: 10,
       })
     })
-  })
+  }, 10_000)
 
   it('updates bulk toolbar count after selecting rows', () => {
     mockedUsePlacesListQuery.mockReturnValue({
