@@ -11,37 +11,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy admin to production
-    runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - production
-      - amazing-ekb-hub
-      - admin
-
-    environment: production
-
-    env:
-      APP_DIR: /opt/amazing-ekb-hub
-      IMAGE_NAME: amazing-ekb-hub-admin
-      ADMIN_BASE_URL: https://admin.strelchukgo.ru
-      VITE_API_BASE_URL: https://api.strelchukgo.ru/v1
+  quality:
+    name: Verify admin before production deploy
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
@@ -61,8 +47,31 @@ jobs:
       - name: Run tests
         run: pnpm run test
 
-      - name: Build application
+      - name: Run build
         run: pnpm run build
+
+  build-image:
+    name: Build admin runtime image
+    needs: quality
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: amazing-ekb-hub-admin
+      IMAGE_ARTIFACT_NAME: admin-runtime-image-${{ github.run_id }}-${{ github.sha }}
+      IMAGE_ARTIFACT_PATH: admin-runtime-image.tar.gz
+      VITE_API_BASE_URL: https://api.strelchukgo.ru/v1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate production build environment
+        run: |
+          set -euo pipefail
+
+          test -n "${VITE_API_BASE_URL}"
 
       - name: Build runtime image
         run: |
@@ -71,6 +80,63 @@ jobs:
             -t "${IMAGE_NAME}:${GITHUB_SHA}" \
             -t "${IMAGE_NAME}:prod" \
             .
+
+      - name: Export runtime image
+        run: |
+          set -euo pipefail
+
+          docker save "${IMAGE_NAME}:${GITHUB_SHA}" "${IMAGE_NAME}:prod" \
+            | gzip -1 > "${IMAGE_ARTIFACT_PATH}"
+
+      - name: Upload runtime image
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.IMAGE_ARTIFACT_NAME }}
+          path: ${{ env.IMAGE_ARTIFACT_PATH }}
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+  deploy:
+    name: Deploy admin to production
+    needs: build-image
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - production
+      - amazing-ekb-hub
+      - admin
+
+    environment: production
+
+    env:
+      APP_DIR: /opt/amazing-ekb-hub
+      IMAGE_NAME: amazing-ekb-hub-admin
+      IMAGE_ARTIFACT_NAME: admin-runtime-image-${{ github.run_id }}-${{ github.sha }}
+      IMAGE_ARTIFACT_DIR: /tmp/amazing-ekb-hub-admin-${{ github.sha }}
+      IMAGE_ARTIFACT_PATH: /tmp/amazing-ekb-hub-admin-${{ github.sha }}/admin-runtime-image.tar.gz
+      ADMIN_BASE_URL: https://admin.strelchukgo.ru
+
+    steps:
+      - name: Download runtime image
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.IMAGE_ARTIFACT_NAME }}
+          path: ${{ env.IMAGE_ARTIFACT_DIR }}
+
+      - name: Validate production environment
+        run: |
+          set -euo pipefail
+
+          test -f "${IMAGE_ARTIFACT_PATH}"
+          test -n "${ADMIN_BASE_URL}"
+
+      - name: Load runtime image
+        run: |
+          set -euo pipefail
+
+          gzip -dc "${IMAGE_ARTIFACT_PATH}" | docker load
 
       - name: Deploy admin
         run: |
@@ -83,6 +149,10 @@ jobs:
           docker compose --env-file .env -f compose.yml --profile apps up -d admin
           docker compose --env-file .env -f compose.yml ps admin
           DEPLOY
+
+      - name: Cleanup runtime image artifact
+        if: always()
+        run: rm -rf "${IMAGE_ARTIFACT_DIR}"
 
       - name: Smoke test admin
         run: |
