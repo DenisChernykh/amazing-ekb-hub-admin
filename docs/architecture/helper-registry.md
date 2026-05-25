@@ -25,6 +25,18 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | ---------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
 | `parsePositiveInteger` | `src/shared/lib/number/parse-positive-integer.ts` | exported   | Parses positive integer URL/form values and returns a caller-provided fallback. |
 
+## Shared UI
+
+| Helper                    | Location                                                     | Visibility | Contract                                                                              |
+| ------------------------- | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------- |
+| `buildAdminDocumentTitle` | `src/shared/ui/document-title/build-admin-document-title.ts` | exported   | Builds a browser title with the shared `Amazing EKB Admin` suffix.                    |
+| `DocumentTitle`           | `src/shared/ui/document-title/document-title.tsx`            | exported   | Synchronizes `document.title` for route and screen components.                        |
+| `ScreenLoadingState`      | `src/shared/ui/screen-state/screen-loading-state.tsx`        | exported   | Renders standardized full-screen loading state for screen-level queries.              |
+| `ScreenResultState`       | `src/shared/ui/screen-state/screen-result-state.tsx`         | exported   | Renders standardized forbidden/not-found/error result states with optional actions.   |
+| `ScreenApiErrorState`     | `src/shared/ui/screen-state/screen-api-error-state.tsx`      | exported   | Maps normalized API errors to forbidden, not-found, or generic screen-level error UI. |
+| `ScreenEmptyState`        | `src/shared/ui/screen-state/screen-empty-state.tsx`          | exported   | Renders reusable empty state with optional primary and reset/filter actions.          |
+| `ScreenStateAction`       | `src/shared/ui/screen-state/screen-state-action.tsx`         | exported   | Describes Ant Design button actions used by shared screen-state components.           |
+
 ## App State
 
 | Helper           | Location                 | Visibility | Contract                                                           |
@@ -92,16 +104,17 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Places List Widget
 
-| Helper                              | Location                                              | Visibility | Contract                                                                                        |
-| ----------------------------------- | ----------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| `getSelectedNavigationKey`          | `src/widgets/admin-shell/model/navigation.ts`         | exported   | Maps the current pathname, including nested section routes, to the selected admin sidebar item. |
-| `setDefaultAwareParam`              | `src/widgets/places-list/model/pagination.ts`         | private    | Writes pagination search params and removes values equal to defaults.                           |
-| `getPlacesListPaginationFromSearch` | `src/widgets/places-list/model/pagination.ts`         | exported   | Reads `page` and `pageSize` from URL search params with safe defaults.                          |
-| `getPlacesListStatusFromValue`      | `src/widgets/places-list/model/pagination.ts`         | exported   | Normalizes raw UI/URL status values; only `active` and `hidden` become backend filters.         |
-| `getPlacesListStatusFromSearch`     | `src/widgets/places-list/model/pagination.ts`         | exported   | Reads admin status filter from URL search params; missing/invalid means all statuses.           |
-| `buildPlacesListPaginationSearch`   | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds default-aware URL search params after changing list pagination.                          |
-| `buildPlacesListStatusSearch`       | `src/widgets/places-list/model/pagination.ts`         | exported   | Builds URL search params after changing status filter and resets the page to default.           |
-| `placesTableColumns`                | `src/widgets/places-list/ui/places-table-columns.tsx` | exported   | Defines read-only Ant Design table columns for `PlaceSummary` rows with admin detail links.     |
+| Helper                              | Location                                                         | Visibility | Contract                                                                                        |
+| ----------------------------------- | ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `getSelectedNavigationKey`          | `src/widgets/admin-shell/model/navigation.ts`                    | exported   | Maps the current pathname, including nested section routes, to the selected admin sidebar item. |
+| `setDefaultAwareParam`              | `src/widgets/places-list/model/pagination.ts`                    | private    | Writes pagination search params and removes values equal to defaults.                           |
+| `getPlacesListPaginationFromSearch` | `src/widgets/places-list/model/pagination.ts`                    | exported   | Reads `page` and `pageSize` from URL search params with safe defaults.                          |
+| `getPlacesListStatusFromValue`      | `src/widgets/places-list/model/pagination.ts`                    | exported   | Normalizes raw UI/URL status values; only `active` and `hidden` become backend filters.         |
+| `getPlacesListStatusFromSearch`     | `src/widgets/places-list/model/pagination.ts`                    | exported   | Reads admin status filter from URL search params; missing/invalid means all statuses.           |
+| `buildPlacesListPaginationSearch`   | `src/widgets/places-list/model/pagination.ts`                    | exported   | Builds default-aware URL search params after changing list pagination.                          |
+| `buildPlacesListStatusSearch`       | `src/widgets/places-list/model/pagination.ts`                    | exported   | Builds URL search params after changing status filter and resets the page to default.           |
+| `usePlacesListRowSelection`         | `src/widgets/places-list/model/use-places-list-row-selection.ts` | exported   | Builds Ant Design table row selection from the bulk moderation store and visible place rows.    |
+| `placesTableColumns`                | `src/widgets/places-list/ui/places-table-columns.tsx`            | exported   | Defines read-only Ant Design table columns for `PlaceSummary` rows with admin detail links.     |
 
 ## Place Form Feature
 

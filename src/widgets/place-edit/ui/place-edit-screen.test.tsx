@@ -107,6 +107,9 @@ describe('PlaceEditScreen', () => {
 
     renderPlaceEditScreen()
 
+    expect(document.title).toBe(
+      'Редактирование: Скрытый SPA | Amazing EKB Admin',
+    )
     expect(mockedUseAdminPlaceDetailQuery).toHaveBeenCalledWith('place-2')
     expect(
       screen.getByRole('heading', { name: 'Редактирование места' }),
@@ -168,7 +171,59 @@ describe('PlaceEditScreen', () => {
     expect(router.state.location.pathname).toBe('/places/place-2')
   })
 
-  it('renders normalized API error message', () => {
+  it('renders loading state while detail is pending', () => {
+    mockedUseAdminPlaceDetailQuery.mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isPending: true,
+    } as ReturnType<typeof useAdminPlaceDetailQuery>)
+
+    renderPlaceEditScreen()
+
+    expect(document.title).toBe('Редактирование места | Amazing EKB Admin')
+    expect(screen.getByText('Загружаем место')).toBeInTheDocument()
+  })
+
+  it('renders forbidden state for permission errors', () => {
+    mockedUseAdminPlaceDetailQuery.mockReturnValue({
+      data: undefined,
+      error: new ApiClientError({
+        kind: 'permission',
+        message: 'Forbidden',
+        status: 403,
+      }),
+      isError: true,
+      isPending: false,
+    } as ReturnType<typeof useAdminPlaceDetailQuery>)
+
+    renderPlaceEditScreen()
+
+    expect(screen.getByText('Доступ запрещен')).toBeInTheDocument()
+  })
+
+  it('renders not-found state for missing places', () => {
+    mockedUseAdminPlaceDetailQuery.mockReturnValue({
+      data: undefined,
+      error: new ApiClientError({
+        kind: 'not-found',
+        message: 'Place not found',
+        status: 404,
+      }),
+      isError: true,
+      isPending: false,
+    } as ReturnType<typeof useAdminPlaceDetailQuery>)
+
+    renderPlaceEditScreen()
+
+    expect(screen.getByText('Место не найдено')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'К списку мест' })).toHaveAttribute(
+      'href',
+      '/places',
+    )
+  })
+
+  it('renders generic screen error for server failures', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
       error: new ApiClientError({
@@ -182,6 +237,7 @@ describe('PlaceEditScreen', () => {
 
     renderPlaceEditScreen()
 
+    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
     expect(screen.getByText('Place unavailable')).toBeInTheDocument()
   })
 })

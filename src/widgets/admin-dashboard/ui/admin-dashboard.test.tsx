@@ -17,6 +17,7 @@ describe('AdminDashboard', () => {
       </CurrentUserContext.Provider>,
     )
 
+    expect(document.title).toBe('Обзор | Amazing EKB Admin')
     expect(screen.getByText('Обзор')).toBeInTheDocument()
     expect(screen.getAllByText('admin@amazing-ekb.ru')).toHaveLength(2)
     expect(screen.getAllByText('Администратор')).toHaveLength(2)

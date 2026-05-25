@@ -43,6 +43,7 @@ describe('PlaceCreateScreen', () => {
   it('renders create place title', () => {
     renderPlaceCreateScreen()
 
+    expect(document.title).toBe('Новое место | Amazing EKB Admin')
     expect(
       screen.getByRole('heading', { name: 'Новое место' }),
     ).toBeInTheDocument()

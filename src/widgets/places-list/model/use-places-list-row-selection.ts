@@ -1,0 +1,49 @@
+import { useAppDispatch, useAppSelector } from '@/app/store-hooks'
+import {
+  bulkModerationActions,
+  selectBulkModerationIsRunning,
+  selectBulkModerationSelectedIds,
+} from '@/features/place/bulk-moderation/model/bulk-moderation-slice'
+import type { PlaceSummary } from '@/shared/api/generated/model'
+import type { TableProps } from 'antd'
+
+/**
+ * Params для row selection списка мест.
+ */
+export type UsePlacesListRowSelectionParams = {
+  visiblePlaces: PlaceSummary[]
+}
+
+/**
+ * Собирает Ant Design rowSelection для списка мест из bulk moderation store.
+ */
+export function usePlacesListRowSelection({
+  visiblePlaces,
+}: UsePlacesListRowSelectionParams): TableProps<PlaceSummary>['rowSelection'] {
+  const dispatch = useAppDispatch()
+  const selectedPlaceIds = useAppSelector(selectBulkModerationSelectedIds)
+  const isBulkModerationRunning = useAppSelector(selectBulkModerationIsRunning)
+
+  return {
+    getCheckboxProps: () => ({
+      disabled: isBulkModerationRunning,
+    }),
+    onSelect: (place, selected) => {
+      dispatch(
+        selected
+          ? bulkModerationActions.selectPlace(place)
+          : bulkModerationActions.deselectPlace(place.id),
+      )
+    },
+    onSelectAll: (selected) => {
+      dispatch(
+        bulkModerationActions.setVisiblePlacesSelection({
+          places: visiblePlaces,
+          selectedIds: selected ? visiblePlaces.map((place) => place.id) : [],
+        }),
+      )
+    },
+    preserveSelectedRowKeys: true,
+    selectedRowKeys: selectedPlaceIds,
+  }
+}
