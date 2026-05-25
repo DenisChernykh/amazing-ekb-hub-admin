@@ -153,15 +153,16 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Cover Feature
 
-| Helper                              | Location                                                     | Visibility | Contract                                                                                        |
-| ----------------------------------- | ------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------- |
-| `PLACE_COVER_UPLOAD_MAX_SIZE_BYTES` | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Defines backend-aligned cover photo size limit for UI validation.                               |
-| `PLACE_COVER_UPLOAD_MIME_TYPES`     | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Defines backend-aligned cover photo MIME allowlist.                                             |
-| `PLACE_COVER_UPLOAD_ACCEPT`         | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Formats the cover upload MIME allowlist for Ant Design Upload/input accept.                     |
-| `getPlaceCoverUploadError`          | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Returns a local validation error for unsupported cover upload files, or `null` for valid files. |
-| `PlaceCoverPreview`                 | `src/features/place/cover/ui/place-cover-preview.tsx`        | exported   | Renders selected cover preview, current cover image, or empty state.                            |
-| `PlaceCoverUploadActions`           | `src/features/place/cover/ui/place-cover-upload-actions.tsx` | exported   | Renders choose/upload/reset controls for the cover upload panel.                                |
-| `PlaceCoverUploadPanel`             | `src/features/place/cover/ui/place-cover-upload-panel.tsx`   | exported   | Renders current cover preview, local file validation, upload submit, and normalized API errors. |
+| Helper                              | Location                                                     | Visibility | Contract                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------ |
+| `PLACE_COVER_UPLOAD_MAX_SIZE_BYTES` | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Defines backend-aligned cover photo size limit for UI validation.                                |
+| `PLACE_COVER_UPLOAD_MIME_TYPES`     | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Defines backend-aligned cover photo MIME allowlist.                                              |
+| `PLACE_COVER_UPLOAD_ACCEPT`         | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Formats the cover upload MIME allowlist for Ant Design Upload/input accept.                      |
+| `getPlaceCoverUploadError`          | `src/features/place/cover/model/place-cover-upload.ts`       | exported   | Returns a local validation error for unsupported cover upload files, or `null` for valid files.  |
+| `PlaceCoverDraftPicker`             | `src/features/place/cover/ui/place-cover-draft-picker.tsx`   | exported   | Renders create-time cover file selection, local validation, preview, and reset before `placeId`. |
+| `PlaceCoverPreview`                 | `src/features/place/cover/ui/place-cover-preview.tsx`        | exported   | Renders selected cover preview, current cover image, or empty state.                             |
+| `PlaceCoverUploadActions`           | `src/features/place/cover/ui/place-cover-upload-actions.tsx` | exported   | Renders choose/upload/reset controls for the cover upload panel.                                 |
+| `PlaceCoverUploadPanel`             | `src/features/place/cover/ui/place-cover-upload-panel.tsx`   | exported   | Renders current cover preview, local file validation, upload submit, and normalized API errors.  |
 
 ## Place Pinned Material Feature
 
