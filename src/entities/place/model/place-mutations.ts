@@ -2,6 +2,7 @@ import type { ApiClientError } from '@/shared/api/client/api-error'
 import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
+  useClearPinnedMaterial,
   useCreatePlace,
   useSetPinnedMaterial,
   useUpdatePlace,
@@ -48,6 +49,14 @@ export type UploadPlaceCoverPhotoMutationOptions = {
  * Callback-и для назначения закрепленного материала через entity bridge.
  */
 export type SetPinnedMaterialMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (place: PlaceDetail) => Promise<void> | void
+}
+
+/**
+ * Callback-и для снятия закрепленного материала через entity bridge.
+ */
+export type ClearPinnedMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
   onSuccess?: (place: PlaceDetail) => Promise<void> | void
 }
@@ -183,6 +192,31 @@ export function useSetPinnedMaterialMutation(
   const queryClient = useQueryClient()
 
   return useSetPinnedMaterial<ApiClientError>({
+    mutation: {
+      onError: options?.onError,
+      onSuccess: async (place, variables) => {
+        await invalidateAdminPlaceDetailQuery(
+          queryClient,
+          variables.pathParams.placeId,
+        )
+        await options?.onSuccess?.(place)
+      },
+    },
+  })
+}
+
+/**
+ * Снимает закрепленный материал места и обновляет admin detail кеш.
+ *
+ * @remarks UI получает только entity-level hook. Список мест и список материалов
+ * не инвалидируются, потому что clear меняет только detail-состояние pinned material.
+ */
+export function useClearPinnedMaterialMutation(
+  options?: ClearPinnedMaterialMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useClearPinnedMaterial<ApiClientError>({
     mutation: {
       onError: options?.onError,
       onSuccess: async (place, variables) => {

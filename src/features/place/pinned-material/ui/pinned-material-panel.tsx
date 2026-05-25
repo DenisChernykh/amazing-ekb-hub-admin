@@ -2,7 +2,10 @@ import {
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
 } from '@/entities/material/ui/material-meta'
-import { useSetPinnedMaterialMutation } from '@/entities/place/model/place-mutations'
+import {
+  useClearPinnedMaterialMutation,
+  useSetPinnedMaterialMutation,
+} from '@/entities/place/model/place-mutations'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
 import {
@@ -21,8 +24,9 @@ import { PinnedMaterialCurrent } from './pinned-material-current'
 const getMaterialOptionLabel = (material: Material) => {
   const platform = getMaterialPlatformMeta(material.platform)
   const type = getMaterialTypeMeta(material.type)
+  const title = material.title ?? 'Без названия'
 
-  return `${material.title} · ${platform.label} · ${type.label}`
+  return `${title} · ${platform.label} · ${type.label}`
 }
 
 /**
@@ -53,10 +57,12 @@ export function PinnedMaterialPanel({
   const [savedMaterialId, setSavedMaterialId] = useState<string | null>(
     initialPinnedMaterialId,
   )
+  const [errorTitle, setErrorTitle] = useState('Не удалось закрепить материал')
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const setPinnedMaterialMutation = useSetPinnedMaterialMutation({
     onError: (error) => {
       const normalizedError = normalizeApiError(error)
+      setErrorTitle('Не удалось закрепить материал')
       setErrorMessages(normalizedError.messages)
       void message.error(normalizedError.message)
     },
@@ -70,7 +76,23 @@ export function PinnedMaterialPanel({
       void message.success('Материал закреплен')
     },
   })
+  const clearPinnedMaterialMutation = useClearPinnedMaterialMutation({
+    onError: (error) => {
+      const normalizedError = normalizeApiError(error)
+      setErrorTitle('Не удалось снять закрепление')
+      setErrorMessages(normalizedError.messages)
+      void message.error(normalizedError.message)
+    },
+    onSuccess: () => {
+      setSelectedMaterialId(null)
+      setSavedMaterialId(null)
+      setErrorMessages([])
+      void message.success('Закрепление снято')
+    },
+  })
   const isChanged = selectedMaterialId !== savedMaterialId
+  const isMutationPending =
+    setPinnedMaterialMutation.isPending || clearPinnedMaterialMutation.isPending
   const materialOptions = materials.map((material) => ({
     label: getMaterialOptionLabel(material),
     value: material.id,
@@ -79,6 +101,13 @@ export function PinnedMaterialPanel({
   const handleMaterialChange = (materialId: string) => {
     setSelectedMaterialId(materialId || null)
     setErrorMessages([])
+  }
+
+  const handleClear = () => {
+    setErrorMessages([])
+    clearPinnedMaterialMutation.mutate({
+      pathParams: { placeId },
+    })
   }
 
   const handleSubmit = () => {
@@ -111,7 +140,7 @@ export function PinnedMaterialPanel({
                 ))}
               </Flex>
             }
-            message="Не удалось закрепить материал"
+            message={errorTitle}
             showIcon
             type="error"
           />
@@ -119,20 +148,25 @@ export function PinnedMaterialPanel({
 
         <Select
           aria-label="Материал"
-          disabled={!materials.length || setPinnedMaterialMutation.isPending}
+          disabled={!materials.length || isMutationPending}
           onChange={handleMaterialChange}
           options={materialOptions}
           placeholder="Выберите материал"
           value={selectedMaterialId ?? undefined}
         />
 
-        <Flex justify="end">
+        <Flex gap={8} justify="end" wrap>
+          {Boolean(pinnedMaterial) && (
+            <Button
+              disabled={isMutationPending}
+              loading={clearPinnedMaterialMutation.isPending}
+              onClick={handleClear}
+            >
+              Снять закрепление
+            </Button>
+          )}
           <Button
-            disabled={
-              !selectedMaterialId ||
-              !isChanged ||
-              setPinnedMaterialMutation.isPending
-            }
+            disabled={!selectedMaterialId || !isChanged || isMutationPending}
             loading={setPinnedMaterialMutation.isPending}
             onClick={handleSubmit}
             type="primary"

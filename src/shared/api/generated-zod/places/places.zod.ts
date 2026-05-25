@@ -13,16 +13,19 @@ import * as zod from 'zod';
  * @summary List places
  */
 export const listPlacesQueryPageDefault = 1;
+export const listPlacesQueryPageMax = 1000;
 
 export const listPlacesQueryPageSizeDefault = 20;
 export const listPlacesQueryPageSizeMax = 100;
 
+export const listPlacesQuerySearchMax = 100;
+
 export const listPlacesQuerySortDefault = `popular`;
 
 export const ListPlacesQueryParams = zod.strictObject({
-  "page": zod.number().min(1).default(listPlacesQueryPageDefault).describe('Номер страницы пагинации. Минимальное значение `1`.'),
+  "page": zod.number().min(1).max(listPlacesQueryPageMax).default(listPlacesQueryPageDefault).describe('Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.'),
   "pageSize": zod.number().min(1).max(listPlacesQueryPageSizeMax).default(listPlacesQueryPageSizeDefault).describe('Размер страницы. Допустимый диапазон от `1` до `100`.'),
-  "search": zod.string().optional().describe('Полнотекстовый поиск по названию и описанию места.'),
+  "search": zod.string().max(listPlacesQuerySearchMax).optional().describe('Полнотекстовый поиск по названию и описанию места. Максимум 100 символов.'),
   "sort": zod.enum(['popular']).default(listPlacesQuerySortDefault).describe('Режим сортировки списка мест.'),
   "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).optional().describe('Фильтр по категории места.')
 })
@@ -36,12 +39,17 @@ export const ListPlaces200Response = zod.strictObject({
   "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
-  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
-}).describe('Краткая карточка места, используемая в списках.')).describe('Элементы текущей страницы.'),
+  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "counters": zod.strictObject({
+  "dzen": zod.number(),
+  "telegram": zod.number(),
+  "instagram": zod.number()
+}).describe('Количество материалов по платформам.')
+}).describe('Краткая публичная карточка места со счетчиками материалов по платформам.')).describe('Элементы текущей страницы.'),
   "total": zod.number().describe('Общее количество доступных элементов.'),
   "page": zod.number().describe('Текущая страница.'),
   "pageSize": zod.number().describe('Размер страницы.')
-}).describe('Пагинированный список мест.')
+}).describe('Публичный пагинированный список мест со счетчиками материалов.')
 
 export const ListPlaces400Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
@@ -66,22 +74,23 @@ export const GetPlaceDetail200Response = zod.strictObject({
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
-  "pinnedMaterial": zod.strictObject({
-  "id": zod.string().describe('Идентификатор материала.'),
-  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
-  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
-  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
-  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
-}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),
   "instagram": zod.number()
 }).describe('Количество материалов по платформам.')
-}).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
+}).describe('Краткая публичная карточка места со счетчиками материалов по платформам.').and(zod.strictObject({
+  "pinnedMaterial": zod.strictObject({
+  "id": zod.string().describe('Идентификатор материала.'),
+  "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
+  "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
+  "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
+  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
+}).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.')
+})).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
 
 export const GetPlaceDetail404Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
@@ -121,10 +130,10 @@ export const ListPlaceMaterials200Response = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места, к которому относится материал.'),
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
-  "title": zod.string().describe('Заголовок материала.'),
+  "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Материал, связанный с местом.')).describe('Материалы места в стабильном порядке отображения.')
 }).describe('Ограниченный список материалов места.')
 

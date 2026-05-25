@@ -90,7 +90,7 @@ export function getMaterialFormInitialValues(
     durationSec: material.durationSec,
     platform: material.platform,
     publishedAt: parsePublishedAtWallClock(material.publishedAt),
-    title: material.title,
+    title: material.title ?? '',
     type: material.type,
     url: material.url,
   }

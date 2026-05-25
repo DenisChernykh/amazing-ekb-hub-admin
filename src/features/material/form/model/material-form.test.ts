@@ -46,6 +46,15 @@ describe('material form helpers', () => {
     )
   })
 
+  it('maps nullable material title to an empty form value', () => {
+    const initialValues = getMaterialFormInitialValues({
+      ...material,
+      title: null,
+    })
+
+    expect(initialValues.title).toBe('')
+  })
+
   it('normalizes create payload and keeps selected local datetime', () => {
     const values: MaterialFormValues = {
       durationSec: undefined,

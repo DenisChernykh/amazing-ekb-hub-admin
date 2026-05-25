@@ -1,6 +1,7 @@
 import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
+  useClearPinnedMaterial,
   useCreatePlace,
   useSetPinnedMaterial,
   useUpdatePlace,
@@ -13,6 +14,7 @@ import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  useClearPinnedMaterialMutation,
   useCreatePlaceMutation,
   useSetPinnedMaterialMutation,
   useUpdatePlaceMutation,
@@ -25,6 +27,7 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
     `/admin/places/${placeId}`,
   ]),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
+  useClearPinnedMaterial: vi.fn(),
   useCreatePlace: vi.fn(),
   useUploadPlaceCoverPhoto: vi.fn(),
   useSetPinnedMaterial: vi.fn(),
@@ -32,6 +35,7 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   useUpdatePlaceStatus: vi.fn(),
 }))
 
+const mockedUseClearPinnedMaterial = vi.mocked(useClearPinnedMaterial)
 const mockedUseCreatePlace = vi.mocked(useCreatePlace)
 const mockedUseSetPinnedMaterial = vi.mocked(useSetPinnedMaterial)
 const mockedUseUploadPlaceCoverPhoto = vi.mocked(useUploadPlaceCoverPhoto)
@@ -48,6 +52,7 @@ const createWrapper = (queryClient: QueryClient) => {
 
 describe('place mutations', () => {
   beforeEach(() => {
+    mockedUseClearPinnedMaterial.mockReset()
     mockedUseCreatePlace.mockReset()
     mockedUseSetPinnedMaterial.mockReset()
     mockedUseUploadPlaceCoverPhoto.mockReset()
@@ -291,6 +296,58 @@ describe('place mutations', () => {
       {
         data: { materialId: 'material-1' },
         pathParams: { placeId: 'place-5' },
+      },
+      undefined,
+      {} as never,
+    )
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
+        .isInvalidated,
+    ).toBe(false)
+    expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
+  })
+
+  it('invalidates admin detail query after clearing pinned material', async () => {
+    const queryClient = new QueryClient()
+    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/admin/places/place-6']
+    const updatedPlace: PlaceDetail = {
+      category: 'spa',
+      counters: {
+        dzen: 0,
+        instagram: 0,
+        telegram: 1,
+      },
+      coverImageUrl: null,
+      id: 'place-6',
+      pinnedMaterial: null,
+      popularityWeight: 8,
+      status: 'hidden',
+      summary: 'SPA без закрепления',
+      tags: ['spa'],
+      title: 'Unpinned SPA',
+    }
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
+    queryClient.setQueryData(detailQueryKey, updatedPlace)
+    mockedUseClearPinnedMaterial.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useClearPinnedMaterial>)
+
+    renderHook(() => useClearPinnedMaterialMutation({ onSuccess }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await mockedUseClearPinnedMaterial.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
+      updatedPlace,
+      {
+        pathParams: { placeId: 'place-6' },
       },
       undefined,
       {} as never,

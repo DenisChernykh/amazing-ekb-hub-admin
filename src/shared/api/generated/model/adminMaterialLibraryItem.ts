@@ -6,20 +6,19 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { MaterialType } from './materialType';
+import type { PlaceMaterialLinkStatus } from './placeMaterialLinkStatus';
 import type { Platform } from './platform';
 
 /**
- * Материал, связанный с местом.
+ * Материал из общей библиотеки для административного интерфейса.
  */
-export type Material = {
+export type AdminMaterialLibraryItem = {
   /** Идентификатор материала. */
   id: string;
-  /** Идентификатор места, к которому относится материал. */
-  placeId: string;
   platform: Platform;
   type: MaterialType;
   /**
-     * Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.
+     * Заголовок материала. Для импортированных материалов может быть `null`.
      * @nullable
      */
   title: string | null;
@@ -30,6 +29,8 @@ export type Material = {
      * @nullable
      */
   durationSec: number | null;
-  /** Публичная ссылка на материал. Допускаются только абсолютные http/https URL. */
+  /** Публичная ссылка на материал. */
   url: string;
+  /** Статус связи с `placeId` из query. Если `placeId` не передан или связи нет, возвращается `null`. */
+  placeLink: PlaceMaterialLinkStatus | null;
 };

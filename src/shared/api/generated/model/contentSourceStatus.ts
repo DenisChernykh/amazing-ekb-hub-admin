@@ -7,6 +7,6 @@
  */
 
 /**
- * Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.
+ * Статус пользовательского content source.
  */
-export type PageParameter = number;
+export type ContentSourceStatus = 'active' | 'disabled';
