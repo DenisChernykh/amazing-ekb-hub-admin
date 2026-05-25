@@ -232,11 +232,14 @@ describe('PlacesList', () => {
 
     renderPlacesList()
 
+    const createLinks = screen
+      .getAllByText('Создать место')
+      .map((element) => element.closest('a'))
+
     expect(screen.getByText('Места пока не созданы')).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Создать место' })).toHaveLength(
-      2,
-    )
-  }, 10_000)
+    expect(createLinks).toHaveLength(2)
+    expect(createLinks.every(Boolean)).toBe(true)
+  })
 
   it('renders reset action for a filtered empty list', async () => {
     mockedUsePlacesListQuery.mockReturnValue({
@@ -252,7 +255,10 @@ describe('PlacesList', () => {
       screen.getByText('По выбранному статусу мест не найдено'),
     ).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Сбросить фильтр' }))
+    const resetButton = screen.getByText('Сбросить фильтр').closest('button')
+
+    expect(resetButton).not.toBeNull()
+    fireEvent.click(resetButton as HTMLButtonElement)
 
     await waitFor(() => {
       expect(mockedUsePlacesListQuery).toHaveBeenLastCalledWith({
@@ -260,7 +266,7 @@ describe('PlacesList', () => {
         pageSize: 10,
       })
     })
-  }, 10_000)
+  })
 
   it('updates bulk toolbar count after selecting rows', () => {
     mockedUsePlacesListQuery.mockReturnValue({
