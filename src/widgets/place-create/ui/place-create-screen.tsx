@@ -4,12 +4,15 @@ import { Card, Flex, Typography } from 'antd'
 import { useNavigate } from 'react-router'
 
 /**
- * Экран создания места с layout-оберткой и возвратом к списку после действий.
+ * Экран создания места с layout-оберткой, отменой в список и переходом к созданному месту.
  */
 export function PlaceCreateScreen() {
   const navigate = useNavigate()
   const navigateToPlaces = () => {
     navigate('/places')
+  }
+  const navigateToCreatedPlace = (placeId: string) => {
+    navigate(`/places/${placeId}`)
   }
 
   return (
@@ -21,7 +24,7 @@ export function PlaceCreateScreen() {
         <Card>
           <CreatePlaceForm
             onCancel={navigateToPlaces}
-            onCreated={navigateToPlaces}
+            onCreated={navigateToCreatedPlace}
           />
         </Card>
       </Flex>

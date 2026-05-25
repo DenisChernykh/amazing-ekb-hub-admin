@@ -10,10 +10,10 @@ vi.mock('@/features/place/create/ui/create-place-form', () => ({
     onCreated,
   }: {
     onCancel: () => void
-    onCreated: () => void
+    onCreated: (placeId: string) => void
   }) => (
     <div>
-      <button onClick={onCreated}>created</button>
+      <button onClick={() => onCreated('place-7')}>created</button>
       <button onClick={onCancel}>cancel</button>
     </div>
   ),
@@ -29,6 +29,10 @@ const renderPlaceCreateScreen = () => {
       {
         path: '/places',
         element: <div>Places list route</div>,
+      },
+      {
+        path: '/places/:placeId',
+        element: <div>Place detail route</div>,
       },
     ],
     {
@@ -49,12 +53,12 @@ describe('PlaceCreateScreen', () => {
     ).toBeInTheDocument()
   })
 
-  it('returns to places list after form success', async () => {
+  it('opens created place detail after form success', async () => {
     renderPlaceCreateScreen()
 
     await userEvent.click(screen.getByRole('button', { name: 'created' }))
 
-    expect(screen.getByText('Places list route')).toBeInTheDocument()
+    expect(screen.getByText('Place detail route')).toBeInTheDocument()
   })
 
   it('returns to places list after cancellation', async () => {
