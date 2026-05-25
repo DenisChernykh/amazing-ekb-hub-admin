@@ -70,6 +70,13 @@ const pageTwoPlaces: PlaceListResponse = {
   total: 2,
 }
 
+const emptyPlaces: PlaceListResponse = {
+  items: [],
+  page: 1,
+  pageSize: 10,
+  total: 0,
+}
+
 const renderPlacesList = (route = '/places') => {
   const store = createAppStore()
 
@@ -163,6 +170,7 @@ describe('PlacesList', () => {
 
     renderPlacesList()
 
+    expect(document.title).toBe('Места | Amazing EKB Admin')
     expect(screen.getByText('Аквацентр')).toBeInTheDocument()
     expect(screen.getByText('Скрытый SPA')).toBeInTheDocument()
     expect(screen.getByText('Бассейны')).toBeInTheDocument()
@@ -179,7 +187,24 @@ describe('PlacesList', () => {
     )
   })
 
-  it('renders normalized API error message', () => {
+  it('renders forbidden state for permission errors', () => {
+    mockedUsePlacesListQuery.mockReturnValue({
+      data: undefined,
+      error: new ApiClientError({
+        kind: 'permission',
+        message: 'Forbidden',
+        status: 403,
+      }),
+      isError: true,
+      isPending: false,
+    } as ReturnType<typeof usePlacesListQuery>)
+
+    renderPlacesList()
+
+    expect(screen.getByText('Доступ запрещен')).toBeInTheDocument()
+  })
+
+  it('renders generic screen error for server failures', () => {
     mockedUsePlacesListQuery.mockReturnValue({
       data: undefined,
       error: new ApiClientError({
@@ -193,7 +218,48 @@ describe('PlacesList', () => {
 
     renderPlacesList()
 
+    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
     expect(screen.getByText('Places unavailable')).toBeInTheDocument()
+  })
+
+  it('renders create action for an empty unfiltered list', () => {
+    mockedUsePlacesListQuery.mockReturnValue({
+      data: emptyPlaces,
+      error: null,
+      isError: false,
+      isPending: false,
+    } as ReturnType<typeof usePlacesListQuery>)
+
+    renderPlacesList()
+
+    expect(screen.getByText('Места пока не созданы')).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Создать место' })).toHaveLength(
+      2,
+    )
+  })
+
+  it('renders reset action for a filtered empty list', async () => {
+    mockedUsePlacesListQuery.mockReturnValue({
+      data: emptyPlaces,
+      error: null,
+      isError: false,
+      isPending: false,
+    } as ReturnType<typeof usePlacesListQuery>)
+
+    renderPlacesList('/places?status=hidden')
+
+    expect(
+      screen.getByText('По выбранному статусу мест не найдено'),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Сбросить фильтр' }))
+
+    await waitFor(() => {
+      expect(mockedUsePlacesListQuery).toHaveBeenLastCalledWith({
+        page: 1,
+        pageSize: 10,
+      })
+    })
   })
 
   it('updates bulk toolbar count after selecting rows', () => {

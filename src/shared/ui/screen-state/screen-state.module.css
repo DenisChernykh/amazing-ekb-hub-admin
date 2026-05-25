@@ -1,0 +1,19 @@
+.frame {
+  min-height: 280px;
+  padding: 24px;
+  background: var(--screen-state-bg);
+  border: 1px solid var(--screen-state-border);
+  border-radius: var(--screen-state-radius);
+}
+
+.result {
+  padding: 0;
+}
+
+.empty {
+  padding: 24px 0;
+}
+
+.emptyDescription {
+  margin: 0;
+}

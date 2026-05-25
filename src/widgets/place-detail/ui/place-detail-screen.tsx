@@ -3,19 +3,14 @@ import { PlaceCategoryTag } from '@/entities/place/ui/place-category-tag'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
 import { PlaceCoverUploadPanel } from '@/features/place/cover/ui/place-cover-upload-panel'
 import { PlaceStatusPanel } from '@/features/place/status/ui/place-status-panel'
-import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceDetail } from '@/shared/api/generated/model'
+import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
-  Alert,
-  Button,
-  Card,
-  Descriptions,
-  Flex,
-  Space,
-  Spin,
-  Tag,
-  Typography,
-} from 'antd'
+  ScreenApiErrorState,
+  ScreenLoadingState,
+  ScreenResultState,
+} from '@/shared/ui/screen-state/screen-state'
+import { Button, Card, Descriptions, Flex, Space, Tag, Typography } from 'antd'
 import { Link } from 'react-router'
 import { PlaceMaterialsPanel } from './place-materials-panel'
 
@@ -41,27 +36,48 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
   const placeQuery = useAdminPlaceDetailQuery(placeId)
 
   if (placeQuery.isPending) {
-    return <Spin />
+    return (
+      <>
+        <DocumentTitle title="Место" />
+        <ScreenLoadingState title="Загружаем место" />
+      </>
+    )
   }
 
   if (placeQuery.isError) {
     return (
-      <Alert
-        title={normalizeApiError(placeQuery.error).message}
-        showIcon
-        type="error"
-      />
+      <>
+        <DocumentTitle title="Ошибка места" />
+        <ScreenApiErrorState
+          error={placeQuery.error}
+          forbiddenAction={{ label: 'На главную', to: '/' }}
+          notFoundAction={{ label: 'К списку мест', to: '/places' }}
+          notFoundSubTitle="Место удалено или ссылка устарела."
+          notFoundTitle="Место не найдено"
+        />
+      </>
     )
   }
 
   const place = placeQuery.data
 
   if (!place) {
-    return <Alert title="Место не найдено" showIcon type="warning" />
+    return (
+      <>
+        <DocumentTitle title="Место не найдено" />
+        <ScreenResultState
+          primaryAction={{ label: 'К списку мест', to: '/places' }}
+          status="404"
+          subTitle="Место удалено или ссылка устарела."
+          title="Место не найдено"
+        />
+      </>
+    )
   }
 
   return (
     <Flex gap={16} vertical>
+      <DocumentTitle title={place.title} />
       <Flex align="center" justify="space-between" wrap>
         <Typography.Title level={2}>{place.title}</Typography.Title>
 

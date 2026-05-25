@@ -1,11 +1,12 @@
 import { DashboardPage } from '@/pages/dashboard/ui/dashboard-page'
 import { LoginPage } from '@/pages/login/ui/login-page'
+import { NotFoundPage } from '@/pages/not-found/ui/not-found-page'
 import { PlaceDetailPage } from '@/pages/place-detail/ui/place-detail-page'
 import { PlaceEditPage } from '@/pages/place-edit/ui/place-edit-page'
 import { PlacesCreatePage } from '@/pages/places-create/ui/places-create-page'
 import { PlacesPage } from '@/pages/places/ui/places-page'
 import { AdminShell } from '@/widgets/admin-shell/ui/admin-shell'
-import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
+import { createBrowserRouter, type RouteObject } from 'react-router'
 import { RequireAuth } from './require-auth'
 
 /**
@@ -32,6 +33,10 @@ export const protectedRouteChildren = [
     path: '/places/new',
     element: <PlacesCreatePage />,
   },
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
 ] satisfies RouteObject[]
 
 /**
@@ -50,9 +55,5 @@ export const router = createBrowserRouter([
         children: protectedRouteChildren,
       },
     ],
-  },
-  {
-    path: '*',
-    element: <Navigate replace to="/" />,
   },
 ])

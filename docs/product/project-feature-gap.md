@@ -120,12 +120,12 @@ Backend уже закрывает обязательные admin-функции 
 - material create/edit drawer forms on `/places/:placeId` are done in admin `main` via merged admin PR [#12](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/12): create uses `POST /admin/places/{placeId}/materials`, edit uses partial `PATCH /admin/materials/{materialId}`, edit drawer shows dirty diff chips and both drawers guard dirty close;
 - pinned material selector on `/places/:placeId`: отдельная card рядом с materials panel, set/change через `PATCH /admin/places/{placeId}/pinned-material`, clear/unpin через `DELETE /admin/places/{placeId}/pinned-material`, success/error feedback, admin detail cache invalidation;
 - route `/places/new` с формой создания места через `POST /admin/places`;
+- route/page title standard and shared screen states for loading, forbidden, not-found, generic errors, and empty list results are implemented on the issue [#32](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/32) branch for `/`, `/login`, `/places`, `/places/new`, `/places/:placeId`, `/places/:placeId/edit`, and unknown protected routes;
 - FSD baseline: `app`, `pages`, `widgets`, `features`, `entities`, `shared`;
 - agent/coding docs: TSDoc, React rules, helper registry.
 
 Не хватает:
 
-- page titles, forbidden/empty/error standards для всех будущих разделов;
 - поиск и фильтр категории в админке;
 - bulk moderation workflow для массовой смены статуса мест; tracked in admin issue [#15](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/15) and Notion roadmap;
 - runtime smoke загрузки/замены cover-фото с реальным backend;

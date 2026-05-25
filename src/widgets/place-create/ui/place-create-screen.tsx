@@ -1,4 +1,5 @@
 import { CreatePlaceForm } from '@/features/place/create/ui/create-place-form'
+import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import { Card, Flex, Typography } from 'antd'
 import { useNavigate } from 'react-router'
 
@@ -12,15 +13,18 @@ export function PlaceCreateScreen() {
   }
 
   return (
-    <Flex gap={16} vertical>
-      <Typography.Title level={2}>Новое место</Typography.Title>
+    <>
+      <DocumentTitle title="Новое место" />
+      <Flex gap={16} vertical>
+        <Typography.Title level={2}>Новое место</Typography.Title>
 
-      <Card>
-        <CreatePlaceForm
-          onCancel={navigateToPlaces}
-          onCreated={navigateToPlaces}
-        />
-      </Card>
-    </Flex>
+        <Card>
+          <CreatePlaceForm
+            onCancel={navigateToPlaces}
+            onCreated={navigateToPlaces}
+          />
+        </Card>
+      </Flex>
+    </>
   )
 }

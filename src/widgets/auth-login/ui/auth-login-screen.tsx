@@ -1,4 +1,5 @@
 import { LoginForm } from '@/features/auth/login/ui/login-form'
+import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import { Card, Flex, Layout, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
 import type { Location } from 'react-router'
@@ -38,25 +39,28 @@ export function AuthLoginScreen() {
   }
 
   return (
-    <Layout className={styles.layout} style={style}>
-      <Content className={styles.content}>
-        <Flex align="center" className={styles.center} justify="center">
-          <Card className={styles.card}>
-            <Typography.Title className={styles.title} level={1}>
-              Amazing EKB Hub Admin
-            </Typography.Title>
-            <Typography.Paragraph type="secondary">
-              Войдите с учетной записью администратора.
-            </Typography.Paragraph>
+    <>
+      <DocumentTitle title="Вход" />
+      <Layout className={styles.layout} style={style}>
+        <Content className={styles.content}>
+          <Flex align="center" className={styles.center} justify="center">
+            <Card className={styles.card}>
+              <Typography.Title className={styles.title} level={1}>
+                Amazing EKB Hub Admin
+              </Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Войдите с учетной записью администратора.
+              </Typography.Paragraph>
 
-            <LoginForm
-              onLoggedIn={() => {
-                navigate(redirectTo, { replace: true })
-              }}
-            />
-          </Card>
-        </Flex>
-      </Content>
-    </Layout>
+              <LoginForm
+                onLoggedIn={() => {
+                  navigate(redirectTo, { replace: true })
+                }}
+              />
+            </Card>
+          </Flex>
+        </Content>
+      </Layout>
+    </>
   )
 }
