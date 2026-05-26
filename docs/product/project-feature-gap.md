@@ -108,8 +108,8 @@ Backend уже закрывает обязательные admin-функции 
 - login page через AntD Form;
 - protected route через `GET /auth/me`;
 - logout button;
-- базовый dashboard placeholder с текущим пользователем;
-- admin shell с sidebar/header/navigation;
+- продуктовый dashboard welcome screen без технических session-полей в admin `main` через merged admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35), deployed in [admin deploy #26433216231](https://github.com/DenisChernykh/amazing-ekb-hub-admin/actions/runs/26433216231), закрывший [admin issue #30](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/30);
+- admin shell с sidebar/header/navigation; header больше не показывает реальный email аккаунта в admin `main` через merged admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35);
 - read-only route `/places` со списком мест через `GET /admin/places`, включая `hidden`;
 - URL-driven status filter для `/places`: all / active / hidden;
 - read-only route `/places/:placeId` через `GET /admin/places/{placeId}`;
@@ -180,6 +180,7 @@ Backend уже закрывает обязательные admin-функции 
 - Подключить список мест с pagination/search/category/status-aware UI.
 - Done: backend PR [#25](https://github.com/DenisChernykh/amazing-ekb-hub-backend/pull/25) добавил `GET /admin/places` и `GET /admin/places/{placeId}`.
 - Done: admin SPA переключает `/places` на `GET /admin/places`, поддерживает status filter и read-only detail route `/places/:placeId`.
+- Done: dashboard privacy polish merged in admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35), deployed in [admin deploy #26433216231](https://github.com/DenisChernykh/amazing-ekb-hub-admin/actions/runs/26433216231), closing admin issue [#30](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/30): dashboard no longer exposes session id/email/role debug fields, and header no longer shows the real account email.
 
 ### Phase 2: Place Editor
 
