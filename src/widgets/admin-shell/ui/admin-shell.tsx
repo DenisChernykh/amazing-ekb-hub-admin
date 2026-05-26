@@ -19,7 +19,7 @@ type AdminShellVariables = CSSProperties & {
 }
 
 /**
- * Общий protected shell админки с sidebar, header, session summary и content outlet.
+ * Общий protected shell админки с sidebar, header, нейтральным session summary и content outlet.
  *
  * @remarks Требует `RequireAuth`, который предоставляет текущего пользователя через session context.
  */
@@ -69,7 +69,7 @@ export function AdminShell() {
 
             <Space wrap>
               <RoleTag role={user.role} />
-              <Typography.Text strong>{user.email}</Typography.Text>
+              <Typography.Text strong>Администратор</Typography.Text>
               <LogoutButton />
             </Space>
           </Flex>
