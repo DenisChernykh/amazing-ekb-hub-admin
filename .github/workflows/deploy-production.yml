@@ -55,11 +55,13 @@ jobs:
     needs: quality
     runs-on: ubuntu-latest
 
+    environment: production
+
     env:
       IMAGE_NAME: amazing-ekb-hub-admin
       IMAGE_ARTIFACT_NAME: admin-runtime-image-${{ github.run_id }}-${{ github.sha }}
       IMAGE_ARTIFACT_PATH: admin-runtime-image.tar.gz
-      VITE_API_BASE_URL: https://api.strelchukgo.ru/v1
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
 
     steps:
       - name: Checkout
@@ -116,7 +118,7 @@ jobs:
       IMAGE_ARTIFACT_NAME: admin-runtime-image-${{ github.run_id }}-${{ github.sha }}
       IMAGE_ARTIFACT_DIR: /tmp/amazing-ekb-hub-admin-${{ github.sha }}
       IMAGE_ARTIFACT_PATH: /tmp/amazing-ekb-hub-admin-${{ github.sha }}/admin-runtime-image.tar.gz
-      ADMIN_BASE_URL: https://admin.strelchukgo.ru
+      ADMIN_BASE_URL: ${{ vars.ADMIN_BASE_URL }}
 
     steps:
       - name: Download runtime image
