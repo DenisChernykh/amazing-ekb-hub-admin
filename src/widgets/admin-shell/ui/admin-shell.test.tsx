@@ -9,7 +9,7 @@ vi.mock('@/features/auth/logout/ui/logout-button', () => ({
 }))
 
 describe('AdminShell', () => {
-  it('renders protected navigation and current user summary', () => {
+  it('renders protected navigation and neutral user summary', () => {
     render(
       <MemoryRouter initialEntries={['/places']}>
         <CurrentUserContext.Provider
@@ -32,7 +32,8 @@ describe('AdminShell', () => {
       'href',
       '/places',
     )
-    expect(screen.getByText('admin@amazing-ekb.ru')).toBeInTheDocument()
+    expect(screen.queryByText('admin@amazing-ekb.ru')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Администратор')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
   })
 })

@@ -1,16 +1,11 @@
-import { useCurrentUser } from '@/entities/session/model/current-user'
-import { getRoleMeta } from '@/entities/session/ui/role-meta'
-import { RoleTag } from '@/entities/session/ui/role-tag'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
-import { Card, Descriptions, Flex, Space, Typography } from 'antd'
+import { UnorderedListOutlined } from '@ant-design/icons'
+import { Button, Card, Flex, Space, Typography } from 'antd'
 
 /**
- * Базовый dashboard widget с краткой информацией о текущей session.
+ * Продуктовый dashboard widget с приветствием и быстрым переходом к местам.
  */
 export function AdminDashboard() {
-  const user = useCurrentUser()
-  const role = getRoleMeta(user.role)
-
   return (
     <>
       <DocumentTitle title="Обзор" />
@@ -19,16 +14,23 @@ export function AdminDashboard() {
 
         <Card>
           <Flex gap={24} vertical>
-            <Space wrap>
-              <RoleTag role={user.role} />
-              <Typography.Text strong>{user.email}</Typography.Text>
+            <Space orientation="vertical" size={8}>
+              <Typography.Title level={3}>
+                Добро пожаловать в панель управления гидом
+              </Typography.Title>
+              <Typography.Paragraph type="secondary">
+                Управляйте местами, карточками и материалами Amazing EKB Hub из
+                одного защищенного интерфейса.
+              </Typography.Paragraph>
             </Space>
 
-            <Descriptions column={1} bordered size="small">
-              <Descriptions.Item label="ID">{user.id}</Descriptions.Item>
-              <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
-              <Descriptions.Item label="Роль">{role.label}</Descriptions.Item>
-            </Descriptions>
+            <Button
+              href="/places"
+              icon={<UnorderedListOutlined aria-hidden="true" />}
+              type="primary"
+            >
+              Перейти к местам
+            </Button>
           </Flex>
         </Card>
       </Flex>
