@@ -31,14 +31,14 @@ describe('LoginForm', () => {
       </AntdApp>,
     )
 
-    await userEvent.type(screen.getByLabelText('Email'), 'admin@amazing-ekb.ru')
-    await userEvent.type(screen.getByLabelText('Пароль'), 'supersecret123')
+    await userEvent.type(screen.getByLabelText('Email'), 'admin@example.test')
+    await userEvent.type(screen.getByLabelText('Пароль'), 'unit-test-password')
     await userEvent.click(screen.getByRole('button', { name: 'Войти' }))
 
     expect(mutate).toHaveBeenCalledWith({
       data: {
-        email: 'admin@amazing-ekb.ru',
-        password: 'supersecret123',
+        email: 'admin@example.test',
+        password: 'unit-test-password',
       },
     })
   })

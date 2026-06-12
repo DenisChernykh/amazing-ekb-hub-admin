@@ -10,7 +10,7 @@ describe('AdminDashboard', () => {
       <MemoryRouter>
         <CurrentUserContext.Provider
           value={{
-            email: 'admin@amazing-ekb.ru',
+            email: 'admin@example.test',
             id: 'admin-1',
             role: 'admin',
           }}
@@ -29,7 +29,7 @@ describe('AdminDashboard', () => {
       screen.getByRole('link', { name: 'Перейти к местам' }),
     ).toHaveAttribute('href', '/places')
 
-    expect(screen.queryByText('admin@amazing-ekb.ru')).not.toBeInTheDocument()
+    expect(screen.queryByText('admin@example.test')).not.toBeInTheDocument()
     expect(screen.queryByText('admin-1')).not.toBeInTheDocument()
     expect(screen.queryByText('ID')).not.toBeInTheDocument()
     expect(screen.queryByText('Email')).not.toBeInTheDocument()

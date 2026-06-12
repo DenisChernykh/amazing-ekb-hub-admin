@@ -14,7 +14,7 @@ describe('AdminShell', () => {
       <MemoryRouter initialEntries={['/places']}>
         <CurrentUserContext.Provider
           value={{
-            email: 'admin@amazing-ekb.ru',
+            email: 'admin@example.test',
             id: 'admin-1',
             role: 'admin',
           }}
@@ -32,7 +32,7 @@ describe('AdminShell', () => {
       'href',
       '/places',
     )
-    expect(screen.queryByText('admin@amazing-ekb.ru')).not.toBeInTheDocument()
+    expect(screen.queryByText('admin@example.test')).not.toBeInTheDocument()
     expect(screen.getAllByText('Администратор')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
   })

@@ -14,11 +14,13 @@ Configure these variables in the `production` GitHub Environment for
 | `ADMIN_BASE_URL`    | Production admin URL used by deploy smoke checks.              |
 | `VITE_API_BASE_URL` | Browser-visible backend API URL compiled into the admin build. |
 
-Current production values:
+Production values are intentionally not written to the repository. Keep concrete
+domains in the GitHub Environment variables and local ignored `.env*.local`
+files only.
 
 ```text
-ADMIN_BASE_URL=https://admin.strelchukgo.ru
-VITE_API_BASE_URL=https://api.strelchukgo.ru/v1
+ADMIN_BASE_URL=<admin-base-url>
+VITE_API_BASE_URL=<api-base-url>
 ```
 
 ## Updating Values
@@ -36,12 +38,12 @@ Or use GitHub CLI:
 gh variable set ADMIN_BASE_URL \
   --repo DenisChernykh/amazing-ekb-hub-admin \
   --env production \
-  --body https://admin.strelchukgo.ru
+  --body "$ADMIN_BASE_URL"
 
 gh variable set VITE_API_BASE_URL \
   --repo DenisChernykh/amazing-ekb-hub-admin \
   --env production \
-  --body https://api.strelchukgo.ru/v1
+  --body "$VITE_API_BASE_URL"
 
 gh variable list \
   --repo DenisChernykh/amazing-ekb-hub-admin \

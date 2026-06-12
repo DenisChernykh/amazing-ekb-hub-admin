@@ -14,7 +14,7 @@ vi.mock('@/entities/session/model/session-hooks', () => ({
 const mockedUseCurrentSessionQuery = vi.mocked(useCurrentSessionQuery)
 
 const admin: AuthMeResponse = {
-  email: 'admin@amazing-ekb.ru',
+  email: 'admin@example.test',
   id: 'admin-1',
   role: 'admin',
 }
@@ -113,7 +113,7 @@ describe('RequireAuth', () => {
     renderProtectedRoute()
 
     expect(
-      screen.getByText('Private route for admin@amazing-ekb.ru'),
+      screen.getByText('Private route for admin@example.test'),
     ).toBeInTheDocument()
   })
 })

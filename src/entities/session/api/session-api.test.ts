@@ -17,7 +17,7 @@ describe('session-api cache helpers', () => {
     const queryKey = getCurrentSessionQueryKey()
 
     queryClient.setQueryData(queryKey, {
-      email: 'admin@amazing-ekb.ru',
+      email: 'admin@example.test',
       id: 'admin-1',
       role: 'admin',
     })
@@ -34,7 +34,7 @@ describe('session-api cache helpers', () => {
     const queryKey = getCurrentSessionQueryKey()
 
     queryClient.setQueryData(queryKey, {
-      email: 'admin@amazing-ekb.ru',
+      email: 'admin@example.test',
       id: 'admin-1',
       role: 'admin',
     })

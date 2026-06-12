@@ -34,7 +34,7 @@ const mockedUseLogin = vi.mocked(useLogin)
 const mockedUseLogout = vi.mocked(useLogout)
 
 const admin: AuthMeResponse = {
-  email: 'admin@amazing-ekb.ru',
+  email: 'admin@example.test',
   id: 'admin-1',
   role: 'admin',
 }
@@ -96,8 +96,8 @@ describe('session hooks', () => {
       admin,
       {
         data: {
-          email: 'admin@amazing-ekb.ru',
-          password: 'supersecret123',
+          email: 'admin@example.test',
+          password: 'unit-test-password',
         },
       },
       undefined,
