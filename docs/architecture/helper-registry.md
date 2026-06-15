@@ -77,24 +77,32 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Material Entity
 
-| Helper                              | Location                                                | Visibility | Contract                                                                                           |
-| ----------------------------------- | ------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
-| `usePlaceMaterialsListQuery`        | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint.                           |
-| `useCreatePlaceMaterialMutation`    | `src/entities/material/model/material-mutations.ts`     | exported   | Creates place material through admin API and invalidates bounded materials list plus admin detail. |
-| `useUpdateMaterialMutation`         | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material through admin API and invalidates bounded materials list plus admin detail.       |
-| `invalidatePlaceMaterialsListQuery` | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates one bounded admin materials list after material mutations.                             |
-| `isSafeMaterialUrl`                 | `src/entities/material/model/material-url.ts`           | exported   | Checks that material links are absolute `http` or `https` URLs before rendering or API payloads.   |
-| `getMaterialUrlValidationError`     | `src/entities/material/model/material-url.ts`           | exported   | Returns the local material URL validation message while leaving empty values to required rules.    |
-| `normalizeMaterialUrl`              | `src/entities/material/model/material-url.ts`           | exported   | Trims material URLs and rejects non-`http/https` payload values before API submission.             |
-| `MATERIAL_PLATFORM_VALUES`          | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material platforms in a stable order for UI controls.                             |
-| `MATERIAL_TYPE_VALUES`              | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material types in a stable order for UI controls.                                 |
-| `getMaterialPlatformMeta`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                      |
-| `getMaterialTypeMeta`               | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                                  |
-| `getMaterialPlatformOptions`        | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend platforms to localized Ant Design select options.                                     |
-| `getMaterialTypeOptions`            | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material types to localized Ant Design select options.                                |
-| `formatMaterialDuration`            | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.                |
-| `formatMaterialPublishedDate`       | `src/entities/material/ui/material-meta.ts`             | exported   | Formats material publication date from source ISO date part without UTC day shifts.                |
-| `PlaceMaterialsPanel`               | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit drawer actions.             |
+| Helper                                 | Location                                                | Visibility | Contract                                                                                           |
+| -------------------------------------- | ------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| `usePlaceMaterialsListQuery`           | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint.                           |
+| `useMaterialLibraryQuery`              | `src/entities/material/model/material-library-hooks.ts` | exported   | Loads the admin material library through the admin `/admin/materials` endpoint.                    |
+| `useCreatePlaceMaterialMutation`       | `src/entities/material/model/material-mutations.ts`     | exported   | Creates place material through admin API and invalidates bounded materials list plus admin detail. |
+| `useUpdateMaterialMutation`            | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material through admin API and invalidates bounded materials list plus admin detail.       |
+| `useUpdateMaterialAdminStatusMutation` | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material library review status and invalidates all material library query variants.        |
+| `invalidatePlaceMaterialsListQuery`    | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates one bounded admin materials list after material mutations.                             |
+| `invalidateMaterialLibraryQueries`     | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates all admin material library list query variants after review status mutations.          |
+| `isSafeMaterialUrl`                    | `src/entities/material/model/material-url.ts`           | exported   | Checks that material links are absolute `http` or `https` URLs before rendering or API payloads.   |
+| `getMaterialUrlValidationError`        | `src/entities/material/model/material-url.ts`           | exported   | Returns the local material URL validation message while leaving empty values to required rules.    |
+| `normalizeMaterialUrl`                 | `src/entities/material/model/material-url.ts`           | exported   | Trims material URLs and rejects non-`http/https` payload values before API submission.             |
+| `MATERIAL_PLATFORM_VALUES`             | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material platforms in a stable order for UI controls.                             |
+| `MATERIAL_TYPE_VALUES`                 | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material types in a stable order for UI controls.                                 |
+| `MATERIAL_ADMIN_STATUS_VALUES`         | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material review statuses in a stable order for UI controls.                       |
+| `getMaterialPlatformMeta`              | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                      |
+| `getMaterialTypeMeta`                  | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                                  |
+| `getMaterialAdminStatusMeta`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialAdminStatus` to localized Ant Design tag metadata.                           |
+| `getMaterialLinkedMeta`                | `src/entities/material/ui/material-meta.ts`             | exported   | Maps material library linked flag to localized Ant Design tag metadata.                            |
+| `getMaterialPlatformOptions`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend platforms to localized Ant Design select options.                                     |
+| `getMaterialTypeOptions`               | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material types to localized Ant Design select options.                                |
+| `getMaterialAdminStatusOptions`        | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material review statuses to localized Ant Design select options.                      |
+| `formatMaterialDuration`               | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.                |
+| `formatMaterialPublishedDate`          | `src/entities/material/ui/material-meta.ts`             | exported   | Formats material publication date from source ISO date part without UTC day shifts.                |
+| `formatMaterialMediaKind`              | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable importer media kind for material library table cells.                             |
+| `PlaceMaterialsPanel`                  | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit drawer actions.             |
 
 ## Auth UI
 
@@ -186,6 +194,22 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit material forms.                                         |
 | `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`  | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.               |
 | `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`      | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.  |
+
+## Material Admin Status Feature
+
+| Helper                       | Location                                                                  | Visibility | Contract                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `MaterialAdminStatusActions` | `src/features/material/admin-status/ui/material-admin-status-actions.tsx` | exported   | Renders approve/reject/archive review actions for one material library item. |
+
+## Material Library Widget
+
+| Helper                                    | Location                                                         | Visibility | Contract                                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------ |
+| `getMaterialLibraryLinkedFilterFromValue` | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Normalizes raw linked filter values from URL or UI controls.                         |
+| `getMaterialLibraryFiltersFromSearch`     | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library platform/status/linked filters from URL search params.        |
+| `getMaterialLibraryQueryParams`           | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Converts material library URL filter state into `/admin/materials` query params.     |
+| `buildMaterialLibraryFiltersSearch`       | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds next URL search params after changing material library filters.               |
+| `MaterialLibraryInbox`                    | `src/widgets/material-library/ui/material-library-inbox.tsx`     | exported   | Renders the material library inbox table with URL-driven filters and review actions. |
 
 ## API Error Internals
 

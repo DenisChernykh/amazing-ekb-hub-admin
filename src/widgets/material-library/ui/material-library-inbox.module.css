@@ -1,0 +1,28 @@
+.title {
+  margin: 0;
+}
+
+.card :global(.ant-card-body) {
+  padding: 0;
+}
+
+.filters {
+  padding: 16px;
+  border-bottom: 1px solid var(--material-library-border);
+}
+
+.filter {
+  min-width: 180px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.sourceCell {
+  min-width: 180px;
+}
+
+.previewText {
+  max-width: 360px;
+}

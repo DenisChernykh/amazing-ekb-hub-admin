@@ -32,4 +32,9 @@ export type Material = {
   durationSec: number | null;
   /** Публичная ссылка на материал. Допускаются только абсолютные http/https URL. */
   url: string;
+  /**
+     * Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.
+     * @nullable
+     */
+  redirectUrl?: string | null;
 };

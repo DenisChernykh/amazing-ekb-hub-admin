@@ -32,6 +32,10 @@ describe('AdminShell', () => {
       'href',
       '/places',
     )
+    expect(screen.getByRole('link', { name: 'Материалы' })).toHaveAttribute(
+      'href',
+      '/materials',
+    )
     expect(screen.queryByText('admin@example.test')).not.toBeInTheDocument()
     expect(screen.getAllByText('Администратор')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
