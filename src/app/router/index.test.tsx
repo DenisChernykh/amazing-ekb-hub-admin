@@ -8,7 +8,6 @@ describe('protectedRouteChildren', () => {
     expect(protectedRouteChildren.map((route) => route.path)).toEqual([
       '/',
       '/places',
-      '/materials',
       '/places/:placeId',
       '/places/:placeId/edit',
       '/places/new',

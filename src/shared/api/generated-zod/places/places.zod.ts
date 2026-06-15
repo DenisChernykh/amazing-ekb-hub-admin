@@ -88,8 +88,7 @@ export const GetPlaceDetail200Response = zod.strictObject({
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.'),
-  "redirectUrl": zod.string().nullish().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Материал, связанный с местом.').nullable().describe('Закреплённый материал места, если он назначен.')
 })).describe('Детальная карточка места с pinned material и счетчиками по платформам.')
 
@@ -134,8 +133,7 @@ export const ListPlaceMaterials200Response = zod.strictObject({
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
   "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
-  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.'),
-  "redirectUrl": zod.string().nullish().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
+  "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Материал, связанный с местом.')).describe('Материалы места в стабильном порядке отображения.')
 }).describe('Ограниченный список материалов места.')
 
@@ -146,20 +144,6 @@ export const ListPlaceMaterials400Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 export const ListPlaceMaterials404Response = zod.strictObject({
-  "statusCode": zod.number().describe('HTTP status code ответа.'),
-  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
-  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
-}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
-
-/**
- * Выполняет временный redirect на сохраненный URL публичного материала. Endpoint не принимает внешний URL от клиента и работает только для материалов активных мест с безопасной https-ссылкой платформы.
- * @summary Redirect to material URL
- */
-export const RedirectMaterialParams = zod.strictObject({
-  "materialId": zod.string().describe('Идентификатор материала.')
-})
-
-export const RedirectMaterial404Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')

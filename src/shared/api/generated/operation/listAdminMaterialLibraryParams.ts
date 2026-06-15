@@ -5,7 +5,6 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { MaterialAdminStatus } from '../model/materialAdminStatus';
 import type { Platform } from '../model/platform';
 
 export type ListAdminMaterialLibraryParams = {
@@ -17,12 +16,4 @@ platform?: Platform;
  * Идентификатор места, для которого нужно вернуть статус связи `placeLink`.
  */
 placeId?: string;
-/**
- * Фильтр по review-статусу материала. Для selector-а привязки обычно используется `approved`.
- */
-adminStatus?: MaterialAdminStatus;
-/**
- * Фильтр по глобальному наличию `PlaceMaterial` связи. `false` означает, что у материала нет ни одной связи с любым place, включая hidden.
- */
-linked?: boolean;
 };

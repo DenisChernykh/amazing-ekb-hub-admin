@@ -27,11 +27,9 @@ import type {
   ListPlaceMaterialsPathParameters,
   ListPlacesParams,
   MaterialListResponse,
-  MaterialNotFoundResponse,
   PlaceDetail,
   PlaceNotFoundResponse,
   PublicPlaceListResponse,
-  RedirectMaterialPathParameters,
   ValidationErrorResponse
 } from '../model';
 
@@ -414,99 +412,6 @@ export function useListPlaceMaterials<TData = Awaited<ReturnType<typeof listPlac
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListPlaceMaterialsQueryOptions({ placeId },params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-/**
- * Выполняет временный redirect на сохраненный URL публичного материала. Endpoint не принимает внешний URL от клиента и работает только для материалов активных мест с безопасной https-ссылкой платформы.
- * @summary Redirect to material URL
- */
-export const redirectMaterial = (
-    { materialId }: RedirectMaterialPathParameters,
- options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
-) => {
-
-
-      return apiMutator<unknown>(
-      {url: `/materials/${encodeURIComponent(String(materialId))}/go`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getRedirectMaterialQueryKey = ({ materialId }: RedirectMaterialPathParameters,) => {
-    return [
-    `/materials/${materialId}/go`
-    ] as const;
-    }
-
-
-export const getRedirectMaterialQueryOptions = <TData = Awaited<ReturnType<typeof redirectMaterial>>, TError = ErrorType<void | MaterialNotFoundResponse>>({ materialId }: RedirectMaterialPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof redirectMaterial>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getRedirectMaterialQueryKey({ materialId });
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof redirectMaterial>>> = ({ signal }) => redirectMaterial({ materialId }, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(materialId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof redirectMaterial>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type RedirectMaterialQueryResult = NonNullable<Awaited<ReturnType<typeof redirectMaterial>>>
-export type RedirectMaterialQueryError = ErrorType<void | MaterialNotFoundResponse>
-
-
-export function useRedirectMaterial<TData = Awaited<ReturnType<typeof redirectMaterial>>, TError = ErrorType<void | MaterialNotFoundResponse>>(
- pathParams: RedirectMaterialPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof redirectMaterial>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof redirectMaterial>>,
-          TError,
-          Awaited<ReturnType<typeof redirectMaterial>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useRedirectMaterial<TData = Awaited<ReturnType<typeof redirectMaterial>>, TError = ErrorType<void | MaterialNotFoundResponse>>(
- pathParams: RedirectMaterialPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof redirectMaterial>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof redirectMaterial>>,
-          TError,
-          Awaited<ReturnType<typeof redirectMaterial>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useRedirectMaterial<TData = Awaited<ReturnType<typeof redirectMaterial>>, TError = ErrorType<void | MaterialNotFoundResponse>>(
- pathParams: RedirectMaterialPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof redirectMaterial>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Redirect to material URL
- */
-
-export function useRedirectMaterial<TData = Awaited<ReturnType<typeof redirectMaterial>>, TError = ErrorType<void | MaterialNotFoundResponse>>(
- { materialId }: RedirectMaterialPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof redirectMaterial>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getRedirectMaterialQueryOptions({ materialId },options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
