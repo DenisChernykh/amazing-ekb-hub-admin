@@ -1,16 +1,22 @@
 import {
   getGetAdminPlaceDetailQueryKey,
+  getListAdminMaterialLibraryQueryKey,
   getListAdminPlaceMaterialsQueryKey,
   updateMaterial,
+  updateMaterialAdminStatus,
   useCreatePlaceMaterial,
 } from '@/shared/api/generated/admin/admin'
-import type { Material } from '@/shared/api/generated/model'
+import type {
+  AdminMaterialLibraryItem,
+  Material,
+} from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   useCreatePlaceMaterialMutation,
+  useUpdateMaterialAdminStatusMutation,
   useUpdateMaterialMutation,
 } from './material-mutations'
 
@@ -21,12 +27,15 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }) => [
     `/admin/places/${placeId}/materials`,
   ]),
+  getListAdminMaterialLibraryQueryKey: vi.fn(() => ['/admin/materials']),
   updateMaterial: vi.fn(),
+  updateMaterialAdminStatus: vi.fn(),
   useCreatePlaceMaterial: vi.fn(),
 }))
 
 const mockedUseCreatePlaceMaterial = vi.mocked(useCreatePlaceMaterial)
 const mockedUpdateMaterial = vi.mocked(updateMaterial)
+const mockedUpdateMaterialAdminStatus = vi.mocked(updateMaterialAdminStatus)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -47,6 +56,30 @@ const material: Material = {
   url: 'https://t.me/amazing_ekb/321',
 }
 
+const libraryItem: AdminMaterialLibraryItem = {
+  adminStatus: 'pending',
+  durationSec: null,
+  excerpt: 'Пост из Telegram',
+  externalId: '321',
+  id: 'material-1',
+  linked: false,
+  mediaKind: 'photo',
+  mediaPreviewUrl: null,
+  platform: 'telegram',
+  placeLink: null,
+  publishedAt: '2026-03-20T10:30:00+05:00',
+  source: {
+    displayName: 'Amazing EKB Telegram',
+    id: 'source-1',
+    platform: 'telegram',
+    url: 'https://t.me/amazing_ekb',
+  },
+  text: 'Пост из Telegram',
+  title: null,
+  type: 'post',
+  url: 'https://t.me/amazing_ekb/321',
+}
+
 describe('material mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlaceMaterial.mockReset()
@@ -57,6 +90,9 @@ describe('material mutations', () => {
     vi.mocked(getListAdminPlaceMaterialsQueryKey).mockImplementation(
       ({ placeId }) => [`/admin/places/${placeId}/materials`],
     )
+    vi.mocked(getListAdminMaterialLibraryQueryKey).mockImplementation(() => [
+      '/admin/materials',
+    ])
   })
 
   it('invalidates materials list and admin detail after creating material', async () => {
@@ -145,5 +181,50 @@ describe('material mutations', () => {
       ...material,
       title: 'Новое название',
     })
+  })
+
+  it('updates material admin status and invalidates all material library queries', async () => {
+    const queryClient = new QueryClient()
+    const allMaterialsQueryKey = ['/admin/materials']
+    const filteredMaterialsQueryKey = [
+      '/admin/materials',
+      { adminStatus: 'pending' },
+    ]
+    const approvedItem: AdminMaterialLibraryItem = {
+      ...libraryItem,
+      adminStatus: 'approved',
+    }
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(allMaterialsQueryKey, { items: [libraryItem] })
+    queryClient.setQueryData(filteredMaterialsQueryKey, {
+      items: [libraryItem],
+    })
+    mockedUpdateMaterialAdminStatus.mockResolvedValue(approvedItem)
+
+    const { result } = renderHook(
+      () => useUpdateMaterialAdminStatusMutation({ onSuccess }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await result.current.mutateAsync({
+      adminStatus: 'approved',
+      materialId: 'material-1',
+    })
+
+    expect(mockedUpdateMaterialAdminStatus).toHaveBeenCalledWith(
+      { materialId: 'material-1' },
+      { adminStatus: 'approved' },
+    )
+    expect(
+      queryClient.getQueryCache().find({ queryKey: allMaterialsQueryKey })
+        ?.state.isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: filteredMaterialsQueryKey })
+        ?.state.isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith(approvedItem)
   })
 })

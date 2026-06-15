@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatMaterialDuration,
+  formatMaterialMediaKind,
   formatMaterialPublishedDate,
+  getMaterialAdminStatusMeta,
+  getMaterialAdminStatusOptions,
+  getMaterialLinkedMeta,
   getMaterialPlatformMeta,
   getMaterialPlatformOptions,
   getMaterialTypeMeta,
@@ -38,6 +42,39 @@ describe('material meta', () => {
       { label: 'Reels', value: 'reel' },
       { label: 'Видео', value: 'video' },
     ])
+  })
+
+  it('maps material admin statuses to localized labels and stable options', () => {
+    expect(getMaterialAdminStatusMeta('pending')).toMatchObject({
+      label: 'На проверке',
+    })
+    expect(getMaterialAdminStatusMeta('approved')).toMatchObject({
+      label: 'Одобрено',
+    })
+    expect(getMaterialAdminStatusMeta('rejected')).toMatchObject({
+      label: 'Отклонено',
+    })
+    expect(getMaterialAdminStatusMeta('archived')).toMatchObject({
+      label: 'Архив',
+    })
+    expect(getMaterialAdminStatusOptions()).toEqual([
+      { label: 'На проверке', value: 'pending' },
+      { label: 'Одобрено', value: 'approved' },
+      { label: 'Отклонено', value: 'rejected' },
+      { label: 'Архив', value: 'archived' },
+    ])
+  })
+
+  it('maps material library linked flag to localized metadata', () => {
+    expect(getMaterialLinkedMeta(true)).toMatchObject({ label: 'Связан' })
+    expect(getMaterialLinkedMeta(false)).toMatchObject({ label: 'Не связан' })
+  })
+
+  it('formats nullable imported media kind', () => {
+    expect(formatMaterialMediaKind(null)).toBe('—')
+    expect(formatMaterialMediaKind('photo')).toBe('Фото')
+    expect(formatMaterialMediaKind('video')).toBe('Видео')
+    expect(formatMaterialMediaKind('custom')).toBe('custom')
   })
 
   it('formats nullable material duration', () => {
