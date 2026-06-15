@@ -1,4 +1,5 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
+import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
 import {
   formatMaterialMediaKind,
   formatMaterialPublishedDate,
@@ -20,6 +21,7 @@ import {
   ScreenEmptyState,
   ScreenLoadingState,
 } from '@/shared/ui/screen-state/screen-state'
+import { PictureOutlined } from '@ant-design/icons'
 import { Card, Flex, Select, Table, Tag, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
 import { useSearchParams } from 'react-router'
@@ -53,6 +55,14 @@ const getPreviewText = (material: AdminMaterialLibraryItem) => {
 
 const getSourceTitle = (material: AdminMaterialLibraryItem) => {
   return material.source?.displayName ?? 'Ручной материал'
+}
+
+const getSafeHref = (url: string | null | undefined) => {
+  if (!url || !isSafeMaterialUrl(url)) {
+    return null
+  }
+
+  return url
 }
 
 const hasActiveFilters = (filters: MaterialLibraryFiltersState) => {
@@ -129,22 +139,29 @@ export function MaterialLibraryInbox() {
         material: AdminMaterialLibraryItem,
       ) => {
         const platformMeta = getMaterialPlatformMeta(material.platform)
+        const sourceHref = getSafeHref(material.source?.url)
 
         return (
           <Flex className={styles.sourceCell} gap={4} vertical>
-            <Typography.Text strong>{getSourceTitle(material)}</Typography.Text>
+            {sourceHref ? (
+              <Typography.Link
+                href={sourceHref}
+                rel="noopener noreferrer"
+                strong
+                target="_blank"
+              >
+                {getSourceTitle(material)}
+              </Typography.Link>
+            ) : (
+              <Typography.Text strong>
+                {getSourceTitle(material)}
+              </Typography.Text>
+            )}
             <Tag color={platformMeta.color}>{platformMeta.label}</Tag>
           </Flex>
         )
       },
       title: 'Источник',
-    },
-    {
-      dataIndex: 'externalId',
-      key: 'externalId',
-      render: (externalId: AdminMaterialLibraryItem['externalId']) =>
-        externalId ?? '—',
-      title: 'External ID',
     },
     {
       dataIndex: 'publishedAt',
@@ -154,21 +171,57 @@ export function MaterialLibraryInbox() {
     },
     {
       key: 'preview',
-      render: (_value: unknown, material: AdminMaterialLibraryItem) => (
-        <Typography.Paragraph
-          className={styles.previewText}
-          ellipsis={{ rows: 2 }}
-        >
-          {getPreviewText(material)}
-        </Typography.Paragraph>
-      ),
+      render: (_value: unknown, material: AdminMaterialLibraryItem) => {
+        const previewText = getPreviewText(material)
+        const materialHref = getSafeHref(material.url)
+
+        return (
+          <Typography.Paragraph
+            className={styles.previewText}
+            ellipsis={{ rows: 2 }}
+          >
+            {materialHref ? (
+              <Typography.Link
+                href={materialHref}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {previewText}
+              </Typography.Link>
+            ) : (
+              previewText
+            )}
+          </Typography.Paragraph>
+        )
+      },
       title: 'Текст',
     },
     {
       dataIndex: 'mediaKind',
       key: 'mediaKind',
-      render: (mediaKind: AdminMaterialLibraryItem['mediaKind']) =>
-        formatMaterialMediaKind(mediaKind),
+      render: (
+        mediaKind: AdminMaterialLibraryItem['mediaKind'],
+        material: AdminMaterialLibraryItem,
+      ) => {
+        const mediaPreviewHref = getSafeHref(material.mediaPreviewUrl)
+
+        return (
+          <Flex gap={4} vertical>
+            <Typography.Text>
+              {formatMaterialMediaKind(mediaKind)}
+            </Typography.Text>
+            {mediaPreviewHref && (
+              <Typography.Link
+                href={mediaPreviewHref}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <PictureOutlined aria-hidden="true" /> Открыть медиа
+              </Typography.Link>
+            )}
+          </Flex>
+        )
+      },
       title: 'Медиа',
     },
     {

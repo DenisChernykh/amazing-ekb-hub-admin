@@ -34,7 +34,7 @@ const telegramMaterial: AdminMaterialLibraryItem = {
   id: 'material-telegram-1',
   linked: true,
   mediaKind: 'photo',
-  mediaPreviewUrl: null,
+  mediaPreviewUrl: 'https://cdn.example.com/telegram-321.jpg',
   platform: 'telegram',
   placeLink: null,
   publishedAt: '2026-03-20T10:30:00.000Z',
@@ -65,6 +65,29 @@ const dzenMaterial: AdminMaterialLibraryItem = {
   title: 'Видеообзор термального комплекса',
   type: 'video',
   url: 'https://dzen.ru/video/watch/abcdef',
+}
+
+const unsafeMaterial: AdminMaterialLibraryItem = {
+  ...telegramMaterial,
+  adminStatus: 'pending',
+  excerpt: 'Материал с unsafe ссылками',
+  externalId: 'unsafe-external-id',
+  id: 'material-unsafe-1',
+  linked: false,
+  mediaKind: 'photo',
+  mediaPreviewUrl: 'data:text/html,<script>alert(1)</script>',
+  platform: 'telegram',
+  publishedAt: '2026-03-23T09:00:00.000Z',
+  source: {
+    displayName: 'Unsafe source',
+    id: 'source-unsafe-1',
+    platform: 'telegram',
+    url: 'javascript://example.com/%0Aalert(1)',
+  },
+  text: null,
+  title: null,
+  type: 'post',
+  url: 'javascript://example.com/%0Aalert(1)',
 }
 
 const materialLibraryResponse: AdminMaterialLibraryListResponse = {
@@ -103,7 +126,7 @@ describe('MaterialLibraryInbox', () => {
     })
   })
 
-  it('renders material library rows with source, review status, and actions', () => {
+  it('renders material library rows with safe source, material, and media links', () => {
     mockedUseMaterialLibraryQuery.mockReturnValue({
       data: materialLibraryResponse,
       error: null,
@@ -117,24 +140,70 @@ describe('MaterialLibraryInbox', () => {
     expect(document.title).toBe('Материалы | Amazing EKB Admin')
     expect(screen.getByText('Материалы')).toBeInTheDocument()
     expect(screen.getByText('Всего: 2')).toBeInTheDocument()
-    expect(screen.getByText('Amazing EKB Telegram')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('columnheader', { name: 'External ID' }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText('321')).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Amazing EKB Telegram' }),
+    ).toHaveAttribute('href', 'https://t.me/amazing_ekb')
+    expect(
+      screen.queryByRole('link', { name: 'Ручной материал' }),
+    ).not.toBeInTheDocument()
     expect(screen.getByText('Telegram')).toBeInTheDocument()
-    expect(screen.getByText('321')).toBeInTheDocument()
     expect(screen.getByText('2026-03-20')).toBeInTheDocument()
     expect(
-      screen.getByText('Пост из Telegram-канала Amazing EKB'),
-    ).toBeInTheDocument()
+      screen.getByRole('link', {
+        name: 'Пост из Telegram-канала Amazing EKB',
+      }),
+    ).toHaveAttribute('href', 'https://t.me/amazing_ekb/321')
     expect(screen.getByText('Фото')).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Открыть медиа' })).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          href: 'https://cdn.example.com/telegram-321.jpg',
+        }),
+      ]),
+    )
     expect(screen.getByText('Связан')).toBeInTheDocument()
     expect(screen.getByText('На проверке')).toBeInTheDocument()
     expect(
-      screen.getByText('Видеообзор термального комплекса'),
-    ).toBeInTheDocument()
+      screen.getByRole('link', {
+        name: 'Видеообзор термального комплекса',
+      }),
+    ).toHaveAttribute('href', 'https://dzen.ru/video/watch/abcdef')
+    expect(screen.getByText('Ручной материал')).toBeInTheDocument()
+    expect(screen.getByText('—')).toBeInTheDocument()
     expect(screen.getByText('Не связан')).toBeInTheDocument()
     expect(screen.getByText('Одобрено')).toBeInTheDocument()
     expect(
       screen.getByText('actions for material-telegram-1'),
     ).toBeInTheDocument()
+  })
+
+  it('renders unsafe material, source, and media URLs as plain text', () => {
+    mockedUseMaterialLibraryQuery.mockReturnValue({
+      data: { items: [unsafeMaterial] },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof useMaterialLibraryQuery>)
+
+    renderInbox()
+
+    expect(screen.getByText('Unsafe source')).toBeInTheDocument()
+    expect(screen.getByText('Материал с unsafe ссылками')).toBeInTheDocument()
+    expect(screen.getByText('Фото')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Unsafe source' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Материал с unsafe ссылками' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Открыть медиа' }),
+    ).not.toBeInTheDocument()
   })
 
   it('renders forbidden state for permission errors', () => {
