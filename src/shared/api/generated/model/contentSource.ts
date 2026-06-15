@@ -36,12 +36,12 @@ export type ContentSource = {
   channelId: string | null;
   status: ContentSourceStatus;
   /**
-     * Время последнего успешного импорта. В этом slice поле только возвращается API.
+     * Время последнего успешного import batch.
      * @nullable
      */
   lastImportedAt: string | null;
   /**
-     * Cursor последнего импорта. В этом slice поле только возвращается API.
+     * JSON cursor последнего Telegram import batch или cursor будущего платформенного импортера.
      * @nullable
      */
   lastCursor: string | null;
