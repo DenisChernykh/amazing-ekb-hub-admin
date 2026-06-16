@@ -1,13 +1,15 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
-import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
 import {
   formatMaterialMediaKind,
   formatMaterialPublishedDate,
   getMaterialAdminStatusMeta,
   getMaterialAdminStatusOptions,
+  getMaterialLibraryPreviewText,
+  getMaterialLibrarySourceTitle,
   getMaterialLinkedMeta,
   getMaterialPlatformMeta,
   getMaterialPlatformOptions,
+  getSafeMaterialHref,
 } from '@/entities/material/ui/material-meta'
 import { MaterialAdminStatusActions } from '@/features/material/admin-status/ui/material-admin-status-actions'
 import type {
@@ -47,22 +49,6 @@ const emptyMaterialLibraryResponse = {
 
 type MaterialLibraryInboxVariables = CSSProperties & {
   '--material-library-border': string
-}
-
-const getPreviewText = (material: AdminMaterialLibraryItem) => {
-  return material.excerpt ?? material.title ?? material.text ?? '—'
-}
-
-const getSourceTitle = (material: AdminMaterialLibraryItem) => {
-  return material.source?.displayName ?? 'Ручной материал'
-}
-
-const getSafeHref = (url: string | null | undefined) => {
-  if (!url || !isSafeMaterialUrl(url)) {
-    return null
-  }
-
-  return url
 }
 
 const hasActiveFilters = (filters: MaterialLibraryFiltersState) => {
@@ -139,7 +125,7 @@ export function MaterialLibraryInbox() {
         material: AdminMaterialLibraryItem,
       ) => {
         const platformMeta = getMaterialPlatformMeta(material.platform)
-        const sourceHref = getSafeHref(material.source?.url)
+        const sourceHref = getSafeMaterialHref(material.source?.url)
 
         return (
           <Flex className={styles.sourceCell} gap={4} vertical>
@@ -150,11 +136,11 @@ export function MaterialLibraryInbox() {
                 strong
                 target="_blank"
               >
-                {getSourceTitle(material)}
+                {getMaterialLibrarySourceTitle(material)}
               </Typography.Link>
             ) : (
               <Typography.Text strong>
-                {getSourceTitle(material)}
+                {getMaterialLibrarySourceTitle(material)}
               </Typography.Text>
             )}
             <Tag color={platformMeta.color}>{platformMeta.label}</Tag>
@@ -172,8 +158,8 @@ export function MaterialLibraryInbox() {
     {
       key: 'preview',
       render: (_value: unknown, material: AdminMaterialLibraryItem) => {
-        const previewText = getPreviewText(material)
-        const materialHref = getSafeHref(material.url)
+        const previewText = getMaterialLibraryPreviewText(material)
+        const materialHref = getSafeMaterialHref(material.url)
 
         return (
           <Typography.Paragraph
@@ -203,7 +189,7 @@ export function MaterialLibraryInbox() {
         mediaKind: AdminMaterialLibraryItem['mediaKind'],
         material: AdminMaterialLibraryItem,
       ) => {
-        const mediaPreviewHref = getSafeHref(material.mediaPreviewUrl)
+        const mediaPreviewHref = getSafeMaterialHref(material.mediaPreviewUrl)
 
         return (
           <Flex gap={4} vertical>

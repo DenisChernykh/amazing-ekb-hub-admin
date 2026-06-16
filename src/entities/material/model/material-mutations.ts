@@ -3,6 +3,8 @@ import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminMaterialLibraryQueryKey,
   getListAdminPlaceMaterialsQueryKey,
+  hidePlaceMaterialLink,
+  linkPlaceMaterial,
   updateMaterial,
   updateMaterialAdminStatus,
   useCreatePlaceMaterial,
@@ -42,6 +44,22 @@ export type UpdateMaterialAdminStatusMutationOptions = {
 }
 
 /**
+ * Callback-и для привязки библиотечного материала к месту через entity bridge.
+ */
+export type LinkPlaceMaterialMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (material: Material) => Promise<void> | void
+}
+
+/**
+ * Callback-и для скрытия связи материала с местом через entity bridge.
+ */
+export type HidePlaceMaterialLinkMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: () => Promise<void> | void
+}
+
+/**
  * Переменные создания материала места через entity bridge.
  */
 export type CreatePlaceMaterialMutationVariables = {
@@ -69,6 +87,22 @@ export type UpdateMaterialMutationVariables = {
 export type UpdateMaterialAdminStatusMutationVariables = {
   adminStatus: MaterialAdminStatus
   materialId: string
+}
+
+/**
+ * Переменные привязки существующего материала к месту через entity bridge.
+ */
+export type LinkPlaceMaterialMutationVariables = {
+  materialId: string
+  placeId: string
+}
+
+/**
+ * Переменные скрытия связи материала с местом через entity bridge.
+ */
+export type HidePlaceMaterialLinkMutationVariables = {
+  materialId: string
+  placeId: string
 }
 
 /**
@@ -108,6 +142,17 @@ const invalidateMaterialDependencies = (
   return Promise.all([
     invalidatePlaceMaterialsListQuery(queryClient, placeId),
     invalidateAdminPlaceDetailQuery(queryClient, placeId),
+  ])
+}
+
+const invalidateMaterialLinkDependencies = (
+  queryClient: QueryClient,
+  placeId: string,
+) => {
+  return Promise.all([
+    invalidatePlaceMaterialsListQuery(queryClient, placeId),
+    invalidateAdminPlaceDetailQuery(queryClient, placeId),
+    invalidateMaterialLibraryQueries(queryClient),
   ])
 }
 
@@ -180,6 +225,58 @@ export function useUpdateMaterialAdminStatusMutation(
     onSuccess: async (material) => {
       await invalidateMaterialLibraryQueries(queryClient)
       await options?.onSuccess?.(material)
+    },
+  })
+}
+
+/**
+ * Привязывает существующий библиотечный материал к месту и обновляет связанные кеши.
+ *
+ * @remarks Wrapper скрывает generated shape `pathParams` и после успеха инвалидирует
+ * admin detail места, bounded список материалов места и все варианты material library.
+ */
+export function useLinkPlaceMaterialMutation(
+  options?: LinkPlaceMaterialMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    Material,
+    ApiClientError,
+    LinkPlaceMaterialMutationVariables
+  >({
+    mutationFn: ({ materialId, placeId }) =>
+      linkPlaceMaterial({ materialId, placeId }),
+    onError: options?.onError,
+    onSuccess: async (material, variables) => {
+      await invalidateMaterialLinkDependencies(queryClient, variables.placeId)
+      await options?.onSuccess?.(material)
+    },
+  })
+}
+
+/**
+ * Скрывает активную связь материала с местом и обновляет связанные кеши.
+ *
+ * @remarks Материал остается в общей библиотеке; wrapper инвалидирует admin detail места,
+ * bounded список материалов места и material library, где меняются linked/placeLink признаки.
+ */
+export function useHidePlaceMaterialLinkMutation(
+  options?: HidePlaceMaterialLinkMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    void,
+    ApiClientError,
+    HidePlaceMaterialLinkMutationVariables
+  >({
+    mutationFn: ({ materialId, placeId }) =>
+      hidePlaceMaterialLink({ materialId, placeId }),
+    onError: options?.onError,
+    onSuccess: async (_result, variables) => {
+      await invalidateMaterialLinkDependencies(queryClient, variables.placeId)
+      await options?.onSuccess?.()
     },
   })
 }

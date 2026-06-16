@@ -1,8 +1,10 @@
 import type {
+  AdminMaterialLibraryItem,
   MaterialAdminStatus,
   MaterialType,
   Platform,
 } from '@/shared/api/generated/model'
+import { isSafeMaterialUrl } from '../model/material-url'
 
 /**
  * UI-метаданные значения материала для тегов и таблиц.
@@ -208,4 +210,39 @@ export function formatMaterialDuration(durationSec: number | null) {
  */
 export function formatMaterialPublishedDate(publishedAt: string) {
   return publishedAt.slice(0, 10)
+}
+
+/**
+ * Возвращает preview-текст библиотечного материала для таблиц и selector-ов.
+ *
+ * @returns `—`, если backend не вернул ни excerpt, ни title, ни text.
+ */
+export function getMaterialLibraryPreviewText(
+  material: AdminMaterialLibraryItem,
+) {
+  return material.excerpt ?? material.title ?? material.text ?? '—'
+}
+
+/**
+ * Возвращает название source библиотечного материала.
+ *
+ * @returns `Ручной материал` для материалов без content source.
+ */
+export function getMaterialLibrarySourceTitle(
+  material: AdminMaterialLibraryItem,
+) {
+  return material.source?.displayName ?? 'Ручной материал'
+}
+
+/**
+ * Возвращает безопасный href для material UI-ссылок.
+ *
+ * @returns `null`, если URL пустой или использует неподдерживаемый протокол.
+ */
+export function getSafeMaterialHref(url: string | null | undefined) {
+  if (!url || !isSafeMaterialUrl(url)) {
+    return null
+  }
+
+  return url
 }

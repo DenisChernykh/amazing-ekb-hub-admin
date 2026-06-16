@@ -2,6 +2,8 @@ import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminMaterialLibraryQueryKey,
   getListAdminPlaceMaterialsQueryKey,
+  hidePlaceMaterialLink,
+  linkPlaceMaterial,
   updateMaterial,
   updateMaterialAdminStatus,
   useCreatePlaceMaterial,
@@ -16,6 +18,8 @@ import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   useCreatePlaceMaterialMutation,
+  useHidePlaceMaterialLinkMutation,
+  useLinkPlaceMaterialMutation,
   useUpdateMaterialAdminStatusMutation,
   useUpdateMaterialMutation,
 } from './material-mutations'
@@ -27,6 +31,8 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }) => [
     `/admin/places/${placeId}/materials`,
   ]),
+  hidePlaceMaterialLink: vi.fn(),
+  linkPlaceMaterial: vi.fn(),
   getListAdminMaterialLibraryQueryKey: vi.fn(() => ['/admin/materials']),
   updateMaterial: vi.fn(),
   updateMaterialAdminStatus: vi.fn(),
@@ -34,6 +40,8 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
 }))
 
 const mockedUseCreatePlaceMaterial = vi.mocked(useCreatePlaceMaterial)
+const mockedHidePlaceMaterialLink = vi.mocked(hidePlaceMaterialLink)
+const mockedLinkPlaceMaterial = vi.mocked(linkPlaceMaterial)
 const mockedUpdateMaterial = vi.mocked(updateMaterial)
 const mockedUpdateMaterialAdminStatus = vi.mocked(updateMaterialAdminStatus)
 
@@ -83,6 +91,8 @@ const libraryItem: AdminMaterialLibraryItem = {
 describe('material mutations', () => {
   beforeEach(() => {
     mockedUseCreatePlaceMaterial.mockReset()
+    mockedHidePlaceMaterialLink.mockReset()
+    mockedLinkPlaceMaterial.mockReset()
     mockedUpdateMaterial.mockReset()
     vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
       ({ placeId }) => [`/admin/places/${placeId}`],
@@ -226,5 +236,100 @@ describe('material mutations', () => {
         ?.state.isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(approvedItem)
+  })
+
+  it('links existing material to place and invalidates material dependencies', async () => {
+    const queryClient = new QueryClient()
+    const materialsQueryKey = ['/admin/places/place-1/materials']
+    const detailQueryKey = ['/admin/places/place-1']
+    const allMaterialsQueryKey = ['/admin/materials']
+    const filteredMaterialsQueryKey = [
+      '/admin/materials',
+      { adminStatus: 'approved', linked: false, placeId: 'place-1' },
+    ]
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(materialsQueryKey, { items: [] })
+    queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
+    queryClient.setQueryData(allMaterialsQueryKey, { items: [libraryItem] })
+    queryClient.setQueryData(filteredMaterialsQueryKey, {
+      items: [libraryItem],
+    })
+    mockedLinkPlaceMaterial.mockResolvedValue(material)
+
+    const { result } = renderHook(
+      () => useLinkPlaceMaterialMutation({ onSuccess }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await result.current.mutateAsync({
+      materialId: 'material-1',
+      placeId: 'place-1',
+    })
+
+    expect(mockedLinkPlaceMaterial).toHaveBeenCalledWith({
+      materialId: 'material-1',
+      placeId: 'place-1',
+    })
+    expect(
+      queryClient.getQueryCache().find({ queryKey: materialsQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: allMaterialsQueryKey })
+        ?.state.isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: filteredMaterialsQueryKey })
+        ?.state.isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith(material)
+  })
+
+  it('hides place-material link and invalidates material dependencies', async () => {
+    const queryClient = new QueryClient()
+    const materialsQueryKey = ['/admin/places/place-1/materials']
+    const detailQueryKey = ['/admin/places/place-1']
+    const allMaterialsQueryKey = ['/admin/materials']
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(materialsQueryKey, { items: [material] })
+    queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
+    queryClient.setQueryData(allMaterialsQueryKey, { items: [libraryItem] })
+    mockedHidePlaceMaterialLink.mockResolvedValue(undefined)
+
+    const { result } = renderHook(
+      () => useHidePlaceMaterialLinkMutation({ onSuccess }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await result.current.mutateAsync({
+      materialId: 'material-1',
+      placeId: 'place-1',
+    })
+
+    expect(mockedHidePlaceMaterialLink).toHaveBeenCalledWith({
+      materialId: 'material-1',
+      placeId: 'place-1',
+    })
+    expect(
+      queryClient.getQueryCache().find({ queryKey: materialsQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: allMaterialsQueryKey })
+        ?.state.isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalled()
   })
 })

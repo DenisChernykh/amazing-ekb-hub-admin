@@ -1,3 +1,4 @@
+import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   formatMaterialDuration,
@@ -5,12 +6,39 @@ import {
   formatMaterialPublishedDate,
   getMaterialAdminStatusMeta,
   getMaterialAdminStatusOptions,
+  getMaterialLibraryPreviewText,
+  getMaterialLibrarySourceTitle,
   getMaterialLinkedMeta,
   getMaterialPlatformMeta,
   getMaterialPlatformOptions,
   getMaterialTypeMeta,
   getMaterialTypeOptions,
+  getSafeMaterialHref,
 } from './material-meta'
+
+const libraryMaterial: AdminMaterialLibraryItem = {
+  adminStatus: 'approved',
+  durationSec: null,
+  excerpt: 'Короткий preview',
+  externalId: '321',
+  id: 'material-1',
+  linked: false,
+  mediaKind: 'photo',
+  mediaPreviewUrl: null,
+  platform: 'telegram',
+  placeLink: null,
+  publishedAt: '2026-03-20T10:30:00+05:00',
+  source: {
+    displayName: 'Amazing EKB Telegram',
+    id: 'source-1',
+    platform: 'telegram',
+    url: 'https://t.me/amazing_ekb',
+  },
+  text: 'Полный текст материала',
+  title: 'Заголовок материала',
+  type: 'post',
+  url: 'https://t.me/amazing_ekb/321',
+}
 
 describe('material meta', () => {
   it('maps material platforms to localized labels', () => {
@@ -90,5 +118,54 @@ describe('material meta', () => {
     expect(formatMaterialPublishedDate('2026-03-20T10:30:00.000Z')).toBe(
       '2026-03-20',
     )
+  })
+
+  it('formats material library preview text with stable fallbacks', () => {
+    expect(getMaterialLibraryPreviewText(libraryMaterial)).toBe(
+      'Короткий preview',
+    )
+    expect(
+      getMaterialLibraryPreviewText({
+        ...libraryMaterial,
+        excerpt: null,
+      }),
+    ).toBe('Заголовок материала')
+    expect(
+      getMaterialLibraryPreviewText({
+        ...libraryMaterial,
+        excerpt: null,
+        title: null,
+      }),
+    ).toBe('Полный текст материала')
+    expect(
+      getMaterialLibraryPreviewText({
+        ...libraryMaterial,
+        excerpt: null,
+        text: null,
+        title: null,
+      }),
+    ).toBe('—')
+  })
+
+  it('formats material library source title with manual fallback', () => {
+    expect(getMaterialLibrarySourceTitle(libraryMaterial)).toBe(
+      'Amazing EKB Telegram',
+    )
+    expect(
+      getMaterialLibrarySourceTitle({
+        ...libraryMaterial,
+        source: null,
+      }),
+    ).toBe('Ручной материал')
+  })
+
+  it('returns only safe material href values', () => {
+    expect(getSafeMaterialHref('https://example.com/material')).toBe(
+      'https://example.com/material',
+    )
+    expect(getSafeMaterialHref('javascript://example.com/%0Aalert(1)')).toBe(
+      null,
+    )
+    expect(getSafeMaterialHref(null)).toBe(null)
   })
 })
