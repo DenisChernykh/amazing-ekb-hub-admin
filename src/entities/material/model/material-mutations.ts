@@ -247,7 +247,9 @@ export function useLinkPlaceMaterialMutation(
   >({
     mutationFn: ({ materialId, placeId }) =>
       linkPlaceMaterial({ materialId, placeId }),
-    onError: options?.onError,
+    onError: (error) => {
+      options?.onError?.(error)
+    },
     onSuccess: async (material, variables) => {
       await invalidateMaterialLinkDependencies(queryClient, variables.placeId)
       await options?.onSuccess?.(material)
@@ -273,7 +275,9 @@ export function useHidePlaceMaterialLinkMutation(
   >({
     mutationFn: ({ materialId, placeId }) =>
       hidePlaceMaterialLink({ materialId, placeId }),
-    onError: options?.onError,
+    onError: (error) => {
+      options?.onError?.(error)
+    },
     onSuccess: async (_result, variables) => {
       await invalidateMaterialLinkDependencies(queryClient, variables.placeId)
       await options?.onSuccess?.()

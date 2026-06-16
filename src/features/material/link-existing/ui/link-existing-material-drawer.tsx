@@ -41,10 +41,11 @@ export type LinkExistingMaterialDrawerProps = {
 }
 
 /**
- * Drawer-сценарий выбора одобренного несвязанного материала из общей библиотеки.
+ * Drawer-сценарий выбора одобренного материала из общей библиотеки для места.
  *
  * @remarks Загружает material library через entity hook, отправляет связь через
- * entity mutation и требует AntD `App` provider для сообщений об успехе/ошибке.
+ * entity mutation, скрывает уже активные связи текущего места и требует AntD
+ * `App` provider для сообщений об успехе/ошибке.
  */
 export function LinkExistingMaterialDrawer({
   onClose,
@@ -56,7 +57,6 @@ export function LinkExistingMaterialDrawer({
   const materialsQuery = useMaterialLibraryQuery(
     {
       adminStatus: 'approved',
-      linked: false,
       placeId,
     },
     { enabled: open },
@@ -226,6 +226,9 @@ export function LinkExistingMaterialDrawer({
   ]
 
   const data = materialsQuery.data ?? emptyMaterialLibraryResponse
+  const linkableMaterials = data.items.filter(
+    (material) => material.placeLink !== 'active',
+  )
 
   return (
     <Drawer
@@ -248,12 +251,12 @@ export function LinkExistingMaterialDrawer({
             title={normalizeApiError(materialsQuery.error).message}
             type="error"
           />
-        ) : data.items.length === 0 ? (
+        ) : linkableMaterials.length === 0 ? (
           <Empty description="Подходящих материалов пока нет" />
         ) : (
           <Table
             columns={columns}
-            dataSource={data.items}
+            dataSource={linkableMaterials}
             loading={materialsQuery.isFetching}
             pagination={false}
             rowKey="id"

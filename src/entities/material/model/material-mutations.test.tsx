@@ -1,3 +1,4 @@
+import { ApiClientError } from '@/shared/api/client/api-error'
 import {
   getGetAdminPlaceDetailQueryKey,
   getListAdminMaterialLibraryQueryKey,
@@ -291,15 +292,48 @@ describe('material mutations', () => {
     expect(onSuccess).toHaveBeenCalledWith(material)
   })
 
+  it('passes normalized link errors to callback', async () => {
+    const queryClient = new QueryClient()
+    const apiError = new ApiClientError({
+      kind: 'server',
+      message: 'Link unavailable',
+      status: 500,
+    })
+    const onError = vi.fn()
+    mockedLinkPlaceMaterial.mockRejectedValue(apiError)
+
+    const { result } = renderHook(
+      () => useLinkPlaceMaterialMutation({ onError }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await expect(
+      result.current.mutateAsync({
+        materialId: 'material-1',
+        placeId: 'place-1',
+      }),
+    ).rejects.toBe(apiError)
+    expect(onError).toHaveBeenCalledWith(apiError)
+  })
+
   it('hides place-material link and invalidates material dependencies', async () => {
     const queryClient = new QueryClient()
     const materialsQueryKey = ['/admin/places/place-1/materials']
     const detailQueryKey = ['/admin/places/place-1']
     const allMaterialsQueryKey = ['/admin/materials']
+    const filteredMaterialsQueryKey = [
+      '/admin/materials',
+      { adminStatus: 'approved', placeId: 'place-1' },
+    ]
     const onSuccess = vi.fn()
     queryClient.setQueryData(materialsQueryKey, { items: [material] })
     queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
     queryClient.setQueryData(allMaterialsQueryKey, { items: [libraryItem] })
+    queryClient.setQueryData(filteredMaterialsQueryKey, {
+      items: [libraryItem],
+    })
     mockedHidePlaceMaterialLink.mockResolvedValue(undefined)
 
     const { result } = renderHook(
@@ -330,6 +364,36 @@ describe('material mutations', () => {
       queryClient.getQueryCache().find({ queryKey: allMaterialsQueryKey })
         ?.state.isInvalidated,
     ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: filteredMaterialsQueryKey })
+        ?.state.isInvalidated,
+    ).toBe(true)
     expect(onSuccess).toHaveBeenCalled()
+  })
+
+  it('passes normalized hide errors to callback', async () => {
+    const queryClient = new QueryClient()
+    const apiError = new ApiClientError({
+      kind: 'server',
+      message: 'Hide unavailable',
+      status: 500,
+    })
+    const onError = vi.fn()
+    mockedHidePlaceMaterialLink.mockRejectedValue(apiError)
+
+    const { result } = renderHook(
+      () => useHidePlaceMaterialLinkMutation({ onError }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await expect(
+      result.current.mutateAsync({
+        materialId: 'material-1',
+        placeId: 'place-1',
+      }),
+    ).rejects.toBe(apiError)
+    expect(onError).toHaveBeenCalledWith(apiError)
   })
 })

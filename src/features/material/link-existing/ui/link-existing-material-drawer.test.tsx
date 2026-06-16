@@ -93,6 +93,24 @@ const unsafeMaterial: AdminMaterialLibraryItem = {
   url: 'javascript://example.com/%0Aalert(1)',
 }
 
+const hiddenPlaceLinkMaterial: AdminMaterialLibraryItem = {
+  ...libraryMaterial,
+  excerpt: 'Скрытая связь для текущего места',
+  id: 'hidden-material',
+  linked: true,
+  placeLink: 'hidden',
+  url: 'https://t.me/amazing_ekb/322',
+}
+
+const activePlaceLinkMaterial: AdminMaterialLibraryItem = {
+  ...libraryMaterial,
+  excerpt: 'Активная связь для текущего места',
+  id: 'active-material',
+  linked: true,
+  placeLink: 'active',
+  url: 'https://t.me/amazing_ekb/323',
+}
+
 const renderDrawer = (props: { onClose?: () => void; open?: boolean } = {}) => {
   const onClose = props.onClose ?? vi.fn()
 
@@ -127,9 +145,15 @@ describe('LinkExistingMaterialDrawer', () => {
     mockedUseLinkPlaceMaterialMutation.mockReset()
   })
 
-  it('loads approved unlinked library materials for the current place', () => {
+  it('loads approved library materials for the current place and hides active place links', () => {
     mockedUseMaterialLibraryQuery.mockReturnValue({
-      data: { items: [libraryMaterial] },
+      data: {
+        items: [
+          libraryMaterial,
+          hiddenPlaceLinkMaterial,
+          activePlaceLinkMaterial,
+        ],
+      },
       error: null,
       isError: false,
       isFetching: false,
@@ -143,23 +167,29 @@ describe('LinkExistingMaterialDrawer', () => {
     renderDrawer()
 
     expect(mockedUseMaterialLibraryQuery).toHaveBeenCalledWith(
-      { adminStatus: 'approved', linked: false, placeId: 'place-1' },
+      { adminStatus: 'approved', placeId: 'place-1' },
       { enabled: true },
     )
     expect(screen.getByText('Добавить из библиотеки')).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'Amazing EKB Telegram' }),
+      screen.getAllByRole('link', { name: 'Amazing EKB Telegram' })[0],
     ).toHaveAttribute('href', 'https://t.me/amazing_ekb')
-    expect(screen.getByText('Telegram')).toBeInTheDocument()
-    expect(screen.getByText('2026-03-20')).toBeInTheDocument()
+    expect(screen.getAllByText('Telegram')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('2026-03-20')[0]).toBeInTheDocument()
     expect(
       screen.getByRole('link', {
         name: 'Пост из Telegram-канала Amazing EKB',
       }),
     ).toHaveAttribute('href', 'https://t.me/amazing_ekb/321')
-    expect(screen.getByText('Фото')).toBeInTheDocument()
-    expect(screen.getByText('Одобрено')).toBeInTheDocument()
+    expect(screen.getAllByText('Фото')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Одобрено')[0]).toBeInTheDocument()
     expect(screen.getByText('Не связан')).toBeInTheDocument()
+    expect(
+      screen.getByText('Скрытая связь для текущего места'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('Активная связь для текущего места'),
+    ).not.toBeInTheDocument()
   })
 
   it('links selected material and closes after success', async () => {

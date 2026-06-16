@@ -208,9 +208,9 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Material Link Existing Feature
 
-| Helper                       | Location                                                                   | Visibility | Contract                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------ |
-| `LinkExistingMaterialDrawer` | `src/features/material/link-existing/ui/link-existing-material-drawer.tsx` | exported   | Renders approved unlinked material selector and links one material to a place. |
+| Helper                       | Location                                                                   | Visibility | Contract                                                                                         |
+| ---------------------------- | -------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `LinkExistingMaterialDrawer` | `src/features/material/link-existing/ui/link-existing-material-drawer.tsx` | exported   | Renders approved material selector, excludes active links for the place, and links one material. |
 
 ## Material Library Widget
 
