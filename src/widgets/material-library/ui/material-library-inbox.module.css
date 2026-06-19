@@ -23,6 +23,10 @@
   min-width: 180px;
 }
 
-.previewText {
+.previewCell {
   max-width: 360px;
+}
+
+.previewText {
+  margin-bottom: 0;
 }
