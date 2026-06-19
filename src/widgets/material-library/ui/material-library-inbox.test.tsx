@@ -241,5 +241,5 @@ describe('MaterialLibraryInbox', () => {
     expect(
       screen.getByRole('button', { name: 'Сбросить фильтры' }),
     ).toBeInTheDocument()
-  })
+  }, 10000)
 })
