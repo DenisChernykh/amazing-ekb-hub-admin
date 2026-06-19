@@ -153,10 +153,20 @@ describe('MaterialLibraryInbox', () => {
     expect(screen.getByText('Telegram')).toBeInTheDocument()
     expect(screen.getByText('2026-03-20')).toBeInTheDocument()
     expect(
-      screen.getByRole('link', {
+      screen.getByText('Пост из Telegram-канала Amazing EKB'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', {
         name: 'Пост из Telegram-канала Amazing EKB',
       }),
-    ).toHaveAttribute('href', 'https://t.me/amazing_ekb/321')
+    ).not.toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Открыть пост' })).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          href: 'https://t.me/amazing_ekb/321',
+        }),
+      ]),
+    )
     expect(screen.getByText('Фото')).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: 'Открыть медиа' })).toEqual(
       expect.arrayContaining([
@@ -168,10 +178,20 @@ describe('MaterialLibraryInbox', () => {
     expect(screen.getByText('Связан')).toBeInTheDocument()
     expect(screen.getByText('На проверке')).toBeInTheDocument()
     expect(
-      screen.getByRole('link', {
+      screen.getByText('Видеообзор термального комплекса'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', {
         name: 'Видеообзор термального комплекса',
       }),
-    ).toHaveAttribute('href', 'https://dzen.ru/video/watch/abcdef')
+    ).not.toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Открыть пост' })).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          href: 'https://dzen.ru/video/watch/abcdef',
+        }),
+      ]),
+    )
     expect(screen.getByText('Ручной материал')).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
     expect(screen.getByText('Не связан')).toBeInTheDocument()
@@ -200,6 +220,9 @@ describe('MaterialLibraryInbox', () => {
     ).not.toBeInTheDocument()
     expect(
       screen.queryByRole('link', { name: 'Материал с unsafe ссылками' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Открыть пост' }),
     ).not.toBeInTheDocument()
     expect(
       screen.queryByRole('link', { name: 'Открыть медиа' }),

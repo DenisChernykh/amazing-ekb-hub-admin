@@ -23,7 +23,7 @@ import {
   ScreenEmptyState,
   ScreenLoadingState,
 } from '@/shared/ui/screen-state/screen-state'
-import { PictureOutlined } from '@ant-design/icons'
+import { ExportOutlined, PictureOutlined } from '@ant-design/icons'
 import { Card, Flex, Select, Table, Tag, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
 import { useSearchParams } from 'react-router'
@@ -162,22 +162,23 @@ export function MaterialLibraryInbox() {
         const materialHref = getSafeMaterialHref(material.url)
 
         return (
-          <Typography.Paragraph
-            className={styles.previewText}
-            ellipsis={{ rows: 2 }}
-          >
-            {materialHref ? (
+          <Flex className={styles.previewCell} gap={4} vertical>
+            <Typography.Paragraph
+              className={styles.previewText}
+              ellipsis={{ rows: 2 }}
+            >
+              {previewText}
+            </Typography.Paragraph>
+            {materialHref !== null && (
               <Typography.Link
                 href={materialHref}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                {previewText}
+                <ExportOutlined aria-hidden="true" /> Открыть пост
               </Typography.Link>
-            ) : (
-              previewText
             )}
-          </Typography.Paragraph>
+          </Flex>
         )
       },
       title: 'Текст',
@@ -196,7 +197,7 @@ export function MaterialLibraryInbox() {
             <Typography.Text>
               {formatMaterialMediaKind(mediaKind)}
             </Typography.Text>
-            {mediaPreviewHref && (
+            {mediaPreviewHref !== null && (
               <Typography.Link
                 href={mediaPreviewHref}
                 rel="noopener noreferrer"
