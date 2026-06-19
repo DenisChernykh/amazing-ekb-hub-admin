@@ -158,6 +158,42 @@ describe('content source mutations', () => {
     expect(onError).toHaveBeenCalledWith(apiError)
   })
 
+  it('updates content source and invalidates sources plus material library', async () => {
+    const queryClient = new QueryClient()
+    const sourceQueryKey = ['/admin/content-sources']
+    const materialQueryKey = ['/admin/materials']
+    const onSuccess = vi.fn()
+    queryClient.setQueryData(sourceQueryKey, { items: [contentSource] })
+    queryClient.setQueryData(materialQueryKey, { items: [] })
+    mockedUpdateContentSource.mockResolvedValue({
+      ...contentSource,
+      displayName: 'Updated',
+    })
+
+    const { result } = renderHook(
+      () => useUpdateContentSourceMutation({ onSuccess }),
+      { wrapper: createWrapper(queryClient) },
+    )
+
+    await result.current.mutateAsync({
+      data: { displayName: 'Updated' },
+      sourceId: 'source-1',
+    })
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: sourceQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: materialQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(onSuccess).toHaveBeenCalledWith({
+      ...contentSource,
+      displayName: 'Updated',
+    })
+  })
+
   it('updates content source status and invalidates source lists', async () => {
     const queryClient = new QueryClient()
     const sourceQueryKey = ['/admin/content-sources']

@@ -130,7 +130,7 @@ export function useCreateContentSourceMutation(
 }
 
 /**
- * Редактирует content source через admin API и обновляет кеши source lists.
+ * Редактирует content source через admin API и обновляет кеши source lists/material library.
  *
  * @remarks Wrapper скрывает generated shape `pathParams/data` и принимает плоские переменные для feature form.
  */
@@ -149,7 +149,10 @@ export function useUpdateContentSourceMutation(
       options?.onError?.(error)
     },
     onSuccess: async (contentSource) => {
-      await invalidateContentSourceQueries(queryClient)
+      await Promise.all([
+        invalidateContentSourceQueries(queryClient),
+        invalidateMaterialLibraryQueries(queryClient),
+      ])
       await options?.onSuccess?.(contentSource)
     },
   })

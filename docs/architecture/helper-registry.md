@@ -119,22 +119,22 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Content Source Entity
 
-| Helper                                 | Location                                                        | Visibility | Contract                                                                                       |
-| -------------------------------------- | --------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
-| `useContentSourcesQuery`               | `src/entities/content-source/model/content-source-hooks.ts`     | exported   | Loads admin content sources through the `/admin/content-sources` endpoint.                     |
-| `useCreateContentSourceMutation`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Creates a content source and invalidates all content source list query variants.               |
-| `useUpdateContentSourceMutation`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Updates editable content source fields and invalidates all content source list query variants. |
-| `useUpdateContentSourceStatusMutation` | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Enables/disables a content source and invalidates all content source list query variants.      |
-| `useImportTelegramSourceMutation`      | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Starts bounded Telegram import and invalidates sources, import runs, and material library.     |
-| `invalidateContentSourceQueries`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Invalidates all admin content source list query variants.                                      |
-| `invalidateImportRunQueries`           | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Invalidates all admin import run list query variants.                                          |
-| `CONTENT_SOURCE_PLATFORM_VALUES`       | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Provides backend content source platforms in a stable order for UI controls.                   |
-| `CONTENT_SOURCE_STATUS_VALUES`         | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Provides backend content source statuses in a stable order for UI controls.                    |
-| `getContentSourcePlatformMeta`         | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourcePlatform` to localized Ant Design tag metadata.                     |
-| `getContentSourceStatusMeta`           | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourceStatus` to localized Ant Design tag metadata.                       |
-| `getContentSourcePlatformOptions`      | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source platforms to localized Ant Design select options.                  |
-| `getContentSourceStatusOptions`        | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source statuses to localized Ant Design select options.                   |
-| `formatContentSourceDateTime`          | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Formats nullable source datetime values for compact admin tables.                              |
+| Helper                                 | Location                                                        | Visibility | Contract                                                                                                 |
+| -------------------------------------- | --------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| `useContentSourcesQuery`               | `src/entities/content-source/model/content-source-hooks.ts`     | exported   | Loads admin content sources through the `/admin/content-sources` endpoint.                               |
+| `useCreateContentSourceMutation`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Creates a content source and invalidates all content source list query variants.                         |
+| `useUpdateContentSourceMutation`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Updates editable source fields and invalidates content source list plus material library query variants. |
+| `useUpdateContentSourceStatusMutation` | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Enables/disables a content source and invalidates all content source list query variants.                |
+| `useImportTelegramSourceMutation`      | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Starts bounded Telegram import and invalidates sources, import runs, and material library.               |
+| `invalidateContentSourceQueries`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Invalidates all admin content source list query variants.                                                |
+| `invalidateImportRunQueries`           | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Invalidates all admin import run list query variants.                                                    |
+| `CONTENT_SOURCE_PLATFORM_VALUES`       | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Provides backend content source platforms in a stable order for UI controls.                             |
+| `CONTENT_SOURCE_STATUS_VALUES`         | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Provides backend content source statuses in a stable order for UI controls.                              |
+| `getContentSourcePlatformMeta`         | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourcePlatform` to localized Ant Design tag metadata.                               |
+| `getContentSourceStatusMeta`           | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourceStatus` to localized Ant Design tag metadata.                                 |
+| `getContentSourcePlatformOptions`      | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source platforms to localized Ant Design select options.                            |
+| `getContentSourceStatusOptions`        | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source statuses to localized Ant Design select options.                             |
+| `formatContentSourceDateTime`          | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Formats nullable source datetime values for compact admin tables.                                        |
 
 ## Import Run Entity
 

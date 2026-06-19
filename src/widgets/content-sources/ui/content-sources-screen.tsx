@@ -32,6 +32,10 @@ const emptyImportRunResponse = {
   items: [],
 }
 
+const hasActiveSourceFilters = (filters: ContentSourceFiltersState) => {
+  return filters.platform !== null || filters.status !== null
+}
+
 type ContentSourcesScreenVariables = CSSProperties & {
   '--content-sources-border': string
 }
@@ -43,14 +47,21 @@ export function ContentSourcesScreen() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { token } = theme.useToken()
   const filters = getContentSourceFiltersFromSearch(searchParams)
+  const hasFilters = hasActiveSourceFilters(filters)
   const contentSourcesQuery = useContentSourcesQuery(
     getContentSourceQueryParams(filters),
   )
+  const sourceLookupQuery = useContentSourcesQuery(undefined, {
+    enabled: hasFilters,
+  })
   const importRunsQuery = useImportRunsQuery()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingSource, setEditingSource] = useState<ContentSource | null>(null)
   const contentSourceData =
     contentSourcesQuery.data ?? emptyContentSourceResponse
+  const sourceLookupData = hasFilters
+    ? (sourceLookupQuery.data ?? emptyContentSourceResponse)
+    : contentSourceData
   const importRunData = importRunsQuery.data ?? emptyImportRunResponse
   const style: ContentSourcesScreenVariables = {
     '--content-sources-border': token.colorBorderSecondary,
@@ -131,12 +142,18 @@ export function ContentSourcesScreen() {
 
       <Card className={styles.card} title="Последние импорты">
         <ImportRunsTable
-          contentSources={contentSourceData.items}
+          contentSources={sourceLookupData.items}
           error={importRunsQuery.error}
           importRuns={importRunData.items}
           isError={importRunsQuery.isError}
-          isFetching={importRunsQuery.isFetching}
-          isPending={importRunsQuery.isPending}
+          isFetching={
+            importRunsQuery.isFetching ||
+            (hasFilters && sourceLookupQuery.isFetching)
+          }
+          isPending={
+            importRunsQuery.isPending ||
+            (hasFilters && sourceLookupQuery.isPending)
+          }
         />
       </Card>
 

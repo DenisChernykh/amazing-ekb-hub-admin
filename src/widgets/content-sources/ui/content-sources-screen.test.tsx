@@ -147,9 +147,6 @@ describe('ContentSourcesScreen', () => {
     mockedEditContentSourceDrawer.mockClear()
     mockedContentSourceStatusActions.mockClear()
     mockedImportTelegramSourceButton.mockClear()
-  })
-
-  it('uses URL filters for content source query', () => {
     mockedUseContentSourcesQuery.mockReturnValue({
       data: sourcesResponse,
       error: null,
@@ -164,32 +161,22 @@ describe('ContentSourcesScreen', () => {
       isFetching: false,
       isPending: false,
     } as unknown as ReturnType<typeof useImportRunsQuery>)
+  })
 
+  it('uses URL filters for content source query', () => {
     renderScreen('/content-sources?platform=telegram&status=active')
 
-    expect(mockedUseContentSourcesQuery).toHaveBeenCalledWith({
+    expect(mockedUseContentSourcesQuery).toHaveBeenNthCalledWith(1, {
       platform: 'telegram',
       status: 'active',
+    })
+    expect(mockedUseContentSourcesQuery).toHaveBeenNthCalledWith(2, undefined, {
+      enabled: true,
     })
     expect(mockedUseImportRunsQuery).toHaveBeenCalledWith()
   })
 
   it('renders content source rows, safe links, actions, and import runs', () => {
-    mockedUseContentSourcesQuery.mockReturnValue({
-      data: sourcesResponse,
-      error: null,
-      isError: false,
-      isFetching: false,
-      isPending: false,
-    } as unknown as ReturnType<typeof useContentSourcesQuery>)
-    mockedUseImportRunsQuery.mockReturnValue({
-      data: runsResponse,
-      error: null,
-      isError: false,
-      isFetching: false,
-      isPending: false,
-    } as unknown as ReturnType<typeof useImportRunsQuery>)
-
     renderScreen()
 
     expect(document.title).toBe('Источники контента | Amazing EKB Admin')
@@ -221,14 +208,43 @@ describe('ContentSourcesScreen', () => {
     expect(screen.getByText('missing-source')).toBeInTheDocument()
   })
 
-  it('opens create and edit drawers from table actions', () => {
-    mockedUseContentSourcesQuery.mockReturnValue({
-      data: sourcesResponse,
+  it('keeps import run source names from unfiltered source lookup while table is filtered', () => {
+    mockedUseContentSourcesQuery
+      .mockReturnValueOnce({
+        data: { items: [telegramSource] },
+        error: null,
+        isError: false,
+        isFetching: false,
+        isPending: false,
+      } as unknown as ReturnType<typeof useContentSourcesQuery>)
+      .mockReturnValueOnce({
+        data: sourcesResponse,
+        error: null,
+        isError: false,
+        isFetching: false,
+        isPending: false,
+      } as unknown as ReturnType<typeof useContentSourcesQuery>)
+    mockedUseImportRunsQuery.mockReturnValue({
+      data: {
+        items: [
+          {
+            ...completedRun,
+            sourceId: 'source-dzen-1',
+          },
+        ],
+      },
       error: null,
       isError: false,
       isFetching: false,
       isPending: false,
-    } as unknown as ReturnType<typeof useContentSourcesQuery>)
+    } as unknown as ReturnType<typeof useImportRunsQuery>)
+
+    renderScreen('/content-sources?platform=telegram')
+
+    expect(screen.getByText('Dzen Source')).toBeInTheDocument()
+  })
+
+  it('opens create and edit drawers from table actions', () => {
     mockedUseImportRunsQuery.mockReturnValue({
       data: { items: [] },
       error: null,
