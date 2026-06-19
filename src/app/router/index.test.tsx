@@ -4,11 +4,12 @@ import { describe, expect, it } from 'vitest'
 import { protectedRouteChildren } from './index'
 
 describe('protectedRouteChildren', () => {
-  it('contains dashboard, places, and not-found routes', () => {
+  it('contains dashboard, places, content sources, and not-found routes', () => {
     expect(protectedRouteChildren.map((route) => route.path)).toEqual([
       '/',
       '/places',
       '/materials',
+      '/content-sources',
       '/places/:placeId',
       '/places/:placeId/edit',
       '/places/new',
