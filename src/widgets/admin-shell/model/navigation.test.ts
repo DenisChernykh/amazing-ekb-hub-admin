@@ -6,6 +6,10 @@ describe('getSelectedNavigationKey', () => {
     expect(getSelectedNavigationKey('/materials')).toBe('materials')
   })
 
+  it('selects content sources navigation on content sources route', () => {
+    expect(getSelectedNavigationKey('/content-sources')).toBe('contentSources')
+  })
+
   it('keeps places navigation selected on nested place routes', () => {
     expect(getSelectedNavigationKey('/places/place-1')).toBe('places')
   })

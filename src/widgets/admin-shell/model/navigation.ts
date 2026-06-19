@@ -1,4 +1,5 @@
 import {
+  ApiOutlined,
   DashboardOutlined,
   FileTextOutlined,
   UnorderedListOutlined,
@@ -36,6 +37,12 @@ export const adminNavigationItems = [
     key: 'materials',
     label: 'Материалы',
     path: '/materials',
+  },
+  {
+    icon: createElement(ApiOutlined),
+    key: 'contentSources',
+    label: 'Источники',
+    path: '/content-sources',
   },
 ] satisfies AdminNavigationItem[]
 

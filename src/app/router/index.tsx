@@ -1,3 +1,4 @@
+import { ContentSourcesPage } from '@/pages/content-sources/ui/content-sources-page'
 import { DashboardPage } from '@/pages/dashboard/ui/dashboard-page'
 import { LoginPage } from '@/pages/login/ui/login-page'
 import { MaterialsPage } from '@/pages/materials/ui/materials-page'
@@ -25,6 +26,10 @@ export const protectedRouteChildren = [
   {
     path: '/materials',
     element: <MaterialsPage />,
+  },
+  {
+    path: '/content-sources',
+    element: <ContentSourcesPage />,
   },
   {
     path: '/places/:placeId',
