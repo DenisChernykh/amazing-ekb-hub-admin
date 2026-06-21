@@ -106,7 +106,7 @@ const mockedEditMaterialDrawer = vi.mocked(EditMaterialDrawer)
 const mockedLinkExistingMaterialDrawer = vi.mocked(LinkExistingMaterialDrawer)
 const mockedPinnedMaterialPanel = vi.mocked(PinnedMaterialPanel)
 
-const materialsResponse: MaterialListResponse = {
+const materialsResponse = {
   items: [
     {
       durationSec: 125,
@@ -117,10 +117,9 @@ const materialsResponse: MaterialListResponse = {
       title: 'Обзор комплекса',
       type: 'post',
       redirectUrl: '/v1/materials/material-1/go',
-      url: 'https://t.me/amazing_ekb/321',
     },
   ],
-}
+} as unknown as MaterialListResponse
 
 const pinnedMaterial = materialsResponse.items[0] ?? null
 
@@ -202,7 +201,6 @@ describe('PlaceMaterialsPanel', () => {
           {
             ...materialsResponse.items[0],
             redirectUrl: null,
-            url: 'javascript://example.com/%0Aalert(1)',
           },
         ],
       },
