@@ -22,7 +22,6 @@ import {
   Space,
   Table,
   Tag,
-  Typography,
 } from 'antd'
 import { useState } from 'react'
 
@@ -38,29 +37,6 @@ type MaterialColumnsOptions = {
   onHideLink: (material: Material) => void
 }
 
-type MaterialWithOptionalRedirect = Material & {
-  redirectUrl?: string | null
-}
-
-const materialRedirectPathPattern = /^\/v1\/materials\/[^/]+\/go$/
-
-/**
- * Возвращает same-origin href для открытия материала через backend redirect.
- *
- * @returns `null`, если backend не прислал ожидаемый redirect path.
- */
-const getSafeMaterialRedirectHref = (
-  redirectUrl: string | null | undefined,
-) => {
-  const href = redirectUrl?.trim()
-
-  if (!href || !materialRedirectPathPattern.test(href)) {
-    return null
-  }
-
-  return href
-}
-
 const getMaterialColumns = ({
   hideLinkError,
   isHideLinkPending,
@@ -70,20 +46,7 @@ const getMaterialColumns = ({
   {
     dataIndex: 'title',
     key: 'title',
-    render: (_value, material) => {
-      const { redirectUrl } = material as MaterialWithOptionalRedirect
-      const materialHref = getSafeMaterialRedirectHref(redirectUrl)
-
-      if (materialHref === null) {
-        return material.title
-      }
-
-      return (
-        <Typography.Link href={materialHref} rel="noreferrer" target="_blank">
-          {material.title}
-        </Typography.Link>
-      )
-    },
+    render: (_value, material) => material.title,
     title: 'Материал',
   },
   {
