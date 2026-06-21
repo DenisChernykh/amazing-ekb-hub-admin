@@ -116,6 +116,7 @@ const materialsResponse: MaterialListResponse = {
       publishedAt: '2026-03-20T10:30:00.000Z',
       title: 'Обзор комплекса',
       type: 'post',
+      redirectUrl: '/v1/materials/material-1/go',
       url: 'https://t.me/amazing_ekb/321',
     },
   ],
@@ -159,10 +160,39 @@ describe('PlaceMaterialsPanel', () => {
     expect(screen.getByText('Материалы')).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Обзор комплекса' }),
-    ).toHaveAttribute('href', 'https://t.me/amazing_ekb/321')
+    ).toHaveAttribute('href', '/v1/materials/material-1/go')
     expect(screen.getByText('Telegram')).toBeInTheDocument()
     expect(screen.getByText('Пост')).toBeInTheDocument()
     expect(screen.getByText('2:05')).toBeInTheDocument()
+  })
+
+  it('renders Dzen material title as text when redirectUrl is absent', () => {
+    mockedUsePlaceMaterialsListQuery.mockReturnValue({
+      data: {
+        items: [
+          {
+            ...materialsResponse.items[0],
+            platform: 'dzen',
+            redirectUrl: undefined,
+            title: 'Дзен обзор',
+            url: 'https://dzen.ru/video/watch/material-1',
+          },
+        ],
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
+
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
+
+    expect(screen.getByText('Дзен обзор')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Дзен обзор' }),
+    ).not.toBeInTheDocument()
   })
 
   it('renders unsafe material URLs as plain text', () => {
@@ -171,6 +201,7 @@ describe('PlaceMaterialsPanel', () => {
         items: [
           {
             ...materialsResponse.items[0],
+            redirectUrl: null,
             url: 'javascript://example.com/%0Aalert(1)',
           },
         ],
