@@ -175,7 +175,6 @@ describe('PlaceMaterialsPanel', () => {
             platform: 'dzen',
             redirectUrl: undefined,
             title: 'Дзен обзор',
-            url: 'https://dzen.ru/video/watch/material-1',
           },
         ],
       },
