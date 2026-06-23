@@ -106,7 +106,7 @@ const mockedEditMaterialDrawer = vi.mocked(EditMaterialDrawer)
 const mockedLinkExistingMaterialDrawer = vi.mocked(LinkExistingMaterialDrawer)
 const mockedPinnedMaterialPanel = vi.mocked(PinnedMaterialPanel)
 
-const materialsResponse: MaterialListResponse = {
+const materialsResponse = {
   items: [
     {
       durationSec: 125,
@@ -116,10 +116,10 @@ const materialsResponse: MaterialListResponse = {
       publishedAt: '2026-03-20T10:30:00.000Z',
       title: 'Обзор комплекса',
       type: 'post',
-      url: 'https://t.me/amazing_ekb/321',
+      redirectUrl: '/v1/materials/material-1/go',
     },
   ],
-}
+} as unknown as MaterialListResponse
 
 const pinnedMaterial = materialsResponse.items[0] ?? null
 
@@ -157,21 +157,51 @@ describe('PlaceMaterialsPanel', () => {
       screen.getByText('pinned selector place-1:Обзор комплекса:1'),
     ).toBeInTheDocument()
     expect(screen.getByText('Материалы')).toBeInTheDocument()
+    expect(screen.getByText('Обзор комплекса')).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'Обзор комплекса' }),
-    ).toHaveAttribute('href', 'https://t.me/amazing_ekb/321')
+      screen.queryByRole('link', { name: 'Обзор комплекса' }),
+    ).not.toBeInTheDocument()
     expect(screen.getByText('Telegram')).toBeInTheDocument()
     expect(screen.getByText('Пост')).toBeInTheDocument()
     expect(screen.getByText('2:05')).toBeInTheDocument()
   })
 
-  it('renders unsafe material URLs as plain text', () => {
+  it('renders Dzen material title as text when redirectUrl is absent', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
       data: {
         items: [
           {
             ...materialsResponse.items[0],
-            url: 'javascript://example.com/%0Aalert(1)',
+            platform: 'dzen',
+            redirectUrl: undefined,
+            title: 'Дзен обзор',
+            url: 'https://dzen.ru/video/watch/material-1',
+          },
+        ],
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
+
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
+
+    expect(screen.getByText('Дзен обзор')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Дзен обзор' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders material title as text when redirectUrl is null', () => {
+    mockedUsePlaceMaterialsListQuery.mockReturnValue({
+      data: {
+        items: [
+          {
+            ...materialsResponse.items[0],
+            redirectUrl: null,
           },
         ],
       },
@@ -358,7 +388,10 @@ describe('PlaceMaterialsPanel', () => {
     render(<PlaceMaterialsPanel pinnedMaterial={null} placeId="place-1" />)
 
     expect(mockedUsePlaceMaterialsListQuery).toHaveBeenCalledWith('place-1')
-    expect(screen.getByRole('link', { name: 'Обзор комплекса' })).toBeVisible()
+    expect(screen.getByText('Обзор комплекса')).toBeVisible()
+    expect(
+      screen.queryByRole('link', { name: 'Обзор комплекса' }),
+    ).not.toBeInTheDocument()
   })
 
   it('renders normalized API error message', () => {

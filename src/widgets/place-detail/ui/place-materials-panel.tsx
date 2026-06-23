@@ -1,6 +1,5 @@
 import { usePlaceMaterialsListQuery } from '@/entities/material/model/material-hooks'
 import { useHidePlaceMaterialLinkMutation } from '@/entities/material/model/material-mutations'
-import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
 import {
   formatMaterialDuration,
   formatMaterialPublishedDate,
@@ -23,7 +22,6 @@ import {
   Space,
   Table,
   Tag,
-  Typography,
 } from 'antd'
 import { useState } from 'react'
 
@@ -48,19 +46,7 @@ const getMaterialColumns = ({
   {
     dataIndex: 'title',
     key: 'title',
-    render: (_value, material) => {
-      const materialUrl = material.url.trim()
-
-      if (!isSafeMaterialUrl(materialUrl)) {
-        return material.title
-      }
-
-      return (
-        <Typography.Link href={materialUrl} rel="noreferrer" target="_blank">
-          {material.title}
-        </Typography.Link>
-      )
-    },
+    render: (_value, material) => material.title,
     title: 'Материал',
   },
   {

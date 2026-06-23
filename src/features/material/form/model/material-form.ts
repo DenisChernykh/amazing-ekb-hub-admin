@@ -40,6 +40,13 @@ export type MaterialFormChangedField = {
   label: string
 }
 
+/**
+ * Материал для edit-flow: read-модели списков могут не содержать исходный URL.
+ */
+export type EditableMaterial = Omit<Material, 'url'> & {
+  url?: string
+}
+
 const materialFormFieldLabels = {
   platform: 'Платформа',
   type: 'Тип',
@@ -84,7 +91,7 @@ const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
  * Возвращает начальные значения формы из материала.
  */
 export function getMaterialFormInitialValues(
-  material: Material,
+  material: EditableMaterial,
 ): MaterialFormValues {
   return {
     durationSec: material.durationSec,
@@ -92,7 +99,7 @@ export function getMaterialFormInitialValues(
     publishedAt: parsePublishedAtWallClock(material.publishedAt),
     title: material.title ?? '',
     type: material.type,
-    url: material.url,
+    url: material.url ?? '',
   }
 }
 
