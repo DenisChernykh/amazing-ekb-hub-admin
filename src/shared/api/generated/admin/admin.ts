@@ -1083,7 +1083,7 @@ export const useImportTelegramChannel = <TError = ErrorType<ValidationErrorRespo
       return useMutation(getImportTelegramChannelMutationOptions(options), queryClient);
     }
     /**
- * Возвращает до 100 материалов общей библиотеки. Если передать `placeId`, каждый item содержит статус связи с этим местом.
+ * Возвращает страницу материалов общей библиотеки. Если передать `placeId`, каждый item содержит статус связи с этим местом.
  * @summary List admin material library
  */
 export const listAdminMaterialLibrary = (

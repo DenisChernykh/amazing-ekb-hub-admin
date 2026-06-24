@@ -3,6 +3,7 @@ import type {
   MaterialAdminStatus,
   MaterialType,
   Platform,
+  PublicMaterial,
 } from '@/shared/api/generated/model'
 import { isSafeMaterialUrl } from '../model/material-url'
 
@@ -221,6 +222,17 @@ export function getMaterialLibraryPreviewText(
   material: AdminMaterialLibraryItem,
 ) {
   return material.excerpt ?? material.title ?? material.text ?? '—'
+}
+
+/**
+ * Возвращает display title публичного материала для admin UI.
+ *
+ * @returns Заголовок материала или fallback для импортированных материалов без title.
+ */
+export function getPublicMaterialTitleText(
+  material: Pick<PublicMaterial, 'title'>,
+) {
+  return material.title ?? 'Материал без названия'
 }
 
 /**

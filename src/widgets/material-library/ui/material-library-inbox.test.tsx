@@ -3,7 +3,7 @@ import { MaterialAdminStatusActions } from '@/features/material/admin-status/ui/
 import { ApiClientError } from '@/shared/api/client/api-error'
 import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
 import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MaterialLibraryInbox } from './material-library-inbox'
@@ -90,9 +90,12 @@ const unsafeMaterial: AdminMaterialLibraryItem = {
   url: 'javascript://example.com/%0Aalert(1)',
 }
 
-const materialLibraryResponse: AdminMaterialLibraryListResponse = {
+const materialLibraryResponse = {
   items: [telegramMaterial, dzenMaterial],
-}
+  page: 2,
+  pageSize: 20,
+  total: 43,
+} satisfies AdminMaterialLibraryListResponse
 
 const renderInbox = (route = '/materials') => {
   render(
@@ -108,7 +111,7 @@ describe('MaterialLibraryInbox', () => {
     mockedMaterialAdminStatusActions.mockClear()
   })
 
-  it('uses URL filters for material library query', () => {
+  it('uses URL filters and pagination for material library query', () => {
     mockedUseMaterialLibraryQuery.mockReturnValue({
       data: materialLibraryResponse,
       error: null,
@@ -117,11 +120,15 @@ describe('MaterialLibraryInbox', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useMaterialLibraryQuery>)
 
-    renderInbox('/materials?platform=telegram&adminStatus=pending&linked=false')
+    renderInbox(
+      '/materials?platform=telegram&adminStatus=pending&linked=false&page=2&pageSize=50',
+    )
 
     expect(mockedUseMaterialLibraryQuery).toHaveBeenCalledWith({
       adminStatus: 'pending',
       linked: false,
+      page: 2,
+      pageSize: 50,
       platform: 'telegram',
     })
   })
@@ -139,7 +146,7 @@ describe('MaterialLibraryInbox', () => {
 
     expect(document.title).toBe('Материалы | Amazing EKB Admin')
     expect(screen.getByText('Материалы')).toBeInTheDocument()
-    expect(screen.getByText('Всего: 2')).toBeInTheDocument()
+    expect(screen.getByText('Всего: 43')).toBeInTheDocument()
     expect(
       screen.queryByRole('columnheader', { name: 'External ID' }),
     ).not.toBeInTheDocument()
@@ -199,6 +206,32 @@ describe('MaterialLibraryInbox', () => {
     expect(
       screen.getByText('actions for material-telegram-1'),
     ).toBeInTheDocument()
+  })
+
+  it('changes material library page through URL state', async () => {
+    mockedUseMaterialLibraryQuery.mockReturnValue({
+      data: {
+        ...materialLibraryResponse,
+        page: 1,
+        pageSize: 1,
+        total: 2,
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof useMaterialLibraryQuery>)
+
+    renderInbox('/materials?page=1&pageSize=1')
+
+    fireEvent.click(screen.getByTitle('2'))
+
+    await waitFor(() => {
+      expect(mockedUseMaterialLibraryQuery).toHaveBeenLastCalledWith({
+        page: 2,
+        pageSize: 1,
+      })
+    })
   })
 
   it('renders unsafe material, source, and media URLs as plain text', () => {
@@ -265,4 +298,30 @@ describe('MaterialLibraryInbox', () => {
       screen.getByRole('button', { name: 'Сбросить фильтры' }),
     ).toBeInTheDocument()
   }, 10000)
+
+  it('resets page when filtered material library is reset', async () => {
+    mockedUseMaterialLibraryQuery.mockReturnValue({
+      data: {
+        items: [],
+        page: 4,
+        pageSize: 50,
+        total: 0,
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof useMaterialLibraryQuery>)
+
+    renderInbox('/materials?adminStatus=rejected&page=4&pageSize=50')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Сбросить фильтры' }))
+
+    await waitFor(() => {
+      expect(mockedUseMaterialLibraryQuery).toHaveBeenLastCalledWith({
+        page: 1,
+        pageSize: 50,
+      })
+    })
+  })
 })

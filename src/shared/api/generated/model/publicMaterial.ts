@@ -18,8 +18,11 @@ export type PublicMaterial = {
   placeId: string;
   platform: Platform;
   type: MaterialType;
-  /** Заголовок материала. */
-  title: string;
+  /**
+     * Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.
+     * @nullable
+     */
+  title: string | null;
   /** Дата и время публикации материала. */
   publishedAt: string;
   /**

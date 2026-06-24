@@ -7,6 +7,7 @@
  */
 import type { MaterialAdminStatus } from '../model/materialAdminStatus';
 import type { Platform } from '../model/platform';
+import type { PageParameter } from './pageParameter';
 
 export type ListAdminMaterialLibraryParams = {
 /**
@@ -25,4 +26,16 @@ adminStatus?: MaterialAdminStatus;
  * Фильтр по глобальному наличию `PlaceMaterial` связи. `false` означает, что у материала нет ни одной связи с любым place, включая hidden.
  */
 linked?: boolean;
+/**
+ * Номер страницы пагинации. Допустимый диапазон от `1` до `1000`.
+ * @minimum 1
+ * @maximum 1000
+ */
+page?: PageParameter;
+/**
+ * Размер страницы. Допустимый диапазон от `1` до `100`. По умолчанию `100`, чтобы сохранить прежний bounded list размер без явной пагинации.
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: number;
 };

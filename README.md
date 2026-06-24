@@ -34,7 +34,9 @@ pnpm run lint:strict
 pnpm run test
 pnpm run format:check
 pnpm run build
+pnpm run api:sync
 pnpm run api:generate
+pnpm run api:update
 pnpm run api:check
 ```
 
