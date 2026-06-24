@@ -1,11 +1,11 @@
 import { defineConfig } from 'orval'
 
-const backendSpecPath = '../backend/docs/api/specification.yaml'
+const openApiSnapshotPath = './openapi.yaml'
 
 export default defineConfig({
   amazingEkbHub: {
     input: {
-      target: backendSpecPath,
+      target: openApiSnapshotPath,
     },
     output: {
       target: './src/shared/api/generated/index.ts',
@@ -36,7 +36,7 @@ export default defineConfig({
 
   amazingEkbHubZod: {
     input: {
-      target: backendSpecPath,
+      target: openApiSnapshotPath,
     },
     output: {
       target: './src/shared/api/generated-zod/index.ts',

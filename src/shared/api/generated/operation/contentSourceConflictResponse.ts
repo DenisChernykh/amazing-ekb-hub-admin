@@ -8,6 +8,6 @@
 import type { NestErrorResponse } from './nestErrorResponse';
 
 /**
- * Content source с такой platform/url уже существует.
+ * Content source с такой platform/url уже существует или identity source уже нельзя менять после старта импортов.
  */
 export type ContentSourceConflictResponse = NestErrorResponse;

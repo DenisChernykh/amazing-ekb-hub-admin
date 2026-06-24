@@ -7,7 +7,7 @@
  */
 
 /**
- * Payload частичного обновления content source. `platform`, `lastImportedAt` и `lastCursor` здесь не редактируются.
+ * Payload частичного обновления content source. `platform`, `lastImportedAt` и `lastCursor` здесь не редактируются. После старта импортов identity-поля `url`, `externalId`, `handle` и `channelId` заблокированы, чтобы не смешивать cursor и imported-material dedupe разных источников.
  */
 export type UpdateContentSourceRequest = {
   /** Новое административное имя источника. */

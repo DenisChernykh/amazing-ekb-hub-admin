@@ -8,9 +8,15 @@
 import type { AdminMaterialLibraryItem } from '../model/adminMaterialLibraryItem';
 
 /**
- * Ограниченный административный список материалов общей библиотеки.
+ * Пагинированный административный список материалов общей библиотеки.
  */
 export type AdminMaterialLibraryListResponse = {
-  /** Материалы библиотеки. */
+  /** Материалы библиотеки на текущей странице. */
   items: AdminMaterialLibraryItem[];
+  /** Общее количество материалов, подходящих под фильтры. */
+  total: number;
+  /** Текущая страница. */
+  page: number;
+  /** Размер страницы. */
+  pageSize: number;
 };
