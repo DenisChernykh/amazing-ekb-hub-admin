@@ -16,6 +16,11 @@ export const MATERIAL_LIBRARY_DEFAULT_PAGE = 1
 export const MATERIAL_LIBRARY_DEFAULT_PAGE_SIZE = 20
 
 /**
+ * Максимальный размер страницы библиотеки материалов по backend-контракту.
+ */
+export const MATERIAL_LIBRARY_MAX_PAGE_SIZE = 100
+
+/**
  * URL-состояние фильтров material library inbox.
  *
  * @remarks `null` означает отсутствие соответствующего query param и backend-режим без фильтра.
@@ -100,16 +105,20 @@ export const getMaterialLibraryFiltersFromSearch = (
  */
 export const getMaterialLibraryPaginationFromSearch = (
   searchParams: URLSearchParams,
-): MaterialLibraryPaginationState => ({
-  page: parsePositiveInteger(
-    searchParams.get('page'),
-    MATERIAL_LIBRARY_DEFAULT_PAGE,
-  ),
-  pageSize: parsePositiveInteger(
+): MaterialLibraryPaginationState => {
+  const pageSize = parsePositiveInteger(
     searchParams.get('pageSize'),
     MATERIAL_LIBRARY_DEFAULT_PAGE_SIZE,
-  ),
-})
+  )
+
+  return {
+    page: parsePositiveInteger(
+      searchParams.get('page'),
+      MATERIAL_LIBRARY_DEFAULT_PAGE,
+    ),
+    pageSize: Math.min(pageSize, MATERIAL_LIBRARY_MAX_PAGE_SIZE),
+  }
+}
 
 /**
  * Преобразует URL-state фильтры и пагинацию в query params backend endpoint.

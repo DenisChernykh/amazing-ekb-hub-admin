@@ -13,6 +13,7 @@ import {
   getMaterialPlatformOptions,
   getMaterialTypeMeta,
   getMaterialTypeOptions,
+  getPublicMaterialTitleText,
   getSafeMaterialHref,
 } from './material-meta'
 
@@ -145,6 +146,15 @@ describe('material meta', () => {
         title: null,
       }),
     ).toBe('—')
+  })
+
+  it('formats public material title with imported material fallback', () => {
+    expect(getPublicMaterialTitleText({ title: 'Обзор комплекса' })).toBe(
+      'Обзор комплекса',
+    )
+    expect(getPublicMaterialTitleText({ title: null })).toBe(
+      'Материал без названия',
+    )
   })
 
   it('formats material library source title with manual fallback', () => {

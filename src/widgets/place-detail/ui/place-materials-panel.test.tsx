@@ -34,7 +34,7 @@ vi.mock('@/features/material/edit/ui/edit-material-drawer', () => ({
       open,
       placeId,
     }: {
-      material: { title: string }
+      material: PublicMaterial
       open: boolean
       placeId: string
     }) =>
@@ -218,6 +218,30 @@ describe('PlaceMaterialsPanel', () => {
     expect(
       screen.queryByRole('link', { name: 'Обзор комплекса' }),
     ).not.toBeInTheDocument()
+  })
+
+  it('renders fallback title for imported materials without title', () => {
+    mockedUsePlaceMaterialsListQuery.mockReturnValue({
+      data: {
+        items: [
+          {
+            ...materialsResponse.items[0],
+            title: null,
+          },
+        ],
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof usePlaceMaterialsListQuery>)
+
+    render(
+      <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
+    )
+
+    expect(screen.getByText('Материал без названия')).toBeInTheDocument()
+    expect(screen.queryByText('null')).not.toBeInTheDocument()
   })
 
   it('opens create material drawer from panel action', () => {

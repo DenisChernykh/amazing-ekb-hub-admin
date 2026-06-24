@@ -63,6 +63,17 @@ describe('material library filters', () => {
     })
   })
 
+  it('clamps material library page size from URL to the backend max', () => {
+    expect(
+      getMaterialLibraryPaginationFromSearch(
+        new URLSearchParams('page=2&pageSize=101'),
+      ),
+    ).toEqual({
+      page: 2,
+      pageSize: 100,
+    })
+  })
+
   it('normalizes raw linked filter values from UI or URL', () => {
     expect(getMaterialLibraryLinkedFilterFromValue('true')).toBe(true)
     expect(getMaterialLibraryLinkedFilterFromValue('false')).toBe(false)
