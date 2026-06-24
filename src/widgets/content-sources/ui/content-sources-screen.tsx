@@ -1,8 +1,10 @@
 import { useContentSourcesQuery } from '@/entities/content-source/model/content-source-hooks'
+import { isActiveImportRunStatus } from '@/entities/import-run/model/import-run-cache'
+import { useImportRunEvents } from '@/entities/import-run/model/import-run-events'
 import { useImportRunsQuery } from '@/entities/import-run/model/import-run-hooks'
 import { CreateContentSourceDrawer } from '@/features/content-source/create/ui/create-content-source-drawer'
 import { EditContentSourceDrawer } from '@/features/content-source/edit/ui/edit-content-source-drawer'
-import type { ContentSource } from '@/shared/api/generated/model'
+import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -40,8 +42,23 @@ type ContentSourcesScreenVariables = CSSProperties & {
   '--content-sources-border': string
 }
 
+const ImportRunEventsSubscription = ({
+  importRun,
+}: {
+  importRun: ImportRun
+}) => {
+  useImportRunEvents(importRun.id, {
+    sourceId: importRun.sourceId,
+  })
+
+  return null
+}
+
 /**
  * Виджет управления content sources и диагностики latest import runs.
+ *
+ * @remarks Активные import runs подписываются на SSE через entity hook; durable
+ * `GET /admin/import-runs` остается источником истины и fallback.
  */
 export function ContentSourcesScreen() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -63,6 +80,9 @@ export function ContentSourcesScreen() {
     ? (sourceLookupQuery.data ?? emptyContentSourceResponse)
     : contentSourceData
   const importRunData = importRunsQuery.data ?? emptyImportRunResponse
+  const activeImportRuns = importRunData.items.filter((importRun) =>
+    isActiveImportRunStatus(importRun.status),
+  )
   const style: ContentSourcesScreenVariables = {
     '--content-sources-border': token.colorBorderSecondary,
   }
@@ -131,9 +151,16 @@ export function ContentSourcesScreen() {
 
       <Card className={styles.card}>
         <ContentSourceFiltersBar filters={filters} onChange={updateFilters} />
+        {activeImportRuns.map((importRun) => (
+          <ImportRunEventsSubscription
+            importRun={importRun}
+            key={importRun.id}
+          />
+        ))}
         <ContentSourcesTable
           contentSources={contentSourceData.items}
           filters={filters}
+          importRuns={importRunData.items}
           isFetching={contentSourcesQuery.isFetching}
           onEdit={setEditingSource}
           onResetFilters={resetFilters}

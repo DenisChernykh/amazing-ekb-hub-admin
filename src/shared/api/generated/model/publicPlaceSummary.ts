@@ -5,13 +5,31 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { PlaceSummary } from './placeSummary';
+import type { PlaceCategory } from './placeCategory';
+import type { PlaceStatus } from './placeStatus';
 import type { PublicPlaceSummaryCounters } from './publicPlaceSummaryCounters';
 
 /**
  * Краткая публичная карточка места со счетчиками материалов по платформам.
  */
-export type PublicPlaceSummary = PlaceSummary & {
+export type PublicPlaceSummary = {
+  /** Идентификатор места. */
+  id: string;
+  /** Название места. */
+  title: string;
+  /** Короткое описание для каталога. */
+  summary: string;
+  /** Набор тегов для поиска и фильтрации. */
+  tags: string[];
+  category: PlaceCategory;
+  status: PlaceStatus;
+  /** Вес популярности для сортировки. */
+  popularityWeight: number;
+  /**
+     * Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
+     * @nullable
+     */
+  coverImageUrl: string | null;
   /** Количество материалов по платформам. */
   counters: PublicPlaceSummaryCounters;
 };

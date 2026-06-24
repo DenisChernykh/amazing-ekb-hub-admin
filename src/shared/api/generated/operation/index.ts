@@ -32,6 +32,7 @@ export * from './placeListResponse';
 export * from './placeNotFoundResponse';
 export * from './publicPlaceListResponse';
 export * from './serviceUnavailableResponse';
+export * from './telegramImportAlreadyRunningResponse';
 export * from './tooManyRequestsResponse';
 export * from './unauthorizedResponse';
 export * from './validationErrorResponse';

@@ -1,4 +1,5 @@
 import { useContentSourcesQuery } from '@/entities/content-source/model/content-source-hooks'
+import { useImportRunEvents } from '@/entities/import-run/model/import-run-events'
 import { useImportRunsQuery } from '@/entities/import-run/model/import-run-hooks'
 import { CreateContentSourceDrawer } from '@/features/content-source/create/ui/create-content-source-drawer'
 import { EditContentSourceDrawer } from '@/features/content-source/edit/ui/edit-content-source-drawer'
@@ -23,6 +24,10 @@ vi.mock('@/entities/import-run/model/import-run-hooks', () => ({
   useImportRunsQuery: vi.fn(),
 }))
 
+vi.mock('@/entities/import-run/model/import-run-events', () => ({
+  useImportRunEvents: vi.fn(),
+}))
+
 vi.mock(
   '@/features/content-source/status/ui/content-source-status-actions',
   () => ({
@@ -38,8 +43,17 @@ vi.mock(
   '@/features/content-source/import/ui/import-telegram-source-button',
   () => ({
     ImportTelegramSourceButton: vi.fn(
-      ({ contentSource }: { contentSource: ContentSource }) => (
-        <div>import action for {contentSource.id}</div>
+      ({
+        activeImportRun,
+        contentSource,
+      }: {
+        activeImportRun?: ImportRun | null
+        contentSource: ContentSource
+      }) => (
+        <div>
+          import action for {contentSource.id} active{' '}
+          {activeImportRun?.id ?? 'none'}
+        </div>
       ),
     ),
   }),
@@ -61,6 +75,7 @@ vi.mock('@/features/content-source/edit/ui/edit-content-source-drawer', () => ({
 }))
 
 const mockedUseContentSourcesQuery = vi.mocked(useContentSourcesQuery)
+const mockedUseImportRunEvents = vi.mocked(useImportRunEvents)
 const mockedUseImportRunsQuery = vi.mocked(useImportRunsQuery)
 const mockedCreateContentSourceDrawer = vi.mocked(CreateContentSourceDrawer)
 const mockedEditContentSourceDrawer = vi.mocked(EditContentSourceDrawer)
@@ -123,6 +138,20 @@ const failedRun: ImportRun = {
   status: 'failed',
 }
 
+const queuedRun: ImportRun = {
+  ...completedRun,
+  createdCount: 0,
+  errorMessage: null,
+  finishedAt: null,
+  foundCount: 0,
+  id: 'run-active',
+  skippedDuplicateCount: 0,
+  startedAt: null,
+  status: 'queued',
+  updatedAt: '2026-06-16T09:30:00.000Z',
+  updatedCount: 0,
+}
+
 const sourcesResponse: ContentSourceListResponse = {
   items: [telegramSource, dzenSource],
 }
@@ -142,6 +171,7 @@ const renderScreen = (route = '/content-sources') => {
 describe('ContentSourcesScreen', () => {
   beforeEach(() => {
     mockedUseContentSourcesQuery.mockReset()
+    mockedUseImportRunEvents.mockReset()
     mockedUseImportRunsQuery.mockReset()
     mockedCreateContentSourceDrawer.mockClear()
     mockedEditContentSourceDrawer.mockClear()
@@ -196,7 +226,7 @@ describe('ContentSourcesScreen', () => {
       screen.getByText('status actions for source-telegram-1'),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('import action for source-telegram-1'),
+      screen.getByText('import action for source-telegram-1 active none'),
     ).toBeInTheDocument()
     expect(screen.getByText('Последние импорты')).toBeInTheDocument()
     expect(screen.getByText('Готово')).toBeInTheDocument()
@@ -260,6 +290,25 @@ describe('ContentSourcesScreen', () => {
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Редактировать' })[0])
     expect(screen.getAllByRole('dialog')[1]).toHaveTextContent('edit drawer')
+  })
+
+  it('passes active import runs into row actions and subscribes them to SSE', () => {
+    mockedUseImportRunsQuery.mockReturnValue({
+      data: { items: [queuedRun, completedRun] },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof useImportRunsQuery>)
+
+    renderScreen()
+
+    expect(
+      screen.getByText('import action for source-telegram-1 active run-active'),
+    ).toBeInTheDocument()
+    expect(mockedUseImportRunEvents).toHaveBeenCalledWith('run-active', {
+      sourceId: 'source-telegram-1',
+    })
   })
 
   it('renders loading, error, and filtered empty states', () => {

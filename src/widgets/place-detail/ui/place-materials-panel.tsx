@@ -11,7 +11,7 @@ import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-dr
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
+import type { PublicMaterial } from '@/shared/api/generated/model'
 import type { TableColumnsType } from 'antd'
 import {
   Alert,
@@ -33,8 +33,8 @@ type HideLinkError = {
 type MaterialColumnsOptions = {
   hideLinkError: HideLinkError | null
   isHideLinkPending: boolean
-  onEdit: (material: Material) => void
-  onHideLink: (material: Material) => void
+  onEdit: (material: PublicMaterial) => void
+  onHideLink: (material: PublicMaterial) => void
 }
 
 const getMaterialColumns = ({
@@ -42,7 +42,7 @@ const getMaterialColumns = ({
   isHideLinkPending,
   onEdit,
   onHideLink,
-}: MaterialColumnsOptions): TableColumnsType<Material> => [
+}: MaterialColumnsOptions): TableColumnsType<PublicMaterial> => [
   {
     dataIndex: 'title',
     key: 'title',
@@ -52,7 +52,7 @@ const getMaterialColumns = ({
   {
     dataIndex: 'platform',
     key: 'platform',
-    render: (platform: Material['platform']) => {
+    render: (platform: PublicMaterial['platform']) => {
       const meta = getMaterialPlatformMeta(platform)
 
       return <Tag color={meta.color}>{meta.label}</Tag>
@@ -62,7 +62,7 @@ const getMaterialColumns = ({
   {
     dataIndex: 'type',
     key: 'type',
-    render: (type: Material['type']) => {
+    render: (type: PublicMaterial['type']) => {
       const meta = getMaterialTypeMeta(type)
 
       return <Tag color={meta.color}>{meta.label}</Tag>
@@ -78,7 +78,7 @@ const getMaterialColumns = ({
   {
     dataIndex: 'durationSec',
     key: 'durationSec',
-    render: (durationSec: Material['durationSec']) =>
+    render: (durationSec: PublicMaterial['durationSec']) =>
       formatMaterialDuration(durationSec),
     title: 'Длительность',
   },
@@ -119,7 +119,7 @@ const getMaterialColumns = ({
  * Props панели материалов места на admin detail screen.
  */
 export type PlaceMaterialsPanelProps = {
-  pinnedMaterial: Material | null
+  pinnedMaterial: PublicMaterial | null
   placeId: string
 }
 
@@ -136,7 +136,9 @@ export function PlaceMaterialsPanel({
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isLinkExistingOpen, setIsLinkExistingOpen] = useState(false)
-  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
+  const [editingMaterial, setEditingMaterial] = useState<PublicMaterial | null>(
+    null,
+  )
   const [hideLinkError, setHideLinkError] = useState<HideLinkError | null>(null)
   const hideLinkMutation = useHidePlaceMaterialLinkMutation()
   const addButton = (
@@ -159,7 +161,7 @@ export function PlaceMaterialsPanel({
     </Space>
   )
 
-  const handleHideLink = (material: Material) => {
+  const handleHideLink = (material: PublicMaterial) => {
     setHideLinkError(null)
     hideLinkMutation.mutate(
       {

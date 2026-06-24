@@ -3,7 +3,7 @@ import {
   useSetPinnedMaterialMutation,
 } from '@/entities/place/model/place-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { Material, PlaceDetail } from '@/shared/api/generated/model'
+import type { PlaceDetail, PublicMaterial } from '@/shared/api/generated/model'
 import {
   fireEvent,
   render,
@@ -77,7 +77,7 @@ const mockedUseClearPinnedMaterialMutation = vi.mocked(
   useClearPinnedMaterialMutation,
 )
 
-const materials: Material[] = [
+const materials: PublicMaterial[] = [
   {
     durationSec: null,
     id: 'material-1',
@@ -86,7 +86,7 @@ const materials: Material[] = [
     publishedAt: '2026-03-20T10:30:00+05:00',
     title: 'Обзор комплекса',
     type: 'post',
-    url: 'https://t.me/amazing_ekb/321',
+    redirectUrl: '/v1/materials/material-1/go',
   },
   {
     durationSec: 90,
@@ -96,7 +96,7 @@ const materials: Material[] = [
     publishedAt: '2026-03-21T10:30:00+05:00',
     title: 'С чего начать',
     type: 'video',
-    url: 'https://dzen.ru/video/123',
+    redirectUrl: '/v1/materials/material-2/go',
   },
 ]
 
@@ -125,7 +125,7 @@ const renderPinnedMaterialPanel = ({
 }: {
   isClearPending?: boolean
   isPending?: boolean
-  pinnedMaterial?: Material | null
+  pinnedMaterial?: PublicMaterial | null
   placeId?: string
 } = {}) => {
   const clearMutate = vi.fn()

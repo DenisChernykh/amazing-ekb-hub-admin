@@ -257,10 +257,42 @@ describe('content source mutations', () => {
       queryClient.getQueryCache().find({ queryKey: runQueryKey })?.state
         .isInvalidated,
     ).toBe(true)
+    expect(queryClient.getQueryData(runQueryKey)).toEqual({
+      items: [importRun],
+    })
     expect(
       queryClient.getQueryCache().find({ queryKey: materialQueryKey })?.state
         .isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(importRun)
+  })
+
+  it('invalidates import runs and passes 409 conflicts to callback', async () => {
+    const queryClient = new QueryClient()
+    const runQueryKey = ['/admin/import-runs']
+    const onError = vi.fn()
+    const apiError = new ApiClientError({
+      kind: 'conflict',
+      message: 'Import already running',
+      status: 409,
+    })
+
+    queryClient.setQueryData(runQueryKey, { items: [] })
+    mockedImportTelegramChannel.mockRejectedValue(apiError)
+
+    const { result } = renderHook(
+      () => useImportTelegramSourceMutation({ onError }),
+      { wrapper: createWrapper(queryClient) },
+    )
+
+    await expect(
+      result.current.mutateAsync({ sourceId: 'source-1' }),
+    ).rejects.toBe(apiError)
+
+    expect(
+      queryClient.getQueryCache().find({ queryKey: runQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(onError).toHaveBeenCalledWith(apiError)
   })
 })

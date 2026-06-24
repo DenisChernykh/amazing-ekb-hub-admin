@@ -7,7 +7,7 @@ import {
   useSetPinnedMaterialMutation,
 } from '@/entities/place/model/place-mutations'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
+import type { PublicMaterial } from '@/shared/api/generated/model'
 import {
   Alert,
   App as AntdApp,
@@ -21,20 +21,19 @@ import { useState } from 'react'
 import { toSetPinnedMaterialRequest } from '../model/pinned-material'
 import { PinnedMaterialCurrent } from './pinned-material-current'
 
-const getMaterialOptionLabel = (material: Material) => {
+const getMaterialOptionLabel = (material: PublicMaterial) => {
   const platform = getMaterialPlatformMeta(material.platform)
   const type = getMaterialTypeMeta(material.type)
-  const title = material.title ?? 'Без названия'
 
-  return `${title} · ${platform.label} · ${type.label}`
+  return `${material.title} · ${platform.label} · ${type.label}`
 }
 
 /**
  * Props панели выбора закрепленного материала места.
  */
 export type PinnedMaterialPanelProps = {
-  materials: Material[]
-  pinnedMaterial: Material | null
+  materials: PublicMaterial[]
+  pinnedMaterial: PublicMaterial | null
   placeId: string
 }
 
