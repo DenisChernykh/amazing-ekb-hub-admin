@@ -100,6 +100,12 @@ const materials: PublicMaterial[] = [
   },
 ]
 
+const untitledMaterial: PublicMaterial = {
+  ...materials[0],
+  id: 'material-untitled',
+  title: null,
+}
+
 const updatedPlace: PlaceDetail = {
   category: 'spa',
   counters: {
@@ -166,6 +172,35 @@ describe('PinnedMaterialPanel', () => {
     expect(screen.getByText('Закрепленный материал')).toBeInTheDocument()
     expect(screen.getByText('Обзор комплекса')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Закрепить' })).toBeDisabled()
+  })
+
+  it('renders fallback labels for imported materials without title', () => {
+    mockedUseClearPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useClearPinnedMaterialMutation>)
+    mockedUseSetPinnedMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useSetPinnedMaterialMutation>)
+
+    render(
+      <AntdApp>
+        <PinnedMaterialPanel
+          materials={[untitledMaterial]}
+          pinnedMaterial={untitledMaterial}
+          placeId="place-1"
+        />
+      </AntdApp>,
+    )
+
+    expect(screen.getByText('Материал без названия')).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', {
+        name: 'Материал без названия · Telegram · Пост',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/null/)).not.toBeInTheDocument()
   })
 
   it('shows clear action only when a pinned material exists', () => {

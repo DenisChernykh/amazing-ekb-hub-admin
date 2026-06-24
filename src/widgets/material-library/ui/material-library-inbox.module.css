@@ -19,6 +19,11 @@
   overflow-x: auto;
 }
 
+.footer {
+  padding: 16px;
+  border-top: 1px solid var(--material-library-border);
+}
+
 .sourceCell {
   min-width: 180px;
 }

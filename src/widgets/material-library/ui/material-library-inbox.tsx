@@ -17,6 +17,7 @@ import type {
   MaterialAdminStatus,
   Platform,
 } from '@/shared/api/generated/model'
+import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -24,12 +25,23 @@ import {
   ScreenLoadingState,
 } from '@/shared/ui/screen-state/screen-state'
 import { ExportOutlined, PictureOutlined } from '@ant-design/icons'
-import { Card, Flex, Select, Table, Tag, Typography, theme } from 'antd'
+import {
+  Card,
+  Flex,
+  Pagination,
+  Select,
+  Table,
+  Tag,
+  Typography,
+  theme,
+} from 'antd'
 import type { CSSProperties } from 'react'
 import { useSearchParams } from 'react-router'
 import {
   buildMaterialLibraryFiltersSearch,
+  buildMaterialLibraryPaginationSearch,
   getMaterialLibraryFiltersFromSearch,
+  getMaterialLibraryPaginationFromSearch,
   getMaterialLibraryQueryParams,
   type MaterialLibraryFiltersState,
 } from '../model/material-library-filters'
@@ -43,8 +55,11 @@ const linkedFilterOptions = [
   { label: 'Без связи', value: 'false' },
 ]
 
-const emptyMaterialLibraryResponse = {
+const emptyMaterialLibraryResponse: AdminMaterialLibraryListResponse = {
   items: [],
+  page: 1,
+  pageSize: 20,
+  total: 0,
 }
 
 type MaterialLibraryInboxVariables = CSSProperties & {
@@ -66,8 +81,9 @@ export function MaterialLibraryInbox() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { token } = theme.useToken()
   const filters = getMaterialLibraryFiltersFromSearch(searchParams)
+  const pagination = getMaterialLibraryPaginationFromSearch(searchParams)
   const materialLibraryQuery = useMaterialLibraryQuery(
-    getMaterialLibraryQueryParams(filters),
+    getMaterialLibraryQueryParams(filters, pagination),
   )
   const data = materialLibraryQuery.data ?? emptyMaterialLibraryResponse
   const style: MaterialLibraryInboxVariables = {
@@ -86,6 +102,12 @@ export function MaterialLibraryInbox() {
       linked: null,
       platform: null,
     })
+  }
+
+  const handlePaginationChange = (page: number, pageSize: number) => {
+    setSearchParams(
+      buildMaterialLibraryPaginationSearch(searchParams, { page, pageSize }),
+    )
   }
 
   if (materialLibraryQuery.isPending) {
@@ -262,9 +284,7 @@ export function MaterialLibraryInbox() {
         <Typography.Title className={styles.title} level={2}>
           Материалы
         </Typography.Title>
-        <Typography.Text type="secondary">
-          Всего: {data.items.length}
-        </Typography.Text>
+        <Typography.Text type="secondary">Всего: {data.total}</Typography.Text>
       </Flex>
 
       <Card className={styles.card}>
@@ -322,6 +342,17 @@ export function MaterialLibraryInbox() {
             rowKey="id"
           />
         </div>
+
+        <Flex className={styles.footer} justify="end">
+          <Pagination
+            current={pagination.page}
+            onChange={handlePaginationChange}
+            pageSize={pagination.pageSize}
+            pageSizeOptions={[20, 50, 100]}
+            showSizeChanger
+            total={data.total}
+          />
+        </Flex>
       </Card>
     </Flex>
   )

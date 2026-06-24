@@ -5,6 +5,7 @@ import {
   formatMaterialPublishedDate,
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
+  getPublicMaterialTitleText,
 } from '@/entities/material/ui/material-meta'
 import { CreateMaterialDrawer } from '@/features/material/create/ui/create-material-drawer'
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
@@ -46,7 +47,7 @@ const getMaterialColumns = ({
   {
     dataIndex: 'title',
     key: 'title',
-    render: (_value, material) => material.title,
+    render: (_value, material) => getPublicMaterialTitleText(material),
     title: 'Материал',
   },
   {

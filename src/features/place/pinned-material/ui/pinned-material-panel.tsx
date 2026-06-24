@@ -1,6 +1,7 @@
 import {
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
+  getPublicMaterialTitleText,
 } from '@/entities/material/ui/material-meta'
 import {
   useClearPinnedMaterialMutation,
@@ -25,7 +26,7 @@ const getMaterialOptionLabel = (material: PublicMaterial) => {
   const platform = getMaterialPlatformMeta(material.platform)
   const type = getMaterialTypeMeta(material.type)
 
-  return `${material.title} · ${platform.label} · ${type.label}`
+  return `${getPublicMaterialTitleText(material)} · ${platform.label} · ${type.label}`
 }
 
 /**

@@ -1,6 +1,7 @@
 import {
   getMaterialPlatformMeta,
   getMaterialTypeMeta,
+  getPublicMaterialTitleText,
 } from '@/entities/material/ui/material-meta'
 import type { PublicMaterial } from '@/shared/api/generated/model'
 import { Flex, Space, Tag, Typography } from 'antd'
@@ -20,7 +21,9 @@ export function PinnedMaterialCurrent({
       <Typography.Text type="secondary">Текущий:</Typography.Text>
       {pinnedMaterial ? (
         <Space size={[4, 4]} wrap>
-          <Typography.Text strong>{pinnedMaterial.title}</Typography.Text>
+          <Typography.Text strong>
+            {getPublicMaterialTitleText(pinnedMaterial)}
+          </Typography.Text>
           <Tag color={getMaterialPlatformMeta(pinnedMaterial.platform).color}>
             {getMaterialPlatformMeta(pinnedMaterial.platform).label}
           </Tag>

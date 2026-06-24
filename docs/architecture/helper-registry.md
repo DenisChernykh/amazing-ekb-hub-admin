@@ -116,6 +116,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `formatMaterialMediaKind`              | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable importer media kind for material library table cells.                              |
 | `getMaterialLibraryPreviewText`        | `src/entities/material/ui/material-meta.ts`             | exported   | Picks excerpt/title/text fallback for material library table and selector previews.                 |
 | `getMaterialLibrarySourceTitle`        | `src/entities/material/ui/material-meta.ts`             | exported   | Picks content source display name or manual-material fallback for library UI.                       |
+| `getPublicMaterialTitleText`           | `src/entities/material/ui/material-meta.ts`             | exported   | Picks title or imported-material fallback for public material admin UI.                             |
 | `getSafeMaterialHref`                  | `src/entities/material/ui/material-meta.ts`             | exported   | Returns safe `http/https` href values or `null` before rendering material/source/media links.       |
 | `PlaceMaterialsPanel`                  | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit/link/hide actions.           |
 
@@ -286,13 +287,16 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Material Library Widget
 
-| Helper                                    | Location                                                         | Visibility | Contract                                                                             |
-| ----------------------------------------- | ---------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------ |
-| `getMaterialLibraryLinkedFilterFromValue` | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Normalizes raw linked filter values from URL or UI controls.                         |
-| `getMaterialLibraryFiltersFromSearch`     | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library platform/status/linked filters from URL search params.        |
-| `getMaterialLibraryQueryParams`           | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Converts material library URL filter state into `/admin/materials` query params.     |
-| `buildMaterialLibraryFiltersSearch`       | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds next URL search params after changing material library filters.               |
-| `MaterialLibraryInbox`                    | `src/widgets/material-library/ui/material-library-inbox.tsx`     | exported   | Renders the material library inbox table with URL-driven filters and review actions. |
+| Helper                                    | Location                                                         | Visibility | Contract                                                                                          |
+| ----------------------------------------- | ---------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `MATERIAL_LIBRARY_MAX_PAGE_SIZE`          | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Defines backend max `pageSize` accepted by material library URL pagination.                       |
+| `getMaterialLibraryLinkedFilterFromValue` | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Normalizes raw linked filter values from URL or UI controls.                                      |
+| `getMaterialLibraryFiltersFromSearch`     | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library platform/status/linked filters from URL search params.                     |
+| `getMaterialLibraryPaginationFromSearch`  | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library `page` and `pageSize` from URL search params.                              |
+| `getMaterialLibraryQueryParams`           | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Converts material library URL filter and pagination state into query params.                      |
+| `buildMaterialLibraryFiltersSearch`       | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds next URL search params after changing material library filters and resets page.            |
+| `buildMaterialLibraryPaginationSearch`    | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds default-aware URL search params after changing material library pagination.                |
+| `MaterialLibraryInbox`                    | `src/widgets/material-library/ui/material-library-inbox.tsx`     | exported   | Renders the material library inbox table with URL-driven filters, pagination, and review actions. |
 
 ## Content Sources Widget
 
