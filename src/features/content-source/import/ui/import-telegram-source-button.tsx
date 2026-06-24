@@ -94,22 +94,22 @@ export function ImportTelegramSourceButton({
         Запустить импорт
       </Button>
 
-      {activeImportRun && activeImportRunMeta ? (
+      {activeImportRun !== null && activeImportRunMeta !== null && (
         <Alert
           description={formatImportRunCounts(activeImportRun)}
           message={`Импорт ${activeImportRunMeta.label.toLowerCase()}`}
           showIcon
           type="info"
         />
-      ) : null}
+      )}
 
-      {infoMessage !== null ? (
+      {infoMessage !== null && (
         <Alert message={infoMessage} showIcon type="info" />
-      ) : null}
+      )}
 
-      {errorMessage !== null ? (
+      {errorMessage !== null && (
         <Alert message={errorMessage} showIcon type="error" />
-      ) : null}
+      )}
     </Flex>
   )
 }
