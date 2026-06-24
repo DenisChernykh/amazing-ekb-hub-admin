@@ -8,7 +8,7 @@
 
 export type ImportTelegramChannelParams = {
 /**
- * Размер одной порции в логических Telegram-постах; одиночный message считается одним постом, album/media group с общим groupedId тоже считается одним постом. Не является общим лимитом библиотеки; для backfill запуск повторяется несколько раз.
+ * Размер одного внутреннего batch-а в логических Telegram-постах; одиночный message считается одним постом, album/media group с общим groupedId тоже считается одним постом. Один queued run может обработать несколько batch-ов подряд и останавливается при исчерпании истории или safety cap 20 batch-ов.
  * @minimum 1
  * @maximum 100
  */

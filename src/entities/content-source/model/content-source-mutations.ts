@@ -1,9 +1,13 @@
+import {
+  invalidateImportRunQueries,
+  syncImportRunQueryCache,
+} from '@/entities/import-run/model/import-run-cache'
 import type { ApiClientError } from '@/shared/api/client/api-error'
+import { getApiErrorStatus } from '@/shared/api/client/api-error'
 import {
   createContentSource,
   getListAdminMaterialLibraryQueryKey,
   getListContentSourcesQueryKey,
-  getListImportRunsQueryKey,
   importTelegramChannel,
   updateContentSource,
   updateContentSourceStatus,
@@ -79,15 +83,6 @@ export type ImportTelegramSourceMutationVariables = {
 export const invalidateContentSourceQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
     queryKey: getListContentSourcesQueryKey(),
-  })
-}
-
-/**
- * Инвалидирует все варианты списка import runs.
- */
-export const invalidateImportRunQueries = (queryClient: QueryClient) => {
-  return queryClient.invalidateQueries({
-    queryKey: getListImportRunsQueryKey(),
   })
 }
 
@@ -186,10 +181,11 @@ export function useUpdateContentSourceStatusMutation(
 }
 
 /**
- * Запускает bounded Telegram import для active Telegram source.
+ * Запускает durable one-click Telegram import для active Telegram source.
  *
- * @remarks После успеха инвалидирует sources, import runs и material library,
- * потому что backend обновляет cursor, создает run и может добавить материалы.
+ * @remarks После успеха сразу синхронизирует returned `ImportRun` в cache,
+ * затем инвалидирует sources, import runs и material library. `409` не считается
+ * фатальным состоянием UX: backend сообщает, что активный import уже существует.
  */
 export function useImportTelegramSourceMutation(
   options?: ImportTelegramSourceMutationOptions,
@@ -202,10 +198,15 @@ export function useImportTelegramSourceMutation(
     ImportTelegramSourceMutationVariables
   >({
     mutationFn: ({ sourceId }) => importTelegramChannel({ sourceId }),
-    onError: (error) => {
+    onError: async (error) => {
+      if (getApiErrorStatus(error) === 409) {
+        await invalidateImportRunQueries(queryClient)
+      }
+
       options?.onError?.(error)
     },
     onSuccess: async (importRun) => {
+      syncImportRunQueryCache(queryClient, importRun)
       await invalidateImportDependencies(queryClient)
       await options?.onSuccess?.(importRun)
     },

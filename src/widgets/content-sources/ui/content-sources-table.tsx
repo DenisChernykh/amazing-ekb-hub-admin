@@ -3,9 +3,10 @@ import {
   getContentSourcePlatformMeta,
   getContentSourceStatusMeta,
 } from '@/entities/content-source/ui/content-source-meta'
+import { getActiveImportRunForSource } from '@/entities/import-run/model/import-run-cache'
 import { ImportTelegramSourceButton } from '@/features/content-source/import/ui/import-telegram-source-button'
 import { ContentSourceStatusActions } from '@/features/content-source/status/ui/content-source-status-actions'
-import type { ContentSource } from '@/shared/api/generated/model'
+import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { ScreenEmptyState } from '@/shared/ui/screen-state/screen-state'
 import { EditOutlined } from '@ant-design/icons'
@@ -14,11 +15,12 @@ import type { ContentSourceFiltersState } from '../model/content-source-filters'
 import styles from './content-sources-screen.module.css'
 
 /**
- * Props for the content sources table.
+ * Props таблицы content sources.
  */
 export type ContentSourcesTableProps = {
   contentSources: ContentSource[]
   filters: ContentSourceFiltersState
+  importRuns: ImportRun[]
   isFetching: boolean
   onEdit: (contentSource: ContentSource) => void
   onResetFilters: () => void
@@ -37,11 +39,15 @@ const getSourceIdentityItems = (contentSource: ContentSource) => {
 }
 
 /**
- * Renders content sources with identity, status, edit, enable/disable and import actions.
+ * Рендерит content sources с идентификаторами, статусом и action-кнопками.
+ *
+ * @remarks Передает active `ImportRun` в Telegram import action, чтобы кнопка
+ * блокировалась от durable backend state после refresh.
  */
 export function ContentSourcesTable({
   contentSources,
   filters,
+  importRuns,
   isFetching,
   onEdit,
   onResetFilters,
@@ -133,7 +139,13 @@ export function ContentSourcesTable({
             Редактировать
           </Button>
           <ContentSourceStatusActions contentSource={contentSource} />
-          <ImportTelegramSourceButton contentSource={contentSource} />
+          <ImportTelegramSourceButton
+            activeImportRun={getActiveImportRunForSource(
+              importRuns,
+              contentSource.id,
+            )}
+            contentSource={contentSource}
+          />
         </Flex>
       ),
       title: 'Действия',

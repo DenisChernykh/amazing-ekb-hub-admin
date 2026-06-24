@@ -5,7 +5,7 @@ import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-dr
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
+import type { PublicMaterial } from '@/shared/api/generated/model'
 import type { MaterialListResponse } from '@/shared/api/generated/operation'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -65,8 +65,8 @@ vi.mock('@/features/place/pinned-material/ui/pinned-material-panel', () => ({
       pinnedMaterial,
       placeId,
     }: {
-      materials: Material[]
-      pinnedMaterial: Material | null
+      materials: PublicMaterial[]
+      pinnedMaterial: PublicMaterial | null
       placeId: string
     }) => (
       <div>
@@ -166,14 +166,14 @@ describe('PlaceMaterialsPanel', () => {
     expect(screen.getByText('2:05')).toBeInTheDocument()
   })
 
-  it('renders Dzen material title as text when redirectUrl is absent', () => {
+  it('renders Dzen material title as text without redirect URL', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
       data: {
         items: [
           {
             ...materialsResponse.items[0],
             platform: 'dzen',
-            redirectUrl: undefined,
+            redirectUrl: null,
             title: 'Дзен обзор',
           },
         ],
@@ -238,7 +238,7 @@ describe('PlaceMaterialsPanel', () => {
     expect(screen.getByText('create material for place-1')).toBeInTheDocument()
   })
 
-  it('opens edit material drawer from row action', () => {
+  it('does not render edit material action when list response has no original URL', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
       data: materialsResponse,
       error: null,
@@ -251,11 +251,9 @@ describe('PlaceMaterialsPanel', () => {
       <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Редактировать' }))
-
     expect(
-      screen.getByText('edit material Обзор комплекса for place-1'),
-    ).toBeInTheDocument()
+      screen.queryByRole('button', { name: 'Редактировать' }),
+    ).not.toBeInTheDocument()
   })
 
   it('opens link existing material drawer from panel action', () => {

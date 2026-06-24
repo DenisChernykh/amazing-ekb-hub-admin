@@ -12,6 +12,7 @@ vi.mock('@/entities/content-source/model/content-source-mutations', () => ({
 }))
 
 const messageError = vi.fn()
+const messageInfo = vi.fn()
 const messageSuccess = vi.fn()
 
 vi.mock('antd', async () => {
@@ -21,6 +22,7 @@ vi.mock('antd', async () => {
   App.useApp = () => ({
     message: {
       error: messageError,
+      info: messageInfo,
       success: messageSuccess,
     },
   })
@@ -70,6 +72,7 @@ const renderButton = (source = contentSource) => {
 describe('ImportTelegramSourceButton', () => {
   beforeEach(() => {
     messageError.mockReset()
+    messageInfo.mockReset()
     messageSuccess.mockReset()
     mockedUseImportTelegramSourceMutation.mockReset()
   })
@@ -83,7 +86,7 @@ describe('ImportTelegramSourceButton', () => {
 
     renderButton()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Импорт Telegram' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Запустить импорт' }))
 
     expect(mutate).toHaveBeenCalledWith(
       { sourceId: 'source-1' },
@@ -99,7 +102,7 @@ describe('ImportTelegramSourceButton', () => {
 
     renderButton({ ...contentSource, status: 'disabled' })
     expect(
-      screen.queryByRole('button', { name: 'Импорт Telegram' }),
+      screen.queryByRole('button', { name: 'Запустить импорт' }),
     ).not.toBeInTheDocument()
   })
 
@@ -116,7 +119,7 @@ describe('ImportTelegramSourceButton', () => {
     })
 
     expect(
-      screen.queryByRole('button', { name: 'Импорт Telegram' }),
+      screen.queryByRole('button', { name: 'Запустить импорт' }),
     ).not.toBeInTheDocument()
   })
 
@@ -139,7 +142,7 @@ describe('ImportTelegramSourceButton', () => {
 
     renderButton()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Импорт Telegram' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Запустить импорт' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Import unavailable',
@@ -156,7 +159,74 @@ describe('ImportTelegramSourceButton', () => {
     renderButton()
 
     expect(
-      screen.getByRole('button', { name: 'Импорт Telegram' }),
+      screen.getByRole('button', { name: 'Запустить импорт' }),
     ).toBeDisabled()
+  })
+
+  it('disables import action and shows active run counters', () => {
+    mockedUseImportTelegramSourceMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useImportTelegramSourceMutation>)
+
+    render(
+      <AntdApp>
+        <ImportTelegramSourceButton
+          activeImportRun={{
+            createdAt: '2026-06-24T08:00:00.000Z',
+            createdCount: 2,
+            errorMessage: null,
+            finishedAt: null,
+            foundCount: 3,
+            id: 'run-1',
+            skippedDuplicateCount: 1,
+            sourceId: 'source-1',
+            startedAt: null,
+            status: 'queued',
+            updatedAt: '2026-06-24T08:00:00.000Z',
+            updatedCount: 0,
+          }}
+          contentSource={contentSource}
+        />
+      </AntdApp>,
+    )
+
+    expect(
+      screen.getByRole('button', { name: 'Запустить импорт' }),
+    ).toBeDisabled()
+    expect(screen.getByText('Импорт в очереди')).toBeInTheDocument()
+    expect(
+      screen.getByText('Найдено 3 · Создано 2 · Обновлено 0 · Дубликаты 1'),
+    ).toBeInTheDocument()
+  })
+
+  it('treats 409 conflicts as an already active import state', async () => {
+    mockedUseImportTelegramSourceMutation.mockReturnValue({
+      isPending: false,
+      mutate: (
+        _variables: ImportMutationVariables,
+        callbacks?: ImportMutationCallbacks,
+      ) => {
+        callbacks?.onError?.(
+          new ApiClientError({
+            kind: 'conflict',
+            message: 'Import already running',
+            status: 409,
+          }),
+        )
+      },
+    } as unknown as ReturnType<typeof useImportTelegramSourceMutation>)
+
+    renderButton()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Запустить импорт' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Импорт уже выполняется. Обновляем статус.',
+    )
+    expect(messageInfo).toHaveBeenCalledWith(
+      'Импорт уже выполняется. Обновляем статус.',
+    )
+    expect(messageError).not.toHaveBeenCalled()
   })
 })
