@@ -5,13 +5,34 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { Material } from './material';
-import type { PublicPlaceSummary } from './publicPlaceSummary';
+import type { PlaceCategory } from './placeCategory';
+import type { PlaceDetailCounters } from './placeDetailCounters';
+import type { PlaceStatus } from './placeStatus';
+import type { PublicMaterial } from './publicMaterial';
 
 /**
- * Детальная карточка места с pinned material и счетчиками по платформам.
+ * Детальная карточка места с публично-безопасным pinned material без исходного внешнего URL и счетчиками по платформам.
  */
-export type PlaceDetail = PublicPlaceSummary & ({
-  /** Закреплённый материал места, если он назначен. */
-  pinnedMaterial: Material | null;
-});
+export type PlaceDetail = {
+  /** Идентификатор места. */
+  id: string;
+  /** Название места. */
+  title: string;
+  /** Короткое описание для каталога. */
+  summary: string;
+  /** Набор тегов для поиска и фильтрации. */
+  tags: string[];
+  category: PlaceCategory;
+  status: PlaceStatus;
+  /** Вес популярности для сортировки. */
+  popularityWeight: number;
+  /**
+     * Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
+     * @nullable
+     */
+  coverImageUrl: string | null;
+  /** Количество материалов по платформам. */
+  counters: PlaceDetailCounters;
+  /** Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен. */
+  pinnedMaterial: PublicMaterial | null;
+};

@@ -1,13 +1,19 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
 import {
   getGetAdminPlaceDetailQueryKey,
+  getListAdminMaterialLibraryQueryKey,
   getListAdminPlaceMaterialsQueryKey,
+  hidePlaceMaterialLink,
+  linkPlaceMaterial,
   updateMaterial,
+  updateMaterialAdminStatus,
   useCreatePlaceMaterial,
 } from '@/shared/api/generated/admin/admin'
 import type {
+  AdminMaterialLibraryItem,
   CreateMaterialRequest,
   Material,
+  MaterialAdminStatus,
   UpdateMaterialRequest,
 } from '@/shared/api/generated/model'
 import type { QueryClient } from '@tanstack/react-query'
@@ -30,6 +36,30 @@ export type UpdateMaterialMutationOptions = {
 }
 
 /**
+ * Callback-и для смены review-статуса материала через entity bridge.
+ */
+export type UpdateMaterialAdminStatusMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (material: AdminMaterialLibraryItem) => Promise<void> | void
+}
+
+/**
+ * Callback-и для привязки библиотечного материала к месту через entity bridge.
+ */
+export type LinkPlaceMaterialMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: (material: Material) => Promise<void> | void
+}
+
+/**
+ * Callback-и для скрытия связи материала с местом через entity bridge.
+ */
+export type HidePlaceMaterialLinkMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: () => Promise<void> | void
+}
+
+/**
  * Переменные создания материала места через entity bridge.
  */
 export type CreatePlaceMaterialMutationVariables = {
@@ -49,6 +79,39 @@ export type UpdateMaterialMutationVariables = {
   data: UpdateMaterialRequest
   materialId: string
   placeId: string
+}
+
+/**
+ * Переменные смены review-статуса материала через entity bridge.
+ */
+export type UpdateMaterialAdminStatusMutationVariables = {
+  adminStatus: MaterialAdminStatus
+  materialId: string
+}
+
+/**
+ * Переменные привязки существующего материала к месту через entity bridge.
+ */
+export type LinkPlaceMaterialMutationVariables = {
+  materialId: string
+  placeId: string
+}
+
+/**
+ * Переменные скрытия связи материала с местом через entity bridge.
+ */
+export type HidePlaceMaterialLinkMutationVariables = {
+  materialId: string
+  placeId: string
+}
+
+/**
+ * Инвалидирует все варианты списка общей библиотеки материалов.
+ */
+export const invalidateMaterialLibraryQueries = (queryClient: QueryClient) => {
+  return queryClient.invalidateQueries({
+    queryKey: getListAdminMaterialLibraryQueryKey(),
+  })
 }
 
 /**
@@ -79,6 +142,17 @@ const invalidateMaterialDependencies = (
   return Promise.all([
     invalidatePlaceMaterialsListQuery(queryClient, placeId),
     invalidateAdminPlaceDetailQuery(queryClient, placeId),
+  ])
+}
+
+const invalidateMaterialLinkDependencies = (
+  queryClient: QueryClient,
+  placeId: string,
+) => {
+  return Promise.all([
+    invalidatePlaceMaterialsListQuery(queryClient, placeId),
+    invalidateAdminPlaceDetailQuery(queryClient, placeId),
+    invalidateMaterialLibraryQueries(queryClient),
   ])
 }
 
@@ -128,4 +202,85 @@ export function useUpdateMaterialMutation(
       },
     },
   )
+}
+
+/**
+ * Меняет review-статус материала через admin API и обновляет кеш библиотеки.
+ *
+ * @remarks Wrapper скрывает generated shape `pathParams/data` и принимает плоские переменные для feature actions.
+ */
+export function useUpdateMaterialAdminStatusMutation(
+  options?: UpdateMaterialAdminStatusMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    AdminMaterialLibraryItem,
+    ApiClientError,
+    UpdateMaterialAdminStatusMutationVariables
+  >({
+    mutationFn: ({ adminStatus, materialId }) =>
+      updateMaterialAdminStatus({ materialId }, { adminStatus }),
+    onError: options?.onError,
+    onSuccess: async (material) => {
+      await invalidateMaterialLibraryQueries(queryClient)
+      await options?.onSuccess?.(material)
+    },
+  })
+}
+
+/**
+ * Привязывает существующий библиотечный материал к месту и обновляет связанные кеши.
+ *
+ * @remarks Wrapper скрывает generated shape `pathParams` и после успеха инвалидирует
+ * admin detail места, bounded список материалов места и все варианты material library.
+ */
+export function useLinkPlaceMaterialMutation(
+  options?: LinkPlaceMaterialMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    Material,
+    ApiClientError,
+    LinkPlaceMaterialMutationVariables
+  >({
+    mutationFn: ({ materialId, placeId }) =>
+      linkPlaceMaterial({ materialId, placeId }),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (material, variables) => {
+      await invalidateMaterialLinkDependencies(queryClient, variables.placeId)
+      await options?.onSuccess?.(material)
+    },
+  })
+}
+
+/**
+ * Скрывает активную связь материала с местом и обновляет связанные кеши.
+ *
+ * @remarks Материал остается в общей библиотеке; wrapper инвалидирует admin detail места,
+ * bounded список материалов места и material library, где меняются linked/placeLink признаки.
+ */
+export function useHidePlaceMaterialLinkMutation(
+  options?: HidePlaceMaterialLinkMutationOptions,
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    void,
+    ApiClientError,
+    HidePlaceMaterialLinkMutationVariables
+  >({
+    mutationFn: ({ materialId, placeId }) =>
+      hidePlaceMaterialLink({ materialId, placeId }),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (_result, variables) => {
+      await invalidateMaterialLinkDependencies(queryClient, variables.placeId)
+      await options?.onSuccess?.()
+    },
+  })
 }

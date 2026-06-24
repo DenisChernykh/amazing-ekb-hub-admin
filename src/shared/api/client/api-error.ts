@@ -17,6 +17,7 @@ export type ApiErrorKind =
   | 'auth'
   | 'permission'
   | 'validation'
+  | 'conflict'
   | 'not-found'
   | 'network'
   | 'server'
@@ -98,6 +99,10 @@ const classifyStatus = (status: number | undefined): ApiErrorKind => {
 
   if (status === 404) {
     return 'not-found'
+  }
+
+  if (status === 409) {
+    return 'conflict'
   }
 
   if (status && status >= 500) {

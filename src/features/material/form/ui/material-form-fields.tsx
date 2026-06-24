@@ -11,12 +11,16 @@ import type { MaterialFormValues } from '../model/material-form'
  */
 export type MaterialFormFieldsProps = {
   disabled?: boolean
+  showUrlField?: boolean
 }
 
 /**
  * Общие Ant Design поля создания и редактирования материала.
  */
-export function MaterialFormFields({ disabled }: MaterialFormFieldsProps) {
+export function MaterialFormFields({
+  disabled,
+  showUrlField = true,
+}: MaterialFormFieldsProps) {
   return (
     <>
       <Form.Item<MaterialFormValues>
@@ -78,28 +82,30 @@ export function MaterialFormFields({ disabled }: MaterialFormFieldsProps) {
         />
       </Form.Item>
 
-      <Form.Item<MaterialFormValues>
-        label="Ссылка"
-        name="url"
-        rules={[
-          { message: 'Введите ссылку', required: true, whitespace: true },
-          {
-            validator: async (_rule, value: unknown) => {
-              if (typeof value !== 'string') {
-                return
-              }
+      {showUrlField && (
+        <Form.Item<MaterialFormValues>
+          label="Ссылка"
+          name="url"
+          rules={[
+            { message: 'Введите ссылку', required: true, whitespace: true },
+            {
+              validator: async (_rule, value: unknown) => {
+                if (typeof value !== 'string') {
+                  return
+                }
 
-              const validationError = getMaterialUrlValidationError(value)
+                const validationError = getMaterialUrlValidationError(value)
 
-              if (validationError) {
-                throw new Error(validationError)
-              }
+                if (validationError) {
+                  throw new Error(validationError)
+                }
+              },
             },
-          },
-        ]}
-      >
-        <Input aria-label="Ссылка" disabled={disabled} />
-      </Form.Item>
+          ]}
+        >
+          <Input aria-label="Ссылка" disabled={disabled} />
+        </Form.Item>
+      )}
     </>
   )
 }

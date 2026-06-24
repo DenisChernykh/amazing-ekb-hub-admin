@@ -12,13 +12,9 @@ import * as zod from 'zod';
  * Аутентифицирует пользователя по email и паролю, ставит access/refresh HttpOnly cookies и возвращает публичный профиль.
  * @summary Login
  */
-export const loginBodyPasswordMin = 8;
-
-
-
 export const LoginBody = zod.strictObject({
   "email": zod.email().describe('Email пользователя.'),
-  "password": zod.string().min(loginBodyPasswordMin).describe('Пароль пользователя.')
+  "password": zod.string().describe('Пароль пользователя. Login не раскрывает password policy и возвращает generic credentials error для неверного пароля любой длины.')
 }).describe('Данные для входа пользователя по email и паролю.')
 
 export const Login200Response = zod.strictObject({

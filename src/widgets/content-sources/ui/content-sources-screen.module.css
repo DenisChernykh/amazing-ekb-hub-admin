@@ -1,0 +1,31 @@
+.title {
+  margin: 0;
+}
+
+.card {
+  border-radius: 8px;
+}
+
+.filters {
+  margin-bottom: 16px;
+}
+
+.filter {
+  min-width: 180px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.sourceCell {
+  min-width: 180px;
+}
+
+.identityCell {
+  min-width: 160px;
+}
+
+.errorText {
+  max-width: 280px;
+}

@@ -12,9 +12,6 @@
 export type AuthLoginRequest = {
   /** Email пользователя. */
   email: string;
-  /**
-     * Пароль пользователя.
-     * @minLength 8
-     */
+  /** Пароль пользователя. Login не раскрывает password policy и возвращает generic credentials error для неверного пароля любой длины. */
   password: string;
 };

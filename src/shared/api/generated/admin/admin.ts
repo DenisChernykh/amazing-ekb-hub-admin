@@ -27,6 +27,7 @@ import type {
 import type {
   AdminMaterialLibraryItem,
   AdminMaterialLibraryListResponse,
+  AdminPlaceDetail,
   ClearPinnedMaterialPathParameters,
   ContentSource,
   ContentSourceConflictResponse,
@@ -54,13 +55,14 @@ import type {
   MaterialListResponse,
   MaterialNotFoundResponse,
   NestErrorResponse,
-  PlaceDetail,
   PlaceListResponse,
   PlaceNotFoundResponse,
   PlacePhotoUploadRequest,
   PlaceSummary,
   SetPinnedMaterialPathParameters,
   SetPinnedMaterialRequest,
+  StreamImportRunEventsPathParameters,
+  TelegramImportAlreadyRunningResponse,
   UnauthorizedResponse,
   UpdateContentSourcePathParameters,
   UpdateContentSourceRequest,
@@ -256,7 +258,7 @@ export const getAdminPlaceDetail = (
 ) => {
 
 
-      return apiMutator<PlaceDetail>(
+      return apiMutator<AdminPlaceDetail>(
       {url: `/admin/places/${encodeURIComponent(String(placeId))}`, method: 'GET', signal
     },
       options);
@@ -919,7 +921,105 @@ export function useListImportRuns<TData = Awaited<ReturnType<typeof listImportRu
 
 
 /**
- * Синхронно импортирует одну bounded-порцию Telegram history для active Telegram content source. Повторные запуски используют cursor и не публикуют материалы на place pages без явной `PlaceMaterial` связи.
+ * Открывает Server-Sent Events stream для одного import run. Stream сразу отправляет initial snapshot текущего `ImportRun`, затем runtime-обновления `import-run.updated` при изменении статуса или счетчиков.
+
+Если подписка не может быть подготовлена, NestJS SSE handler отправляет `event: error` и закрывает stream.
+
+БД и `GET /admin/import-runs` остаются источником истины и fallback для refresh/reconnect; in-memory SSE доставляет только обновления текущего backend process.
+
+ * @summary Stream import run updates
+ */
+export const streamImportRunEvents = (
+    { runId }: StreamImportRunEventsPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<string>(
+      {url: `/admin/import-runs/${encodeURIComponent(String(runId))}/events`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getStreamImportRunEventsQueryKey = ({ runId }: StreamImportRunEventsPathParameters,) => {
+    return [
+    `/admin/import-runs/${runId}/events`
+    ] as const;
+    }
+
+
+export const getStreamImportRunEventsQueryOptions = <TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>({ runId }: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStreamImportRunEventsQueryKey({ runId });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof streamImportRunEvents>>> = ({ signal }) => streamImportRunEvents({ runId }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(runId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StreamImportRunEventsQueryResult = NonNullable<Awaited<ReturnType<typeof streamImportRunEvents>>>
+export type StreamImportRunEventsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamImportRunEventsPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamImportRunEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamImportRunEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamImportRunEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamImportRunEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Stream import run updates
+ */
+
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ { runId }: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStreamImportRunEventsQueryOptions({ runId },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Создает durable queued one-click Telegram import/backfill run для active Telegram content source. HTTP не ждет GramJS/Telegram processing; worker позже переведет run в `running`, обработает до 20 внутренних batch-ов по `limit` логических постов, сохраняя cursor после каждого успешного непустого batch-а, и остановится при исчерпании истории, safety cap или final failure. Fresh active `queued/running` run того же source возвращает `409 Conflict`; stale `queued/running` runs старше консервативного timeout закрываются как `failed` перед созданием новой queued попытки.
  * @summary Import Telegram channel posts
  */
 export const importTelegramChannel = (
@@ -938,7 +1038,7 @@ export const importTelegramChannel = (
 
 
 
-export const getImportTelegramChannelMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | NestErrorResponse>,
+export const getImportTelegramChannelMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | TelegramImportAlreadyRunningResponse | NestErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importTelegramChannel>>, TError,{pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}, TContext>, request?: SecondParameter<typeof apiMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof importTelegramChannel>>, TError,{pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}, TContext> => {
 
@@ -967,12 +1067,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ImportTelegramChannelMutationResult = NonNullable<Awaited<ReturnType<typeof importTelegramChannel>>>
 
-    export type ImportTelegramChannelMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | NestErrorResponse>
+    export type ImportTelegramChannelMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | TelegramImportAlreadyRunningResponse | NestErrorResponse>
 
     /**
  * @summary Import Telegram channel posts
  */
-export const useImportTelegramChannel = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | NestErrorResponse>,
+export const useImportTelegramChannel = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | TelegramImportAlreadyRunningResponse | NestErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importTelegramChannel>>, TError,{pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}, TContext>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof importTelegramChannel>>,
@@ -1572,7 +1672,7 @@ export const setPinnedMaterial = (
 ) => {
 
 
-      return apiMutator<PlaceDetail>(
+      return apiMutator<AdminPlaceDetail>(
       {url: `/admin/places/${encodeURIComponent(String(placeId))}/pinned-material`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: setPinnedMaterialRequest, signal
@@ -1636,7 +1736,7 @@ export const clearPinnedMaterial = (
 ) => {
 
 
-      return apiMutator<PlaceDetail>(
+      return apiMutator<AdminPlaceDetail>(
       {url: `/admin/places/${encodeURIComponent(String(placeId))}/pinned-material`, method: 'DELETE', signal
     },
       options);
