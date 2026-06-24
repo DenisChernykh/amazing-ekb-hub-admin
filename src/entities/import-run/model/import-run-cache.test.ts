@@ -1,10 +1,16 @@
-import { getListImportRunsQueryKey } from '@/shared/api/generated/admin/admin'
+import {
+  getListAdminMaterialLibraryQueryKey,
+  getListContentSourcesQueryKey,
+  getListImportRunsQueryKey,
+} from '@/shared/api/generated/admin/admin'
 import type { ImportRun } from '@/shared/api/generated/model'
 import type { ImportRunListResponse } from '@/shared/api/generated/operation'
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 import {
   getActiveImportRunForSource,
+  getImportRunFromQueryCache,
+  invalidateImportRunDependencyQueries,
   invalidateImportRunQueries,
   isActiveImportRunStatus,
   syncImportRunQueryCache,
@@ -149,6 +155,51 @@ describe('import run cache helpers', () => {
     expect(
       queryClient.getQueryCache().find({
         queryKey: getListImportRunsQueryKey(),
+      })?.state.isInvalidated,
+    ).toBe(true)
+  })
+
+  it('finds an import run in mounted import-run query caches', () => {
+    const queryClient = new QueryClient()
+    const queuedRun = makeRun({ id: 'run-queued', status: 'queued' })
+
+    queryClient.setQueryData(
+      getListImportRunsQueryKey({ sourceId: 'source-1' }),
+      {
+        items: [queuedRun],
+      },
+    )
+
+    expect(getImportRunFromQueryCache(queryClient, 'run-queued')).toBe(
+      queuedRun,
+    )
+    expect(getImportRunFromQueryCache(queryClient, 'run-missing')).toBeNull()
+  })
+
+  it('invalidates import completion dependency caches', async () => {
+    const queryClient = new QueryClient()
+
+    queryClient.setQueryData(getListImportRunsQueryKey(), { items: [] })
+    queryClient.setQueryData(getListContentSourcesQueryKey(), { items: [] })
+    queryClient.setQueryData(getListAdminMaterialLibraryQueryKey(), {
+      items: [],
+    })
+
+    await invalidateImportRunDependencyQueries(queryClient)
+
+    expect(
+      queryClient.getQueryCache().find({
+        queryKey: getListImportRunsQueryKey(),
+      })?.state.isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({
+        queryKey: getListContentSourcesQueryKey(),
+      })?.state.isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({
+        queryKey: getListAdminMaterialLibraryQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
   })

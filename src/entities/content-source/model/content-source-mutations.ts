@@ -1,12 +1,13 @@
 import {
+  invalidateImportRunDependencyQueries,
   invalidateImportRunQueries,
   syncImportRunQueryCache,
 } from '@/entities/import-run/model/import-run-cache'
+import { invalidateMaterialLibraryQueries } from '@/entities/material/model/material-mutations'
 import type { ApiClientError } from '@/shared/api/client/api-error'
 import { getApiErrorStatus } from '@/shared/api/client/api-error'
 import {
   createContentSource,
-  getListAdminMaterialLibraryQueryKey,
   getListContentSourcesQueryKey,
   importTelegramChannel,
   updateContentSource,
@@ -86,18 +87,8 @@ export const invalidateContentSourceQueries = (queryClient: QueryClient) => {
   })
 }
 
-const invalidateMaterialLibraryQueries = (queryClient: QueryClient) => {
-  return queryClient.invalidateQueries({
-    queryKey: getListAdminMaterialLibraryQueryKey(),
-  })
-}
-
 const invalidateImportDependencies = (queryClient: QueryClient) => {
-  return Promise.all([
-    invalidateContentSourceQueries(queryClient),
-    invalidateImportRunQueries(queryClient),
-    invalidateMaterialLibraryQueries(queryClient),
-  ])
+  return invalidateImportRunDependencyQueries(queryClient)
 }
 
 /**

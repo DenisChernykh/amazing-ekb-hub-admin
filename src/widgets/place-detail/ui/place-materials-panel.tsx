@@ -11,7 +11,7 @@ import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-dr
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material, PublicMaterial } from '@/shared/api/generated/model'
+import type { PublicMaterial } from '@/shared/api/generated/model'
 import type { TableColumnsType } from 'antd'
 import {
   Alert,
@@ -33,16 +33,9 @@ type HideLinkError = {
 type MaterialColumnsOptions = {
   hideLinkError: HideLinkError | null
   isHideLinkPending: boolean
-  onEdit: (material: EditablePlaceMaterial) => void
+  onEdit: (material: PublicMaterial) => void
   onHideLink: (material: PublicMaterial) => void
 }
-
-type EditablePlaceMaterial = Material & PublicMaterial
-
-const isEditablePlaceMaterial = (
-  material: PublicMaterial,
-): material is EditablePlaceMaterial =>
-  typeof (material as { url?: unknown }).url === 'string'
 
 const getMaterialColumns = ({
   hideLinkError,
@@ -98,11 +91,9 @@ const getMaterialColumns = ({
       return (
         <Space orientation="vertical" size={4}>
           <Space size={[4, 4]} wrap>
-            {isEditablePlaceMaterial(material) ? (
-              <Button onClick={() => onEdit(material)} type="link">
-                Редактировать
-              </Button>
-            ) : null}
+            <Button onClick={() => onEdit(material)} type="link">
+              Редактировать
+            </Button>
             <Button
               danger
               disabled={isHideLinkPending}
@@ -145,7 +136,9 @@ export function PlaceMaterialsPanel({
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isLinkExistingOpen, setIsLinkExistingOpen] = useState(false)
-  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
+  const [editingMaterial, setEditingMaterial] = useState<PublicMaterial | null>(
+    null,
+  )
   const [hideLinkError, setHideLinkError] = useState<HideLinkError | null>(null)
   const hideLinkMutation = useHidePlaceMaterialLinkMutation()
   const addButton = (

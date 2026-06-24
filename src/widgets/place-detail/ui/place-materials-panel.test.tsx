@@ -238,7 +238,7 @@ describe('PlaceMaterialsPanel', () => {
     expect(screen.getByText('create material for place-1')).toBeInTheDocument()
   })
 
-  it('does not render edit material action when list response has no original URL', () => {
+  it('opens edit material drawer for URL-less list rows', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
       data: materialsResponse,
       error: null,
@@ -251,9 +251,11 @@ describe('PlaceMaterialsPanel', () => {
       <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
     )
 
+    fireEvent.click(screen.getByRole('button', { name: 'Редактировать' }))
+
     expect(
-      screen.queryByRole('button', { name: 'Редактировать' }),
-    ).not.toBeInTheDocument()
+      screen.getByText('edit material Обзор комплекса for place-1'),
+    ).toBeInTheDocument()
   })
 
   it('opens link existing material drawer from panel action', () => {

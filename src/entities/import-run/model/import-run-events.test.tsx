@@ -1,4 +1,8 @@
-import { getListImportRunsQueryKey } from '@/shared/api/generated/admin/admin'
+import {
+  getListAdminMaterialLibraryQueryKey,
+  getListContentSourcesQueryKey,
+  getListImportRunsQueryKey,
+} from '@/shared/api/generated/admin/admin'
 import type { ImportRun } from '@/shared/api/generated/model'
 import type { ImportRunListResponse } from '@/shared/api/generated/operation'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -104,7 +108,7 @@ describe('useImportRunEvents', () => {
     })
   })
 
-  it('updates import run caches from import-run.updated events and closes on terminal status', () => {
+  it('updates import run caches from import-run.updated events and invalidates dependencies on terminal status', async () => {
     const queryClient = new QueryClient()
     const queuedRun = makeRun({ status: 'queued' })
     const completedRun = makeRun({
@@ -120,16 +124,21 @@ describe('useImportRunEvents', () => {
         items: [queuedRun],
       },
     )
+    queryClient.setQueryData(getListContentSourcesQueryKey(), { items: [] })
+    queryClient.setQueryData(getListAdminMaterialLibraryQueryKey(), {
+      items: [],
+    })
 
     renderHook(() => useImportRunEvents('run-1', { sourceId: 'source-1' }), {
       wrapper: createWrapper(queryClient),
     })
 
-    act(() => {
+    await act(async () => {
       EventSourceMock.instances[0]?.emit(
         'import-run.updated',
         JSON.stringify(completedRun),
       )
+      await Promise.resolve()
     })
 
     expect(
@@ -138,6 +147,16 @@ describe('useImportRunEvents', () => {
       )?.items,
     ).toEqual([completedRun])
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
+    expect(
+      queryClient.getQueryCache().find({
+        queryKey: getListContentSourcesQueryKey(),
+      })?.state.isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({
+        queryKey: getListAdminMaterialLibraryQueryKey(),
+      })?.state.isInvalidated,
+    ).toBe(true)
   })
 
   it('falls back to import-run refetch when SSE emits an error', () => {
@@ -174,6 +193,27 @@ describe('useImportRunEvents', () => {
 
     act(() => {
       EventSourceMock.instances[0]?.emit('import-run.updated', '{broken')
+    })
+
+    expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: getListImportRunsQueryKey(),
+    })
+  })
+
+  it('falls back to import-run refetch when an event payload violates the generated schema', () => {
+    const queryClient = new QueryClient()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+    renderHook(() => useImportRunEvents('run-1', { sourceId: 'source-1' }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    act(() => {
+      EventSourceMock.instances[0]?.emit(
+        'import-run.updated',
+        JSON.stringify({ id: 'run-1', status: 'completed' }),
+      )
     })
 
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()

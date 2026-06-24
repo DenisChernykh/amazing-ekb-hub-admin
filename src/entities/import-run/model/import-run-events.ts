@@ -1,17 +1,17 @@
-import { buildApiUrl } from '@/shared/api/client/api-base-url'
-import type { ImportRun, ImportRunStatus } from '@/shared/api/generated/model'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import {
+  getImportRunFromQueryCache,
+  invalidateImportRunDependencyQueries,
   invalidateImportRunQueries,
   isTerminalImportRunStatus,
   syncImportRunQueryCache,
 } from './import-run-cache'
-
-/**
- * Имя успешного SSE-события обновления import run.
- */
-export const IMPORT_RUN_UPDATED_EVENT = 'import-run.updated'
+import { parseImportRunEventData } from './import-run-events-parser'
+import {
+  subscribeToImportRunEvents,
+  type ImportRunEventsSubscription,
+} from './import-run-events-transport'
 
 /**
  * Интервал fallback refetch, пока SSE недоступен или сломан.
@@ -31,51 +31,6 @@ export type ImportRunEventsOptions = {
  */
 export type ImportRunEventsState = {
   isFallbackRefetchEnabled: boolean
-}
-
-const importRunStatuses = new Set<ImportRunStatus>([
-  'queued',
-  'running',
-  'completed',
-  'failed',
-])
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
-
-const isNullableString = (value: unknown): value is string | null =>
-  typeof value === 'string' || value === null
-
-const isImportRun = (value: unknown): value is ImportRun => {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.sourceId === 'string' &&
-    typeof value.status === 'string' &&
-    importRunStatuses.has(value.status as ImportRunStatus) &&
-    isNullableString(value.startedAt) &&
-    isNullableString(value.finishedAt) &&
-    typeof value.foundCount === 'number' &&
-    typeof value.createdCount === 'number' &&
-    typeof value.updatedCount === 'number' &&
-    typeof value.skippedDuplicateCount === 'number' &&
-    isNullableString(value.errorMessage) &&
-    typeof value.createdAt === 'string' &&
-    typeof value.updatedAt === 'string'
-  )
-}
-
-const parseImportRunEventData = (data: string) => {
-  const parsed: unknown = JSON.parse(data)
-
-  if (!isImportRun(parsed)) {
-    throw new Error('Unexpected import run SSE payload')
-  }
-
-  return parsed
 }
 
 /**
@@ -108,51 +63,31 @@ export function useImportRunEvents(
       return
     }
 
-    let isClosed = false
-    const eventSource = new EventSource(
-      buildApiUrl(`/admin/import-runs/${encodeURIComponent(runId)}/events`),
-      {
-        withCredentials: true,
-      },
-    )
-    const closeEventSource = () => {
-      if (isClosed) {
-        return
-      }
-
-      isClosed = true
-      eventSource.close()
-    }
+    let subscription: ImportRunEventsSubscription | null = null
     const enableFallback = () => {
-      closeEventSource()
+      subscription?.close()
       setFallbackRunId(runId)
     }
-    const handleUpdate = (event: Event) => {
-      try {
-        const importRun = parseImportRunEventData(
-          (event as MessageEvent<string>).data,
-        )
+    subscription = subscribeToImportRunEvents(runId, {
+      onError: enableFallback,
+      onUpdate: (data) => {
+        try {
+          const importRun = parseImportRunEventData(data)
+          const isTerminal = isTerminalImportRunStatus(importRun.status)
 
-        syncImportRunQueryCache(queryClient, importRun)
+          syncImportRunQueryCache(queryClient, importRun)
 
-        if (isTerminalImportRunStatus(importRun.status)) {
-          closeEventSource()
+          if (isTerminal) {
+            void invalidateImportRunDependencyQueries(queryClient)
+            subscription?.close()
+          }
+        } catch {
+          enableFallback()
         }
-      } catch {
-        enableFallback()
-      }
-    }
-    const handleError = () => {
-      enableFallback()
-    }
-
-    eventSource.addEventListener(IMPORT_RUN_UPDATED_EVENT, handleUpdate)
-    eventSource.addEventListener('error', handleError)
-
+      },
+    })
     return () => {
-      eventSource.removeEventListener(IMPORT_RUN_UPDATED_EVENT, handleUpdate)
-      eventSource.removeEventListener('error', handleError)
-      closeEventSource()
+      subscription.close()
     }
   }, [enabled, fallbackRunId, isEventSourceUnavailable, queryClient, runId])
 
@@ -161,10 +96,20 @@ export function useImportRunEvents(
       return
     }
 
-    void invalidateImportRunQueries(queryClient)
+    const refetchImportRuns = async () => {
+      await invalidateImportRunQueries(queryClient)
+
+      const importRun = getImportRunFromQueryCache(queryClient, runId)
+
+      if (importRun && isTerminalImportRunStatus(importRun.status)) {
+        await invalidateImportRunDependencyQueries(queryClient)
+      }
+    }
+
+    void refetchImportRuns()
 
     const intervalId = window.setInterval(() => {
-      void invalidateImportRunQueries(queryClient)
+      void refetchImportRuns()
     }, IMPORT_RUN_EVENTS_FALLBACK_REFETCH_INTERVAL_MS)
 
     return () => {

@@ -1,4 +1,8 @@
-import { getListImportRunsQueryKey } from '@/shared/api/generated/admin/admin'
+import {
+  getListAdminMaterialLibraryQueryKey,
+  getListContentSourcesQueryKey,
+  getListImportRunsQueryKey,
+} from '@/shared/api/generated/admin/admin'
 import type { ImportRun, ImportRunStatus } from '@/shared/api/generated/model'
 import type { ImportRunListResponse } from '@/shared/api/generated/operation'
 import type { ListImportRunsParams } from '@/shared/api/generated/operation/listImportRunsParams'
@@ -169,4 +173,46 @@ export const invalidateImportRunQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
     queryKey: getListImportRunsQueryKey(),
   })
+}
+
+/**
+ * Инвалидирует кеши, которые меняются в результате завершения import run.
+ *
+ * @remarks Import worker может обновить материалы и `lastImportedAt` уже после
+ * `201 queued`, поэтому terminal SSE/fallback должен обновлять зависимые списки.
+ */
+export const invalidateImportRunDependencyQueries = (
+  queryClient: QueryClient,
+) => {
+  return Promise.all([
+    invalidateImportRunQueries(queryClient),
+    queryClient.invalidateQueries({
+      queryKey: getListContentSourcesQueryKey(),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: getListAdminMaterialLibraryQueryKey(),
+    }),
+  ])
+}
+
+/**
+ * Ищет import run среди смонтированных cache-вариантов `GET /admin/import-runs`.
+ */
+export const getImportRunFromQueryCache = (
+  queryClient: QueryClient,
+  runId: string,
+) => {
+  const rootQueryKey = getListImportRunsQueryKey()
+
+  return (
+    queryClient
+      .getQueryCache()
+      .findAll({ queryKey: rootQueryKey })
+      .flatMap((query) => {
+        const response = query.state.data as ImportRunListResponse | undefined
+
+        return response?.items ?? []
+      })
+      .find((importRun) => importRun.id === runId) ?? null
+  )
 }
