@@ -1,4 +1,10 @@
-import type { MaterialType, Platform } from '@/shared/api/generated/model'
+import type {
+  AdminMaterialLibraryItem,
+  MaterialAdminStatus,
+  MaterialType,
+  Platform,
+} from '@/shared/api/generated/model'
+import { isSafeMaterialUrl } from '../model/material-url'
 
 /**
  * UI-метаданные значения материала для тегов и таблиц.
@@ -38,6 +44,43 @@ const materialTypeMeta: Record<MaterialType, MaterialMeta> = {
   },
 }
 
+const materialAdminStatusMeta: Record<MaterialAdminStatus, MaterialMeta> = {
+  approved: {
+    color: 'green',
+    label: 'Одобрено',
+  },
+  archived: {
+    color: 'default',
+    label: 'Архив',
+  },
+  pending: {
+    color: 'gold',
+    label: 'На проверке',
+  },
+  rejected: {
+    color: 'red',
+    label: 'Отклонено',
+  },
+}
+
+const materialLinkedMeta: Record<'linked' | 'unlinked', MaterialMeta> = {
+  linked: {
+    color: 'green',
+    label: 'Связан',
+  },
+  unlinked: {
+    color: 'default',
+    label: 'Не связан',
+  },
+}
+
+const materialMediaKindLabel: Record<string, string> = {
+  album: 'Альбом',
+  document: 'Документ',
+  photo: 'Фото',
+  video: 'Видео',
+}
+
 /**
  * Runtime-значения платформ материалов в стабильном UI-порядке.
  */
@@ -57,6 +100,16 @@ export const MATERIAL_TYPE_VALUES = [
 ] satisfies MaterialType[]
 
 /**
+ * Runtime-значения review-статусов материалов в стабильном UI-порядке.
+ */
+export const MATERIAL_ADMIN_STATUS_VALUES = [
+  'pending',
+  'approved',
+  'rejected',
+  'archived',
+] satisfies MaterialAdminStatus[]
+
+/**
  * Возвращает локализованные UI-метаданные платформы материала.
  */
 export function getMaterialPlatformMeta(platform: Platform) {
@@ -68,6 +121,20 @@ export function getMaterialPlatformMeta(platform: Platform) {
  */
 export function getMaterialTypeMeta(type: MaterialType) {
   return materialTypeMeta[type]
+}
+
+/**
+ * Возвращает локализованные UI-метаданные review-статуса материала.
+ */
+export function getMaterialAdminStatusMeta(status: MaterialAdminStatus) {
+  return materialAdminStatusMeta[status]
+}
+
+/**
+ * Возвращает локализованные UI-метаданные наличия связи материала с местом.
+ */
+export function getMaterialLinkedMeta(linked: boolean) {
+  return materialLinkedMeta[linked ? 'linked' : 'unlinked']
 }
 
 /**
@@ -88,6 +155,29 @@ export function getMaterialTypeOptions() {
     label: getMaterialTypeMeta(type).label,
     value: type,
   }))
+}
+
+/**
+ * Возвращает options review-статусов материалов для Ant Design Select.
+ */
+export function getMaterialAdminStatusOptions() {
+  return MATERIAL_ADMIN_STATUS_VALUES.map((status) => ({
+    label: getMaterialAdminStatusMeta(status).label,
+    value: status,
+  }))
+}
+
+/**
+ * Форматирует nullable media kind импортированного материала.
+ *
+ * @returns `—`, если importer не вернул тип media.
+ */
+export function formatMaterialMediaKind(mediaKind: string | null) {
+  if (mediaKind === null) {
+    return '—'
+  }
+
+  return materialMediaKindLabel[mediaKind] ?? mediaKind
 }
 
 /**
@@ -120,4 +210,39 @@ export function formatMaterialDuration(durationSec: number | null) {
  */
 export function formatMaterialPublishedDate(publishedAt: string) {
   return publishedAt.slice(0, 10)
+}
+
+/**
+ * Возвращает preview-текст библиотечного материала для таблиц и selector-ов.
+ *
+ * @returns `—`, если backend не вернул ни excerpt, ни title, ни text.
+ */
+export function getMaterialLibraryPreviewText(
+  material: AdminMaterialLibraryItem,
+) {
+  return material.excerpt ?? material.title ?? material.text ?? '—'
+}
+
+/**
+ * Возвращает название source библиотечного материала.
+ *
+ * @returns `Ручной материал` для материалов без content source.
+ */
+export function getMaterialLibrarySourceTitle(
+  material: AdminMaterialLibraryItem,
+) {
+  return material.source?.displayName ?? 'Ручной материал'
+}
+
+/**
+ * Возвращает безопасный href для material UI-ссылок.
+ *
+ * @returns `null`, если URL пустой или использует неподдерживаемый протокол.
+ */
+export function getSafeMaterialHref(url: string | null | undefined) {
+  if (!url || !isSafeMaterialUrl(url)) {
+    return null
+  }
+
+  return url
 }

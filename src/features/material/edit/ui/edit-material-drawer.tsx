@@ -4,6 +4,7 @@ import {
   getMaterialFormInitialValues,
   hasMaterialFormChanges,
   toUpdateMaterialRequest,
+  type EditableMaterial,
   type MaterialFormChangedField,
   type MaterialFormValues,
 } from '@/features/material/form/model/material-form'
@@ -18,7 +19,7 @@ import { useState } from 'react'
  * Props drawer-а редактирования материала.
  */
 export type EditMaterialDrawerProps = {
-  material: Material
+  material: EditableMaterial
   onClose: () => void
   onUpdated?: (material: Material) => void
   open: boolean
@@ -41,6 +42,7 @@ export function EditMaterialDrawer({
   const { message, modal } = AntdApp.useApp()
   const [form] = Form.useForm<MaterialFormValues>()
   const initialValues = getMaterialFormInitialValues(material)
+  const showUrlField = typeof material.url === 'string'
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const [isDirty, setIsDirty] = useState(false)
   const [changedFields, setChangedFields] = useState<
@@ -148,7 +150,10 @@ export function EditMaterialDrawer({
           </Form.Item>
         )}
 
-        <MaterialFormFields disabled={updateMaterialMutation.isPending} />
+        <MaterialFormFields
+          disabled={updateMaterialMutation.isPending}
+          showUrlField={showUrlField}
+        />
 
         <Flex gap={8} justify="end" wrap>
           <Button

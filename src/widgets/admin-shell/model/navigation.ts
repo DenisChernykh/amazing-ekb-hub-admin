@@ -1,4 +1,9 @@
-import { DashboardOutlined, UnorderedListOutlined } from '@ant-design/icons'
+import {
+  ApiOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons'
 import { createElement, type ReactNode } from 'react'
 
 /**
@@ -26,6 +31,18 @@ export const adminNavigationItems = [
     key: 'places',
     label: 'Места',
     path: '/places',
+  },
+  {
+    icon: createElement(FileTextOutlined),
+    key: 'materials',
+    label: 'Материалы',
+    path: '/materials',
+  },
+  {
+    icon: createElement(ApiOutlined),
+    key: 'contentSources',
+    label: 'Источники',
+    path: '/content-sources',
   },
 ] satisfies AdminNavigationItem[]
 

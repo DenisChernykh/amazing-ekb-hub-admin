@@ -3,9 +3,8 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios'
+import { getApiBaseUrl } from './api-base-url'
 import { normalizeApiError } from './api-error'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/v1'
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean
@@ -34,7 +33,7 @@ const requestRefresh = async (client: AxiosInstance) => {
  * Cookie-only Axios transport для generated API клиента админки.
  */
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
 })
 

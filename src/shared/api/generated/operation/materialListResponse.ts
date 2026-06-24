@@ -5,12 +5,12 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { Material } from '../model/material';
+import type { PublicMaterial } from '../model/publicMaterial';
 
 /**
- * Ограниченный список материалов места.
+ * Ограниченный список материалов места без исходного внешнего URL.
  */
 export type MaterialListResponse = {
   /** Материалы места в стабильном порядке отображения. */
-  items: Material[];
+  items: PublicMaterial[];
 };

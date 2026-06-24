@@ -9,7 +9,7 @@ import type { MaterialType } from './materialType';
 import type { Platform } from './platform';
 
 /**
- * Материал, связанный с местом.
+ * Административный материал, связанный с местом. Содержит исходную внешнюю ссылку для внутренних сценариев управления.
  */
 export type Material = {
   /** Идентификатор материала. */
@@ -30,6 +30,6 @@ export type Material = {
      * @nullable
      */
   durationSec: number | null;
-  /** Публичная ссылка на материал. Допускаются только абсолютные http/https URL. */
+  /** Исходная внешняя ссылка на материал. Допускаются только абсолютные http/https URL. */
   url: string;
 };

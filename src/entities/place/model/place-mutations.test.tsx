@@ -271,7 +271,7 @@ describe('place mutations', () => {
         publishedAt: '2026-03-20T10:30:00+05:00',
         title: 'Стартовый обзор',
         type: 'post',
-        url: 'https://t.me/amazing_ekb/321',
+        redirectUrl: '/v1/materials/material-1/go',
       },
       popularityWeight: 8,
       status: 'hidden',

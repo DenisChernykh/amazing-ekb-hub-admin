@@ -15,6 +15,8 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `normalizeApiError` | `src/shared/api/client/api-error.ts`     | exported   | Converts Axios, network, and unknown errors to `ApiClientError`.                                                               |
 | `isApiClientError`  | `src/shared/api/client/api-error.ts`     | exported   | Narrows unknown errors to `ApiClientError`.                                                                                    |
 | `getApiErrorStatus` | `src/shared/api/client/api-error.ts`     | exported   | Reads HTTP status from a normalized API error.                                                                                 |
+| `getApiBaseUrl`     | `src/shared/api/client/api-base-url.ts`  | exported   | Returns the shared backend API base URL for Axios and browser APIs such as `EventSource`.                                      |
+| `buildApiUrl`       | `src/shared/api/client/api-base-url.ts`  | exported   | Builds backend API URLs from the shared base URL and a relative path.                                                          |
 | `apiMutator`        | `src/shared/api/client/orval-mutator.ts` | exported   | Orval custom mutator that sends generated requests through the shared Axios client.                                            |
 | `shouldSkipRefresh` | `src/shared/api/client/api-client.ts`    | private    | Detects auth endpoints that must not trigger refresh retry. Promote only if another transport needs the same auth-loop rule.   |
 | `requestRefresh`    | `src/shared/api/client/api-client.ts`    | private    | Shares one in-flight refresh request between concurrent 401 responses. Keep transport-local unless another API client appears. |
@@ -24,6 +26,14 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | Helper                 | Location                                          | Visibility | Contract                                                                        |
 | ---------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
 | `parsePositiveInteger` | `src/shared/lib/number/parse-positive-integer.ts` | exported   | Parses positive integer URL/form values and returns a caller-provided fallback. |
+
+## Shared URL Helpers
+
+| Helper                      | Location                         | Visibility | Contract                                                                  |
+| --------------------------- | -------------------------------- | ---------- | ------------------------------------------------------------------------- |
+| `isSafeHttpUrl`             | `src/shared/lib/url/safe-url.ts` | exported   | Checks that a URL is an absolute `http` or `https` URL.                   |
+| `getHttpUrlValidationError` | `src/shared/lib/url/safe-url.ts` | exported   | Returns the shared local validation message for unsafe `http/https` URLs. |
+| `normalizeHttpUrl`          | `src/shared/lib/url/safe-url.ts` | exported   | Trims safe `http/https` URLs and throws before unsafe API payloads.       |
 
 ## Shared UI
 
@@ -77,24 +87,81 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Material Entity
 
-| Helper                              | Location                                                | Visibility | Contract                                                                                           |
-| ----------------------------------- | ------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
-| `usePlaceMaterialsListQuery`        | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint.                           |
-| `useCreatePlaceMaterialMutation`    | `src/entities/material/model/material-mutations.ts`     | exported   | Creates place material through admin API and invalidates bounded materials list plus admin detail. |
-| `useUpdateMaterialMutation`         | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material through admin API and invalidates bounded materials list plus admin detail.       |
-| `invalidatePlaceMaterialsListQuery` | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates one bounded admin materials list after material mutations.                             |
-| `isSafeMaterialUrl`                 | `src/entities/material/model/material-url.ts`           | exported   | Checks that material links are absolute `http` or `https` URLs before rendering or API payloads.   |
-| `getMaterialUrlValidationError`     | `src/entities/material/model/material-url.ts`           | exported   | Returns the local material URL validation message while leaving empty values to required rules.    |
-| `normalizeMaterialUrl`              | `src/entities/material/model/material-url.ts`           | exported   | Trims material URLs and rejects non-`http/https` payload values before API submission.             |
-| `MATERIAL_PLATFORM_VALUES`          | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material platforms in a stable order for UI controls.                             |
-| `MATERIAL_TYPE_VALUES`              | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material types in a stable order for UI controls.                                 |
-| `getMaterialPlatformMeta`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                      |
-| `getMaterialTypeMeta`               | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                                  |
-| `getMaterialPlatformOptions`        | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend platforms to localized Ant Design select options.                                     |
-| `getMaterialTypeOptions`            | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material types to localized Ant Design select options.                                |
-| `formatMaterialDuration`            | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.                |
-| `formatMaterialPublishedDate`       | `src/entities/material/ui/material-meta.ts`             | exported   | Formats material publication date from source ISO date part without UTC day shifts.                |
-| `PlaceMaterialsPanel`               | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit drawer actions.             |
+| Helper                                 | Location                                                | Visibility | Contract                                                                                            |
+| -------------------------------------- | ------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------- |
+| `usePlaceMaterialsListQuery`           | `src/entities/material/model/material-hooks.ts`         | exported   | Loads place materials through the admin bounded materials read endpoint.                            |
+| `useMaterialLibraryQuery`              | `src/entities/material/model/material-library-hooks.ts` | exported   | Loads the admin material library through the admin `/admin/materials` endpoint.                     |
+| `useCreatePlaceMaterialMutation`       | `src/entities/material/model/material-mutations.ts`     | exported   | Creates place material through admin API and invalidates bounded materials list plus admin detail.  |
+| `useUpdateMaterialMutation`            | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material through admin API and invalidates bounded materials list plus admin detail.        |
+| `useUpdateMaterialAdminStatusMutation` | `src/entities/material/model/material-mutations.ts`     | exported   | Updates material library review status and invalidates all material library query variants.         |
+| `useLinkPlaceMaterialMutation`         | `src/entities/material/model/material-mutations.ts`     | exported   | Links an existing library material to a place and invalidates place detail/material/library caches. |
+| `useHidePlaceMaterialLinkMutation`     | `src/entities/material/model/material-mutations.ts`     | exported   | Hides an active place-material link and invalidates place detail/material/library caches.           |
+| `invalidatePlaceMaterialsListQuery`    | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates one bounded admin materials list after material mutations.                              |
+| `invalidateMaterialLibraryQueries`     | `src/entities/material/model/material-mutations.ts`     | exported   | Invalidates all admin material library list query variants after review status mutations.           |
+| `isSafeMaterialUrl`                    | `src/entities/material/model/material-url.ts`           | exported   | Checks that material links are absolute `http` or `https` URLs before rendering or API payloads.    |
+| `getMaterialUrlValidationError`        | `src/entities/material/model/material-url.ts`           | exported   | Returns the local material URL validation message while leaving empty values to required rules.     |
+| `normalizeMaterialUrl`                 | `src/entities/material/model/material-url.ts`           | exported   | Trims material URLs and rejects non-`http/https` payload values before API submission.              |
+| `MATERIAL_PLATFORM_VALUES`             | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material platforms in a stable order for UI controls.                              |
+| `MATERIAL_TYPE_VALUES`                 | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material types in a stable order for UI controls.                                  |
+| `MATERIAL_ADMIN_STATUS_VALUES`         | `src/entities/material/ui/material-meta.ts`             | exported   | Provides backend material review statuses in a stable order for UI controls.                        |
+| `getMaterialPlatformMeta`              | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `Platform` to localized Ant Design tag metadata.                                       |
+| `getMaterialTypeMeta`                  | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialType` to localized Ant Design tag metadata.                                   |
+| `getMaterialAdminStatusMeta`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend `MaterialAdminStatus` to localized Ant Design tag metadata.                            |
+| `getMaterialLinkedMeta`                | `src/entities/material/ui/material-meta.ts`             | exported   | Maps material library linked flag to localized Ant Design tag metadata.                             |
+| `getMaterialPlatformOptions`           | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend platforms to localized Ant Design select options.                                      |
+| `getMaterialTypeOptions`               | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material types to localized Ant Design select options.                                 |
+| `getMaterialAdminStatusOptions`        | `src/entities/material/ui/material-meta.ts`             | exported   | Maps backend material review statuses to localized Ant Design select options.                       |
+| `formatMaterialDuration`               | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable material duration as `m:ss`, `h:mm:ss`, or `—` for list/detail UI.                 |
+| `formatMaterialPublishedDate`          | `src/entities/material/ui/material-meta.ts`             | exported   | Formats material publication date from source ISO date part without UTC day shifts.                 |
+| `formatMaterialMediaKind`              | `src/entities/material/ui/material-meta.ts`             | exported   | Formats nullable importer media kind for material library table cells.                              |
+| `getMaterialLibraryPreviewText`        | `src/entities/material/ui/material-meta.ts`             | exported   | Picks excerpt/title/text fallback for material library table and selector previews.                 |
+| `getMaterialLibrarySourceTitle`        | `src/entities/material/ui/material-meta.ts`             | exported   | Picks content source display name or manual-material fallback for library UI.                       |
+| `getSafeMaterialHref`                  | `src/entities/material/ui/material-meta.ts`             | exported   | Returns safe `http/https` href values or `null` before rendering material/source/media links.       |
+| `PlaceMaterialsPanel`                  | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit/link/hide actions.           |
+
+## Content Source Entity
+
+| Helper                                 | Location                                                        | Visibility | Contract                                                                                                         |
+| -------------------------------------- | --------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| `useContentSourcesQuery`               | `src/entities/content-source/model/content-source-hooks.ts`     | exported   | Loads admin content sources through the `/admin/content-sources` endpoint.                                       |
+| `useCreateContentSourceMutation`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Creates a content source and invalidates all content source list query variants.                                 |
+| `useUpdateContentSourceMutation`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Updates editable source fields and invalidates content source list plus material library query variants.         |
+| `useUpdateContentSourceStatusMutation` | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Enables/disables a content source and invalidates all content source list query variants.                        |
+| `useImportTelegramSourceMutation`      | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Starts one-click Telegram import, syncs returned run into cache, and invalidates sources/import/material caches. |
+| `invalidateContentSourceQueries`       | `src/entities/content-source/model/content-source-mutations.ts` | exported   | Invalidates all admin content source list query variants.                                                        |
+| `CONTENT_SOURCE_PLATFORM_VALUES`       | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Provides backend content source platforms in a stable order for UI controls.                                     |
+| `CONTENT_SOURCE_STATUS_VALUES`         | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Provides backend content source statuses in a stable order for UI controls.                                      |
+| `getContentSourcePlatformMeta`         | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourcePlatform` to localized Ant Design tag metadata.                                       |
+| `getContentSourceStatusMeta`           | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourceStatus` to localized Ant Design tag metadata.                                         |
+| `getContentSourcePlatformOptions`      | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source platforms to localized Ant Design select options.                                    |
+| `getContentSourceStatusOptions`        | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source statuses to localized Ant Design select options.                                     |
+| `formatContentSourceDateTime`          | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Formats nullable source datetime values for compact admin tables.                                                |
+
+## Import Run Entity
+
+| Helper                                           | Location                                                       | Visibility | Contract                                                                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `useImportRunsQuery`                             | `src/entities/import-run/model/import-run-hooks.ts`            | exported   | Loads admin import run diagnostics through the `/admin/import-runs` endpoint.                                   |
+| `isActiveImportRunStatus`                        | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Detects `queued/running` import statuses that should block a repeated import action.                            |
+| `isTerminalImportRunStatus`                      | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Detects `completed/failed` statuses that should close realtime subscriptions.                                   |
+| `getActiveImportRunForSource`                    | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Picks the newest active import run for one content source from a newest-first import run list.                  |
+| `upsertImportRunInList`                          | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Adds or replaces an import run inside an `ImportRunListResponse` while preserving newest-first behavior.        |
+| `syncImportRunQueryCache`                        | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Syncs all mounted import-run list query caches with a streamed or returned import run snapshot.                 |
+| `invalidateImportRunQueries`                     | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Invalidates all admin import run list query variants.                                                           |
+| `invalidateImportRunDependencyQueries`           | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Invalidates import-run, content-source, and material-library caches after import completion changes.            |
+| `getImportRunFromQueryCache`                     | `src/entities/import-run/model/import-run-cache.ts`            | exported   | Finds one import run snapshot in mounted import-run query caches by id.                                         |
+| `parseImportRunEventData`                        | `src/entities/import-run/model/import-run-events-parser.ts`    | exported   | Parses one SSE payload as `ImportRun` through generated Zod contract.                                           |
+| `IMPORT_RUN_UPDATED_EVENT`                       | `src/entities/import-run/model/import-run-events-transport.ts` | exported   | Defines the backend SSE event name carrying successful import run updates.                                      |
+| `ImportRunEventsHandlers`                        | `src/entities/import-run/model/import-run-events-transport.ts` | exported   | Describes raw transport callbacks for import-run SSE updates and errors.                                        |
+| `ImportRunEventsSubscription`                    | `src/entities/import-run/model/import-run-events-transport.ts` | exported   | Describes the cleanup handle returned by the import-run SSE transport.                                          |
+| `subscribeToImportRunEvents`                     | `src/entities/import-run/model/import-run-events-transport.ts` | exported   | Opens native `EventSource` for one import run without parsing payloads or touching React Query.                 |
+| `IMPORT_RUN_EVENTS_FALLBACK_REFETCH_INTERVAL_MS` | `src/entities/import-run/model/import-run-events.ts`           | exported   | Defines the fallback durable-refetch interval while SSE is unavailable or failed.                               |
+| `ImportRunEventsOptions`                         | `src/entities/import-run/model/import-run-events.ts`           | exported   | Describes options for enabling one import-run SSE subscription.                                                 |
+| `ImportRunEventsState`                           | `src/entities/import-run/model/import-run-events.ts`           | exported   | Describes runtime state returned by the SSE subscription hook.                                                  |
+| `useImportRunEvents`                             | `src/entities/import-run/model/import-run-events.ts`           | exported   | Subscribes to `GET /admin/import-runs/{runId}/events`, updates React Query caches, and falls back to refetches. |
+| `getImportRunStatusMeta`                         | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Maps backend `ImportRunStatus` to localized Ant Design tag metadata.                                            |
+| `formatImportRunCounts`                          | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats import run counters in a stable display order.                                                          |
+| `formatImportRunDateTime`                        | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats nullable import run datetime values for compact admin tables.                                           |
 
 ## Auth UI
 
@@ -186,6 +253,58 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit material forms.                                         |
 | `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`  | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.               |
 | `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`      | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.  |
+
+## Material Admin Status Feature
+
+| Helper                       | Location                                                                  | Visibility | Contract                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `MaterialAdminStatusActions` | `src/features/material/admin-status/ui/material-admin-status-actions.tsx` | exported   | Renders approve/reject/archive review actions for one material library item. |
+
+## Material Link Existing Feature
+
+| Helper                       | Location                                                                   | Visibility | Contract                                                                                         |
+| ---------------------------- | -------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `LinkExistingMaterialDrawer` | `src/features/material/link-existing/ui/link-existing-material-drawer.tsx` | exported   | Renders approved material selector, excludes active links for the place, and links one material. |
+
+## Content Source Form Feature
+
+| Helper                              | Location                                                                  | Visibility | Contract                                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| `ContentSourceFormValues`           | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Defines create/edit content source form values before conversion to generated API payloads.                    |
+| `ContentSourceFormChangedField`     | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Describes a normalized changed content source field shown as an edit drawer diff chip.                         |
+| `getContentSourceFormInitialValues` | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Maps admin `ContentSource` to form initial values.                                                             |
+| `toCreateContentSourceRequest`      | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Normalizes form values into `POST /admin/content-sources` payload.                                             |
+| `toUpdateContentSourceRequest`      | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/content-sources/{sourceId}` payload with explicit null clears.       |
+| `hasContentSourceFormChanges`       | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Detects whether normalized content source form values differ from loaded server values.                        |
+| `getContentSourceFormChangedFields` | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Returns normalized changed field labels for edit drawer chips.                                                 |
+| `ContentSourceFormErrorAlert`       | `src/features/content-source/form/ui/content-source-form-error-alert.tsx` | exported   | Renders normalized create/edit content source API errors.                                                      |
+| `ContentSourceFormFields`           | `src/features/content-source/form/ui/content-source-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit content source forms.                                         |
+| `CreateContentSourceDrawer`         | `src/features/content-source/create/ui/create-content-source-drawer.tsx`  | exported   | Creates content sources in a guarded Ant Design drawer through the entity mutation bridge.                     |
+| `EditContentSourceDrawer`           | `src/features/content-source/edit/ui/edit-content-source-drawer.tsx`      | exported   | Edits content source fields in a guarded Ant Design drawer with dirty diff chips.                              |
+| `ContentSourceStatusActions`        | `src/features/content-source/status/ui/content-source-status-actions.tsx` | exported   | Renders enable/disable actions for one content source.                                                         |
+| `ImportTelegramSourceButton`        | `src/features/content-source/import/ui/import-telegram-source-button.tsx` | exported   | Renders one-click Telegram import action, active-run disabled state, counters, and 409 active-import feedback. |
+
+## Material Library Widget
+
+| Helper                                    | Location                                                         | Visibility | Contract                                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------ |
+| `getMaterialLibraryLinkedFilterFromValue` | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Normalizes raw linked filter values from URL or UI controls.                         |
+| `getMaterialLibraryFiltersFromSearch`     | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library platform/status/linked filters from URL search params.        |
+| `getMaterialLibraryQueryParams`           | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Converts material library URL filter state into `/admin/materials` query params.     |
+| `buildMaterialLibraryFiltersSearch`       | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds next URL search params after changing material library filters.               |
+| `MaterialLibraryInbox`                    | `src/widgets/material-library/ui/material-library-inbox.tsx`     | exported   | Renders the material library inbox table with URL-driven filters and review actions. |
+
+## Content Sources Widget
+
+| Helper                              | Location                                                        | Visibility | Contract                                                                                                                     |
+| ----------------------------------- | --------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `getContentSourceFiltersFromSearch` | `src/widgets/content-sources/model/content-source-filters.ts`   | exported   | Reads content source platform/status filters from URL search params.                                                         |
+| `getContentSourceQueryParams`       | `src/widgets/content-sources/model/content-source-filters.ts`   | exported   | Converts content source URL filter state into `/admin/content-sources` query params.                                         |
+| `buildContentSourceFiltersSearch`   | `src/widgets/content-sources/model/content-source-filters.ts`   | exported   | Builds next URL search params after changing content source filters.                                                         |
+| `ContentSourceFiltersBar`           | `src/widgets/content-sources/ui/content-source-filters-bar.tsx` | exported   | Renders URL-driven platform/status filters for the content sources table.                                                    |
+| `ContentSourcesTable`               | `src/widgets/content-sources/ui/content-sources-table.tsx`      | exported   | Renders content source rows, identity metadata, status actions, and active-run-aware import action.                          |
+| `ImportRunsTable`                   | `src/widgets/content-sources/ui/import-runs-table.tsx`          | exported   | Renders read-only latest import run diagnostics and source display names.                                                    |
+| `ContentSourcesScreen`              | `src/widgets/content-sources/ui/content-sources-screen.tsx`     | exported   | Renders content source management, URL-driven filters, source actions, latest import runs, and active-run SSE subscriptions. |
 
 ## API Error Internals
 

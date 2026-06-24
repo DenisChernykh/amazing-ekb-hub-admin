@@ -25,7 +25,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminMaterialLibraryItem,
   AdminMaterialLibraryListResponse,
+  AdminPlaceDetail,
   ClearPinnedMaterialPathParameters,
   ContentSource,
   ContentSourceConflictResponse,
@@ -38,28 +40,36 @@ import type {
   ForbiddenResponse,
   GetAdminPlaceDetailPathParameters,
   HidePlaceMaterialLinkPathParameters,
+  ImportRun,
+  ImportRunListResponse,
+  ImportTelegramChannelParams,
+  ImportTelegramChannelPathParameters,
   LinkPlaceMaterialPathParameters,
   ListAdminMaterialLibraryParams,
   ListAdminPlaceMaterialsParams,
   ListAdminPlaceMaterialsPathParameters,
   ListAdminPlacesParams,
   ListContentSourcesParams,
+  ListImportRunsParams,
   Material,
   MaterialListResponse,
   MaterialNotFoundResponse,
   NestErrorResponse,
-  PlaceDetail,
   PlaceListResponse,
   PlaceNotFoundResponse,
   PlacePhotoUploadRequest,
   PlaceSummary,
   SetPinnedMaterialPathParameters,
   SetPinnedMaterialRequest,
+  StreamImportRunEventsPathParameters,
+  TelegramImportAlreadyRunningResponse,
   UnauthorizedResponse,
   UpdateContentSourcePathParameters,
   UpdateContentSourceRequest,
   UpdateContentSourceStatusPathParameters,
   UpdateContentSourceStatusRequest,
+  UpdateMaterialAdminStatusPathParameters,
+  UpdateMaterialAdminStatusRequest,
   UpdateMaterialPathParameters,
   UpdateMaterialRequest,
   UpdatePlaceMaterialLinkPathParameters,
@@ -248,7 +258,7 @@ export const getAdminPlaceDetail = (
 ) => {
 
 
-      return apiMutator<PlaceDetail>(
+      return apiMutator<AdminPlaceDetail>(
       {url: `/admin/places/${encodeURIComponent(String(placeId))}`, method: 'GET', signal
     },
       options);
@@ -817,6 +827,262 @@ export const useUpdateContentSourceStatus = <TError = ErrorType<ValidationErrorR
       return useMutation(getUpdateContentSourceStatusMutationOptions(options), queryClient);
     }
     /**
+ * Возвращает до 100 диагностических записей попыток импорта материалов.
+ * @summary List import runs
+ */
+export const listImportRuns = (
+    params?: ListImportRunsParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<ImportRunListResponse>(
+      {url: `/admin/import-runs`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getListImportRunsQueryKey = (params?: ListImportRunsParams,) => {
+    return [
+    `/admin/import-runs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListImportRunsQueryOptions = <TData = Awaited<ReturnType<typeof listImportRuns>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(params?: ListImportRunsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImportRuns>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListImportRunsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listImportRuns>>> = ({ signal }) => listImportRuns(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listImportRuns>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListImportRunsQueryResult = NonNullable<Awaited<ReturnType<typeof listImportRuns>>>
+export type ListImportRunsQueryError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useListImportRuns<TData = Awaited<ReturnType<typeof listImportRuns>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params: undefined |  ListImportRunsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImportRuns>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listImportRuns>>,
+          TError,
+          Awaited<ReturnType<typeof listImportRuns>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListImportRuns<TData = Awaited<ReturnType<typeof listImportRuns>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListImportRunsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImportRuns>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listImportRuns>>,
+          TError,
+          Awaited<ReturnType<typeof listImportRuns>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListImportRuns<TData = Awaited<ReturnType<typeof listImportRuns>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListImportRunsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImportRuns>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List import runs
+ */
+
+export function useListImportRuns<TData = Awaited<ReturnType<typeof listImportRuns>>, TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>>(
+ params?: ListImportRunsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImportRuns>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListImportRunsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Открывает Server-Sent Events stream для одного import run. Stream сразу отправляет initial snapshot текущего `ImportRun`, затем runtime-обновления `import-run.updated` при изменении статуса или счетчиков.
+
+Если подписка не может быть подготовлена, NestJS SSE handler отправляет `event: error` и закрывает stream.
+
+БД и `GET /admin/import-runs` остаются источником истины и fallback для refresh/reconnect; in-memory SSE доставляет только обновления текущего backend process.
+
+ * @summary Stream import run updates
+ */
+export const streamImportRunEvents = (
+    { runId }: StreamImportRunEventsPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<string>(
+      {url: `/admin/import-runs/${encodeURIComponent(String(runId))}/events`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getStreamImportRunEventsQueryKey = ({ runId }: StreamImportRunEventsPathParameters,) => {
+    return [
+    `/admin/import-runs/${runId}/events`
+    ] as const;
+    }
+
+
+export const getStreamImportRunEventsQueryOptions = <TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>({ runId }: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStreamImportRunEventsQueryKey({ runId });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof streamImportRunEvents>>> = ({ signal }) => streamImportRunEvents({ runId }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(runId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StreamImportRunEventsQueryResult = NonNullable<Awaited<ReturnType<typeof streamImportRunEvents>>>
+export type StreamImportRunEventsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamImportRunEventsPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamImportRunEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamImportRunEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamImportRunEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamImportRunEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Stream import run updates
+ */
+
+export function useStreamImportRunEvents<TData = Awaited<ReturnType<typeof streamImportRunEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ { runId }: StreamImportRunEventsPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamImportRunEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStreamImportRunEventsQueryOptions({ runId },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Создает durable queued one-click Telegram import/backfill run для active Telegram content source. HTTP не ждет GramJS/Telegram processing; worker позже переведет run в `running`, обработает до 20 внутренних batch-ов по `limit` логических постов, сохраняя cursor после каждого успешного непустого batch-а, и остановится при исчерпании истории, safety cap или final failure. Fresh active `queued/running` run того же source возвращает `409 Conflict`; stale `queued/running` runs старше консервативного timeout закрываются как `failed` перед созданием новой queued попытки.
+ * @summary Import Telegram channel posts
+ */
+export const importTelegramChannel = (
+    { sourceId }: ImportTelegramChannelPathParameters,
+    params?: ImportTelegramChannelParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<ImportRun>(
+      {url: `/admin/content-sources/${encodeURIComponent(String(sourceId))}/imports/telegram`, method: 'POST',
+        params, signal
+    },
+      options);
+    }
+
+
+
+export const getImportTelegramChannelMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | TelegramImportAlreadyRunningResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importTelegramChannel>>, TError,{pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof importTelegramChannel>>, TError,{pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}, TContext> => {
+
+const mutationKey = ['importTelegramChannel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importTelegramChannel>>, {pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}> = (props) => {
+          const {pathParams,params} = props ?? {};
+
+          return  importTelegramChannel(pathParams,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportTelegramChannelMutationResult = NonNullable<Awaited<ReturnType<typeof importTelegramChannel>>>
+
+    export type ImportTelegramChannelMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | TelegramImportAlreadyRunningResponse | NestErrorResponse>
+
+    /**
+ * @summary Import Telegram channel posts
+ */
+export const useImportTelegramChannel = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ContentSourceNotFoundResponse | TelegramImportAlreadyRunningResponse | NestErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importTelegramChannel>>, TError,{pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof importTelegramChannel>>,
+        TError,
+        {pathParams: ImportTelegramChannelPathParameters;params?: ImportTelegramChannelParams},
+        TContext
+      > => {
+      return useMutation(getImportTelegramChannelMutationOptions(options), queryClient);
+    }
+    /**
  * Возвращает до 100 материалов общей библиотеки. Если передать `placeId`, каждый item содержит статус связи с этим местом.
  * @summary List admin material library
  */
@@ -1331,6 +1597,71 @@ export const useUpdateMaterial = <TError = ErrorType<ValidationErrorResponse | U
       return useMutation(getUpdateMaterialMutationOptions(options), queryClient);
     }
     /**
+ * Обновляет review-статус материала в административной библиотеке. Статус не удаляет материал и сам по себе не меняет публичную видимость уже существующих `PlaceMaterial` связей.
+ * @summary Update material admin status
+ */
+export const updateMaterialAdminStatus = (
+    { materialId }: UpdateMaterialAdminStatusPathParameters,
+    updateMaterialAdminStatusRequest: BodyType<UpdateMaterialAdminStatusRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AdminMaterialLibraryItem>(
+      {url: `/admin/materials/${encodeURIComponent(String(materialId))}/admin-status`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateMaterialAdminStatusRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getUpdateMaterialAdminStatusMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | MaterialNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMaterialAdminStatus>>, TError,{pathParams: UpdateMaterialAdminStatusPathParameters;data: BodyType<UpdateMaterialAdminStatusRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMaterialAdminStatus>>, TError,{pathParams: UpdateMaterialAdminStatusPathParameters;data: BodyType<UpdateMaterialAdminStatusRequest>}, TContext> => {
+
+const mutationKey = ['updateMaterialAdminStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMaterialAdminStatus>>, {pathParams: UpdateMaterialAdminStatusPathParameters;data: BodyType<UpdateMaterialAdminStatusRequest>}> = (props) => {
+          const {pathParams,data} = props ?? {};
+
+          return  updateMaterialAdminStatus(pathParams,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMaterialAdminStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateMaterialAdminStatus>>>
+    export type UpdateMaterialAdminStatusMutationBody = BodyType<UpdateMaterialAdminStatusRequest>
+    export type UpdateMaterialAdminStatusMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | MaterialNotFoundResponse>
+
+    /**
+ * @summary Update material admin status
+ */
+export const useUpdateMaterialAdminStatus = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | MaterialNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMaterialAdminStatus>>, TError,{pathParams: UpdateMaterialAdminStatusPathParameters;data: BodyType<UpdateMaterialAdminStatusRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateMaterialAdminStatus>>,
+        TError,
+        {pathParams: UpdateMaterialAdminStatusPathParameters;data: BodyType<UpdateMaterialAdminStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getUpdateMaterialAdminStatusMutationOptions(options), queryClient);
+    }
+    /**
  * Назначает закреплённый материал для места. Операция доступна только администратору.
  * @summary Set pinned material for place
  */
@@ -1341,7 +1672,7 @@ export const setPinnedMaterial = (
 ) => {
 
 
-      return apiMutator<PlaceDetail>(
+      return apiMutator<AdminPlaceDetail>(
       {url: `/admin/places/${encodeURIComponent(String(placeId))}/pinned-material`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: setPinnedMaterialRequest, signal
@@ -1405,7 +1736,7 @@ export const clearPinnedMaterial = (
 ) => {
 
 
-      return apiMutator<PlaceDetail>(
+      return apiMutator<AdminPlaceDetail>(
       {url: `/admin/places/${encodeURIComponent(String(placeId))}/pinned-material`, method: 'DELETE', signal
     },
       options);

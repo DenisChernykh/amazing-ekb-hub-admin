@@ -1,4 +1,5 @@
 import { useUpdateMaterialMutation } from '@/entities/material/model/material-mutations'
+import type { EditableMaterial } from '@/features/material/form/model/material-form'
 import type { Material } from '@/shared/api/generated/model'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
@@ -126,14 +127,14 @@ const material: Material = {
   url: 'https://example.com/material/321',
 }
 
-const renderEditDrawer = () => {
+const renderEditDrawer = (editableMaterial: EditableMaterial = material) => {
   const onClose = vi.fn()
   const onUpdated = vi.fn()
 
   render(
     <AntdApp>
       <EditMaterialDrawer
-        material={material}
+        material={editableMaterial}
         onClose={onClose}
         onUpdated={onUpdated}
         open
@@ -182,6 +183,40 @@ describe('EditMaterialDrawer', () => {
     })
 
     expect(screen.getAllByText('Заголовок')).toHaveLength(2)
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith({
+        data: { title: 'Обновленный обзор' },
+        materialId: 'material-1',
+        placeId: 'place-1',
+      })
+    })
+  })
+
+  it('edits non-url fields when list material does not include original url', async () => {
+    const mutate = vi.fn()
+    const materialWithoutUrl: EditableMaterial = {
+      durationSec: material.durationSec,
+      id: material.id,
+      placeId: material.placeId,
+      platform: material.platform,
+      publishedAt: material.publishedAt,
+      title: material.title,
+      type: material.type,
+    }
+    mockedUseUpdateMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useUpdateMaterialMutation>)
+
+    renderEditDrawer(materialWithoutUrl)
+
+    expect(screen.queryByLabelText('Ссылка')).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Заголовок'), {
+      target: { value: '  Обновленный обзор  ' },
+    })
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
 
     await waitFor(() => {

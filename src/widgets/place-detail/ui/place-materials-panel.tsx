@@ -1,5 +1,5 @@
 import { usePlaceMaterialsListQuery } from '@/entities/material/model/material-hooks'
-import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
+import { useHidePlaceMaterialLinkMutation } from '@/entities/material/model/material-mutations'
 import {
   formatMaterialDuration,
   formatMaterialPublishedDate,
@@ -8,38 +8,51 @@ import {
 } from '@/entities/material/ui/material-meta'
 import { CreateMaterialDrawer } from '@/features/material/create/ui/create-material-drawer'
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
+import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
+import type { PublicMaterial } from '@/shared/api/generated/model'
 import type { TableColumnsType } from 'antd'
-import { Alert, Button, Card, Empty, Table, Tag, Typography } from 'antd'
+import {
+  Alert,
+  App as AntdApp,
+  Button,
+  Card,
+  Empty,
+  Space,
+  Table,
+  Tag,
+} from 'antd'
 import { useState } from 'react'
 
-const getMaterialColumns = (
-  onEdit: (material: Material) => void,
-): TableColumnsType<Material> => [
+type HideLinkError = {
+  materialId: string
+  message: string
+}
+
+type MaterialColumnsOptions = {
+  hideLinkError: HideLinkError | null
+  isHideLinkPending: boolean
+  onEdit: (material: PublicMaterial) => void
+  onHideLink: (material: PublicMaterial) => void
+}
+
+const getMaterialColumns = ({
+  hideLinkError,
+  isHideLinkPending,
+  onEdit,
+  onHideLink,
+}: MaterialColumnsOptions): TableColumnsType<PublicMaterial> => [
   {
     dataIndex: 'title',
     key: 'title',
-    render: (_value, material) => {
-      const materialUrl = material.url.trim()
-
-      if (!isSafeMaterialUrl(materialUrl)) {
-        return material.title
-      }
-
-      return (
-        <Typography.Link href={materialUrl} rel="noreferrer" target="_blank">
-          {material.title}
-        </Typography.Link>
-      )
-    },
+    render: (_value, material) => material.title,
     title: 'Материал',
   },
   {
     dataIndex: 'platform',
     key: 'platform',
-    render: (platform: Material['platform']) => {
+    render: (platform: PublicMaterial['platform']) => {
       const meta = getMaterialPlatformMeta(platform)
 
       return <Tag color={meta.color}>{meta.label}</Tag>
@@ -49,7 +62,7 @@ const getMaterialColumns = (
   {
     dataIndex: 'type',
     key: 'type',
-    render: (type: Material['type']) => {
+    render: (type: PublicMaterial['type']) => {
       const meta = getMaterialTypeMeta(type)
 
       return <Tag color={meta.color}>{meta.label}</Tag>
@@ -65,17 +78,39 @@ const getMaterialColumns = (
   {
     dataIndex: 'durationSec',
     key: 'durationSec',
-    render: (durationSec: Material['durationSec']) =>
+    render: (durationSec: PublicMaterial['durationSec']) =>
       formatMaterialDuration(durationSec),
     title: 'Длительность',
   },
   {
     key: 'actions',
-    render: (_value, material) => (
-      <Button onClick={() => onEdit(material)} type="link">
-        Редактировать
-      </Button>
-    ),
+    render: (_value, material) => {
+      const errorMessage =
+        hideLinkError?.materialId === material.id ? hideLinkError.message : null
+
+      return (
+        <Space orientation="vertical" size={4}>
+          <Space size={[4, 4]} wrap>
+            <Button onClick={() => onEdit(material)} type="link">
+              Редактировать
+            </Button>
+            <Button
+              danger
+              disabled={isHideLinkPending}
+              onClick={() => {
+                onHideLink(material)
+              }}
+              type="link"
+            >
+              Скрыть связь
+            </Button>
+          </Space>
+          {errorMessage !== null && (
+            <Alert showIcon title={errorMessage} type="error" />
+          )}
+        </Space>
+      )
+    },
     title: 'Действия',
   },
 ]
@@ -84,12 +119,12 @@ const getMaterialColumns = (
  * Props панели материалов места на admin detail screen.
  */
 export type PlaceMaterialsPanelProps = {
-  pinnedMaterial: Material | null
+  pinnedMaterial: PublicMaterial | null
   placeId: string
 }
 
 /**
- * Показывает selector закрепленного материала и bounded список материалов места с create/edit drawer actions.
+ * Показывает selector закрепленного материала и bounded список материалов места с create/edit/link/hide actions.
  *
  * @remarks Загружает bounded список через admin endpoint, поэтому материалы hidden places доступны в админке.
  */
@@ -97,19 +132,58 @@ export function PlaceMaterialsPanel({
   pinnedMaterial,
   placeId,
 }: PlaceMaterialsPanelProps) {
+  const { message } = AntdApp.useApp()
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
-  const addButton = (
-    <Button
-      onClick={() => {
-        setIsCreateOpen(true)
-      }}
-      type="primary"
-    >
-      Добавить материал
-    </Button>
+  const [isLinkExistingOpen, setIsLinkExistingOpen] = useState(false)
+  const [editingMaterial, setEditingMaterial] = useState<PublicMaterial | null>(
+    null,
   )
+  const [hideLinkError, setHideLinkError] = useState<HideLinkError | null>(null)
+  const hideLinkMutation = useHidePlaceMaterialLinkMutation()
+  const addButton = (
+    <Space size={[8, 8]} wrap>
+      <Button
+        onClick={() => {
+          setIsLinkExistingOpen(true)
+        }}
+      >
+        Добавить из библиотеки
+      </Button>
+      <Button
+        onClick={() => {
+          setIsCreateOpen(true)
+        }}
+        type="primary"
+      >
+        Добавить материал
+      </Button>
+    </Space>
+  )
+
+  const handleHideLink = (material: PublicMaterial) => {
+    setHideLinkError(null)
+    hideLinkMutation.mutate(
+      {
+        materialId: material.id,
+        placeId,
+      },
+      {
+        onError: (error) => {
+          const apiError = normalizeApiError(error)
+          setHideLinkError({
+            materialId: material.id,
+            message: apiError.message,
+          })
+          void message.error(apiError.message)
+        },
+        onSuccess: () => {
+          setHideLinkError(null)
+          void message.success('Связь скрыта')
+        },
+      },
+    )
+  }
 
   if (materialsQuery.isError) {
     return (
@@ -122,8 +196,8 @@ export function PlaceMaterialsPanel({
         />
         <Card extra={addButton} title="Материалы">
           <Alert
-            message={normalizeApiError(materialsQuery.error).message}
             showIcon
+            title={normalizeApiError(materialsQuery.error).message}
             type="error"
           />
         </Card>
@@ -133,6 +207,14 @@ export function PlaceMaterialsPanel({
             setIsCreateOpen(false)
           }}
           open={isCreateOpen}
+          placeId={placeId}
+        />
+        <LinkExistingMaterialDrawer
+          key={`link-existing:${placeId}`}
+          onClose={() => {
+            setIsLinkExistingOpen(false)
+          }}
+          open={isLinkExistingOpen}
           placeId={placeId}
         />
       </>
@@ -151,7 +233,12 @@ export function PlaceMaterialsPanel({
       />
       <Card extra={addButton} title="Материалы">
         <Table
-          columns={getMaterialColumns(setEditingMaterial)}
+          columns={getMaterialColumns({
+            hideLinkError,
+            isHideLinkPending: hideLinkMutation.isPending,
+            onEdit: setEditingMaterial,
+            onHideLink: handleHideLink,
+          })}
           dataSource={materials}
           loading={materialsQuery.isPending || materialsQuery.isFetching}
           locale={{
@@ -169,7 +256,15 @@ export function PlaceMaterialsPanel({
         open={isCreateOpen}
         placeId={placeId}
       />
-      {editingMaterial && (
+      <LinkExistingMaterialDrawer
+        key={`link-existing:${placeId}`}
+        onClose={() => {
+          setIsLinkExistingOpen(false)
+        }}
+        open={isLinkExistingOpen}
+        placeId={placeId}
+      />
+      {editingMaterial !== null && (
         <EditMaterialDrawer
           key={editingMaterial.id}
           material={editingMaterial}
