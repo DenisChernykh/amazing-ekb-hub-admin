@@ -1,37 +1,77 @@
-import { useListAdminPlaceMaterials } from '@/shared/api/generated/admin/admin'
-import { renderHook } from '@testing-library/react'
+import {
+  getListAdminPlaceMaterialsQueryKey,
+  listAdminPlaceMaterials,
+} from '@/shared/api/generated/admin/admin'
+import type { MaterialListResponse } from '@/shared/api/generated/operation'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { renderHook, waitFor } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlaceMaterialsListQuery } from './material-hooks'
 
 vi.mock('@/shared/api/generated/admin/admin', () => ({
-  useListAdminPlaceMaterials: vi.fn(),
+  getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }, params) => [
+    `/admin/places/${placeId}/materials`,
+    ...(params ? [params] : []),
+  ]),
+  listAdminPlaceMaterials: vi.fn(),
+  useListAdminPlaceMaterials: vi.fn(() => ({
+    data: undefined,
+    isPending: true,
+  })),
 }))
 
-const mockedUseListAdminPlaceMaterials = vi.mocked(useListAdminPlaceMaterials)
+const mockedListAdminPlaceMaterials = vi.mocked(listAdminPlaceMaterials)
+
+const materialListResponse: MaterialListResponse = {
+  items: [],
+}
+
+const createWrapper = (queryClient: QueryClient) => {
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    )
+  }
+}
+
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
 
 describe('material hooks', () => {
   beforeEach(() => {
-    mockedUseListAdminPlaceMaterials.mockReset()
+    mockedListAdminPlaceMaterials.mockReset()
+    vi.mocked(getListAdminPlaceMaterialsQueryKey).mockClear()
   })
 
-  it('loads place materials through entity bridge without overriding retry policy', () => {
-    mockedUseListAdminPlaceMaterials.mockReturnValue({
-      data: undefined,
-      isPending: true,
-    } as unknown as ReturnType<typeof useListAdminPlaceMaterials>)
+  it('loads place materials through generated fetcher and query key', async () => {
+    const queryClient = createQueryClient()
+    const params = { platform: 'telegram' as const }
+    mockedListAdminPlaceMaterials.mockResolvedValue(materialListResponse)
 
-    renderHook(() =>
-      usePlaceMaterialsListQuery(
-        'place-1',
-        { platform: 'telegram' },
-        { enabled: true },
-      ),
+    const { result } = renderHook(
+      () => usePlaceMaterialsListQuery('place-1', params),
+      { wrapper: createWrapper(queryClient) },
     )
 
-    expect(mockedUseListAdminPlaceMaterials).toHaveBeenCalledWith(
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(getListAdminPlaceMaterialsQueryKey).toHaveBeenCalledWith(
       { placeId: 'place-1' },
-      { platform: 'telegram' },
-      { query: { enabled: true } },
+      params,
     )
+    expect(mockedListAdminPlaceMaterials).toHaveBeenCalledWith(
+      { placeId: 'place-1' },
+      params,
+      undefined,
+      expect.any(AbortSignal),
+    )
+    expect(result.current.data).toBe(materialListResponse)
   })
 })

@@ -1,12 +1,13 @@
+import { ApiClientError } from '@/shared/api/client/api-error'
 import {
+  clearPinnedMaterial,
+  createPlace,
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
-  useClearPinnedMaterial,
-  useCreatePlace,
-  useSetPinnedMaterial,
-  useUpdatePlace,
-  useUpdatePlaceStatus,
-  useUploadPlaceCoverPhoto,
+  setPinnedMaterial,
+  updatePlace,
+  updatePlaceStatus,
+  uploadPlaceCoverPhoto,
 } from '@/shared/api/generated/admin/admin'
 import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -23,24 +24,30 @@ import {
 } from './place-mutations'
 
 vi.mock('@/shared/api/generated/admin/admin', () => ({
+  clearPinnedMaterial: vi.fn(),
+  createPlace: vi.fn(),
   getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
     `/admin/places/${placeId}`,
   ]),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
+  setPinnedMaterial: vi.fn(),
+  updatePlace: vi.fn(),
+  updatePlaceStatus: vi.fn(),
+  uploadPlaceCoverPhoto: vi.fn(),
   useClearPinnedMaterial: vi.fn(),
   useCreatePlace: vi.fn(),
-  useUploadPlaceCoverPhoto: vi.fn(),
   useSetPinnedMaterial: vi.fn(),
   useUpdatePlace: vi.fn(),
   useUpdatePlaceStatus: vi.fn(),
+  useUploadPlaceCoverPhoto: vi.fn(),
 }))
 
-const mockedUseClearPinnedMaterial = vi.mocked(useClearPinnedMaterial)
-const mockedUseCreatePlace = vi.mocked(useCreatePlace)
-const mockedUseSetPinnedMaterial = vi.mocked(useSetPinnedMaterial)
-const mockedUseUploadPlaceCoverPhoto = vi.mocked(useUploadPlaceCoverPhoto)
-const mockedUseUpdatePlace = vi.mocked(useUpdatePlace)
-const mockedUseUpdatePlaceStatus = vi.mocked(useUpdatePlaceStatus)
+const mockedClearPinnedMaterial = vi.mocked(clearPinnedMaterial)
+const mockedCreatePlace = vi.mocked(createPlace)
+const mockedSetPinnedMaterial = vi.mocked(setPinnedMaterial)
+const mockedUpdatePlace = vi.mocked(updatePlace)
+const mockedUpdatePlaceStatus = vi.mocked(updatePlaceStatus)
+const mockedUploadPlaceCoverPhoto = vi.mocked(uploadPlaceCoverPhoto)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -50,100 +57,134 @@ const createWrapper = (queryClient: QueryClient) => {
   }
 }
 
+const placeSummary: PlaceSummary = {
+  category: 'spa',
+  coverImageUrl: null,
+  id: 'place-1',
+  popularityWeight: 7,
+  status: 'active',
+  summary: 'Новый SPA в центре',
+  tags: ['spa'],
+  title: 'Тихий SPA',
+}
+
+const placeDetail: PlaceDetail = {
+  category: 'spa',
+  counters: {
+    dzen: 0,
+    instagram: 0,
+    telegram: 1,
+  },
+  coverImageUrl: null,
+  id: 'place-1',
+  pinnedMaterial: null,
+  popularityWeight: 8,
+  status: 'hidden',
+  summary: 'SPA без закрепления',
+  tags: ['spa'],
+  title: 'Unpinned SPA',
+}
+
 describe('place mutations', () => {
   beforeEach(() => {
-    mockedUseClearPinnedMaterial.mockReset()
-    mockedUseCreatePlace.mockReset()
-    mockedUseSetPinnedMaterial.mockReset()
-    mockedUseUploadPlaceCoverPhoto.mockReset()
-    mockedUseUpdatePlace.mockReset()
-    mockedUseUpdatePlaceStatus.mockReset()
+    mockedClearPinnedMaterial.mockReset()
+    mockedCreatePlace.mockReset()
+    mockedSetPinnedMaterial.mockReset()
+    mockedUpdatePlace.mockReset()
+    mockedUpdatePlaceStatus.mockReset()
+    mockedUploadPlaceCoverPhoto.mockReset()
     vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
       ({ placeId }) => [`/admin/places/${placeId}`],
     )
     vi.mocked(getListAdminPlacesQueryKey).mockReturnValue(['/admin/places'])
   })
 
-  it('invalidates places list queries after creating a place', async () => {
+  it('creates place through generated fetcher and invalidates places list queries', async () => {
     const queryClient = new QueryClient()
     const queryKey = ['/admin/places', { page: 1, pageSize: 10 }]
-    const createdPlace: PlaceSummary = {
-      category: 'spa',
-      coverImageUrl: null,
-      id: 'place-1',
-      popularityWeight: 7,
-      status: 'active',
-      summary: 'Новый SPA в центре',
-      tags: ['spa'],
-      title: 'Тихий SPA',
-    }
     const onSuccess = vi.fn()
     queryClient.setQueryData(queryKey, { items: [], page: 1, pageSize: 10 })
-    mockedUseCreatePlace.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useCreatePlace>)
+    mockedCreatePlace.mockResolvedValue(placeSummary)
 
-    renderHook(() => useCreatePlaceMutation({ onSuccess }), {
+    const { result } = renderHook(() => useCreatePlaceMutation({ onSuccess }), {
       wrapper: createWrapper(queryClient),
     })
 
-    await mockedUseCreatePlace.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      createdPlace,
-      {
-        data: {
-          category: 'spa',
-          summary: 'Новый SPA',
-          tags: ['spa'],
-          title: 'SPA',
-        },
+    await result.current.mutateAsync({
+      data: {
+        category: 'spa',
+        summary: 'Новый SPA',
+        tags: ['spa'],
+        title: 'SPA',
       },
-      undefined,
-      {} as never,
-    )
+    })
 
+    expect(mockedCreatePlace).toHaveBeenCalledWith({
+      category: 'spa',
+      summary: 'Новый SPA',
+      tags: ['spa'],
+      title: 'SPA',
+    })
     expect(
       queryClient.getQueryCache().find({ queryKey })?.state.isInvalidated,
     ).toBe(true)
-    expect(onSuccess).toHaveBeenCalledWith(createdPlace)
+    expect(onSuccess).toHaveBeenCalledWith(placeSummary)
   })
 
-  it('invalidates places list and detail queries after updating status', async () => {
+  it('passes create place errors to callback', async () => {
+    const queryClient = new QueryClient()
+    const apiError = new ApiClientError({
+      kind: 'server',
+      message: 'Create unavailable',
+      status: 500,
+    })
+    const onError = vi.fn()
+    mockedCreatePlace.mockRejectedValue(apiError)
+
+    const { result } = renderHook(() => useCreatePlaceMutation({ onError }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await expect(
+      result.current.mutateAsync({
+        data: {
+          category: 'spa',
+          title: 'SPA',
+        },
+      }),
+    ).rejects.toBe(apiError)
+    expect(onError).toHaveBeenCalledWith(apiError)
+  })
+
+  it('updates place status and invalidates places list plus detail queries', async () => {
     const queryClient = new QueryClient()
     const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const detailQueryKey = ['/admin/places/place-2']
     const updatedPlace: PlaceSummary = {
-      category: 'spa',
-      coverImageUrl: null,
+      ...placeSummary,
       id: 'place-2',
-      popularityWeight: 5,
       status: 'active',
-      summary: 'SPA вернулся в каталог',
-      tags: ['spa'],
       title: 'Скрытый SPA',
     }
     const onSuccess = vi.fn()
     queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
     queryClient.setQueryData(detailQueryKey, updatedPlace)
-    mockedUseUpdatePlaceStatus.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useUpdatePlaceStatus>)
+    mockedUpdatePlaceStatus.mockResolvedValue(updatedPlace)
 
-    renderHook(() => useUpdatePlaceStatusMutation({ onSuccess }), {
-      wrapper: createWrapper(queryClient),
-    })
-
-    await mockedUseUpdatePlaceStatus.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      updatedPlace,
-      {
-        data: { status: 'active' },
-        pathParams: { placeId: 'place-2' },
-      },
-      undefined,
-      {} as never,
+    const { result } = renderHook(
+      () => useUpdatePlaceStatusMutation({ onSuccess }),
+      { wrapper: createWrapper(queryClient) },
     )
 
+    await result.current.mutateAsync({
+      data: { status: 'active' },
+      pathParams: { placeId: 'place-2' },
+    })
+
+    expect(mockedUpdatePlaceStatus).toHaveBeenCalledWith(
+      { placeId: 'place-2' },
+      { status: 'active' },
+    )
     expect(
       queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
         .isInvalidated,
@@ -155,42 +196,34 @@ describe('place mutations', () => {
     expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
   })
 
-  it('invalidates places list and detail queries after updating place fields', async () => {
+  it('updates place fields and invalidates places list plus detail queries', async () => {
     const queryClient = new QueryClient()
     const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const detailQueryKey = ['/admin/places/place-3']
     const updatedPlace: PlaceSummary = {
+      ...placeSummary,
       category: 'cafe',
-      coverImageUrl: null,
       id: 'place-3',
-      popularityWeight: 12,
-      status: 'active',
-      summary: 'Кофейня с мастер-классами',
-      tags: ['coffee'],
       title: 'Новая кофейня',
     }
     const onSuccess = vi.fn()
     queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
     queryClient.setQueryData(detailQueryKey, updatedPlace)
-    mockedUseUpdatePlace.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useUpdatePlace>)
+    mockedUpdatePlace.mockResolvedValue(updatedPlace)
 
-    renderHook(() => useUpdatePlaceMutation({ onSuccess }), {
+    const { result } = renderHook(() => useUpdatePlaceMutation({ onSuccess }), {
       wrapper: createWrapper(queryClient),
     })
 
-    await mockedUseUpdatePlace.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      updatedPlace,
-      {
-        data: { title: 'Новая кофейня' },
-        pathParams: { placeId: 'place-3' },
-      },
-      undefined,
-      {} as never,
-    )
+    await result.current.mutateAsync({
+      data: { title: 'Новая кофейня' },
+      pathParams: { placeId: 'place-3' },
+    })
 
+    expect(mockedUpdatePlace).toHaveBeenCalledWith(
+      { placeId: 'place-3' },
+      { title: 'Новая кофейня' },
+    )
     expect(
       queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
         .isInvalidated,
@@ -202,43 +235,35 @@ describe('place mutations', () => {
     expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
   })
 
-  it('invalidates places list and detail queries after uploading cover photo', async () => {
+  it('uploads cover photo and invalidates places list plus detail queries', async () => {
     const queryClient = new QueryClient()
     const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const detailQueryKey = ['/admin/places/place-4']
+    const file = new File(['cover'], 'cover.png', { type: 'image/png' })
     const updatedPlace: PlaceSummary = {
-      category: 'spa',
+      ...placeSummary,
       coverImageUrl: '/places/place-4/photo',
       id: 'place-4',
-      popularityWeight: 8,
-      status: 'active',
-      summary: 'SPA с новым фото',
-      tags: ['spa'],
-      title: 'Фото SPA',
     }
-    const file = new File(['cover'], 'cover.png', { type: 'image/png' })
     const onSuccess = vi.fn()
     queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
     queryClient.setQueryData(detailQueryKey, updatedPlace)
-    mockedUseUploadPlaceCoverPhoto.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useUploadPlaceCoverPhoto>)
+    mockedUploadPlaceCoverPhoto.mockResolvedValue(updatedPlace)
 
-    renderHook(() => useUploadPlaceCoverPhotoMutation({ onSuccess }), {
-      wrapper: createWrapper(queryClient),
-    })
-
-    await mockedUseUploadPlaceCoverPhoto.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      updatedPlace,
-      {
-        data: { photo: file },
-        pathParams: { placeId: 'place-4' },
-      },
-      undefined,
-      {} as never,
+    const { result } = renderHook(
+      () => useUploadPlaceCoverPhotoMutation({ onSuccess }),
+      { wrapper: createWrapper(queryClient) },
     )
 
+    await result.current.mutateAsync({
+      data: { photo: file },
+      pathParams: { placeId: 'place-4' },
+    })
+
+    expect(mockedUploadPlaceCoverPhoto).toHaveBeenCalledWith(
+      { placeId: 'place-4' },
+      { photo: file },
+    )
     expect(
       queryClient.getQueryCache().find({ queryKey: listQueryKey })?.state
         .isInvalidated,
@@ -250,18 +275,12 @@ describe('place mutations', () => {
     expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
   })
 
-  it('invalidates admin detail query after setting pinned material', async () => {
+  it('sets pinned material and invalidates only admin detail query', async () => {
     const queryClient = new QueryClient()
     const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const detailQueryKey = ['/admin/places/place-5']
     const updatedPlace: PlaceDetail = {
-      category: 'spa',
-      counters: {
-        dzen: 0,
-        instagram: 0,
-        telegram: 1,
-      },
-      coverImageUrl: null,
+      ...placeDetail,
       id: 'place-5',
       pinnedMaterial: {
         durationSec: null,
@@ -269,38 +288,32 @@ describe('place mutations', () => {
         placeId: 'place-5',
         platform: 'telegram',
         publishedAt: '2026-03-20T10:30:00+05:00',
+        redirectUrl: '/v1/materials/material-1/go',
         title: 'Стартовый обзор',
         type: 'post',
-        redirectUrl: '/v1/materials/material-1/go',
       },
-      popularityWeight: 8,
-      status: 'hidden',
-      summary: 'SPA со стартовым материалом',
-      tags: ['spa'],
-      title: 'Pinned SPA',
     }
     const onSuccess = vi.fn()
     queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
     queryClient.setQueryData(detailQueryKey, updatedPlace)
-    mockedUseSetPinnedMaterial.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useSetPinnedMaterial>)
+    mockedSetPinnedMaterial.mockResolvedValue(updatedPlace)
 
-    renderHook(() => useSetPinnedMaterialMutation({ onSuccess }), {
-      wrapper: createWrapper(queryClient),
-    })
-
-    await mockedUseSetPinnedMaterial.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      updatedPlace,
+    const { result } = renderHook(
+      () => useSetPinnedMaterialMutation({ onSuccess }),
       {
-        data: { materialId: 'material-1' },
-        pathParams: { placeId: 'place-5' },
+        wrapper: createWrapper(queryClient),
       },
-      undefined,
-      {} as never,
     )
 
+    await result.current.mutateAsync({
+      data: { materialId: 'material-1' },
+      pathParams: { placeId: 'place-5' },
+    })
+
+    expect(mockedSetPinnedMaterial).toHaveBeenCalledWith(
+      { placeId: 'place-5' },
+      { materialId: 'material-1' },
+    )
     expect(
       queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
         .isInvalidated,
@@ -312,47 +325,34 @@ describe('place mutations', () => {
     expect(onSuccess).toHaveBeenCalledWith(updatedPlace)
   })
 
-  it('invalidates admin detail query after clearing pinned material', async () => {
+  it('clears pinned material and invalidates only admin detail query', async () => {
     const queryClient = new QueryClient()
     const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const detailQueryKey = ['/admin/places/place-6']
     const updatedPlace: PlaceDetail = {
-      category: 'spa',
-      counters: {
-        dzen: 0,
-        instagram: 0,
-        telegram: 1,
-      },
-      coverImageUrl: null,
+      ...placeDetail,
       id: 'place-6',
       pinnedMaterial: null,
-      popularityWeight: 8,
-      status: 'hidden',
-      summary: 'SPA без закрепления',
-      tags: ['spa'],
-      title: 'Unpinned SPA',
     }
     const onSuccess = vi.fn()
     queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
     queryClient.setQueryData(detailQueryKey, updatedPlace)
-    mockedUseClearPinnedMaterial.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useClearPinnedMaterial>)
+    mockedClearPinnedMaterial.mockResolvedValue(updatedPlace)
 
-    renderHook(() => useClearPinnedMaterialMutation({ onSuccess }), {
-      wrapper: createWrapper(queryClient),
-    })
-
-    await mockedUseClearPinnedMaterial.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      updatedPlace,
+    const { result } = renderHook(
+      () => useClearPinnedMaterialMutation({ onSuccess }),
       {
-        pathParams: { placeId: 'place-6' },
+        wrapper: createWrapper(queryClient),
       },
-      undefined,
-      {} as never,
     )
 
+    await result.current.mutateAsync({
+      pathParams: { placeId: 'place-6' },
+    })
+
+    expect(mockedClearPinnedMaterial).toHaveBeenCalledWith({
+      placeId: 'place-6',
+    })
     expect(
       queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
         .isInvalidated,

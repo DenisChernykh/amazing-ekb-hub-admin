@@ -4,21 +4,16 @@ import {
 } from '@/entities/session/api/session-api'
 import type { ApiClientError } from '@/shared/api/client/api-error'
 import {
-  useGetCurrentUser,
-  useLogin,
-  useLogout,
+  getCurrentUser,
+  getGetCurrentUserQueryKey,
+  login,
+  logout,
 } from '@/shared/api/generated/auth/auth'
-import type { AuthMeResponse } from '@/shared/api/generated/model'
-import type { UseQueryOptions } from '@tanstack/react-query'
-import { useQueryClient } from '@tanstack/react-query'
-
-/**
- * Безопасные options для запроса текущей сессии без возможности заменить query key или query function.
- */
-export type CurrentSessionQueryOptions = Omit<
-  Partial<UseQueryOptions<AuthMeResponse, ApiClientError, AuthMeResponse>>,
-  'queryFn' | 'queryKey'
->
+import type {
+  AuthLoginRequest,
+  AuthMeResponse,
+} from '@/shared/api/generated/model'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 type LoginSessionOptions = {
   onError?: (error: ApiClientError) => void
@@ -33,12 +28,11 @@ type LogoutSessionOptions = {
 /**
  * Загружает текущую cookie-сессию и отключает retry для auth guard сценариев.
  */
-export function useCurrentSessionQuery(options?: CurrentSessionQueryOptions) {
-  return useGetCurrentUser({
-    query: {
-      retry: false,
-      ...options,
-    },
+export function useCurrentSessionQuery() {
+  return useQuery<AuthMeResponse, ApiClientError>({
+    queryFn: ({ signal }) => getCurrentUser(undefined, signal),
+    queryKey: getGetCurrentUserQueryKey(),
+    retry: false,
   })
 }
 
@@ -48,13 +42,18 @@ export function useCurrentSessionQuery(options?: CurrentSessionQueryOptions) {
 export function useLoginSession(options?: LoginSessionOptions) {
   const queryClient = useQueryClient()
 
-  return useLogin({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (session) => {
-        await invalidateCurrentSession(queryClient)
-        await options?.onSuccess?.(session)
-      },
+  return useMutation<
+    AuthMeResponse,
+    ApiClientError,
+    { data: AuthLoginRequest }
+  >({
+    mutationFn: ({ data }) => login(data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (session) => {
+      await invalidateCurrentSession(queryClient)
+      await options?.onSuccess?.(session)
     },
   })
 }
@@ -65,13 +64,14 @@ export function useLoginSession(options?: LoginSessionOptions) {
 export function useLogoutSession(options?: LogoutSessionOptions) {
   const queryClient = useQueryClient()
 
-  return useLogout({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async () => {
-        removeCurrentSession(queryClient)
-        await options?.onSuccess?.()
-      },
+  return useMutation<void, ApiClientError>({
+    mutationFn: () => logout(),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async () => {
+      removeCurrentSession(queryClient)
+      await options?.onSuccess?.()
     },
   })
 }

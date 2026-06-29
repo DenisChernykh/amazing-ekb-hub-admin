@@ -1,17 +1,25 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
 import {
+  clearPinnedMaterial,
+  createPlace,
   getGetAdminPlaceDetailQueryKey,
   getListAdminPlacesQueryKey,
-  useClearPinnedMaterial,
-  useCreatePlace,
-  useSetPinnedMaterial,
-  useUpdatePlace,
-  useUpdatePlaceStatus,
-  useUploadPlaceCoverPhoto,
+  setPinnedMaterial,
+  updatePlace,
+  updatePlaceStatus,
+  uploadPlaceCoverPhoto,
 } from '@/shared/api/generated/admin/admin'
-import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  CreatePlaceRequest,
+  PlaceDetail,
+  PlacePhotoUploadRequest,
+  PlaceSummary,
+  SetPinnedMaterialRequest,
+  UpdatePlaceRequest,
+  UpdatePlaceStatusRequest,
+} from '@/shared/api/generated/model'
 import type { QueryClient } from '@tanstack/react-query'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 /**
  * Callback-и для создания места через entity bridge.
@@ -90,13 +98,18 @@ export const invalidateAdminPlaceDetailQuery = (
 export function useCreatePlaceMutation(options?: CreatePlaceMutationOptions) {
   const queryClient = useQueryClient()
 
-  return useCreatePlace<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (place) => {
-        await invalidatePlacesListQueries(queryClient)
-        await options?.onSuccess?.(place)
-      },
+  return useMutation<
+    PlaceSummary,
+    ApiClientError,
+    { data: CreatePlaceRequest }
+  >({
+    mutationFn: ({ data }) => createPlace(data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (place) => {
+      await invalidatePlacesListQueries(queryClient)
+      await options?.onSuccess?.(place)
     },
   })
 }
@@ -111,19 +124,27 @@ export function useUpdatePlaceStatusMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useUpdatePlaceStatus<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (place, variables) => {
-        await Promise.all([
-          invalidatePlacesListQueries(queryClient),
-          invalidateAdminPlaceDetailQuery(
-            queryClient,
-            variables.pathParams.placeId,
-          ),
-        ])
-        await options?.onSuccess?.(place)
-      },
+  return useMutation<
+    PlaceSummary,
+    ApiClientError,
+    {
+      data: UpdatePlaceStatusRequest
+      pathParams: { placeId: string }
+    }
+  >({
+    mutationFn: ({ data, pathParams }) => updatePlaceStatus(pathParams, data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (place, variables) => {
+      await Promise.all([
+        invalidatePlacesListQueries(queryClient),
+        invalidateAdminPlaceDetailQuery(
+          queryClient,
+          variables.pathParams.placeId,
+        ),
+      ])
+      await options?.onSuccess?.(place)
     },
   })
 }
@@ -136,19 +157,27 @@ export function useUpdatePlaceStatusMutation(
 export function useUpdatePlaceMutation(options?: UpdatePlaceMutationOptions) {
   const queryClient = useQueryClient()
 
-  return useUpdatePlace<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (place, variables) => {
-        await Promise.all([
-          invalidatePlacesListQueries(queryClient),
-          invalidateAdminPlaceDetailQuery(
-            queryClient,
-            variables.pathParams.placeId,
-          ),
-        ])
-        await options?.onSuccess?.(place)
-      },
+  return useMutation<
+    PlaceSummary,
+    ApiClientError,
+    {
+      data: UpdatePlaceRequest
+      pathParams: { placeId: string }
+    }
+  >({
+    mutationFn: ({ data, pathParams }) => updatePlace(pathParams, data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (place, variables) => {
+      await Promise.all([
+        invalidatePlacesListQueries(queryClient),
+        invalidateAdminPlaceDetailQuery(
+          queryClient,
+          variables.pathParams.placeId,
+        ),
+      ])
+      await options?.onSuccess?.(place)
     },
   })
 }
@@ -163,19 +192,28 @@ export function useUploadPlaceCoverPhotoMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useUploadPlaceCoverPhoto<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (place, variables) => {
-        await Promise.all([
-          invalidatePlacesListQueries(queryClient),
-          invalidateAdminPlaceDetailQuery(
-            queryClient,
-            variables.pathParams.placeId,
-          ),
-        ])
-        await options?.onSuccess?.(place)
-      },
+  return useMutation<
+    PlaceSummary,
+    ApiClientError,
+    {
+      data: PlacePhotoUploadRequest
+      pathParams: { placeId: string }
+    }
+  >({
+    mutationFn: ({ data, pathParams }) =>
+      uploadPlaceCoverPhoto(pathParams, data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (place, variables) => {
+      await Promise.all([
+        invalidatePlacesListQueries(queryClient),
+        invalidateAdminPlaceDetailQuery(
+          queryClient,
+          variables.pathParams.placeId,
+        ),
+      ])
+      await options?.onSuccess?.(place)
     },
   })
 }
@@ -191,16 +229,24 @@ export function useSetPinnedMaterialMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useSetPinnedMaterial<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (place, variables) => {
-        await invalidateAdminPlaceDetailQuery(
-          queryClient,
-          variables.pathParams.placeId,
-        )
-        await options?.onSuccess?.(place)
-      },
+  return useMutation<
+    PlaceDetail,
+    ApiClientError,
+    {
+      data: SetPinnedMaterialRequest
+      pathParams: { placeId: string }
+    }
+  >({
+    mutationFn: ({ data, pathParams }) => setPinnedMaterial(pathParams, data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (place, variables) => {
+      await invalidateAdminPlaceDetailQuery(
+        queryClient,
+        variables.pathParams.placeId,
+      )
+      await options?.onSuccess?.(place)
     },
   })
 }
@@ -216,16 +262,23 @@ export function useClearPinnedMaterialMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useClearPinnedMaterial<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (place, variables) => {
-        await invalidateAdminPlaceDetailQuery(
-          queryClient,
-          variables.pathParams.placeId,
-        )
-        await options?.onSuccess?.(place)
-      },
+  return useMutation<
+    PlaceDetail,
+    ApiClientError,
+    {
+      pathParams: { placeId: string }
+    }
+  >({
+    mutationFn: ({ pathParams }) => clearPinnedMaterial(pathParams),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (place, variables) => {
+      await invalidateAdminPlaceDetailQuery(
+        queryClient,
+        variables.pathParams.placeId,
+      )
+      await options?.onSuccess?.(place)
     },
   })
 }

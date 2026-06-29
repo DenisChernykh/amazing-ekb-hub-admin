@@ -1,5 +1,6 @@
 import { ApiClientError } from '@/shared/api/client/api-error'
 import {
+  createPlaceMaterial,
   getGetAdminPlaceDetailQueryKey,
   getListAdminMaterialLibraryQueryKey,
   getListAdminPlaceMaterialsQueryKey,
@@ -7,7 +8,6 @@ import {
   linkPlaceMaterial,
   updateMaterial,
   updateMaterialAdminStatus,
-  useCreatePlaceMaterial,
 } from '@/shared/api/generated/admin/admin'
 import type {
   AdminMaterialLibraryItem,
@@ -32,6 +32,7 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }) => [
     `/admin/places/${placeId}/materials`,
   ]),
+  createPlaceMaterial: vi.fn(),
   hidePlaceMaterialLink: vi.fn(),
   linkPlaceMaterial: vi.fn(),
   getListAdminMaterialLibraryQueryKey: vi.fn(() => ['/admin/materials']),
@@ -40,7 +41,7 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   useCreatePlaceMaterial: vi.fn(),
 }))
 
-const mockedUseCreatePlaceMaterial = vi.mocked(useCreatePlaceMaterial)
+const mockedCreatePlaceMaterial = vi.mocked(createPlaceMaterial)
 const mockedHidePlaceMaterialLink = vi.mocked(hidePlaceMaterialLink)
 const mockedLinkPlaceMaterial = vi.mocked(linkPlaceMaterial)
 const mockedUpdateMaterial = vi.mocked(updateMaterial)
@@ -91,7 +92,7 @@ const libraryItem: AdminMaterialLibraryItem = {
 
 describe('material mutations', () => {
   beforeEach(() => {
-    mockedUseCreatePlaceMaterial.mockReset()
+    mockedCreatePlaceMaterial.mockReset()
     mockedHidePlaceMaterialLink.mockReset()
     mockedLinkPlaceMaterial.mockReset()
     mockedUpdateMaterial.mockReset()
@@ -113,30 +114,37 @@ describe('material mutations', () => {
     const onSuccess = vi.fn()
     queryClient.setQueryData(materialsQueryKey, { items: [] })
     queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
-    mockedUseCreatePlaceMaterial.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useCreatePlaceMaterial>)
+    mockedCreatePlaceMaterial.mockResolvedValue(material)
 
-    renderHook(() => useCreatePlaceMaterialMutation({ onSuccess }), {
-      wrapper: createWrapper(queryClient),
+    const { result } = renderHook(
+      () => useCreatePlaceMaterialMutation({ onSuccess }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await result.current.mutateAsync({
+      data: {
+        durationSec: null,
+        platform: 'telegram',
+        publishedAt: '2026-03-20T10:30:00+05:00',
+        title: 'Обзор комплекса',
+        type: 'post',
+        url: 'https://t.me/amazing_ekb/321',
+      },
+      pathParams: { placeId: 'place-1' },
     })
 
-    await mockedUseCreatePlaceMaterial.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      material,
+    expect(mockedCreatePlaceMaterial).toHaveBeenCalledWith(
+      { placeId: 'place-1' },
       {
-        data: {
-          durationSec: null,
-          platform: 'telegram',
-          publishedAt: '2026-03-20T10:30:00+05:00',
-          title: 'Обзор комплекса',
-          type: 'post',
-          url: 'https://t.me/amazing_ekb/321',
-        },
-        pathParams: { placeId: 'place-1' },
+        durationSec: null,
+        platform: 'telegram',
+        publishedAt: '2026-03-20T10:30:00+05:00',
+        title: 'Обзор комплекса',
+        type: 'post',
+        url: 'https://t.me/amazing_ekb/321',
       },
-      undefined,
-      {} as never,
     )
 
     expect(
@@ -148,6 +156,38 @@ describe('material mutations', () => {
         .isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(material)
+  })
+
+  it('passes create material errors to callback', async () => {
+    const queryClient = new QueryClient()
+    const apiError = new ApiClientError({
+      kind: 'server',
+      message: 'Create material unavailable',
+      status: 500,
+    })
+    const onError = vi.fn()
+    mockedCreatePlaceMaterial.mockRejectedValue(apiError)
+
+    const { result } = renderHook(
+      () => useCreatePlaceMaterialMutation({ onError }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    )
+
+    await expect(
+      result.current.mutateAsync({
+        data: {
+          platform: 'telegram',
+          publishedAt: '2026-03-20T10:30:00+05:00',
+          title: 'Обзор комплекса',
+          type: 'post',
+          url: 'https://t.me/amazing_ekb/321',
+        },
+        pathParams: { placeId: 'place-1' },
+      }),
+    ).rejects.toBe(apiError)
+    expect(onError).toHaveBeenCalledWith(apiError)
   })
 
   it('invalidates materials list and admin detail after updating material', async () => {

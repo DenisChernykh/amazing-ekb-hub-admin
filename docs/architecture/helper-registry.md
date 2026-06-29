@@ -58,12 +58,15 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Session Entity
 
-| Helper                      | Location                                  | Visibility | Contract                                                      |
-| --------------------------- | ----------------------------------------- | ---------- | ------------------------------------------------------------- |
-| `getCurrentSessionQueryKey` | `src/entities/session/api/session-api.ts` | exported   | Returns the React Query key for the current backend session.  |
-| `invalidateCurrentSession`  | `src/entities/session/api/session-api.ts` | exported   | Invalidates the current session query after login or refresh. |
-| `removeCurrentSession`      | `src/entities/session/api/session-api.ts` | exported   | Removes the current session query after logout.               |
-| `getRoleMeta`               | `src/entities/session/ui/role-meta.ts`    | exported   | Maps backend `Role` to localized Ant Design tag metadata.     |
+| Helper                      | Location                                      | Visibility | Contract                                                            |
+| --------------------------- | --------------------------------------------- | ---------- | ------------------------------------------------------------------- |
+| `getCurrentSessionQueryKey` | `src/entities/session/api/session-api.ts`     | exported   | Returns the React Query key for the current backend session.        |
+| `invalidateCurrentSession`  | `src/entities/session/api/session-api.ts`     | exported   | Invalidates the current session query after login or refresh.       |
+| `removeCurrentSession`      | `src/entities/session/api/session-api.ts`     | exported   | Removes the current session query after logout.                     |
+| `useCurrentSessionQuery`    | `src/entities/session/model/session-hooks.ts` | exported   | Loads the current backend session with auth-guard retry disabled.   |
+| `useLoginSession`           | `src/entities/session/model/session-hooks.ts` | exported   | Logs in through auth API and invalidates the current session query. |
+| `useLogoutSession`          | `src/entities/session/model/session-hooks.ts` | exported   | Logs out through auth API and removes the current session query.    |
+| `getRoleMeta`               | `src/entities/session/ui/role-meta.ts`        | exported   | Maps backend `Role` to localized Ant Design tag metadata.           |
 
 ## Place Entity
 

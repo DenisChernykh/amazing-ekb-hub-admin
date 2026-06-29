@@ -1,36 +1,30 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
-import { useListAdminMaterialLibrary } from '@/shared/api/generated/admin/admin'
+import {
+  getListAdminMaterialLibraryQueryKey,
+  listAdminMaterialLibrary,
+} from '@/shared/api/generated/admin/admin'
 import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation/adminMaterialLibraryListResponse'
 import type { ListAdminMaterialLibraryParams } from '@/shared/api/generated/operation/listAdminMaterialLibraryParams'
-import type { UseQueryOptions } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
+
+type MaterialLibraryQueryOptions = {
+  enabled?: boolean
+}
 
 /**
- * Безопасные options для запроса общей библиотеки материалов без замены query key или query function.
- */
-export type MaterialLibraryQueryOptions = Omit<
-  Partial<
-    UseQueryOptions<
-      AdminMaterialLibraryListResponse,
-      ApiClientError,
-      AdminMaterialLibraryListResponse
-    >
-  >,
-  'queryFn' | 'queryKey'
->
-
-/**
- * Загружает административную библиотеку материалов через entity-level bridge.
+ * Загружает административную библиотеку материалов через entity-level hook.
  *
- * @remarks UI получает этот hook вместо generated admin hook, чтобы не зависеть от transport-слоя напрямую.
+ * @remarks Использует generated fetcher и query key; из options поддерживает
+ * только `enabled` для ленивых drawer-сценариев.
  */
 export function useMaterialLibraryQuery(
   params?: ListAdminMaterialLibraryParams,
   options?: MaterialLibraryQueryOptions,
 ) {
-  return useListAdminMaterialLibrary<
-    AdminMaterialLibraryListResponse,
-    ApiClientError
-  >(params, {
-    query: options,
+  return useQuery<AdminMaterialLibraryListResponse, ApiClientError>({
+    enabled: options?.enabled,
+    queryFn: ({ signal }) =>
+      listAdminMaterialLibrary(params, undefined, signal),
+    queryKey: getListAdminMaterialLibraryQueryKey(params),
   })
 }

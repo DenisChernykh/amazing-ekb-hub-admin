@@ -1,5 +1,6 @@
 import type { ApiClientError } from '@/shared/api/client/api-error'
 import {
+  createPlaceMaterial,
   getGetAdminPlaceDetailQueryKey,
   getListAdminMaterialLibraryQueryKey,
   getListAdminPlaceMaterialsQueryKey,
@@ -7,7 +8,6 @@ import {
   linkPlaceMaterial,
   updateMaterial,
   updateMaterialAdminStatus,
-  useCreatePlaceMaterial,
 } from '@/shared/api/generated/admin/admin'
 import type {
   AdminMaterialLibraryItem,
@@ -166,16 +166,21 @@ export function useCreatePlaceMaterialMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useCreatePlaceMaterial<ApiClientError>({
-    mutation: {
-      onError: options?.onError,
-      onSuccess: async (material, variables) => {
-        await invalidateMaterialDependencies(
-          queryClient,
-          variables.pathParams.placeId,
-        )
-        await options?.onSuccess?.(material)
-      },
+  return useMutation<
+    Material,
+    ApiClientError,
+    CreatePlaceMaterialMutationVariables
+  >({
+    mutationFn: ({ data, pathParams }) => createPlaceMaterial(pathParams, data),
+    onError: (error) => {
+      options?.onError?.(error)
+    },
+    onSuccess: async (material, variables) => {
+      await invalidateMaterialDependencies(
+        queryClient,
+        variables.pathParams.placeId,
+      )
+      await options?.onSuccess?.(material)
     },
   })
 }
@@ -195,7 +200,9 @@ export function useUpdateMaterialMutation(
     {
       mutationFn: ({ data, materialId }) =>
         updateMaterial({ materialId }, data),
-      onError: options?.onError,
+      onError: (error) => {
+        options?.onError?.(error)
+      },
       onSuccess: async (material, variables) => {
         await invalidateMaterialDependencies(queryClient, variables.placeId)
         await options?.onSuccess?.(material)
@@ -221,7 +228,9 @@ export function useUpdateMaterialAdminStatusMutation(
   >({
     mutationFn: ({ adminStatus, materialId }) =>
       updateMaterialAdminStatus({ materialId }, { adminStatus }),
-    onError: options?.onError,
+    onError: (error) => {
+      options?.onError?.(error)
+    },
     onSuccess: async (material) => {
       await invalidateMaterialLibraryQueries(queryClient)
       await options?.onSuccess?.(material)
