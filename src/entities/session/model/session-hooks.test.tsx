@@ -1,12 +1,12 @@
 import {
+  getCurrentUser,
   getGetCurrentUserQueryKey,
-  useGetCurrentUser,
-  useLogin,
-  useLogout,
+  login,
+  logout,
 } from '@/shared/api/generated/auth/auth'
 import type { AuthMeResponse } from '@/shared/api/generated/model'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { renderHook } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -15,23 +15,19 @@ import {
   useLogoutSession,
 } from './session-hooks'
 
-vi.mock('@/shared/api/generated/auth/auth', async () => {
-  const actual = await vi.importActual<
-    typeof import('@/shared/api/generated/auth/auth')
-  >('@/shared/api/generated/auth/auth')
+vi.mock('@/shared/api/generated/auth/auth', () => ({
+  getCurrentUser: vi.fn(),
+  getGetCurrentUserQueryKey: vi.fn(() => ['/auth/me']),
+  login: vi.fn(),
+  logout: vi.fn(),
+  useGetCurrentUser: vi.fn(),
+  useLogin: vi.fn(),
+  useLogout: vi.fn(),
+}))
 
-  return {
-    ...actual,
-    getGetCurrentUserQueryKey: vi.fn(() => ['/auth/me']),
-    useGetCurrentUser: vi.fn(),
-    useLogin: vi.fn(),
-    useLogout: vi.fn(),
-  }
-})
-
-const mockedUseGetCurrentUser = vi.mocked(useGetCurrentUser)
-const mockedUseLogin = vi.mocked(useLogin)
-const mockedUseLogout = vi.mocked(useLogout)
+const mockedGetCurrentUser = vi.mocked(getCurrentUser)
+const mockedLogin = vi.mocked(login)
+const mockedLogout = vi.mocked(logout)
 
 const admin: AuthMeResponse = {
   email: 'admin@example.test',
@@ -47,90 +43,83 @@ const createWrapper = (queryClient: QueryClient) => {
   }
 }
 
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: true,
+      },
+    },
+  })
+
 describe('session hooks', () => {
   beforeEach(() => {
-    mockedUseGetCurrentUser.mockReset()
-    mockedUseLogin.mockReset()
-    mockedUseLogout.mockReset()
+    mockedGetCurrentUser.mockReset()
+    mockedLogin.mockReset()
+    mockedLogout.mockReset()
     vi.mocked(getGetCurrentUserQueryKey).mockReturnValue(['/auth/me'])
   })
 
-  it('passes safe current session query options with retry disabled by default', () => {
-    mockedUseGetCurrentUser.mockReturnValue({
-      data: admin,
-      isError: false,
-      isPending: false,
-    } as ReturnType<typeof useGetCurrentUser>)
+  it('loads current session through generated fetcher with retry disabled', async () => {
+    const queryClient = createQueryClient()
+    mockedGetCurrentUser.mockResolvedValue(admin)
 
-    renderHook(() =>
-      useCurrentSessionQuery({
-        refetchOnWindowFocus: false,
-        staleTime: 5_000,
-      }),
-    )
-
-    expect(mockedUseGetCurrentUser).toHaveBeenCalledWith({
-      query: {
-        refetchOnWindowFocus: false,
-        retry: false,
-        staleTime: 5_000,
-      },
-    })
-  })
-
-  it('invalidates current session after successful login', async () => {
-    const queryClient = new QueryClient()
-    const onSuccess = vi.fn()
-    const queryKey = ['/auth/me']
-    queryClient.setQueryData(queryKey, admin)
-    mockedUseLogin.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useLogin>)
-
-    renderHook(() => useLoginSession({ onSuccess }), {
+    const { result } = renderHook(() => useCurrentSessionQuery(), {
       wrapper: createWrapper(queryClient),
     })
 
-    await mockedUseLogin.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      admin,
-      {
-        data: {
-          email: 'admin@example.test',
-          password: 'unit-test-password',
-        },
-      },
-      undefined,
-      {} as never,
-    )
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
+    expect(getGetCurrentUserQueryKey).toHaveBeenCalled()
+    expect(mockedGetCurrentUser).toHaveBeenCalledWith(
+      undefined,
+      expect.any(AbortSignal),
+    )
+    expect(result.current.data).toBe(admin)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: ['/auth/me'] })?.options
+        .retry,
+    ).toBe(false)
+  })
+
+  it('logs in through generated fetcher and invalidates current session', async () => {
+    const queryClient = new QueryClient()
+    const onSuccess = vi.fn()
+    const queryKey = ['/auth/me']
+    const credentials = {
+      email: 'admin@example.test',
+      password: 'unit-test-password',
+    }
+    queryClient.setQueryData(queryKey, admin)
+    mockedLogin.mockResolvedValue(admin)
+
+    const { result } = renderHook(() => useLoginSession({ onSuccess }), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await result.current.mutateAsync({ data: credentials })
+
+    expect(mockedLogin).toHaveBeenCalledWith(credentials)
     expect(
       queryClient.getQueryCache().find({ queryKey })?.state.isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(admin)
   })
 
-  it('removes current session after successful logout', async () => {
+  it('logs out through generated fetcher and removes current session', async () => {
     const queryClient = new QueryClient()
     const onSuccess = vi.fn()
     const queryKey = ['/auth/me']
     queryClient.setQueryData(queryKey, admin)
-    mockedUseLogout.mockReturnValue({
-      isPending: false,
-      mutate: vi.fn(),
-    } as unknown as ReturnType<typeof useLogout>)
+    mockedLogout.mockResolvedValue(undefined)
 
-    renderHook(() => useLogoutSession({ onSuccess }), {
+    const { result } = renderHook(() => useLogoutSession({ onSuccess }), {
       wrapper: createWrapper(queryClient),
     })
 
-    await mockedUseLogout.mock.calls[0]?.[0]?.mutation?.onSuccess?.(
-      undefined,
-      undefined,
-      undefined,
-      {} as never,
-    )
+    await result.current.mutateAsync()
 
+    expect(mockedLogout).toHaveBeenCalled()
     expect(queryClient.getQueryData(queryKey)).toBeUndefined()
     expect(onSuccess).toHaveBeenCalled()
   })
