@@ -7,6 +7,7 @@ import type {
   ContentSourceStatus,
 } from '@/shared/api/generated/model'
 import type { ListContentSourcesParams } from '@/shared/api/generated/operation/listContentSourcesParams'
+import { isOneOf } from '@/shared/lib/type/is-one-of'
 
 /**
  * URL-состояние фильтров content sources.
@@ -21,25 +22,13 @@ export type ContentSourceFiltersState = {
 const getContentSourcePlatformFromValue = (
   value: string | number | null,
 ): ContentSourcePlatform | null => {
-  if (typeof value !== 'string') {
-    return null
-  }
-
-  return CONTENT_SOURCE_PLATFORM_VALUES.includes(value as ContentSourcePlatform)
-    ? (value as ContentSourcePlatform)
-    : null
+  return isOneOf(CONTENT_SOURCE_PLATFORM_VALUES, value) ? value : null
 }
 
 const getContentSourceStatusFromValue = (
   value: string | number | null,
 ): ContentSourceStatus | null => {
-  if (typeof value !== 'string') {
-    return null
-  }
-
-  return CONTENT_SOURCE_STATUS_VALUES.includes(value as ContentSourceStatus)
-    ? (value as ContentSourceStatus)
-    : null
+  return isOneOf(CONTENT_SOURCE_STATUS_VALUES, value) ? value : null
 }
 
 /**

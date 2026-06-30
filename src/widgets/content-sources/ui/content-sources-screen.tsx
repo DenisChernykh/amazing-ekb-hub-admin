@@ -1,17 +1,12 @@
 import { useContentSourcesQuery } from '@/entities/content-source/model/content-source-hooks'
-import { isActiveImportRunStatus } from '@/entities/import-run/model/import-run-cache'
-import { useImportRunEvents } from '@/entities/import-run/model/import-run-events'
 import { useImportRunsQuery } from '@/entities/import-run/model/import-run-hooks'
-import { CreateContentSourceDrawer } from '@/features/content-source/create/ui/create-content-source-drawer'
-import { EditContentSourceDrawer } from '@/features/content-source/edit/ui/edit-content-source-drawer'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
+import type { ContentSource } from '@/shared/api/generated/model'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
   ScreenLoadingState,
 } from '@/shared/ui/screen-state/screen-state'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Flex, Typography, theme } from 'antd'
+import { Card, Flex, theme } from 'antd'
 import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
@@ -22,8 +17,12 @@ import {
   type ContentSourceFiltersState,
 } from '../model/content-source-filters'
 import { ContentSourceFiltersBar } from './content-source-filters-bar'
+import { ContentSourcesDrawers } from './content-sources-drawers'
+import { ContentSourcesHeader } from './content-sources-header'
 import styles from './content-sources-screen.module.css'
+import { ContentSourcesStateLayout } from './content-sources-state-layout'
 import { ContentSourcesTable } from './content-sources-table'
+import { ImportRunEventsSubscriptions } from './import-run-events-subscriptions'
 import { ImportRunsTable } from './import-runs-table'
 
 const emptyContentSourceResponse = {
@@ -40,18 +39,6 @@ const hasActiveSourceFilters = (filters: ContentSourceFiltersState) => {
 
 type ContentSourcesScreenVariables = CSSProperties & {
   '--content-sources-border': string
-}
-
-const ImportRunEventsSubscription = ({
-  importRun,
-}: {
-  importRun: ImportRun
-}) => {
-  useImportRunEvents(importRun.id, {
-    sourceId: importRun.sourceId,
-  })
-
-  return null
 }
 
 /**
@@ -80,9 +67,6 @@ export function ContentSourcesScreen() {
     ? (sourceLookupQuery.data ?? emptyContentSourceResponse)
     : contentSourceData
   const importRunData = importRunsQuery.data ?? emptyImportRunResponse
-  const activeImportRuns = importRunData.items.filter((importRun) =>
-    isActiveImportRunStatus(importRun.status),
-  )
   const style: ContentSourcesScreenVariables = {
     '--content-sources-border': token.colorBorderSecondary,
   }
@@ -100,63 +84,37 @@ export function ContentSourcesScreen() {
 
   if (contentSourcesQuery.isPending) {
     return (
-      <Flex gap={16} style={style} vertical>
-        <DocumentTitle title="Источники контента" />
-        <Typography.Title className={styles.title} level={2}>
-          Источники контента
-        </Typography.Title>
+      <ContentSourcesStateLayout style={style}>
         <ScreenLoadingState title="Загружаем источники" />
-      </Flex>
+      </ContentSourcesStateLayout>
     )
   }
 
   if (contentSourcesQuery.isError) {
     return (
-      <Flex gap={16} style={style} vertical>
-        <DocumentTitle title="Источники контента" />
-        <Typography.Title className={styles.title} level={2}>
-          Источники контента
-        </Typography.Title>
+      <ContentSourcesStateLayout style={style}>
         <ScreenApiErrorState
           error={contentSourcesQuery.error}
           forbiddenAction={{ label: 'На главную', to: '/' }}
           notFoundAction={{ label: 'К источникам', to: '/content-sources' }}
         />
-      </Flex>
+      </ContentSourcesStateLayout>
     )
   }
 
   return (
     <Flex gap={16} style={style} vertical>
       <DocumentTitle title="Источники контента" />
-      <Flex align="center" justify="space-between" wrap>
-        <Typography.Title className={styles.title} level={2}>
-          Источники контента
-        </Typography.Title>
-        <Flex align="center" gap={12} wrap>
-          <Typography.Text type="secondary">
-            Всего: {contentSourceData.items.length}
-          </Typography.Text>
-          <Button
-            icon={<PlusOutlined aria-hidden="true" />}
-            onClick={() => {
-              setIsCreateOpen(true)
-            }}
-            type="primary"
-          >
-            Создать источник
-          </Button>
-        </Flex>
-      </Flex>
+      <ContentSourcesHeader
+        onCreate={() => {
+          setIsCreateOpen(true)
+        }}
+        total={contentSourceData.items.length}
+      />
 
       <Card className={styles.card}>
         <ContentSourceFiltersBar filters={filters} onChange={updateFilters} />
-        {activeImportRuns.map((importRun) => (
-          <ImportRunEventsSubscription
-            importRun={importRun}
-            key={importRun.id}
-          />
-        ))}
+        <ImportRunEventsSubscriptions importRuns={importRunData.items} />
         <ContentSourcesTable
           contentSources={contentSourceData.items}
           filters={filters}
@@ -184,21 +142,16 @@ export function ContentSourcesScreen() {
         />
       </Card>
 
-      <CreateContentSourceDrawer
-        onClose={() => {
+      <ContentSourcesDrawers
+        editingSource={editingSource}
+        isCreateOpen={isCreateOpen}
+        onCloseCreate={() => {
           setIsCreateOpen(false)
         }}
-        open={isCreateOpen}
+        onCloseEdit={() => {
+          setEditingSource(null)
+        }}
       />
-      {editingSource && (
-        <EditContentSourceDrawer
-          contentSource={editingSource}
-          onClose={() => {
-            setEditingSource(null)
-          }}
-          open={Boolean(editingSource)}
-        />
-      )}
     </Flex>
   )
 }

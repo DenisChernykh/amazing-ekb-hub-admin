@@ -1,13 +1,11 @@
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-} from 'axios'
+import axios, { AxiosError, type AxiosInstance } from 'axios'
 import { getApiBaseUrl } from './api-base-url'
 import { normalizeApiError } from './api-error'
 
-type RetriableRequestConfig = InternalAxiosRequestConfig & {
-  _retry?: boolean
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    isAuthRefreshRetry?: boolean
+  }
 }
 
 let refreshPromise: Promise<void> | null = null
@@ -40,16 +38,16 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as RetriableRequestConfig | undefined
+    const originalRequest = error.config
     const status = error.response?.status
 
     if (
       status === 401 &&
       originalRequest &&
-      !originalRequest._retry &&
+      !originalRequest.isAuthRefreshRetry &&
       !shouldSkipRefresh(originalRequest.url)
     ) {
-      originalRequest._retry = true
+      originalRequest.isAuthRefreshRetry = true
 
       try {
         await requestRefresh(apiClient)

@@ -105,6 +105,40 @@ describe('apiClient', () => {
     ).toBe(true)
   })
 
+  it('does not refresh again when the retried request still returns 401', async () => {
+    const calls: InternalAxiosRequestConfig[] = []
+    const adapter: AxiosAdapter = async (config) => {
+      calls.push(config)
+
+      if (calls.length > 3) {
+        throw new Error('Unexpected refresh loop')
+      }
+
+      if (config.url === '/auth/refresh') {
+        return createResponse(config, 204)
+      }
+
+      return rejectResponse(config, 401, {
+        statusCode: 401,
+        message: 'Authentication required',
+        error: 'Unauthorized',
+      })
+    }
+
+    apiClient.defaults.adapter = adapter
+
+    await expect(apiClient.get('/admin/places')).rejects.toMatchObject({
+      kind: 'auth',
+      status: 401,
+    })
+
+    expect(calls.map((call) => call.url)).toEqual([
+      '/admin/places',
+      '/auth/refresh',
+      '/admin/places',
+    ])
+  })
+
   it('does not start refresh loops for auth endpoints', async () => {
     const calls: InternalAxiosRequestConfig[] = []
     const adapter: AxiosAdapter = async (config) => {

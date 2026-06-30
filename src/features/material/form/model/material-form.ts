@@ -56,6 +56,15 @@ const materialFormFieldLabels = {
   url: 'Ссылка',
 } satisfies Record<keyof NormalizedMaterialFormValues, string>
 
+const materialFormFieldKeys: Array<keyof NormalizedMaterialFormValues> = [
+  'platform',
+  'type',
+  'title',
+  'publishedAt',
+  'durationSec',
+  'url',
+]
+
 const serializePublishedAt = (publishedAt: Dayjs | null | undefined) => {
   if (!publishedAt) {
     return null
@@ -187,8 +196,8 @@ export function getMaterialFormChangedFields(
   const normalizedValues = normalizeMaterialFormValues(values)
   const normalizedInitialValues = normalizeMaterialFormValues(initialValues)
 
-  return Object.entries(materialFormFieldLabels).flatMap(([key, label]) => {
-    const field = key as keyof NormalizedMaterialFormValues
+  return materialFormFieldKeys.flatMap((field) => {
+    const label = materialFormFieldLabels[field]
 
     if (normalizedValues[field] === normalizedInitialValues[field]) {
       return []

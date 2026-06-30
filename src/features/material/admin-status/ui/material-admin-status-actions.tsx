@@ -10,26 +10,35 @@ import { Alert, App as AntdApp, Button, Flex, Space } from 'antd'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-const statusAction: Record<
-  Exclude<MaterialAdminStatus, 'pending'>,
-  { icon: ReactNode; label: string; successMessage: string }
-> = {
-  approved: {
+type ReviewableMaterialAdminStatus = Exclude<MaterialAdminStatus, 'pending'>
+
+type MaterialAdminStatusAction = {
+  icon: ReactNode
+  label: string
+  status: ReviewableMaterialAdminStatus
+  successMessage: string
+}
+
+const statusActions: MaterialAdminStatusAction[] = [
+  {
     icon: <CheckOutlined aria-hidden="true" />,
     label: 'Одобрить',
+    status: 'approved',
     successMessage: 'Материал одобрен',
   },
-  rejected: {
+  {
     icon: <CloseOutlined aria-hidden="true" />,
     label: 'Отклонить',
+    status: 'rejected',
     successMessage: 'Материал отклонен',
   },
-  archived: {
+  {
     icon: <InboxOutlined aria-hidden="true" />,
     label: 'В архив',
+    status: 'archived',
     successMessage: 'Материал отправлен в архив',
   },
-}
+]
 
 type MaterialAdminStatusActionsProps = {
   material: AdminMaterialLibraryItem
@@ -47,15 +56,11 @@ export function MaterialAdminStatusActions({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const updateStatusMutation = useUpdateMaterialAdminStatusMutation()
 
-  const handleStatusChange = (
-    adminStatus: Exclude<MaterialAdminStatus, 'pending'>,
-  ) => {
-    const action = statusAction[adminStatus]
-
+  const handleStatusChange = (action: MaterialAdminStatusAction) => {
     setErrorMessage(null)
     updateStatusMutation.mutate(
       {
-        adminStatus,
+        adminStatus: action.status,
         materialId: material.id,
       },
       {
@@ -75,22 +80,19 @@ export function MaterialAdminStatusActions({
   return (
     <Flex gap={8} vertical>
       <Space size={[4, 4]} wrap>
-        {Object.entries(statusAction).map(([status, action]) => (
+        {statusActions.map((action) => (
           <Button
             disabled={
-              updateStatusMutation.isPending || material.adminStatus === status
+              updateStatusMutation.isPending ||
+              material.adminStatus === action.status
             }
             icon={action.icon}
-            key={status}
+            key={action.status}
             onClick={() => {
-              handleStatusChange(
-                status as Exclude<MaterialAdminStatus, 'pending'>,
-              )
+              handleStatusChange(action)
             }}
             size="small"
-            title={
-              getMaterialAdminStatusMeta(status as MaterialAdminStatus).label
-            }
+            title={getMaterialAdminStatusMeta(action.status).label}
           >
             {action.label}
           </Button>
