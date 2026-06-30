@@ -1,4 +1,5 @@
 import { LoginForm } from '@/features/auth/login/ui/login-form'
+import { isRecord } from '@/shared/lib/type/is-record'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import { Card, Flex, Layout, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
@@ -6,14 +7,22 @@ import type { Location } from 'react-router'
 import { useLocation, useNavigate } from 'react-router'
 import styles from './auth-login-screen.module.css'
 
-type LoginLocationState = {
-  from?: Location
-}
-
 const { Content } = Layout
 
+const isRedirectLocation = (
+  value: unknown,
+): value is Pick<Location, 'hash' | 'pathname' | 'search'> => {
+  return (
+    isRecord(value) &&
+    typeof value.pathname === 'string' &&
+    typeof value.search === 'string' &&
+    typeof value.hash === 'string'
+  )
+}
+
 const getRedirectPath = (state: unknown) => {
-  const from = (state as LoginLocationState | null)?.from
+  const from =
+    isRecord(state) && isRedirectLocation(state.from) ? state.from : null
 
   if (!from || from.pathname === '/login') {
     return '/'

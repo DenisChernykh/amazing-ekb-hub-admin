@@ -6,7 +6,16 @@ import {
 import type { ImportRun, ImportRunStatus } from '@/shared/api/generated/model'
 import type { ImportRunListResponse } from '@/shared/api/generated/operation'
 import type { ListImportRunsParams } from '@/shared/api/generated/operation/listImportRunsParams'
+import { isOneOf } from '@/shared/lib/type/is-one-of'
+import { isRecord } from '@/shared/lib/type/is-record'
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
+
+const importRunStatusValues = [
+  'queued',
+  'running',
+  'completed',
+  'failed',
+] satisfies ImportRunStatus[]
 
 const activeImportRunStatuses = new Set<ImportRunStatus>(['queued', 'running'])
 
@@ -15,16 +24,24 @@ const terminalImportRunStatuses = new Set<ImportRunStatus>([
   'failed',
 ])
 
+const isImportRunStatus = (value: unknown): value is ImportRunStatus =>
+  isOneOf(importRunStatusValues, value)
+
 const getImportRunQueryParams = (
   queryKey: QueryKey,
 ): ListImportRunsParams | undefined => {
   const [, params] = queryKey
 
-  if (typeof params === 'object' && params !== null) {
-    return params as ListImportRunsParams
+  if (!isRecord(params)) {
+    return undefined
   }
 
-  return undefined
+  return {
+    ...(typeof params.sourceId === 'string'
+      ? { sourceId: params.sourceId }
+      : {}),
+    ...(isImportRunStatus(params.status) ? { status: params.status } : {}),
+  }
 }
 
 const matchesImportRunParams = (
@@ -206,13 +223,10 @@ export const getImportRunFromQueryCache = (
 
   return (
     queryClient
-      .getQueryCache()
-      .findAll({ queryKey: rootQueryKey })
-      .flatMap((query) => {
-        const response = query.state.data as ImportRunListResponse | undefined
-
-        return response?.items ?? []
+      .getQueriesData<ImportRunListResponse | undefined>({
+        queryKey: rootQueryKey,
       })
+      .flatMap(([, response]) => response?.items ?? [])
       .find((importRun) => importRun.id === runId) ?? null
   )
 }

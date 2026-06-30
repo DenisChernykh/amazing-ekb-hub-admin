@@ -46,6 +46,10 @@ const contentSourceFormFieldLabels = {
   url: 'Ссылка',
 } satisfies Record<keyof NormalizedContentSourceFormValues, string>
 
+const contentSourceFormFieldKeys: Array<
+  keyof NormalizedContentSourceFormValues
+> = ['channelId', 'displayName', 'externalId', 'handle', 'platform', 'url']
+
 const trimOptionalValue = (value: string | undefined) => {
   const trimmedValue = (value ?? '').trim()
 
@@ -180,15 +184,13 @@ export function getContentSourceFormChangedFields(
   const normalizedInitialValues =
     normalizeContentSourceFormValues(initialValues)
 
-  return Object.entries(contentSourceFormFieldLabels).flatMap(
-    ([key, label]) => {
-      const field = key as keyof NormalizedContentSourceFormValues
+  return contentSourceFormFieldKeys.flatMap((field) => {
+    const label = contentSourceFormFieldLabels[field]
 
-      if (normalizedValues[field] === normalizedInitialValues[field]) {
-        return []
-      }
+    if (normalizedValues[field] === normalizedInitialValues[field]) {
+      return []
+    }
 
-      return [{ key: field, label }]
-    },
-  )
+    return [{ key: field, label }]
+  })
 }

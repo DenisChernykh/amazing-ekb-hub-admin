@@ -47,8 +47,10 @@ export const subscribeToImportRunEvents = (
     eventSource.removeEventListener('error', handleError)
     eventSource.close()
   }
-  const handleUpdate = (event: Event) => {
-    handlers.onUpdate((event as MessageEvent<string>).data)
+  const handleUpdate: EventListener = (event) => {
+    if (event instanceof MessageEvent && typeof event.data === 'string') {
+      handlers.onUpdate(event.data)
+    }
   }
   const handleError = () => {
     handlers.onError()

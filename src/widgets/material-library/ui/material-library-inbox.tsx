@@ -1,22 +1,4 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
-import {
-  formatMaterialMediaKind,
-  formatMaterialPublishedDate,
-  getMaterialAdminStatusMeta,
-  getMaterialAdminStatusOptions,
-  getMaterialLibraryPreviewText,
-  getMaterialLibrarySourceTitle,
-  getMaterialLinkedMeta,
-  getMaterialPlatformMeta,
-  getMaterialPlatformOptions,
-  getSafeMaterialHref,
-} from '@/entities/material/ui/material-meta'
-import { MaterialAdminStatusActions } from '@/features/material/admin-status/ui/material-admin-status-actions'
-import type {
-  AdminMaterialLibraryItem,
-  MaterialAdminStatus,
-  Platform,
-} from '@/shared/api/generated/model'
 import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
@@ -24,17 +6,7 @@ import {
   ScreenEmptyState,
   ScreenLoadingState,
 } from '@/shared/ui/screen-state/screen-state'
-import { ExportOutlined, PictureOutlined } from '@ant-design/icons'
-import {
-  Card,
-  Flex,
-  Pagination,
-  Select,
-  Table,
-  Tag,
-  Typography,
-  theme,
-} from 'antd'
+import { Card, Flex, Pagination, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
 import { useSearchParams } from 'react-router'
 import {
@@ -45,15 +17,9 @@ import {
   getMaterialLibraryQueryParams,
   type MaterialLibraryFiltersState,
 } from '../model/material-library-filters'
+import { MaterialLibraryFilterBar } from './material-library-filter-bar'
 import styles from './material-library-inbox.module.css'
-
-const allValue = 'all'
-
-const linkedFilterOptions = [
-  { label: 'Все связи', value: allValue },
-  { label: 'Связанные', value: 'true' },
-  { label: 'Без связи', value: 'false' },
-]
+import { MaterialLibraryTable } from './material-library-table'
 
 const emptyMaterialLibraryResponse: AdminMaterialLibraryListResponse = {
   items: [],
@@ -138,130 +104,6 @@ export function MaterialLibraryInbox() {
     )
   }
 
-  const columns = [
-    {
-      dataIndex: 'source',
-      key: 'source',
-      render: (
-        _value: AdminMaterialLibraryItem['source'],
-        material: AdminMaterialLibraryItem,
-      ) => {
-        const platformMeta = getMaterialPlatformMeta(material.platform)
-        const sourceHref = getSafeMaterialHref(material.source?.url)
-
-        return (
-          <Flex className={styles.sourceCell} gap={4} vertical>
-            {sourceHref ? (
-              <Typography.Link
-                href={sourceHref}
-                rel="noopener noreferrer"
-                strong
-                target="_blank"
-              >
-                {getMaterialLibrarySourceTitle(material)}
-              </Typography.Link>
-            ) : (
-              <Typography.Text strong>
-                {getMaterialLibrarySourceTitle(material)}
-              </Typography.Text>
-            )}
-            <Tag color={platformMeta.color}>{platformMeta.label}</Tag>
-          </Flex>
-        )
-      },
-      title: 'Источник',
-    },
-    {
-      dataIndex: 'publishedAt',
-      key: 'publishedAt',
-      render: (publishedAt: string) => formatMaterialPublishedDate(publishedAt),
-      title: 'Дата',
-    },
-    {
-      key: 'preview',
-      render: (_value: unknown, material: AdminMaterialLibraryItem) => {
-        const previewText = getMaterialLibraryPreviewText(material)
-        const materialHref = getSafeMaterialHref(material.url)
-
-        return (
-          <Flex className={styles.previewCell} gap={4} vertical>
-            <Typography.Paragraph
-              className={styles.previewText}
-              ellipsis={{ rows: 2 }}
-            >
-              {previewText}
-            </Typography.Paragraph>
-            {materialHref !== null && (
-              <Typography.Link
-                href={materialHref}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <ExportOutlined aria-hidden="true" /> Открыть пост
-              </Typography.Link>
-            )}
-          </Flex>
-        )
-      },
-      title: 'Текст',
-    },
-    {
-      dataIndex: 'mediaKind',
-      key: 'mediaKind',
-      render: (
-        mediaKind: AdminMaterialLibraryItem['mediaKind'],
-        material: AdminMaterialLibraryItem,
-      ) => {
-        const mediaPreviewHref = getSafeMaterialHref(material.mediaPreviewUrl)
-
-        return (
-          <Flex gap={4} vertical>
-            <Typography.Text>
-              {formatMaterialMediaKind(mediaKind)}
-            </Typography.Text>
-            {mediaPreviewHref !== null && (
-              <Typography.Link
-                href={mediaPreviewHref}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <PictureOutlined aria-hidden="true" /> Открыть медиа
-              </Typography.Link>
-            )}
-          </Flex>
-        )
-      },
-      title: 'Медиа',
-    },
-    {
-      dataIndex: 'linked',
-      key: 'linked',
-      render: (linked: AdminMaterialLibraryItem['linked']) => {
-        const meta = getMaterialLinkedMeta(linked)
-
-        return <Tag color={meta.color}>{meta.label}</Tag>
-      },
-      title: 'Связь',
-    },
-    {
-      dataIndex: 'adminStatus',
-      key: 'adminStatus',
-      render: (status: AdminMaterialLibraryItem['adminStatus']) => {
-        const meta = getMaterialAdminStatusMeta(status)
-
-        return <Tag color={meta.color}>{meta.label}</Tag>
-      },
-      title: 'Статус',
-    },
-    {
-      key: 'actions',
-      render: (_value: unknown, material: AdminMaterialLibraryItem) => (
-        <MaterialAdminStatusActions material={material} />
-      ),
-      title: 'Действия',
-    },
-  ]
-
   const emptyText = (
     <ScreenEmptyState
       description={
@@ -288,60 +130,12 @@ export function MaterialLibraryInbox() {
       </Flex>
 
       <Card className={styles.card}>
-        <Flex className={styles.filters} gap={12} wrap>
-          <Select
-            className={styles.filter}
-            onChange={(value) => {
-              updateFilters({
-                ...filters,
-                platform: value === allValue ? null : (value as Platform),
-              })
-            }}
-            options={[
-              { label: 'Все платформы', value: allValue },
-              ...getMaterialPlatformOptions(),
-            ]}
-            value={filters.platform ?? allValue}
-          />
-          <Select
-            className={styles.filter}
-            onChange={(value) => {
-              updateFilters({
-                ...filters,
-                adminStatus:
-                  value === allValue ? null : (value as MaterialAdminStatus),
-              })
-            }}
-            options={[
-              { label: 'Все статусы', value: allValue },
-              ...getMaterialAdminStatusOptions(),
-            ]}
-            value={filters.adminStatus ?? allValue}
-          />
-          <Select
-            className={styles.filter}
-            onChange={(value) => {
-              updateFilters({
-                ...filters,
-                linked:
-                  value === allValue ? null : (value as string) === 'true',
-              })
-            }}
-            options={linkedFilterOptions}
-            value={filters.linked === null ? allValue : String(filters.linked)}
-          />
-        </Flex>
-
-        <div className={styles.tableWrap}>
-          <Table
-            columns={columns}
-            dataSource={data.items}
-            loading={materialLibraryQuery.isFetching}
-            locale={{ emptyText }}
-            pagination={false}
-            rowKey="id"
-          />
-        </div>
+        <MaterialLibraryFilterBar filters={filters} onChange={updateFilters} />
+        <MaterialLibraryTable
+          emptyText={emptyText}
+          isFetching={materialLibraryQuery.isFetching}
+          materials={data.items}
+        />
 
         <Flex className={styles.footer} justify="end">
           <Pagination

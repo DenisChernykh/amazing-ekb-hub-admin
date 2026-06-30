@@ -8,12 +8,14 @@ import {
   type MaterialFormChangedField,
   type MaterialFormValues,
 } from '@/features/material/form/model/material-form'
+import { MaterialFormChangedFields } from '@/features/material/form/ui/material-form-changed-fields'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
-import { App as AntdApp, Button, Drawer, Flex, Form, Space, Tag } from 'antd'
+import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
+import { EditMaterialDrawerActions } from './edit-material-drawer-actions'
 
 /**
  * Props drawer-а редактирования материала.
@@ -142,11 +144,7 @@ export function EditMaterialDrawer({
 
         {Boolean(changedFields.length) && (
           <Form.Item>
-            <Space size={[4, 4]} wrap>
-              {changedFields.map((field) => (
-                <Tag key={field.key}>{field.label}</Tag>
-              ))}
-            </Space>
+            <MaterialFormChangedFields fields={changedFields} />
           </Form.Item>
         )}
 
@@ -155,22 +153,11 @@ export function EditMaterialDrawer({
           showUrlField={showUrlField}
         />
 
-        <Flex gap={8} justify="end" wrap>
-          <Button
-            disabled={updateMaterialMutation.isPending}
-            onClick={requestClose}
-          >
-            Отмена
-          </Button>
-          <Button
-            disabled={!isDirty}
-            htmlType="submit"
-            loading={updateMaterialMutation.isPending}
-            type="primary"
-          >
-            Сохранить
-          </Button>
-        </Flex>
+        <EditMaterialDrawerActions
+          isDirty={isDirty}
+          isPending={updateMaterialMutation.isPending}
+          onCancel={requestClose}
+        />
       </Form>
     </Drawer>
   )

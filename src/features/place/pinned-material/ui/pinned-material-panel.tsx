@@ -9,18 +9,12 @@ import {
 } from '@/entities/place/model/place-mutations'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PublicMaterial } from '@/shared/api/generated/model'
-import {
-  Alert,
-  App as AntdApp,
-  Button,
-  Card,
-  Flex,
-  Select,
-  Typography,
-} from 'antd'
+import { App as AntdApp, Card, Flex, Select } from 'antd'
 import { useState } from 'react'
 import { toSetPinnedMaterialRequest } from '../model/pinned-material'
+import { PinnedMaterialActions } from './pinned-material-actions'
 import { PinnedMaterialCurrent } from './pinned-material-current'
+import { PinnedMaterialErrorAlert } from './pinned-material-error-alert'
 
 const getMaterialOptionLabel = (material: PublicMaterial) => {
   const platform = getMaterialPlatformMeta(material.platform)
@@ -130,19 +124,9 @@ export function PinnedMaterialPanel({
         <PinnedMaterialCurrent pinnedMaterial={pinnedMaterial} />
 
         {Boolean(errorMessages.length) && (
-          <Alert
-            description={
-              <Flex gap={4} vertical>
-                {errorMessages.map((errorMessage) => (
-                  <Typography.Text key={errorMessage}>
-                    {errorMessage}
-                  </Typography.Text>
-                ))}
-              </Flex>
-            }
-            message={errorTitle}
-            showIcon
-            type="error"
+          <PinnedMaterialErrorAlert
+            messages={errorMessages}
+            title={errorTitle}
           />
         )}
 
@@ -155,25 +139,15 @@ export function PinnedMaterialPanel({
           value={selectedMaterialId ?? undefined}
         />
 
-        <Flex gap={8} justify="end" wrap>
-          {Boolean(pinnedMaterial) && (
-            <Button
-              disabled={isMutationPending}
-              loading={clearPinnedMaterialMutation.isPending}
-              onClick={handleClear}
-            >
-              Снять закрепление
-            </Button>
-          )}
-          <Button
-            disabled={!selectedMaterialId || !isChanged || isMutationPending}
-            loading={setPinnedMaterialMutation.isPending}
-            onClick={handleSubmit}
-            type="primary"
-          >
-            Закрепить
-          </Button>
-        </Flex>
+        <PinnedMaterialActions
+          canSubmit={Boolean(selectedMaterialId) && isChanged}
+          hasPinnedMaterial={pinnedMaterial !== null}
+          isClearPending={clearPinnedMaterialMutation.isPending}
+          isMutationPending={isMutationPending}
+          isSetPending={setPinnedMaterialMutation.isPending}
+          onClear={handleClear}
+          onSubmit={handleSubmit}
+        />
       </Flex>
     </Card>
   )

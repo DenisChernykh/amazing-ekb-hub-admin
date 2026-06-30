@@ -6,11 +6,8 @@ import axios, {
 import { getApiBaseUrl } from './api-base-url'
 import { normalizeApiError } from './api-error'
 
-type RetriableRequestConfig = InternalAxiosRequestConfig & {
-  _retry?: boolean
-}
-
 let refreshPromise: Promise<void> | null = null
+const retriedRequests = new WeakSet<InternalAxiosRequestConfig>()
 
 const shouldSkipRefresh = (url: string | undefined) =>
   typeof url === 'string' &&
@@ -40,16 +37,16 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as RetriableRequestConfig | undefined
+    const originalRequest = error.config
     const status = error.response?.status
 
     if (
       status === 401 &&
       originalRequest &&
-      !originalRequest._retry &&
+      !retriedRequests.has(originalRequest) &&
       !shouldSkipRefresh(originalRequest.url)
     ) {
-      originalRequest._retry = true
+      retriedRequests.add(originalRequest)
 
       try {
         await requestRefresh(apiClient)

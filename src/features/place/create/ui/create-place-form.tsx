@@ -10,9 +10,9 @@ import {
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import { Alert, App as AntdApp, Button, Flex, Form, Typography } from 'antd'
+import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { CreatePlacePartialSuccessAlert } from './create-place-partial-success-alert'
 
 type CreatePlaceFormProps = {
   onCancel: () => void
@@ -107,24 +107,9 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
 
       {partialSuccess && (
         <Form.Item>
-          <Alert
-            description={
-              <Flex gap={8} vertical>
-                <Flex gap={4} vertical>
-                  {partialSuccess.messages.map((errorMessage) => (
-                    <Typography.Text key={errorMessage}>
-                      {errorMessage}
-                    </Typography.Text>
-                  ))}
-                </Flex>
-                <Link to={`/places/${partialSuccess.placeId}`}>
-                  <Button>Открыть созданное место</Button>
-                </Link>
-              </Flex>
-            }
-            message="Место создано, но cover-фото не загрузилось"
-            showIcon
-            type="warning"
+          <CreatePlacePartialSuccessAlert
+            messages={partialSuccess.messages}
+            placeId={partialSuccess.placeId}
           />
         </Form.Item>
       )}

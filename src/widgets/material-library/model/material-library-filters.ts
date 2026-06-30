@@ -1,9 +1,14 @@
+import {
+  MATERIAL_ADMIN_STATUS_VALUES,
+  MATERIAL_PLATFORM_VALUES,
+} from '@/entities/material/ui/material-meta'
 import type {
   MaterialAdminStatus,
   Platform,
 } from '@/shared/api/generated/model'
 import type { ListAdminMaterialLibraryParams } from '@/shared/api/generated/operation/listAdminMaterialLibraryParams'
 import { parsePositiveInteger } from '@/shared/lib/number/parse-positive-integer'
+import { isOneOf } from '@/shared/lib/type/is-one-of'
 
 /**
  * Страница библиотеки материалов по умолчанию.
@@ -39,35 +44,16 @@ export type MaterialLibraryPaginationState = {
   pageSize: number
 }
 
-const platformValues = ['telegram', 'dzen', 'instagram'] satisfies Platform[]
-
-const adminStatusValues = [
-  'pending',
-  'approved',
-  'rejected',
-  'archived',
-] satisfies MaterialAdminStatus[]
-
 const getMaterialLibraryPlatformFromValue = (
   value: string | number | null,
 ): Platform | null => {
-  if (typeof value !== 'string') {
-    return null
-  }
-
-  return platformValues.includes(value as Platform) ? (value as Platform) : null
+  return isOneOf(MATERIAL_PLATFORM_VALUES, value) ? value : null
 }
 
 const getMaterialLibraryAdminStatusFromValue = (
   value: string | number | null,
 ): MaterialAdminStatus | null => {
-  if (typeof value !== 'string') {
-    return null
-  }
-
-  return adminStatusValues.includes(value as MaterialAdminStatus)
-    ? (value as MaterialAdminStatus)
-    : null
+  return isOneOf(MATERIAL_ADMIN_STATUS_VALUES, value) ? value : null
 }
 
 /**

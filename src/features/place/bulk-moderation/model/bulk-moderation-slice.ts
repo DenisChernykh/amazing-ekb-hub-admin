@@ -217,13 +217,13 @@ const bulkModerationSlice = createSlice({
       setQueueItems(state, items, 'bulk', action.payload.targetStatus)
     },
     startUndoOperation(state) {
-      const items = state.queueOrder
+      const items: BulkModerationQueueItem[] = state.queueOrder
         .map((id) => state.queueById[id])
         .filter((item) => item.operationStatus === 'succeeded')
         .map((item) => ({
           ...item,
           errorMessage: null,
-          operationStatus: 'queued' as const,
+          operationStatus: 'queued',
           previousStatus: item.targetStatus,
           targetStatus: item.previousStatus,
         }))

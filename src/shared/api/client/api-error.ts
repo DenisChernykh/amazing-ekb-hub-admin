@@ -1,3 +1,4 @@
+import { isRecord } from '@/shared/lib/type/is-record'
 import { AxiosError } from 'axios'
 
 /**
@@ -61,11 +62,31 @@ export const isApiClientError = (error: unknown): error is ApiClientError =>
 export const getApiErrorStatus = (error: unknown) =>
   isApiClientError(error) ? error.status : undefined
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
+const isNestMessage = (
+  message: unknown,
+): message is NestErrorBody['message'] => {
+  return (
+    message === undefined ||
+    typeof message === 'string' ||
+    (Array.isArray(message) &&
+      message.every((item) => typeof item === 'string'))
+  )
+}
+
+const isNestErrorBody = (value: unknown): value is NestErrorBody => {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    (value.statusCode === undefined || typeof value.statusCode === 'number') &&
+    isNestMessage(value.message) &&
+    (value.error === undefined || typeof value.error === 'string')
+  )
+}
 
 const toNestErrorBody = (value: unknown): NestErrorBody | undefined =>
-  isRecord(value) ? (value as NestErrorBody) : undefined
+  isNestErrorBody(value) ? value : undefined
 
 const getMessages = (body: NestErrorBody | undefined, fallback: string) => {
   const message = body?.message

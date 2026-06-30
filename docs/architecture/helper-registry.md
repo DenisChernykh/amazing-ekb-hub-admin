@@ -27,6 +27,13 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | ---------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
 | `parsePositiveInteger` | `src/shared/lib/number/parse-positive-integer.ts` | exported   | Parses positive integer URL/form values and returns a caller-provided fallback. |
 
+## Shared Type Helpers
+
+| Helper     | Location                           | Visibility | Contract                                                                     |
+| ---------- | ---------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `isOneOf`  | `src/shared/lib/type/is-one-of.ts` | exported   | Narrows unknown string values through a readonly literal allowlist.          |
+| `isRecord` | `src/shared/lib/type/is-record.ts` | exported   | Narrows unknown non-array objects before safely reading string-keyed fields. |
+
 ## Shared URL Helpers
 
 | Helper                      | Location                         | Visibility | Contract                                                                  |
@@ -121,7 +128,13 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `getMaterialLibrarySourceTitle`        | `src/entities/material/ui/material-meta.ts`             | exported   | Picks content source display name or manual-material fallback for library UI.                       |
 | `getPublicMaterialTitleText`           | `src/entities/material/ui/material-meta.ts`             | exported   | Picks title or imported-material fallback for public material admin UI.                             |
 | `getSafeMaterialHref`                  | `src/entities/material/ui/material-meta.ts`             | exported   | Returns safe `http/https` href values or `null` before rendering material/source/media links.       |
+| `MaterialLibrarySourceCell`            | `src/entities/material/ui/material-library-cells.tsx`   | exported   | Renders a material library source title as a safe link plus platform tag.                           |
+| `MaterialLibraryPreviewCell`           | `src/entities/material/ui/material-library-cells.tsx`   | exported   | Renders material library preview text either as plain text/action link or as the safe text link.    |
+| `MaterialLibraryMediaCell`             | `src/entities/material/ui/material-library-cells.tsx`   | exported   | Renders importer media kind with an optional safe media-preview link.                               |
+| `MaterialLibraryAdminStatusTag`        | `src/entities/material/ui/material-library-cells.tsx`   | exported   | Renders localized material library review status tags.                                              |
+| `MaterialLibraryLinkedTag`             | `src/entities/material/ui/material-library-cells.tsx`   | exported   | Renders localized material library linked/unlinked tags.                                            |
 | `PlaceMaterialsPanel`                  | `src/widgets/place-detail/ui/place-materials-panel.tsx` | exported   | Renders bounded materials table on admin place detail with create/edit/link/hide actions.           |
+| `PlaceMaterialsTable`                  | `src/widgets/place-detail/ui/place-materials-table.tsx` | exported   | Renders the bounded materials table without owning query, drawer, or mutation callback state.       |
 
 ## Content Source Entity
 
@@ -189,18 +202,19 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Form Feature
 
-| Helper                      | Location                                                | Visibility | Contract                                                                                                                                               |
-| --------------------------- | ------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `PlaceFormValues`           | `src/features/place/form/model/place-form.ts`           | exported   | Defines create/edit place form values, including optional `summary`/`tags`, before conversion to generated API payloads.                               |
-| `getPlaceFormInitialValues` | `src/features/place/form/model/place-form.ts`           | exported   | Maps admin `PlaceDetail` to form initial values.                                                                                                       |
-| `toCreatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Normalizes form values into `POST /admin/places` payload, preserving empty optional `summary`/`tags` as `''` and `[]`.                                 |
-| `toUpdatePlaceRequest`      | `src/features/place/form/model/place-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only, including explicit clears for optional `summary`/`tags`. |
-| `hasPlaceFormChanges`       | `src/features/place/form/model/place-form.ts`           | exported   | Detects whether normalized form values differ from the loaded server values.                                                                           |
-| `PlaceFormErrorAlert`       | `src/features/place/form/ui/place-form-error-alert.tsx` | exported   | Renders normalized create/edit place API errors without parsing backend field names.                                                                   |
-| `PlaceFormFields`           | `src/features/place/form/ui/place-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit place forms.                                                                                          |
-| `EditPlaceForm`             | `src/features/place/edit/ui/edit-place-form.tsx`        | exported   | Edits place fields, tracks dirty state, and submits partial update payloads through the entity.                                                        |
-| `CreatePlaceForm`           | `src/features/place/create/ui/create-place-form.tsx`    | exported   | Creates places using the shared place form fields and create mutation bridge.                                                                          |
-| `PlaceEditScreen`           | `src/widgets/place-edit/ui/place-edit-screen.tsx`       | exported   | Loads admin detail, hosts edit form, and blocks dirty in-app navigation.                                                                               |
+| Helper                           | Location                                                              | Visibility | Contract                                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `PlaceFormValues`                | `src/features/place/form/model/place-form.ts`                         | exported   | Defines create/edit place form values, including optional `summary`/`tags`, before conversion to generated API payloads.                               |
+| `getPlaceFormInitialValues`      | `src/features/place/form/model/place-form.ts`                         | exported   | Maps admin `PlaceDetail` to form initial values.                                                                                                       |
+| `toCreatePlaceRequest`           | `src/features/place/form/model/place-form.ts`                         | exported   | Normalizes form values into `POST /admin/places` payload, preserving empty optional `summary`/`tags` as `''` and `[]`.                                 |
+| `toUpdatePlaceRequest`           | `src/features/place/form/model/place-form.ts`                         | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only, including explicit clears for optional `summary`/`tags`. |
+| `hasPlaceFormChanges`            | `src/features/place/form/model/place-form.ts`                         | exported   | Detects whether normalized form values differ from the loaded server values.                                                                           |
+| `PlaceFormErrorAlert`            | `src/features/place/form/ui/place-form-error-alert.tsx`               | exported   | Renders normalized create/edit place API errors without parsing backend field names.                                                                   |
+| `PlaceFormFields`                | `src/features/place/form/ui/place-form-fields.tsx`                    | exported   | Renders shared Ant Design fields for create/edit place forms.                                                                                          |
+| `EditPlaceForm`                  | `src/features/place/edit/ui/edit-place-form.tsx`                      | exported   | Edits place fields, tracks dirty state, and submits partial update payloads through the entity.                                                        |
+| `CreatePlaceForm`                | `src/features/place/create/ui/create-place-form.tsx`                  | exported   | Creates places using the shared place form fields and create mutation bridge.                                                                          |
+| `CreatePlacePartialSuccessAlert` | `src/features/place/create/ui/create-place-partial-success-alert.tsx` | exported   | Renders the partial-success warning after place creation succeeds but cover upload fails.                                                              |
+| `PlaceEditScreen`                | `src/widgets/place-edit/ui/place-edit-screen.tsx`                     | exported   | Loads admin detail, hosts edit form, and blocks dirty in-app navigation.                                                                               |
 
 ## Place Status Feature
 
@@ -237,26 +251,30 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Place Pinned Material Feature
 
-| Helper                       | Location                                                          | Visibility | Contract                                                                                                        |
-| ---------------------------- | ----------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
-| `toSetPinnedMaterialRequest` | `src/features/place/pinned-material/model/pinned-material.ts`     | exported   | Builds `PATCH /admin/places/{placeId}/pinned-material` payload or returns `null` for non-assign values.         |
-| `PinnedMaterialPanel`        | `src/features/place/pinned-material/ui/pinned-material-panel.tsx` | exported   | Renders current pinned material, set/change selector, and clear action using the loaded bounded materials list. |
+| Helper                       | Location                                                                | Visibility | Contract                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `toSetPinnedMaterialRequest` | `src/features/place/pinned-material/model/pinned-material.ts`           | exported   | Builds `PATCH /admin/places/{placeId}/pinned-material` payload or returns `null` for non-assign values.         |
+| `PinnedMaterialActions`      | `src/features/place/pinned-material/ui/pinned-material-actions.tsx`     | exported   | Renders submit and clear actions for the pinned material panel.                                                 |
+| `PinnedMaterialErrorAlert`   | `src/features/place/pinned-material/ui/pinned-material-error-alert.tsx` | exported   | Renders normalized pinned material mutation errors.                                                             |
+| `PinnedMaterialPanel`        | `src/features/place/pinned-material/ui/pinned-material-panel.tsx`       | exported   | Renders current pinned material, set/change selector, and clear action using the loaded bounded materials list. |
 
 ## Material Form Feature
 
-| Helper                         | Location                                                      | Visibility | Contract                                                                                                 |
-| ------------------------------ | ------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
-| `MaterialFormValues`           | `src/features/material/form/model/material-form.ts`           | exported   | Defines create/edit material form values before conversion to generated API payloads.                    |
-| `MaterialFormChangedField`     | `src/features/material/form/model/material-form.ts`           | exported   | Describes a normalized changed material field shown as an edit drawer diff chip.                         |
-| `getMaterialFormInitialValues` | `src/features/material/form/model/material-form.ts`           | exported   | Maps admin `Material` to form initial values.                                                            |
-| `toCreateMaterialRequest`      | `src/features/material/form/model/material-form.ts`           | exported   | Normalizes form values into `POST /admin/places/{placeId}/materials` payload with local offset datetime. |
-| `toUpdateMaterialRequest`      | `src/features/material/form/model/material-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/materials/{materialId}` payload from changed fields only.      |
-| `hasMaterialFormChanges`       | `src/features/material/form/model/material-form.ts`           | exported   | Detects whether normalized material form values differ from loaded server values.                        |
-| `getMaterialFormChangedFields` | `src/features/material/form/model/material-form.ts`           | exported   | Returns normalized changed field labels for edit drawer chips.                                           |
-| `MaterialFormErrorAlert`       | `src/features/material/form/ui/material-form-error-alert.tsx` | exported   | Renders normalized create/edit material API errors without parsing backend field names.                  |
-| `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit material forms.                                         |
-| `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`  | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.               |
-| `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`      | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.  |
+| Helper                         | Location                                                         | Visibility | Contract                                                                                                 |
+| ------------------------------ | ---------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| `MaterialFormValues`           | `src/features/material/form/model/material-form.ts`              | exported   | Defines create/edit material form values before conversion to generated API payloads.                    |
+| `MaterialFormChangedField`     | `src/features/material/form/model/material-form.ts`              | exported   | Describes a normalized changed material field shown as an edit drawer diff chip.                         |
+| `getMaterialFormInitialValues` | `src/features/material/form/model/material-form.ts`              | exported   | Maps admin `Material` to form initial values.                                                            |
+| `toCreateMaterialRequest`      | `src/features/material/form/model/material-form.ts`              | exported   | Normalizes form values into `POST /admin/places/{placeId}/materials` payload with local offset datetime. |
+| `toUpdateMaterialRequest`      | `src/features/material/form/model/material-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/materials/{materialId}` payload from changed fields only.      |
+| `hasMaterialFormChanges`       | `src/features/material/form/model/material-form.ts`              | exported   | Detects whether normalized material form values differ from loaded server values.                        |
+| `getMaterialFormChangedFields` | `src/features/material/form/model/material-form.ts`              | exported   | Returns normalized changed field labels for edit drawer chips.                                           |
+| `MaterialFormChangedFields`    | `src/features/material/form/ui/material-form-changed-fields.tsx` | exported   | Renders material edit drawer changed-field chips.                                                        |
+| `MaterialFormErrorAlert`       | `src/features/material/form/ui/material-form-error-alert.tsx`    | exported   | Renders normalized create/edit material API errors without parsing backend field names.                  |
+| `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit material forms.                                         |
+| `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`     | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.               |
+| `EditMaterialDrawerActions`    | `src/features/material/edit/ui/edit-material-drawer-actions.tsx` | exported   | Renders cancel/save actions for the edit material drawer.                                                |
+| `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`         | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.  |
 
 ## Material Admin Status Feature
 
@@ -268,50 +286,60 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 | Helper                       | Location                                                                   | Visibility | Contract                                                                                         |
 | ---------------------------- | -------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `LinkExistingMaterialTable`  | `src/features/material/link-existing/ui/link-existing-material-table.tsx`  | exported   | Renders approved material library rows for the place-linking drawer.                             |
 | `LinkExistingMaterialDrawer` | `src/features/material/link-existing/ui/link-existing-material-drawer.tsx` | exported   | Renders approved material selector, excludes active links for the place, and links one material. |
 
 ## Content Source Form Feature
 
-| Helper                              | Location                                                                  | Visibility | Contract                                                                                                       |
-| ----------------------------------- | ------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
-| `ContentSourceFormValues`           | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Defines create/edit content source form values before conversion to generated API payloads.                    |
-| `ContentSourceFormChangedField`     | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Describes a normalized changed content source field shown as an edit drawer diff chip.                         |
-| `getContentSourceFormInitialValues` | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Maps admin `ContentSource` to form initial values.                                                             |
-| `toCreateContentSourceRequest`      | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Normalizes form values into `POST /admin/content-sources` payload.                                             |
-| `toUpdateContentSourceRequest`      | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Builds a normalized partial `PATCH /admin/content-sources/{sourceId}` payload with explicit null clears.       |
-| `hasContentSourceFormChanges`       | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Detects whether normalized content source form values differ from loaded server values.                        |
-| `getContentSourceFormChangedFields` | `src/features/content-source/form/model/content-source-form.ts`           | exported   | Returns normalized changed field labels for edit drawer chips.                                                 |
-| `ContentSourceFormErrorAlert`       | `src/features/content-source/form/ui/content-source-form-error-alert.tsx` | exported   | Renders normalized create/edit content source API errors.                                                      |
-| `ContentSourceFormFields`           | `src/features/content-source/form/ui/content-source-form-fields.tsx`      | exported   | Renders shared Ant Design fields for create/edit content source forms.                                         |
-| `CreateContentSourceDrawer`         | `src/features/content-source/create/ui/create-content-source-drawer.tsx`  | exported   | Creates content sources in a guarded Ant Design drawer through the entity mutation bridge.                     |
-| `EditContentSourceDrawer`           | `src/features/content-source/edit/ui/edit-content-source-drawer.tsx`      | exported   | Edits content source fields in a guarded Ant Design drawer with dirty diff chips.                              |
-| `ContentSourceStatusActions`        | `src/features/content-source/status/ui/content-source-status-actions.tsx` | exported   | Renders enable/disable actions for one content source.                                                         |
-| `ImportTelegramSourceButton`        | `src/features/content-source/import/ui/import-telegram-source-button.tsx` | exported   | Renders one-click Telegram import action, active-run disabled state, counters, and 409 active-import feedback. |
+| Helper                              | Location                                                                     | Visibility | Contract                                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| `ContentSourceFormValues`           | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Defines create/edit content source form values before conversion to generated API payloads.                    |
+| `ContentSourceFormChangedField`     | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Describes a normalized changed content source field shown as an edit drawer diff chip.                         |
+| `getContentSourceFormInitialValues` | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Maps admin `ContentSource` to form initial values.                                                             |
+| `toCreateContentSourceRequest`      | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Normalizes form values into `POST /admin/content-sources` payload.                                             |
+| `toUpdateContentSourceRequest`      | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/content-sources/{sourceId}` payload with explicit null clears.       |
+| `hasContentSourceFormChanges`       | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Detects whether normalized content source form values differ from loaded server values.                        |
+| `getContentSourceFormChangedFields` | `src/features/content-source/form/model/content-source-form.ts`              | exported   | Returns normalized changed field labels for edit drawer chips.                                                 |
+| `ContentSourceFormChangedFields`    | `src/features/content-source/form/ui/content-source-form-changed-fields.tsx` | exported   | Renders content source edit drawer changed-field chips.                                                        |
+| `ContentSourceFormErrorAlert`       | `src/features/content-source/form/ui/content-source-form-error-alert.tsx`    | exported   | Renders normalized create/edit content source API errors.                                                      |
+| `ContentSourceFormFields`           | `src/features/content-source/form/ui/content-source-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit content source forms.                                         |
+| `CreateContentSourceDrawer`         | `src/features/content-source/create/ui/create-content-source-drawer.tsx`     | exported   | Creates content sources in a guarded Ant Design drawer through the entity mutation bridge.                     |
+| `EditContentSourceDrawerActions`    | `src/features/content-source/edit/ui/edit-content-source-drawer-actions.tsx` | exported   | Renders cancel/save actions for the edit content source drawer.                                                |
+| `EditContentSourceDrawer`           | `src/features/content-source/edit/ui/edit-content-source-drawer.tsx`         | exported   | Edits content source fields in a guarded Ant Design drawer with dirty diff chips.                              |
+| `ContentSourceStatusActions`        | `src/features/content-source/status/ui/content-source-status-actions.tsx`    | exported   | Renders enable/disable actions for one content source.                                                         |
+| `ImportTelegramSourceButton`        | `src/features/content-source/import/ui/import-telegram-source-button.tsx`    | exported   | Renders one-click Telegram import action, active-run disabled state, counters, and 409 active-import feedback. |
 
 ## Material Library Widget
 
-| Helper                                    | Location                                                         | Visibility | Contract                                                                                          |
-| ----------------------------------------- | ---------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
-| `MATERIAL_LIBRARY_MAX_PAGE_SIZE`          | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Defines backend max `pageSize` accepted by material library URL pagination.                       |
-| `getMaterialLibraryLinkedFilterFromValue` | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Normalizes raw linked filter values from URL or UI controls.                                      |
-| `getMaterialLibraryFiltersFromSearch`     | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library platform/status/linked filters from URL search params.                     |
-| `getMaterialLibraryPaginationFromSearch`  | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Reads material library `page` and `pageSize` from URL search params.                              |
-| `getMaterialLibraryQueryParams`           | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Converts material library URL filter and pagination state into query params.                      |
-| `buildMaterialLibraryFiltersSearch`       | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds next URL search params after changing material library filters and resets page.            |
-| `buildMaterialLibraryPaginationSearch`    | `src/widgets/material-library/model/material-library-filters.ts` | exported   | Builds default-aware URL search params after changing material library pagination.                |
-| `MaterialLibraryInbox`                    | `src/widgets/material-library/ui/material-library-inbox.tsx`     | exported   | Renders the material library inbox table with URL-driven filters, pagination, and review actions. |
+| Helper                                    | Location                                                          | Visibility | Contract                                                                                          |
+| ----------------------------------------- | ----------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `MATERIAL_LIBRARY_MAX_PAGE_SIZE`          | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Defines backend max `pageSize` accepted by material library URL pagination.                       |
+| `getMaterialLibraryLinkedFilterFromValue` | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Normalizes raw linked filter values from URL or UI controls.                                      |
+| `getMaterialLibraryFiltersFromSearch`     | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Reads material library platform/status/linked filters from URL search params.                     |
+| `getMaterialLibraryPaginationFromSearch`  | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Reads material library `page` and `pageSize` from URL search params.                              |
+| `getMaterialLibraryQueryParams`           | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Converts material library URL filter and pagination state into query params.                      |
+| `buildMaterialLibraryFiltersSearch`       | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Builds next URL search params after changing material library filters and resets page.            |
+| `buildMaterialLibraryPaginationSearch`    | `src/widgets/material-library/model/material-library-filters.ts`  | exported   | Builds default-aware URL search params after changing material library pagination.                |
+| `MaterialLibraryFilterBar`                | `src/widgets/material-library/ui/material-library-filter-bar.tsx` | exported   | Renders typed URL-driven filters for the material library inbox.                                  |
+| `MaterialLibraryTable`                    | `src/widgets/material-library/ui/material-library-table.tsx`      | exported   | Renders the material library inbox table without owning URL/query state.                          |
+| `MaterialLibraryInbox`                    | `src/widgets/material-library/ui/material-library-inbox.tsx`      | exported   | Renders the material library inbox table with URL-driven filters, pagination, and review actions. |
 
 ## Content Sources Widget
 
-| Helper                              | Location                                                        | Visibility | Contract                                                                                                                     |
-| ----------------------------------- | --------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `getContentSourceFiltersFromSearch` | `src/widgets/content-sources/model/content-source-filters.ts`   | exported   | Reads content source platform/status filters from URL search params.                                                         |
-| `getContentSourceQueryParams`       | `src/widgets/content-sources/model/content-source-filters.ts`   | exported   | Converts content source URL filter state into `/admin/content-sources` query params.                                         |
-| `buildContentSourceFiltersSearch`   | `src/widgets/content-sources/model/content-source-filters.ts`   | exported   | Builds next URL search params after changing content source filters.                                                         |
-| `ContentSourceFiltersBar`           | `src/widgets/content-sources/ui/content-source-filters-bar.tsx` | exported   | Renders URL-driven platform/status filters for the content sources table.                                                    |
-| `ContentSourcesTable`               | `src/widgets/content-sources/ui/content-sources-table.tsx`      | exported   | Renders content source rows, identity metadata, status actions, and active-run-aware import action.                          |
-| `ImportRunsTable`                   | `src/widgets/content-sources/ui/import-runs-table.tsx`          | exported   | Renders read-only latest import run diagnostics and source display names.                                                    |
-| `ContentSourcesScreen`              | `src/widgets/content-sources/ui/content-sources-screen.tsx`     | exported   | Renders content source management, URL-driven filters, source actions, latest import runs, and active-run SSE subscriptions. |
+| Helper                              | Location                                                             | Visibility | Contract                                                                                                                     |
+| ----------------------------------- | -------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `getContentSourceFiltersFromSearch` | `src/widgets/content-sources/model/content-source-filters.ts`        | exported   | Reads content source platform/status filters from URL search params.                                                         |
+| `getContentSourceQueryParams`       | `src/widgets/content-sources/model/content-source-filters.ts`        | exported   | Converts content source URL filter state into `/admin/content-sources` query params.                                         |
+| `buildContentSourceFiltersSearch`   | `src/widgets/content-sources/model/content-source-filters.ts`        | exported   | Builds next URL search params after changing content source filters.                                                         |
+| `ContentSourceFiltersBar`           | `src/widgets/content-sources/ui/content-source-filters-bar.tsx`      | exported   | Renders URL-driven platform/status filters for the content sources table.                                                    |
+| `ContentSourcesHeader`              | `src/widgets/content-sources/ui/content-sources-header.tsx`          | exported   | Renders the content sources screen heading and create action.                                                                |
+| `ContentSourcesStateLayout`         | `src/widgets/content-sources/ui/content-sources-state-layout.tsx`    | exported   | Renders the shared loading/error shell for content sources screen states.                                                    |
+| `ContentSourcesDrawers`             | `src/widgets/content-sources/ui/content-sources-drawers.tsx`         | exported   | Renders the create/edit drawers controlled by the content sources screen.                                                    |
+| `getContentSourcesTableColumns`     | `src/widgets/content-sources/ui/content-sources-table-columns.tsx`   | exported   | Builds content source table columns with safe links and row actions.                                                         |
+| `ContentSourcesTable`               | `src/widgets/content-sources/ui/content-sources-table.tsx`           | exported   | Renders content source rows, identity metadata, status actions, and active-run-aware import action.                          |
+| `ImportRunEventsSubscriptions`      | `src/widgets/content-sources/ui/import-run-events-subscriptions.tsx` | exported   | Mounts active import-run SSE subscriptions without visible UI.                                                               |
+| `ImportRunsTable`                   | `src/widgets/content-sources/ui/import-runs-table.tsx`               | exported   | Renders read-only latest import run diagnostics and source display names.                                                    |
+| `ContentSourcesScreen`              | `src/widgets/content-sources/ui/content-sources-screen.tsx`          | exported   | Renders content source management, URL-driven filters, source actions, latest import runs, and active-run SSE subscriptions. |
 
 ## API Error Internals
 

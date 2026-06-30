@@ -13,7 +13,7 @@ import styles from './content-sources-screen.module.css'
 const allValue = 'all'
 
 /**
- * Props for the content source filter controls.
+ * Props URL-driven фильтров content sources.
  */
 export type ContentSourceFiltersBarProps = {
   filters: ContentSourceFiltersState
@@ -21,7 +21,7 @@ export type ContentSourceFiltersBarProps = {
 }
 
 /**
- * Renders URL-backed filters for the content sources table.
+ * Рендерит фильтры content sources table поверх URL-состояния.
  */
 export function ContentSourceFiltersBar({
   filters,
@@ -29,13 +29,12 @@ export function ContentSourceFiltersBar({
 }: ContentSourceFiltersBarProps) {
   return (
     <Flex className={styles.filters} gap={12} wrap>
-      <Select
+      <Select<ContentSourcePlatform | typeof allValue>
         className={styles.filter}
         onChange={(value) => {
           onChange({
             ...filters,
-            platform:
-              value === allValue ? null : (value as ContentSourcePlatform),
+            platform: value === allValue ? null : value,
           })
         }}
         options={[
@@ -44,12 +43,12 @@ export function ContentSourceFiltersBar({
         ]}
         value={filters.platform ?? allValue}
       />
-      <Select
+      <Select<ContentSourceStatus | typeof allValue>
         className={styles.filter}
         onChange={(value) => {
           onChange({
             ...filters,
-            status: value === allValue ? null : (value as ContentSourceStatus),
+            status: value === allValue ? null : value,
           })
         }}
         options={[

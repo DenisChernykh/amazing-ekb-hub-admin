@@ -7,12 +7,14 @@ import {
   type ContentSourceFormChangedField,
   type ContentSourceFormValues,
 } from '@/features/content-source/form/model/content-source-form'
+import { ContentSourceFormChangedFields } from '@/features/content-source/form/ui/content-source-form-changed-fields'
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { ContentSource } from '@/shared/api/generated/model'
-import { App as AntdApp, Button, Drawer, Flex, Form, Space, Tag } from 'antd'
+import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
+import { EditContentSourceDrawerActions } from './edit-content-source-drawer-actions'
 
 /**
  * Props drawer-а редактирования content source.
@@ -136,11 +138,7 @@ export function EditContentSourceDrawer({
 
         {Boolean(changedFields.length) && (
           <Form.Item>
-            <Space size={[4, 4]} wrap>
-              {changedFields.map((field) => (
-                <Tag key={field.key}>{field.label}</Tag>
-              ))}
-            </Space>
+            <ContentSourceFormChangedFields fields={changedFields} />
           </Form.Item>
         )}
 
@@ -149,22 +147,11 @@ export function EditContentSourceDrawer({
           platformDisabled
         />
 
-        <Flex gap={8} justify="end" wrap>
-          <Button
-            disabled={updateSourceMutation.isPending}
-            onClick={requestClose}
-          >
-            Отмена
-          </Button>
-          <Button
-            disabled={!isDirty}
-            htmlType="submit"
-            loading={updateSourceMutation.isPending}
-            type="primary"
-          >
-            Сохранить
-          </Button>
-        </Flex>
+        <EditContentSourceDrawerActions
+          isDirty={isDirty}
+          isPending={updateSourceMutation.isPending}
+          onCancel={requestClose}
+        />
       </Form>
     </Drawer>
   )
