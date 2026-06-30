@@ -104,6 +104,7 @@ Backend уже закрывает обязательные admin-функции 
 
 - Vite SPA + Ant Design baseline;
 - generated API + Orval;
+- TanStack entity hooks keep the FSD UI boundary while using generated Orval fetchers/query keys directly; done in merged admin PR [#59](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/59), closing admin issue [#46](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/46);
 - cookie-only Axios transport with `withCredentials`;
 - refresh-once на `401`;
 - NestJS-only error normalization;
