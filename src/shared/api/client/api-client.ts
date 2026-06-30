@@ -1,13 +1,14 @@
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-} from 'axios'
+import axios, { AxiosError, type AxiosInstance } from 'axios'
 import { getApiBaseUrl } from './api-base-url'
 import { normalizeApiError } from './api-error'
 
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    isAuthRefreshRetry?: boolean
+  }
+}
+
 let refreshPromise: Promise<void> | null = null
-const retriedRequests = new WeakSet<InternalAxiosRequestConfig>()
 
 const shouldSkipRefresh = (url: string | undefined) =>
   typeof url === 'string' &&
@@ -43,10 +44,10 @@ apiClient.interceptors.response.use(
     if (
       status === 401 &&
       originalRequest &&
-      !retriedRequests.has(originalRequest) &&
+      !originalRequest.isAuthRefreshRetry &&
       !shouldSkipRefresh(originalRequest.url)
     ) {
-      retriedRequests.add(originalRequest)
+      originalRequest.isAuthRefreshRetry = true
 
       try {
         await requestRefresh(apiClient)
