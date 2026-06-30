@@ -105,6 +105,7 @@ Backend уже закрывает обязательные admin-функции 
 - Vite SPA + Ant Design baseline;
 - generated API + Orval;
 - TanStack entity hooks keep the FSD UI boundary while using generated Orval fetchers/query keys directly; done in merged admin PR [#59](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/59), closing admin issue [#46](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/46);
+- Unsafe hand-written production type assertions are removed from the material-library/content-source admin slice via shared runtime guards, typed key iteration, and a static regression test; done in merged admin PR [#60](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/60), closing admin issue [#42](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/42);
 - cookie-only Axios transport with `withCredentials`;
 - refresh-once на `401`;
 - NestJS-only error normalization;
@@ -216,6 +217,7 @@ Backend уже закрывает обязательные admin-функции 
 - Добавить общую библиотеку `/materials`. Implemented in epic branch `epic/material-library-admin`, not in `main`: inbox route, URL-driven filters, review actions, source/material/media links, explicit `Открыть пост` action, and UX polish without `External ID` as a primary column. PR [#44](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/44) was reverted from `main` by `410aefd`; explicit post link UX landed via merged admin PR [#48](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/48).
 - Добавить link existing material workflow. Done in epic branch via merged admin PR [#45](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/45): drawer from place detail, approved/unlinked material lookup, link action, hide-link action, and cache invalidation.
 - Добавить content sources и import runs. Done in epic branch via merged admin PR [#47](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/47): `/content-sources`, list/create/edit/status, Telegram import action, latest import runs panel, and no scheduler/queue/import limit UI.
+- Admin follow-up [#42](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/42) is done via merged admin PR [#60](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/60): material-library/content-source URL value parsing now uses shared runtime guards, production non-const `as` assertions are blocked by an AST regression test, and the Codex auth-refresh review fix is included.
 - Remaining: release/smoke decision for `epic/material-library-admin` and optional relation-aware pinned material behavior after hide-link; tracked in [admin issue #26](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/26).
 
 ### Phase 5: Pinned Material
