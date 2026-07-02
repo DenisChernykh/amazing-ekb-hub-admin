@@ -34,18 +34,23 @@ vi.mock('antd', async () => {
     DatePicker: ({
       'aria-label': ariaLabel,
       onChange,
+      showTime,
       value,
     }: {
       'aria-label'?: string
       onChange?: (value: ReturnType<typeof dayjs> | null) => void
+      showTime?: boolean | object
       value?: ReturnType<typeof dayjs> | null
     }) => (
       <input
         aria-label={ariaLabel}
+        data-show-time={showTime ? 'true' : 'false'}
         onChange={(event) => {
           onChange?.(event.target.value ? dayjs(event.target.value) : null)
         }}
-        value={value?.format('YYYY-MM-DDTHH:mm') ?? ''}
+        value={
+          value?.format(showTime ? 'YYYY-MM-DDTHH:mm' : 'YYYY-MM-DD') ?? ''
+        }
       />
     ),
     Drawer: ({
@@ -165,8 +170,48 @@ describe('EditMaterialDrawer', () => {
     )
     expect(screen.getByRole('combobox', { name: 'Тип' })).toHaveValue('post')
     expect(screen.getByLabelText('Заголовок')).toHaveValue('Обзор комплекса')
-    expect(screen.getByLabelText('Длительность, сек')).toHaveValue(125)
+    expect(screen.getByLabelText('Дата публикации')).toHaveAttribute(
+      'data-show-time',
+      'false',
+    )
+    expect(screen.queryByLabelText('Длительность, сек')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
+  })
+
+  it('shows duration with date-only controls for video materials', () => {
+    mockedUseUpdateMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUpdateMaterialMutation>)
+
+    renderEditDrawer({ ...material, type: 'video' })
+
+    expect(screen.getByLabelText('Дата публикации')).toHaveAttribute(
+      'data-show-time',
+      'false',
+    )
+    expect(screen.getByLabelText('Длительность, сек')).toHaveValue(125)
+  })
+
+  it('hides duration after changing material type to post', () => {
+    mockedUseUpdateMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUpdateMaterialMutation>)
+
+    renderEditDrawer({ ...material, type: 'video' })
+
+    expect(screen.getByLabelText('Длительность, сек')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Тип' }), {
+      target: { value: 'post' },
+    })
+
+    expect(screen.getByLabelText('Дата публикации')).toHaveAttribute(
+      'data-show-time',
+      'false',
+    )
+    expect(screen.queryByLabelText('Длительность, сек')).not.toBeInTheDocument()
   })
 
   it('shows changed field chips and sends partial update payload', async () => {

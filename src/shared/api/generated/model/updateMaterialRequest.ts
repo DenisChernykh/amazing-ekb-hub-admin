@@ -16,7 +16,7 @@ export type UpdateMaterialRequest = {
   type?: MaterialType;
   /** Новый заголовок материала. */
   title?: string;
-  /** Новая дата публикации. */
+  /** Новая календарная дата публикации в формате `YYYY-MM-DD`. */
   publishedAt?: string;
   /**
      * Новая длительность в секундах.

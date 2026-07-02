@@ -5,6 +5,7 @@ import {
   getMaterialFormChangedFields,
   getMaterialFormInitialValues,
   hasMaterialFormChanges,
+  isMaterialDurationEnabled,
   toCreateMaterialRequest,
   toUpdateMaterialRequest,
   type MaterialFormValues,
@@ -22,6 +23,13 @@ const material: Material = {
 }
 
 describe('material form helpers', () => {
+  it('enables duration only for video material types', () => {
+    expect(isMaterialDurationEnabled('post')).toBe(false)
+    expect(isMaterialDurationEnabled('reel')).toBe(true)
+    expect(isMaterialDurationEnabled('video')).toBe(true)
+    expect(isMaterialDurationEnabled(undefined)).toBe(false)
+  })
+
   it('maps material to form initial values', () => {
     const initialValues = getMaterialFormInitialValues(material)
 
@@ -55,7 +63,7 @@ describe('material form helpers', () => {
     expect(initialValues.title).toBe('')
   })
 
-  it('normalizes create payload and keeps selected local datetime', () => {
+  it('normalizes create payload and stores selected calendar date', () => {
     const values: MaterialFormValues = {
       durationSec: undefined,
       platform: 'telegram',
@@ -74,7 +82,29 @@ describe('material form helpers', () => {
       type: 'video',
       url: 'https://t.me/amazing_ekb/322',
     })
-    expect(request.publishedAt).toMatch(/^2026-03-20T00:30:00[+-]\d{2}:\d{2}$/)
+    expect(request.publishedAt).toBe('2026-03-20')
+  })
+
+  it('omits duration and stores post calendar date', () => {
+    const values: MaterialFormValues = {
+      durationSec: 125,
+      platform: 'telegram',
+      publishedAt: dayjs('2026-03-20T18:45:00'),
+      title: '  Новый пост  ',
+      type: 'post',
+      url: 'https://t.me/amazing_ekb/322',
+    }
+
+    const request = toCreateMaterialRequest(values)
+
+    expect(request).toMatchObject({
+      platform: 'telegram',
+      title: 'Новый пост',
+      type: 'post',
+      url: 'https://t.me/amazing_ekb/322',
+    })
+    expect(request).not.toHaveProperty('durationSec')
+    expect(request.publishedAt).toBe('2026-03-20')
   })
 
   it('rejects unsafe material URLs before building create payload', () => {
@@ -91,7 +121,10 @@ describe('material form helpers', () => {
   })
 
   it('builds partial update payload only from changed normalized fields', () => {
-    const initialValues = getMaterialFormInitialValues(material)
+    const initialValues = getMaterialFormInitialValues({
+      ...material,
+      type: 'video',
+    })
     const values: MaterialFormValues = {
       ...initialValues,
       durationSec: null,
@@ -104,6 +137,23 @@ describe('material form helpers', () => {
       title: 'Обновленный обзор',
       url: 'https://t.me/amazing_ekb/999',
     })
+  })
+
+  it('clears duration when changing a video material to post', () => {
+    const initialValues = getMaterialFormInitialValues({
+      ...material,
+      durationSec: 125,
+      publishedAt: '2026-03-20T10:30:00+05:00',
+      type: 'video',
+    })
+    const values: MaterialFormValues = {
+      ...initialValues,
+      type: 'post',
+    }
+
+    const request = toUpdateMaterialRequest(values, initialValues)
+
+    expect(request).toEqual({ durationSec: null, type: 'post' })
   })
 
   it('does not resubmit unchanged unsafe material URL in update payload', () => {
@@ -134,7 +184,10 @@ describe('material form helpers', () => {
   })
 
   it('returns changed field labels for edit drawer chips', () => {
-    const initialValues = getMaterialFormInitialValues(material)
+    const initialValues = getMaterialFormInitialValues({
+      ...material,
+      type: 'video',
+    })
     const values: MaterialFormValues = {
       ...initialValues,
       durationSec: null,
