@@ -139,7 +139,7 @@ describe('material form helpers', () => {
     })
   })
 
-  it('omits duration when changing a video material to post', () => {
+  it('clears duration when changing a video material to post', () => {
     const initialValues = getMaterialFormInitialValues({
       ...material,
       durationSec: 125,
@@ -153,8 +153,7 @@ describe('material form helpers', () => {
 
     const request = toUpdateMaterialRequest(values, initialValues)
 
-    expect(request).toEqual({ type: 'post' })
-    expect(request).not.toHaveProperty('durationSec')
+    expect(request).toEqual({ durationSec: null, type: 'post' })
   })
 
   it('does not resubmit unchanged unsafe material URL in update payload', () => {

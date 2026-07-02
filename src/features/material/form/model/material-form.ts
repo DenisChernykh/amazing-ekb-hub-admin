@@ -167,6 +167,10 @@ export function toUpdateMaterialRequest(
   const normalizedValues = normalizeMaterialFormValues(values)
   const normalizedInitialValues = normalizeMaterialFormValues(initialValues)
   const request: UpdateMaterialRequest = {}
+  const isDurationEnabled = isMaterialDurationEnabled(normalizedValues.type)
+  const wasDurationEnabled = isMaterialDurationEnabled(
+    normalizedInitialValues.type,
+  )
 
   if (normalizedValues.platform !== normalizedInitialValues.platform) {
     request.platform = getRequiredValue(normalizedValues.platform, 'platform')
@@ -188,10 +192,18 @@ export function toUpdateMaterialRequest(
   }
 
   if (
-    isMaterialDurationEnabled(normalizedValues.type) &&
+    isDurationEnabled &&
     normalizedValues.durationSec !== normalizedInitialValues.durationSec
   ) {
     request.durationSec = normalizedValues.durationSec
+  }
+
+  if (
+    wasDurationEnabled &&
+    !isDurationEnabled &&
+    normalizedInitialValues.durationSec !== null
+  ) {
+    request.durationSec = null
   }
 
   if (normalizedValues.url !== normalizedInitialValues.url) {
