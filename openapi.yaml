@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.0/schema/2021-09-28
 openapi: 3.0.3
 info:
   title: Amazing EKB Hub API
@@ -16,21 +17,22 @@ tags:
     description: Административные операции управления местами и материалами.
   - name: Health
     description: Служебные эндпоинты liveness/readiness для мониторинга и orchestration.
+
 components:
   securitySchemes:
     AccessCookieAuth:
       type: apiKey
       in: cookie
       name: aeh_access_token
-      description: >
-        HttpOnly cookie с JWT access token. Клиент должен отправлять запросы с
-        credentials.
+      description: |
+        HttpOnly cookie с JWT access token. Клиент должен отправлять запросы с credentials.
     RefreshCookieAuth:
       type: apiKey
       in: cookie
       name: aeh_refresh_token
       description: |
         HttpOnly cookie с refresh token для `/auth/refresh` и `/auth/logout`.
+
   parameters:
     PlaceId:
       name: placeId
@@ -40,6 +42,7 @@ components:
       schema:
         type: string
       example: place_ekb_001
+
     MaterialId:
       name: materialId
       in: path
@@ -48,6 +51,7 @@ components:
       schema:
         type: string
       example: material_telegram_001
+
     ContentSourceId:
       name: sourceId
       in: path
@@ -56,6 +60,7 @@ components:
       schema:
         type: string
       example: source_telegram_001
+
     Page:
       name: page
       in: query
@@ -67,6 +72,7 @@ components:
         maximum: 1000
         default: 1
       example: 1
+
     PageSize:
       name: pageSize
       in: query
@@ -78,18 +84,21 @@ components:
         maximum: 100
         default: 20
       example: 20
+
   examples:
     AuthLoginRequest:
       summary: Вход по email и паролю
       value:
         email: admin@example.test
         password: replace_me_password
+
     AuthMeResponse:
       summary: Профиль текущего пользователя
       value:
         id: user_admin_001
         email: admin@example.test
         role: admin
+
     PlaceSummary:
       summary: Краткая карточка места
       value:
@@ -104,6 +113,7 @@ components:
         status: active
         popularityWeight: 95
         coverImageUrl: /v1/places/place_ekb_001/photo
+
     PublicPlaceSummary:
       summary: Краткая публичная карточка места
       value:
@@ -122,6 +132,7 @@ components:
           dzen: 12
           telegram: 7
           instagram: 3
+
     PlaceDetail:
       summary: Детальная карточка места
       value:
@@ -142,13 +153,14 @@ components:
           platform: telegram
           type: post
           title: null
-          publishedAt: '2026-03-20T10:30:00.000Z'
+          publishedAt: '2026-03-20'
           durationSec: null
           redirectUrl: /v1/materials/material_telegram_001/go
         counters:
           dzen: 12
           telegram: 7
           instagram: 3
+
     PlaceListResponse:
       summary: Пагинированный список мест
       value:
@@ -176,6 +188,7 @@ components:
         total: 2
         page: 1
         pageSize: 20
+
     PublicPlaceListResponse:
       summary: Публичный пагинированный список мест
       value:
@@ -211,6 +224,7 @@ components:
         total: 2
         page: 1
         pageSize: 20
+
     Material:
       summary: Материал о месте
       value:
@@ -219,9 +233,10 @@ components:
         platform: telegram
         type: post
         title: null
-        publishedAt: '2026-03-20T10:30:00.000Z'
+        publishedAt: '2026-03-20'
         durationSec: null
         url: https://t.me/amazing_ekb/321
+
     MaterialListResponse:
       summary: Список материалов места
       value:
@@ -231,7 +246,7 @@ components:
             platform: telegram
             type: post
             title: null
-            publishedAt: '2026-03-20T10:30:00.000Z'
+            publishedAt: '2026-03-20'
             durationSec: null
             redirectUrl: /v1/materials/material_telegram_001/go
           - id: material_dzen_002
@@ -239,9 +254,10 @@ components:
             platform: dzen
             type: video
             title: Видеообзор термального комплекса
-            publishedAt: '2026-03-22T09:00:00.000Z'
+            publishedAt: '2026-03-22'
             durationSec: 183
             redirectUrl: /v1/materials/material_dzen_002/go
+
     AdminMaterialLibraryListResponse:
       summary: Список материалов общей библиотеки
       value:
@@ -250,7 +266,7 @@ components:
             platform: telegram
             type: post
             title: null
-            publishedAt: '2026-03-20T10:30:00.000Z'
+            publishedAt: '2026-03-20'
             durationSec: null
             url: https://t.me/amazing_ekb/321
             source:
@@ -259,8 +275,8 @@ components:
               displayName: Amazing EKB Telegram
               url: https://t.me/amazing_ekb
             externalId: '321'
-            text: Пост из Telegram-канала Amazing EKB
-            excerpt: Пост из Telegram-канала Amazing EKB
+            text: 'Пост из Telegram-канала Amazing EKB'
+            excerpt: 'Пост из Telegram-канала Amazing EKB'
             mediaKind: photo
             mediaPreviewUrl: null
             adminStatus: approved
@@ -270,7 +286,7 @@ components:
             platform: dzen
             type: video
             title: Видеообзор термального комплекса
-            publishedAt: '2026-03-22T09:00:00.000Z'
+            publishedAt: '2026-03-22'
             durationSec: 183
             url: https://dzen.ru/video/watch/abcdef
             source: null
@@ -285,6 +301,7 @@ components:
         total: 2
         page: 1
         pageSize: 100
+
     ContentSource:
       summary: Пользовательский content source
       value:
@@ -300,6 +317,7 @@ components:
         lastCursor: null
         createdAt: '2026-05-20T10:00:00.000Z'
         updatedAt: '2026-05-20T10:00:00.000Z'
+
     ContentSourceListResponse:
       summary: Список пользовательских content sources
       value:
@@ -316,6 +334,7 @@ components:
             lastCursor: null
             createdAt: '2026-05-20T10:00:00.000Z'
             updatedAt: '2026-05-20T10:00:00.000Z'
+
     ImportRun:
       summary: Диагностическая запись попытки импорта
       value:
@@ -331,6 +350,7 @@ components:
         errorMessage: null
         createdAt: '2026-05-26T05:00:00.000Z'
         updatedAt: '2026-05-26T05:01:00.000Z'
+
     QueuedImportRun:
       summary: Queued import run после HTTP trigger-а
       value:
@@ -346,6 +366,7 @@ components:
         errorMessage: null
         createdAt: '2026-05-26T05:00:00.000Z'
         updatedAt: '2026-05-26T05:00:00.000Z'
+
     ImportRunListResponse:
       summary: Список попыток импорта
       value:
@@ -362,6 +383,7 @@ components:
             errorMessage: null
             createdAt: '2026-05-26T05:00:00.000Z'
             updatedAt: '2026-05-26T05:01:00.000Z'
+
     ValidationError:
       summary: Ошибка валидации входных данных
       value:
@@ -369,81 +391,95 @@ components:
         message:
           - page must not be less than 1
         error: Bad Request
+
     UnauthorizedError:
       summary: Пользователь не аутентифицирован
       value:
         statusCode: 401
         message: Authentication required
         error: Unauthorized
+
     ForbiddenError:
       summary: Недостаточно прав
       value:
         statusCode: 403
         message: Insufficient role
         error: Forbidden
+
     TooManyRequestsError:
       summary: Слишком много auth-запросов
       value:
         statusCode: 429
         message: Too many auth attempts, please retry later
+
     PlaceNotFoundError:
       summary: Место не найдено
       value:
         statusCode: 404
         message: Place not found
         error: Not Found
+
     MaterialNotFoundError:
       summary: Материал не найден
       value:
         statusCode: 404
         message: Material not found
         error: Not Found
+
     ContentSourceNotFoundError:
       summary: Content source не найден
       value:
         statusCode: 404
         message: Content source not found
         error: Not Found
+
     ContentSourceConflictError:
       summary: Content source уже существует
       value:
         statusCode: 409
         message: Content source already exists for this platform and URL
         error: Conflict
+
     ContentSourceIdentityLockedError:
       summary: Identity content source уже использовался для импортов
       value:
         statusCode: 409
         message: Content source identity cannot be changed after imports have started
         error: Conflict
+
     TelegramImportAlreadyRunningError:
       summary: Telegram import уже выполняется
       value:
         statusCode: 409
         message: Telegram import is already running for this content source
         error: Conflict
+
     PinnedMaterialBadRequestError:
       summary: Материал не принадлежит месту
       value:
         statusCode: 400
         message: Pinned material must belong to the same place
         error: Bad Request
+
     ServiceUnavailableError:
       summary: Сервис временно не готов
       value:
         statusCode: 503
         message: Database is not ready
         error: Service Unavailable
+
     HealthLiveResponse:
       summary: Приложение живо
       value:
         status: ok
+
     HealthReadyResponse:
       summary: Приложение готово обслуживать запросы
       value:
         status: ok
         checks:
           database: up
+
   responses:
     ValidationError:
       description: Ошибка валидации входных параметров или тела запроса.
@@ -454,10 +490,9 @@ components:
           examples:
             default:
               $ref: '#/components/examples/ValidationError'
+
     Unauthorized:
-      description: >-
-        Пользователь не аутентифицирован или auth cookie
-        отсутствует/некорректна.
+      description: Пользователь не аутентифицирован или auth cookie отсутствует/некорректна.
       content:
         application/json:
           schema:
@@ -465,6 +500,7 @@ components:
           examples:
             default:
               $ref: '#/components/examples/UnauthorizedError'
+
     Forbidden:
       description: У текущего пользователя недостаточно прав для выполнения операции.
       content:
@@ -474,6 +510,7 @@ components:
           examples:
             default:
               $ref: '#/components/examples/ForbiddenError'
+
     TooManyRequests:
       description: Слишком много auth-запросов за короткий промежуток времени.
       content:
@@ -483,6 +520,7 @@ components:
           examples:
             default:
               $ref: '#/components/examples/TooManyRequestsError'
+
     PlaceNotFound:
       description: Указанное место не найдено.
       content:
@@ -492,6 +530,7 @@ components:
           examples:
             default:
               $ref: '#/components/examples/PlaceNotFoundError'
+
     MaterialNotFound:
       description: Указанный материал не найден.
       content:
@@ -501,6 +540,7 @@ components:
           examples:
             default:
               $ref: '#/components/examples/MaterialNotFoundError'
+
     ContentSourceNotFound:
       description: Указанный content source не найден.
       content:
@@ -510,10 +550,9 @@ components:
           examples:
             default:
               $ref: '#/components/examples/ContentSourceNotFoundError'
+
     ContentSourceConflict:
-      description: >-
-        Content source с такой platform/url уже существует или identity source
-        уже нельзя менять после старта импортов.
+      description: Content source с такой platform/url уже существует или identity source уже нельзя менять после старта импортов.
       content:
         application/json:
           schema:
@@ -523,10 +562,9 @@ components:
               $ref: '#/components/examples/ContentSourceConflictError'
             identityLocked:
               $ref: '#/components/examples/ContentSourceIdentityLockedError'
+
     TelegramImportAlreadyRunning:
-      description: >-
-        Для этого content source уже есть active queued/running Telegram import
-        run.
+      description: Для этого content source уже есть active queued/running Telegram import run.
       content:
         application/json:
           schema:
@@ -534,6 +572,7 @@ components:
           examples:
             default:
               $ref: '#/components/examples/TelegramImportAlreadyRunningError'
+
     ServiceUnavailable:
       description: Сервис временно не готов обрабатывать запросы.
       content:
@@ -543,99 +582,72 @@ components:
           examples:
             default:
               $ref: '#/components/examples/ServiceUnavailableError'
+
   schemas:
     Role:
       type: string
       description: Роль пользователя в системе.
-      enum:
-        - admin
-        - user
+      enum: [admin, user]
       example: admin
+
     PlaceCategory:
       type: string
       description: Категория места в каталоге.
-      enum:
-        - pools
-        - spa
-        - cafe
-        - hotels
-        - workshops
+      enum: [pools, spa, cafe, hotels, workshops]
       example: spa
+
     PlaceStatus:
       type: string
       description: Статус публикации места.
-      enum:
-        - active
-        - hidden
+      enum: [active, hidden]
       example: active
+
     Platform:
       type: string
       description: Платформа, на которой опубликован материал.
-      enum:
-        - dzen
-        - telegram
-        - instagram
+      enum: [dzen, telegram, instagram]
       example: telegram
+
     MaterialType:
       type: string
       description: Тип материала.
-      enum:
-        - post
-        - reel
-        - video
+      enum: [post, reel, video]
       example: post
+
     MaterialAdminStatus:
       type: string
       description: Review-статус материала в административной библиотеке.
-      enum:
-        - pending
-        - approved
-        - rejected
-        - archived
+      enum: [pending, approved, rejected, archived]
       example: approved
+
     PlaceMaterialLinkStatus:
       type: string
       description: Статус связи библиотечного материала с конкретным местом.
-      enum:
-        - active
-        - hidden
+      enum: [active, hidden]
       example: active
+
     ContentSourcePlatform:
       type: string
-      description: >-
-        Платформа пользовательского источника контента. Этот enum отделен от
-        material `Platform`, чтобы будущие источники не меняли публичные
-        счетчики материалов.
-      enum:
-        - telegram
-        - dzen
-        - instagram
-        - tiktok
-        - vk
-        - pinterest
+      description: Платформа пользовательского источника контента. Этот enum отделен от material `Platform`, чтобы будущие источники не меняли публичные счетчики материалов.
+      enum: [telegram, dzen, instagram, tiktok, vk, pinterest]
       example: telegram
+
     ContentSourceStatus:
       type: string
       description: Статус пользовательского content source.
-      enum:
-        - active
-        - disabled
+      enum: [active, disabled]
       example: active
+
     ImportRunStatus:
       type: string
       description: Статус попытки импорта материалов.
-      enum:
-        - queued
-        - running
-        - completed
-        - failed
+      enum: [queued, running, completed, failed]
       example: completed
+
     NestErrorResponse:
       type: object
       description: Стандартный JSON body, который NestJS возвращает для `HttpException`.
-      required:
-        - statusCode
-        - message
+      required: [statusCode, message]
       properties:
         statusCode:
           type: integer
@@ -647,20 +659,17 @@ components:
             - type: array
               items:
                 type: string
-          description: >-
-            Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив
-            строк.
+          description: Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.
           example: Bad Request
         error:
           type: string
           description: Стандартное HTTP reason summary от NestJS.
           example: Bad Request
+
     AuthLoginRequest:
       type: object
       description: Данные для входа пользователя по email и паролю.
-      required:
-        - email
-        - password
+      required: [email, password]
       properties:
         email:
           type: string
@@ -669,18 +678,13 @@ components:
           example: admin@example.test
         password:
           type: string
-          description: >-
-            Пароль пользователя. Login не раскрывает password policy и
-            возвращает generic credentials error для неверного пароля любой
-            длины.
+          description: Пароль пользователя. Login не раскрывает password policy и возвращает generic credentials error для неверного пароля любой длины.
           example: replace_me_password
+
     AuthMeResponse:
       type: object
       description: Публичный профиль текущего пользователя.
-      required:
-        - id
-        - email
-        - role
+      required: [id, email, role]
       properties:
         id:
           type: string
@@ -693,18 +697,21 @@ components:
           example: admin@example.test
         role:
           $ref: '#/components/schemas/Role'
+
     PlaceSummary:
       type: object
       description: Краткая карточка места, используемая в списках.
       required:
-        - id
-        - title
-        - summary
-        - tags
-        - category
-        - status
-        - popularityWeight
-        - coverImageUrl
+        [
+          id,
+          title,
+          summary,
+          tags,
+          category,
+          status,
+          popularityWeight,
+          coverImageUrl,
+        ]
       properties:
         id:
           type: string
@@ -738,23 +745,24 @@ components:
         coverImageUrl:
           type: string
           nullable: true
-          description: >-
-            Публичный cover-фото места. Если фото отсутствует или не должно
-            отдаться публично, возвращается `null`.
+          description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
           example: /v1/places/place_ekb_001/photo
+
     PublicPlaceSummary:
       type: object
       description: Краткая публичная карточка места со счетчиками материалов по платформам.
       required:
-        - id
-        - title
-        - summary
-        - tags
-        - category
-        - status
-        - popularityWeight
-        - coverImageUrl
-        - counters
+        [
+          id,
+          title,
+          summary,
+          tags,
+          category,
+          status,
+          popularityWeight,
+          coverImageUrl,
+          counters,
+        ]
       properties:
         id:
           type: string
@@ -788,17 +796,12 @@ components:
         coverImageUrl:
           type: string
           nullable: true
-          description: >-
-            Публичный cover-фото места. Если фото отсутствует или не должно
-            отдаться публично, возвращается `null`.
+          description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
           example: /v1/places/place_ekb_001/photo
         counters:
           type: object
           description: Количество материалов по платформам.
-          required:
-            - dzen
-            - telegram
-            - instagram
+          required: [dzen, telegram, instagram]
           properties:
             dzen:
               type: integer
@@ -809,20 +812,12 @@ components:
             instagram:
               type: integer
               example: 3
+
     Material:
       type: object
-      description: >-
-        Административный материал, связанный с местом. Содержит исходную внешнюю
-        ссылку для внутренних сценариев управления.
+      description: Административный материал, связанный с местом. Содержит исходную внешнюю ссылку для внутренних сценариев управления.
       required:
-        - id
-        - placeId
-        - platform
-        - type
-        - title
-        - publishedAt
-        - url
-        - durationSec
+        [id, placeId, platform, type, title, publishedAt, url, durationSec]
       properties:
         id:
           type: string
@@ -839,15 +834,13 @@ components:
         title:
           type: string
           nullable: true
-          description: >-
-            Заголовок материала. Для импортированных материалов может быть
-            `null`, если источник не дает надежный ручной title.
+          description: Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.
           example: null
         publishedAt:
           type: string
-          format: date-time
-          description: Дата и время публикации материала.
-          example: '2026-03-20T10:30:00.000Z'
+          format: date
+          description: Календарная дата публикации материала в формате `YYYY-MM-DD`.
+          example: '2026-03-20'
         durationSec:
           type: integer
           nullable: true
@@ -856,24 +849,23 @@ components:
         url:
           type: string
           format: uri
-          description: >-
-            Исходная внешняя ссылка на материал. Допускаются только абсолютные
-            http/https URL.
+          description: Исходная внешняя ссылка на материал. Допускаются только абсолютные http/https URL.
           example: https://t.me/amazing_ekb/321
+
     PublicMaterial:
       type: object
-      description: >-
-        Публичный материал, связанный с местом. Исходный внешний URL не
-        отдается; публичные клиенты должны использовать `redirectUrl`.
+      description: Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.
       required:
-        - id
-        - placeId
-        - platform
-        - type
-        - title
-        - publishedAt
-        - durationSec
-        - redirectUrl
+        [
+          id,
+          placeId,
+          platform,
+          type,
+          title,
+          publishedAt,
+          durationSec,
+          redirectUrl,
+        ]
       properties:
         id:
           type: string
@@ -890,15 +882,13 @@ components:
         title:
           type: string
           nullable: true
-          description: >-
-            Заголовок материала. Для импортированных материалов может быть
-            `null`, если источник не дает надежный ручной title.
+          description: Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.
           example: null
         publishedAt:
           type: string
-          format: date-time
-          description: Дата и время публикации материала.
-          example: '2026-03-20T10:30:00.000Z'
+          format: date
+          description: Календарная дата публикации материала в формате `YYYY-MM-DD`.
+          example: '2026-03-20'
         durationSec:
           type: integer
           nullable: true
@@ -907,19 +897,13 @@ components:
         redirectUrl:
           type: string
           nullable: true
-          description: >-
-            Same-origin redirect URL для публичного открытия материала без
-            прямого внешнего href. Поле заполняется только для публично
-            безопасных target URL.
+          description: Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.
           example: /v1/materials/material_telegram_001/go
+
     MaterialContentSourceSummary:
       type: object
       description: Краткое представление content source для imported material.
-      required:
-        - id
-        - platform
-        - displayName
-        - url
+      required: [id, platform, displayName, url]
       properties:
         id:
           type: string
@@ -936,26 +920,29 @@ components:
           format: uri
           description: URL source.
           example: https://t.me/amazing_ekb
+
     AdminMaterialLibraryItem:
       type: object
       description: Материал из общей библиотеки для административного интерфейса.
       required:
-        - id
-        - platform
-        - type
-        - title
-        - publishedAt
-        - durationSec
-        - url
-        - source
-        - externalId
-        - text
-        - excerpt
-        - mediaKind
-        - mediaPreviewUrl
-        - adminStatus
-        - linked
-        - placeLink
+        [
+          id,
+          platform,
+          type,
+          title,
+          publishedAt,
+          durationSec,
+          url,
+          source,
+          externalId,
+          text,
+          excerpt,
+          mediaKind,
+          mediaPreviewUrl,
+          adminStatus,
+          linked,
+          placeLink,
+        ]
       properties:
         id:
           type: string
@@ -968,15 +955,13 @@ components:
         title:
           type: string
           nullable: true
-          description: >-
-            Заголовок материала. Для импортированных материалов может быть
-            `null`.
+          description: Заголовок материала. Для импортированных материалов может быть `null`.
           example: null
         publishedAt:
           type: string
-          format: date-time
-          description: Дата и время публикации материала.
-          example: '2026-03-20T10:30:00.000Z'
+          format: date
+          description: Календарная дата публикации материала в формате `YYYY-MM-DD`.
+          example: '2026-03-20'
         durationSec:
           type: integer
           nullable: true
@@ -989,34 +974,28 @@ components:
           example: https://t.me/amazing_ekb/321
         source:
           nullable: true
-          description: >-
-            Content source, из которого импортирован материал. Для manual
-            materials возвращается `null`.
+          description: Content source, из которого импортирован материал. Для manual materials возвращается `null`.
           oneOf:
             - $ref: '#/components/schemas/MaterialContentSourceSummary'
         externalId:
           type: string
           nullable: true
-          description: >-
-            Платформенный id материала внутри source, например Telegram message
-            id.
+          description: Платформенный id материала внутри source, например Telegram message id.
           example: '321'
         text:
           type: string
           nullable: true
           description: Полный текст импортированного материала, если он есть.
-          example: Пост из Telegram-канала Amazing EKB
+          example: 'Пост из Telegram-канала Amazing EKB'
         excerpt:
           type: string
           nullable: true
           description: Короткий текстовый preview для админского списка.
-          example: Пост из Telegram-канала Amazing EKB
+          example: 'Пост из Telegram-канала Amazing EKB'
         mediaKind:
           type: string
           nullable: true
-          description: >-
-            Нормализованный тип media из импортера без скачивания бинарных
-            файлов.
+          description: Нормализованный тип media из импортера без скачивания бинарных файлов.
           example: photo
         mediaPreviewUrl:
           type: string
@@ -1028,25 +1007,18 @@ components:
           $ref: '#/components/schemas/MaterialAdminStatus'
         linked:
           type: boolean
-          description: >-
-            Есть ли у материала хотя бы одна связь `PlaceMaterial` с любым
-            местом, включая hidden-связи.
+          description: Есть ли у материала хотя бы одна связь `PlaceMaterial` с любым местом, включая hidden-связи.
           example: false
         placeLink:
           nullable: true
-          description: >-
-            Статус связи с `placeId` из query. Если `placeId` не передан или
-            связи нет, возвращается `null`.
+          description: Статус связи с `placeId` из query. Если `placeId` не передан или связи нет, возвращается `null`.
           oneOf:
             - $ref: '#/components/schemas/PlaceMaterialLinkStatus'
+
     AdminMaterialLibraryListResponse:
       type: object
       description: Пагинированный административный список материалов общей библиотеки.
-      required:
-        - items
-        - total
-        - page
-        - pageSize
+      required: [items, total, page, pageSize]
       properties:
         items:
           type: array
@@ -1065,24 +1037,25 @@ components:
           type: integer
           description: Размер страницы.
           example: 100
+
     ContentSource:
       type: object
-      description: >-
-        Пользовательский управляемый источник контента: Telegram-канал,
-        Dzen-канал/профиль или будущий platform resource.
+      description: 'Пользовательский управляемый источник контента: Telegram-канал, Dzen-канал/профиль или будущий platform resource.'
       required:
-        - id
-        - platform
-        - displayName
-        - url
-        - externalId
-        - handle
-        - channelId
-        - status
-        - lastImportedAt
-        - lastCursor
-        - createdAt
-        - updatedAt
+        [
+          id,
+          platform,
+          displayName,
+          url,
+          externalId,
+          handle,
+          channelId,
+          status,
+          lastImportedAt,
+          lastCursor,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: string
@@ -1097,9 +1070,7 @@ components:
         url:
           type: string
           format: uri
-          description: >-
-            Публичный URL управляемого источника. Допускаются только абсолютные
-            http/https URL.
+          description: Публичный URL управляемого источника. Допускаются только абсолютные http/https URL.
           example: https://t.me/amazing_ekb
         externalId:
           type: string
@@ -1114,9 +1085,7 @@ components:
         channelId:
           type: string
           nullable: true
-          description: >-
-            Дополнительный channel id для платформ, где он отличается от
-            externalId/handle.
+          description: Дополнительный channel id для платформ, где он отличается от externalId/handle.
           example: null
         status:
           $ref: '#/components/schemas/ContentSourceStatus'
@@ -1129,9 +1098,7 @@ components:
         lastCursor:
           type: string
           nullable: true
-          description: >-
-            JSON cursor последнего Telegram import batch или cursor будущего
-            платформенного импортера.
+          description: JSON cursor последнего Telegram import batch или cursor будущего платформенного импортера.
           example: null
         createdAt:
           type: string
@@ -1143,33 +1110,36 @@ components:
           format: date-time
           description: Время последнего обновления записи.
           example: '2026-05-20T10:00:00.000Z'
+
     ContentSourceListResponse:
       type: object
       description: Ограниченный административный список пользовательских content sources.
-      required:
-        - items
+      required: [items]
       properties:
         items:
           type: array
           description: Content sources в стабильном порядке.
           items:
             $ref: '#/components/schemas/ContentSource'
+
     ImportRun:
       type: object
       description: Диагностическая запись одной попытки импорта материалов.
       required:
-        - id
-        - sourceId
-        - status
-        - startedAt
-        - finishedAt
-        - foundCount
-        - createdCount
-        - updatedCount
-        - skippedDuplicateCount
-        - errorMessage
-        - createdAt
-        - updatedAt
+        [
+          id,
+          sourceId,
+          status,
+          startedAt,
+          finishedAt,
+          foundCount,
+          createdCount,
+          updatedCount,
+          skippedDuplicateCount,
+          errorMessage,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: string
@@ -1185,9 +1155,7 @@ components:
           type: string
           format: date-time
           nullable: true
-          description: >-
-            Время начала фактической обработки. Для queued run может быть
-            `null`.
+          description: Время начала фактической обработки. Для queued run может быть `null`.
           example: '2026-05-26T05:00:00.000Z'
         finishedAt:
           type: string
@@ -1218,9 +1186,7 @@ components:
         errorMessage:
           type: string
           nullable: true
-          description: >-
-            Безопасная однострочная диагностика failed run без stack trace и
-            secret-значений.
+          description: Безопасная однострочная диагностика failed run без stack trace и secret-значений.
           example: null
         createdAt:
           type: string
@@ -1232,33 +1198,34 @@ components:
           format: date-time
           description: Время последнего обновления записи.
           example: '2026-05-26T05:01:00.000Z'
+
     ImportRunListResponse:
       type: object
       description: Ограниченный административный список попыток импорта.
-      required:
-        - items
+      required: [items]
       properties:
         items:
           type: array
           description: Import runs в порядке от новых к старым.
           items:
             $ref: '#/components/schemas/ImportRun'
+
     PlaceDetail:
       type: object
-      description: >-
-        Детальная карточка места с публично-безопасным pinned material без
-        исходного внешнего URL и счетчиками по платформам.
+      description: Детальная карточка места с публично-безопасным pinned material без исходного внешнего URL и счетчиками по платформам.
       required:
-        - id
-        - title
-        - summary
-        - tags
-        - category
-        - status
-        - popularityWeight
-        - coverImageUrl
-        - counters
-        - pinnedMaterial
+        [
+          id,
+          title,
+          summary,
+          tags,
+          category,
+          status,
+          popularityWeight,
+          coverImageUrl,
+          counters,
+          pinnedMaterial,
+        ]
       properties:
         id:
           type: string
@@ -1292,17 +1259,12 @@ components:
         coverImageUrl:
           type: string
           nullable: true
-          description: >-
-            Публичный cover-фото места. Если фото отсутствует или не должно
-            отдаться публично, возвращается `null`.
+          description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
           example: /v1/places/place_ekb_001/photo
         counters:
           type: object
           description: Количество материалов по платформам.
-          required:
-            - dzen
-            - telegram
-            - instagram
+          required: [dzen, telegram, instagram]
           properties:
             dzen:
               type: integer
@@ -1315,26 +1277,22 @@ components:
               example: 3
         pinnedMaterial:
           nullable: true
-          description: >-
-            Закреплённый материал места, если он назначен. Исходный внешний URL
-            не отдается; клиенты должны использовать только `redirectUrl`, когда
-            он доступен.
+          description: Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен.
           oneOf:
             - $ref: '#/components/schemas/PublicMaterial'
+
     AdminPlaceDetail:
       allOf:
         - $ref: '#/components/schemas/PlaceDetail'
       description: >
         Детальная карточка места для администратора. Shape совпадает с
-        `PlaceDetail`: исходный внешний URL закрепленного материала не отдается.
+        `PlaceDetail`: исходный внешний URL закрепленного материала не
+        отдается.
+
     PlaceListResponse:
       type: object
       description: Пагинированный список мест.
-      required:
-        - items
-        - total
-        - page
-        - pageSize
+      required: [items, total, page, pageSize]
       properties:
         items:
           type: array
@@ -1353,14 +1311,11 @@ components:
           type: integer
           description: Размер страницы.
           example: 20
+
     PublicPlaceListResponse:
       type: object
       description: Публичный пагинированный список мест со счетчиками материалов.
-      required:
-        - items
-        - total
-        - page
-        - pageSize
+      required: [items, total, page, pageSize]
       properties:
         items:
           type: array
@@ -1379,23 +1334,22 @@ components:
           type: integer
           description: Размер страницы.
           example: 20
+
     MaterialListResponse:
       type: object
       description: Ограниченный список материалов места без исходного внешнего URL.
-      required:
-        - items
+      required: [items]
       properties:
         items:
           type: array
           description: Материалы места в стабильном порядке отображения.
           items:
             $ref: '#/components/schemas/PublicMaterial'
+
     CreatePlaceRequest:
       type: object
       description: Payload создания нового места.
-      required:
-        - title
-        - category
+      required: [title, category]
       properties:
         title:
           type: string
@@ -1403,15 +1357,11 @@ components:
           example: Bаден-Баден Уктус
         summary:
           type: string
-          description: >-
-            Короткое описание места. Если поле не передано, backend сохранит
-            пустую строку.
+          description: Короткое описание места. Если поле не передано, backend сохранит пустую строку.
           example: Термальный комплекс с открытыми бассейнами и SPA-зоной.
         tags:
           type: array
-          description: >-
-            Теги для поиска и фильтрации. Если поле не передано, backend
-            сохранит пустой массив.
+          description: Теги для поиска и фильтрации. Если поле не передано, backend сохранит пустой массив.
           items:
             type: string
           example:
@@ -1422,10 +1372,9 @@ components:
           $ref: '#/components/schemas/PlaceCategory'
         popularityWeight:
           type: integer
-          description: >-
-            Начальный вес популярности. Если поле не передано, backend сохранит
-            0.
+          description: Начальный вес популярности. Если поле не передано, backend сохранит 0.
           example: 95
+
     UpdatePlaceRequest:
       type: object
       description: Payload частичного обновления места.
@@ -1452,21 +1401,19 @@ components:
           type: integer
           description: Обновлённый вес популярности.
           example: 99
+
     UpdatePlaceStatusRequest:
       type: object
       description: Payload изменения статуса места.
-      required:
-        - status
+      required: [status]
       properties:
         status:
           $ref: '#/components/schemas/PlaceStatus'
+
     CreateContentSourceRequest:
       type: object
       description: Payload создания пользовательского content source.
-      required:
-        - platform
-        - displayName
-        - url
+      required: [platform, displayName, url]
       properties:
         platform:
           $ref: '#/components/schemas/ContentSourcePlatform'
@@ -1477,9 +1424,7 @@ components:
         url:
           type: string
           format: uri
-          description: >-
-            Публичный URL источника. Допускаются только абсолютные http/https
-            URL.
+          description: Публичный URL источника. Допускаются только абсолютные http/https URL.
           example: https://t.me/amazing_ekb
         externalId:
           type: string
@@ -1494,18 +1439,12 @@ components:
         channelId:
           type: string
           nullable: true
-          description: >-
-            Дополнительный channel id для платформ, где он отличается от
-            externalId/handle.
+          description: Дополнительный channel id для платформ, где он отличается от externalId/handle.
           example: null
+
     UpdateContentSourceRequest:
       type: object
-      description: >-
-        Payload частичного обновления content source. `platform`,
-        `lastImportedAt` и `lastCursor` здесь не редактируются. После старта
-        импортов identity-поля `url`, `externalId`, `handle` и `channelId`
-        заблокированы, чтобы не смешивать cursor и imported-material dedupe
-        разных источников.
+      description: Payload частичного обновления content source. `platform`, `lastImportedAt` и `lastCursor` здесь не редактируются. После старта импортов identity-поля `url`, `externalId`, `handle` и `channelId` заблокированы, чтобы не смешивать cursor и imported-material dedupe разных источников.
       properties:
         displayName:
           type: string
@@ -1514,9 +1453,7 @@ components:
         url:
           type: string
           format: uri
-          description: >-
-            Новый публичный URL источника. Допускаются только абсолютные
-            http/https URL.
+          description: Новый публичный URL источника. Допускаются только абсолютные http/https URL.
           example: https://t.me/amazing_ekb
         externalId:
           type: string
@@ -1533,23 +1470,19 @@ components:
           nullable: true
           description: Новый channel id или `null`, чтобы очистить поле.
           example: null
+
     UpdateContentSourceStatusRequest:
       type: object
       description: Payload переключения статуса content source без удаления записи.
-      required:
-        - status
+      required: [status]
       properties:
         status:
           $ref: '#/components/schemas/ContentSourceStatus'
+
     CreateMaterialRequest:
       type: object
       description: Payload создания нового материала для места.
-      required:
-        - platform
-        - type
-        - title
-        - publishedAt
-        - url
+      required: [platform, type, title, publishedAt, url]
       properties:
         platform:
           $ref: '#/components/schemas/Platform'
@@ -1561,9 +1494,9 @@ components:
           example: Обзор комплекса и советы по посещению
         publishedAt:
           type: string
-          format: date-time
-          description: Момент публикации материала.
-          example: '2026-03-20T10:30:00.000Z'
+          format: date
+          description: Календарная дата публикации материала в формате `YYYY-MM-DD`.
+          example: '2026-03-20'
         durationSec:
           type: integer
           nullable: true
@@ -1572,10 +1505,9 @@ components:
         url:
           type: string
           format: uri
-          description: >-
-            Публичная ссылка на материал. Допускаются только абсолютные
-            http/https URL.
+          description: Публичная ссылка на материал. Допускаются только абсолютные http/https URL.
           example: https://t.me/amazing_ekb/321
+
     UpdateMaterialRequest:
       type: object
       description: Payload частичного обновления материала.
@@ -1590,9 +1522,9 @@ components:
           example: Обновлённый обзор комплекса
         publishedAt:
           type: string
-          format: date-time
-          description: Новая дата публикации.
-          example: '2026-03-22T09:00:00.000Z'
+          format: date
+          description: Новая календарная дата публикации в формате `YYYY-MM-DD`.
+          example: '2026-03-22'
         durationSec:
           type: integer
           nullable: true
@@ -1601,73 +1533,65 @@ components:
         url:
           type: string
           format: uri
-          description: >-
-            Новая публичная ссылка на материал. Допускаются только абсолютные
-            http/https URL.
+          description: Новая публичная ссылка на материал. Допускаются только абсолютные http/https URL.
           example: https://t.me/amazing_ekb/400
+
     UpdateMaterialAdminStatusRequest:
       type: object
-      description: >-
-        Payload обновления review-статуса материала в административной
-        библиотеке.
-      required:
-        - adminStatus
+      description: Payload обновления review-статуса материала в административной библиотеке.
+      required: [adminStatus]
       properties:
         adminStatus:
           $ref: '#/components/schemas/MaterialAdminStatus'
+
     UpdatePlaceMaterialLinkRequest:
       type: object
       description: Payload обновления активной связи материала с местом.
       properties:
         isPinned:
           type: boolean
-          description: >-
-            Нужно ли закрепить материал в блоке “Начни отсюда”. Если `true`,
-            backend снимет закрепление с других материалов этого места.
+          description: Нужно ли закрепить материал в блоке “Начни отсюда”. Если `true`, backend снимет закрепление с других материалов этого места.
           example: true
         sortOrder:
           type: integer
           minimum: 0
           description: Ручной порядок отображения в списках материалов места.
           example: 10
+
     SetPinnedMaterialRequest:
       type: object
       description: Payload назначения закреплённого материала для места.
-      required:
-        - materialId
+      required: [materialId]
       properties:
         materialId:
           type: string
           description: Идентификатор материала, который нужно закрепить.
           example: material_telegram_001
+
     PlacePhotoUploadRequest:
       type: object
       description: Multipart payload для загрузки cover-фото места.
-      required:
-        - photo
+      required: [photo]
       properties:
         photo:
           type: string
           format: binary
           description: Файл cover-фото в формате JPEG, PNG или WebP размеров до 5 MB.
+
     HealthLiveResponse:
       type: object
       description: Ответ liveness-пробы. Показывает, что процесс приложения запущен.
-      required:
-        - status
+      required: [status]
       properties:
         status:
           type: string
           description: Признак живости приложения.
           example: ok
+
     HealthReadyResponse:
       type: object
-      description: >-
-        Ответ readiness-пробы. Показывает готовность приложения обслуживать
-        запросы.
-      required:
-        - status
-        - checks
+      description: Ответ readiness-пробы. Показывает готовность приложения обслуживать запросы.
+      required: [status, checks]
       properties:
         status:
           type: string
@@ -1676,22 +1600,19 @@ components:
         checks:
           type: object
           description: Результаты инфраструктурных проверок.
-          required:
-            - database
+          required: [database]
           properties:
             database:
               type: string
               description: Статус подключения к базе данных.
               example: up
+
 paths:
   /health/live:
     get:
-      tags:
-        - Health
+      tags: [Health]
       summary: Liveness probe
-      description: >-
-        Проверяет, что процесс приложения запущен и HTTP-слой отвечает на
-        запросы.
+      description: Проверяет, что процесс приложения запущен и HTTP-слой отвечает на запросы.
       operationId: getLiveness
       responses:
         '200':
@@ -1703,14 +1624,12 @@ paths:
               examples:
                 default:
                   $ref: '#/components/examples/HealthLiveResponse'
+
   /health/ready:
     get:
-      tags:
-        - Health
+      tags: [Health]
       summary: Readiness probe
-      description: >-
-        Проверяет готовность приложения обслуживать запросы, включая доступность
-        базы данных.
+      description: Проверяет готовность приложения обслуживать запросы, включая доступность базы данных.
       operationId: getReadiness
       responses:
         '200':
@@ -1724,14 +1643,12 @@ paths:
                   $ref: '#/components/examples/HealthReadyResponse'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
+
   /auth/login:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Login
-      description: >-
-        Аутентифицирует пользователя по email и паролю, ставит access/refresh
-        HttpOnly cookies и возвращает публичный профиль.
+      description: Аутентифицирует пользователя по email и паролю, ставит access/refresh HttpOnly cookies и возвращает публичный профиль.
       operationId: login
       requestBody:
         required: true
@@ -1745,9 +1662,7 @@ paths:
                 $ref: '#/components/examples/AuthLoginRequest'
       responses:
         '200':
-          description: >-
-            Успешная аутентификация. Ответ устанавливает `aeh_access_token` и
-            `aeh_refresh_token`.
+          description: Успешная аутентификация. Ответ устанавливает `aeh_access_token` и `aeh_refresh_token`.
           headers:
             Set-Cookie:
               description: HttpOnly auth cookies для access и refresh токенов.
@@ -1766,10 +1681,10 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+
   /auth/refresh:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Refresh tokens
       description: Обновляет access/refresh HttpOnly cookies по валидной refresh cookie.
       operationId: refreshTokens
@@ -1787,14 +1702,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '429':
           $ref: '#/components/responses/TooManyRequests'
+
   /auth/logout:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Logout
-      description: >-
-        Выполняет logout, отзывает refresh token из cookie и очищает auth
-        cookies.
+      description: Выполняет logout, отзывает refresh token из cookie и очищает auth cookies.
       operationId: logout
       security:
         - RefreshCookieAuth: []
@@ -1806,10 +1719,10 @@ paths:
               description: Очистка `aeh_access_token` и `aeh_refresh_token`.
               schema:
                 type: string
+
   /auth/me:
     get:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Get current user
       description: Возвращает публичный профиль текущего аутентифицированного пользователя.
       operationId: getCurrentUser
@@ -1827,14 +1740,12 @@ paths:
                   $ref: '#/components/examples/AuthMeResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
   /places:
     get:
-      tags:
-        - Places
+      tags: [Places]
       summary: List places
-      description: >-
-        Возвращает публичный список мест с пагинацией, поиском и фильтрацией по
-        категории.
+      description: Возвращает публичный список мест с пагинацией, поиском и фильтрацией по категории.
       operationId: listPlaces
       parameters:
         - $ref: '#/components/parameters/Page'
@@ -1842,9 +1753,7 @@ paths:
         - name: search
           in: query
           required: false
-          description: >-
-            Полнотекстовый поиск по названию и описанию места. Максимум 100
-            символов.
+          description: Полнотекстовый поиск по названию и описанию места. Максимум 100 символов.
           schema:
             type: string
             maxLength: 100
@@ -1855,9 +1764,7 @@ paths:
           description: Режим сортировки списка мест.
           schema:
             type: string
-            enum:
-              - popular
-              - title_asc
+            enum: [popular, title_asc]
             default: popular
           example: title_asc
         - name: category
@@ -1879,10 +1786,10 @@ paths:
                   $ref: '#/components/examples/PublicPlaceListResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
+
   /places/{placeId}:
     get:
-      tags:
-        - Places
+      tags: [Places]
       summary: Get place details
       description: Возвращает детальную карточку публичного места по его идентификатору.
       operationId: getPlaceDetail
@@ -1900,10 +1807,10 @@ paths:
                   $ref: '#/components/examples/PlaceDetail'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /places/{placeId}/photo:
     get:
-      tags:
-        - Places
+      tags: [Places]
       summary: Get place cover photo
       description: Возвращает бинарное содержимое публичного cover-фото активного места.
       operationId: getPlaceCoverPhoto
@@ -1927,14 +1834,12 @@ paths:
                 format: binary
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /places/{placeId}/materials:
     get:
-      tags:
-        - Places
+      tags: [Places]
       summary: List place materials
-      description: >-
-        Возвращает до 100 материалов, связанных с указанным активным местом, с
-        опциональным фильтром по платформе.
+      description: Возвращает до 100 материалов, связанных с указанным активным местом, с опциональным фильтром по платформе.
       operationId: listPlaceMaterials
       parameters:
         - $ref: '#/components/parameters/PlaceId'
@@ -1959,15 +1864,12 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /materials/{materialId}/go:
     get:
-      tags:
-        - Places
+      tags: [Places]
       summary: Redirect to material URL
-      description: >-
-        Выполняет временный redirect на сохраненный URL публичного материала.
-        Endpoint не принимает внешний URL от клиента и работает только для
-        материалов активных мест с безопасной https-ссылкой платформы.
+      description: Выполняет временный redirect на сохраненный URL публичного материала. Endpoint не принимает внешний URL от клиента и работает только для материалов активных мест с безопасной https-ссылкой платформы.
       operationId: redirectMaterial
       parameters:
         - $ref: '#/components/parameters/MaterialId'
@@ -1982,14 +1884,12 @@ paths:
                 format: uri
         '404':
           $ref: '#/components/responses/MaterialNotFound'
+
   /favorites:
     get:
-      tags:
-        - Favorites
+      tags: [Favorites]
       summary: List favorites
-      description: >-
-        Возвращает список избранных мест текущего аутентифицированного
-        пользователя.
+      description: Возвращает список избранных мест текущего аутентифицированного пользователя.
       operationId: listFavorites
       security:
         - AccessCookieAuth: []
@@ -2005,10 +1905,10 @@ paths:
                   $ref: '#/components/examples/PlaceListResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
   /favorites/{placeId}:
     post:
-      tags:
-        - Favorites
+      tags: [Favorites]
       summary: Add favorite
       description: Добавляет место в избранное текущего пользователя.
       operationId: addFavorite
@@ -2024,8 +1924,7 @@ paths:
         '404':
           $ref: '#/components/responses/PlaceNotFound'
     delete:
-      tags:
-        - Favorites
+      tags: [Favorites]
       summary: Remove favorite
       description: Удаляет место из избранного текущего пользователя.
       operationId: removeFavorite
@@ -2038,15 +1937,12 @@ paths:
           description: Место удалено из избранного.
         '401':
           $ref: '#/components/responses/Unauthorized'
+
   /admin/places:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: List admin places
-      description: >-
-        Возвращает административный список мест с пагинацией и опциональной
-        фильтрацией по статусу. Если `status` не указан, возвращаются и
-        активные, и скрытые места.
+      description: Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
       operationId: listAdminPlaces
       security:
         - AccessCookieAuth: []
@@ -2057,9 +1953,7 @@ paths:
         - name: status
           in: query
           required: false
-          description: >-
-            Фильтр по статусу места. Если параметр отсутствует, возвращаются все
-            статусы.
+          description: Фильтр по статусу места. Если параметр отсутствует, возвращаются все статусы.
           schema:
             $ref: '#/components/schemas/PlaceStatus'
           example: hidden
@@ -2080,8 +1974,7 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
     post:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Create place
       description: Создаёт новое место в каталоге. Операция доступна только администратору.
       operationId: createPlace
@@ -2122,14 +2015,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+
   /admin/places/{placeId}:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Get admin place details
-      description: >-
-        Возвращает детальную карточку места для администратора независимо от
-        публичного статуса места.
+      description: Возвращает детальную карточку места для администратора независимо от публичного статуса места.
       operationId: getAdminPlaceDetail
       security:
         - AccessCookieAuth: []
@@ -2153,12 +2044,9 @@ paths:
         '404':
           $ref: '#/components/responses/PlaceNotFound'
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update place
-      description: >-
-        Частично обновляет место по идентификатору. Операция доступна только
-        администратору.
+      description: Частично обновляет место по идентификатору. Операция доступна только администратору.
       operationId: updatePlace
       security:
         - AccessCookieAuth: []
@@ -2200,10 +2088,10 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /admin/places/{placeId}/status:
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update place status
       description: Меняет статус публикации места. Операция доступна только администратору.
       operationId: updatePlaceStatus
@@ -2241,14 +2129,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /admin/places/{placeId}/photo:
     post:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Upload place cover photo
-      description: >-
-        Загружает или заменяет cover-фото места. Операция доступна только
-        администратору.
+      description: Загружает или заменяет cover-фото места. Операция доступна только администратору.
       operationId: uploadPlaceCoverPhoto
       security:
         - AccessCookieAuth: []
@@ -2283,14 +2169,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /admin/content-sources:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: List admin content sources
-      description: >-
-        Возвращает до 100 пользовательских content sources. Источник — это
-        управляемый канал/ресурс пользователя, а не случайная внешняя ссылка.
+      description: Возвращает до 100 пользовательских content sources. Источник — это управляемый канал/ресурс пользователя, а не случайная внешняя ссылка.
       operationId: listContentSources
       security:
         - AccessCookieAuth: []
@@ -2326,9 +2210,9 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+
     post:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Create content source
       description: Создает пользовательский content source для будущих импортов материалов.
       operationId: createContentSource
@@ -2369,14 +2253,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/ContentSourceConflict'
+
   /admin/content-sources/{sourceId}:
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update content source
-      description: >-
-        Частично обновляет content source. Platform и import cursor-поля в этом
-        endpoint не изменяются.
+      description: Частично обновляет content source. Platform и import cursor-поля в этом endpoint не изменяются.
       operationId: updateContentSource
       security:
         - AccessCookieAuth: []
@@ -2415,14 +2297,12 @@ paths:
           $ref: '#/components/responses/ContentSourceNotFound'
         '409':
           $ref: '#/components/responses/ContentSourceConflict'
+
   /admin/content-sources/{sourceId}/status:
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update content source status
-      description: >-
-        Переключает content source между `active` и `disabled` без удаления
-        записи.
+      description: Переключает content source между `active` и `disabled` без удаления записи.
       operationId: updateContentSourceStatus
       security:
         - AccessCookieAuth: []
@@ -2458,10 +2338,10 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/ContentSourceNotFound'
+
   /admin/import-runs:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: List import runs
       description: Возвращает до 100 диагностических записей попыток импорта материалов.
       operationId: listImportRuns
@@ -2499,25 +2379,17 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+
   /admin/import-runs/{runId}/events:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Stream import run updates
-      description: >
-        Открывает Server-Sent Events stream для одного import run. Stream сразу
-        отправляет initial snapshot текущего `ImportRun`, затем
-        runtime-обновления `import-run.updated` при изменении статуса или
-        счетчиков.
+      description: |
+        Открывает Server-Sent Events stream для одного import run. Stream сразу отправляет initial snapshot текущего `ImportRun`, затем runtime-обновления `import-run.updated` при изменении статуса или счетчиков.
 
+        Если подписка не может быть подготовлена, NestJS SSE handler отправляет `event: error` и закрывает stream.
 
-        Если подписка не может быть подготовлена, NestJS SSE handler отправляет
-        `event: error` и закрывает stream.
-
-
-        БД и `GET /admin/import-runs` остаются источником истины и fallback для
-        refresh/reconnect; in-memory SSE доставляет только обновления текущего
-        backend process.
+        БД и `GET /admin/import-runs` остаются источником истины и fallback для refresh/reconnect; in-memory SSE доставляет только обновления текущего backend process.
       operationId: streamImportRunEvents
       security:
         - AccessCookieAuth: []
@@ -2532,25 +2404,18 @@ paths:
           example: import_run_001
       responses:
         '200':
-          description: >-
-            Server-Sent Events stream. Каждое событие `import-run.updated`
-            содержит JSON-serialized `ImportRun` в `data`; ошибка подготовки
-            подписки приходит как SSE `error` event.
+          description: Server-Sent Events stream. Каждое событие `import-run.updated` содержит JSON-serialized `ImportRun` в `data`; ошибка подготовки подписки приходит как SSE `error` event.
           content:
             text/event-stream:
               schema:
                 type: string
-                description: >-
-                  SSE stream, где `data` событий `import-run.updated`
-                  соответствует `#/components/schemas/ImportRun`.
+                description: SSE stream, где `data` событий `import-run.updated` соответствует `#/components/schemas/ImportRun`.
               examples:
                 running:
                   summary: Running snapshot event
-                  value: >
+                  value: |
                     event: import-run.updated
-
-                    data:
-                    {"id":"import_run_001","sourceId":"source_telegram_001","status":"running","startedAt":"2026-05-26T05:00:00.000Z","finishedAt":null,"foundCount":3,"createdCount":2,"updatedCount":1,"skippedDuplicateCount":0,"errorMessage":null,"createdAt":"2026-05-26T05:00:00.000Z","updatedAt":"2026-05-26T05:00:10.000Z"}
+                    data: {"id":"import_run_001","sourceId":"source_telegram_001","status":"running","startedAt":"2026-05-26T05:00:00.000Z","finishedAt":null,"foundCount":3,"createdCount":2,"updatedCount":1,"skippedDuplicateCount":0,"errorMessage":null,"createdAt":"2026-05-26T05:00:00.000Z","updatedAt":"2026-05-26T05:00:10.000Z"}
                 missingRun:
                   summary: Missing run subscription error
                   value: |
@@ -2560,21 +2425,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+
   /admin/content-sources/{sourceId}/imports/telegram:
     post:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Import Telegram channel posts
-      description: >-
-        Создает durable queued one-click Telegram import/backfill run для active
-        Telegram content source. HTTP не ждет GramJS/Telegram processing; worker
-        позже переведет run в `running`, обработает до 20 внутренних batch-ов по
-        `limit` логических постов, сохраняя cursor после каждого успешного
-        непустого batch-а, и остановится при исчерпании истории, safety cap или
-        final failure. Fresh active `queued/running` run того же source
-        возвращает `409 Conflict`; stale `queued/running` runs старше
-        консервативного timeout закрываются как `failed` перед созданием новой
-        queued попытки.
+      description: Создает durable queued one-click Telegram import/backfill run для active Telegram content source. HTTP не ждет GramJS/Telegram processing; worker позже переведет run в `running`, обработает до 20 внутренних batch-ов по `limit` логических постов, сохраняя cursor после каждого успешного непустого batch-а, и остановится при исчерпании истории, safety cap или final failure. Fresh active `queued/running` run того же source возвращает `409 Conflict`; stale `queued/running` runs старше консервативного timeout закрываются как `failed` перед созданием новой queued попытки.
       operationId: importTelegramChannel
       security:
         - AccessCookieAuth: []
@@ -2584,12 +2440,7 @@ paths:
         - name: limit
           in: query
           required: false
-          description: >-
-            Размер одного внутреннего batch-а в логических Telegram-постах;
-            одиночный message считается одним постом, album/media group с общим
-            groupedId тоже считается одним постом. Один queued run может
-            обработать несколько batch-ов подряд и останавливается при
-            исчерпании истории или safety cap 20 batch-ов.
+          description: Размер одного внутреннего batch-а в логических Telegram-постах; одиночный message считается одним постом, album/media group с общим groupedId тоже считается одним постом. Один queued run может обработать несколько batch-ов подряд и останавливается при исчерпании истории или safety cap 20 batch-ов.
           schema:
             type: integer
             minimum: 1
@@ -2598,9 +2449,7 @@ paths:
           example: 50
       responses:
         '201':
-          description: >-
-            Telegram import job поставлен в очередь; response содержит queued
-            import run reference.
+          description: Telegram import job поставлен в очередь; response содержит queued import run reference.
           content:
             application/json:
               schema:
@@ -2619,9 +2468,7 @@ paths:
         '409':
           $ref: '#/components/responses/TelegramImportAlreadyRunning'
         '503':
-          description: >-
-            Import run создан, но job не удалось поставить в queue; run
-            переведен в failed с безопасной диагностикой.
+          description: Import run создан, но job не удалось поставить в queue; run переведен в failed с безопасной диагностикой.
           content:
             application/json:
               schema:
@@ -2632,14 +2479,12 @@ paths:
                     statusCode: 503
                     message: Import queue is unavailable
                     error: Service Unavailable
+
   /admin/materials:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: List admin material library
-      description: >-
-        Возвращает страницу материалов общей библиотеки. Если передать
-        `placeId`, каждый item содержит статус связи с этим местом.
+      description: Возвращает страницу материалов общей библиотеки. Если передать `placeId`, каждый item содержит статус связи с этим местом.
       operationId: listAdminMaterialLibrary
       security:
         - AccessCookieAuth: []
@@ -2655,28 +2500,21 @@ paths:
         - name: placeId
           in: query
           required: false
-          description: >-
-            Идентификатор места, для которого нужно вернуть статус связи
-            `placeLink`.
+          description: Идентификатор места, для которого нужно вернуть статус связи `placeLink`.
           schema:
             type: string
           example: place_ekb_001
         - name: adminStatus
           in: query
           required: false
-          description: >-
-            Фильтр по review-статусу материала. Для selector-а привязки обычно
-            используется `approved`.
+          description: Фильтр по review-статусу материала. Для selector-а привязки обычно используется `approved`.
           schema:
             $ref: '#/components/schemas/MaterialAdminStatus'
           example: approved
         - name: linked
           in: query
           required: false
-          description: >-
-            Фильтр по глобальному наличию `PlaceMaterial` связи. `false`
-            означает, что у материала нет ни одной связи с любым place, включая
-            hidden.
+          description: Фильтр по глобальному наличию `PlaceMaterial` связи. `false` означает, что у материала нет ни одной связи с любым place, включая hidden.
           schema:
             type: boolean
           example: false
@@ -2684,10 +2522,7 @@ paths:
         - name: pageSize
           in: query
           required: false
-          description: >-
-            Размер страницы. Допустимый диапазон от `1` до `100`. По умолчанию
-            `100`, чтобы сохранить прежний bounded list размер без явной
-            пагинации.
+          description: Размер страницы. Допустимый диапазон от `1` до `100`. По умолчанию `100`, чтобы сохранить прежний bounded list размер без явной пагинации.
           schema:
             type: integer
             minimum: 1
@@ -2712,14 +2547,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /admin/places/{placeId}/materials:
     get:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: List admin place materials
-      description: >-
-        Возвращает до 100 материалов указанного места для администратора,
-        включая скрытые места.
+      description: Возвращает до 100 материалов указанного места для администратора, включая скрытые места.
       operationId: listAdminPlaceMaterials
       security:
         - AccessCookieAuth: []
@@ -2751,13 +2584,11 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
     post:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Create material for place
-      description: >-
-        Создаёт новый материал для указанного места. Операция доступна только
-        администратору.
+      description: Создаёт новый материал для указанного места. Операция доступна только администратору.
       operationId: createPlaceMaterial
       security:
         - AccessCookieAuth: []
@@ -2777,7 +2608,7 @@ paths:
                   platform: telegram
                   type: post
                   title: Обзор комплекса и советы по посещению
-                  publishedAt: '2026-03-20T10:30:00.000Z'
+                  publishedAt: '2026-03-20'
                   durationSec: null
                   url: https://t.me/amazing_ekb/321
       responses:
@@ -2798,14 +2629,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/PlaceNotFound'
+
   /admin/places/{placeId}/materials/{materialId}:
     put:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Link material to place
-      description: >-
-        Создает или реактивирует связь существующего библиотечного материала с
-        местом. Повторный active-link запрос идемпотентен.
+      description: Создает или реактивирует связь существующего библиотечного материала с местом. Повторный active-link запрос идемпотентен.
       operationId: linkPlaceMaterial
       security:
         - AccessCookieAuth: []
@@ -2838,13 +2667,11 @@ paths:
                   $ref: '#/components/examples/PlaceNotFoundError'
                 materialNotFound:
                   $ref: '#/components/examples/MaterialNotFoundError'
+
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update place-material link
-      description: >-
-        Обновляет активную связь материала с местом: закрепление и ручной
-        порядок отображения.
+      description: 'Обновляет активную связь материала с местом: закрепление и ручной порядок отображения.'
       operationId: updatePlaceMaterialLink
       security:
         - AccessCookieAuth: []
@@ -2896,13 +2723,11 @@ paths:
                     statusCode: 404
                     message: Place material link not found
                     error: Not Found
+
     delete:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Hide place-material link
-      description: >-
-        Скрывает активную связь материала с местом без удаления материала из
-        общей библиотеки.
+      description: Скрывает активную связь материала с местом без удаления материала из общей библиотеки.
       operationId: hidePlaceMaterialLink
       security:
         - AccessCookieAuth: []
@@ -2933,14 +2758,12 @@ paths:
                     statusCode: 404
                     message: Place material link not found
                     error: Not Found
+
   /admin/materials/{materialId}:
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update material
-      description: >-
-        Частично обновляет материал по идентификатору. Операция доступна только
-        администратору.
+      description: Частично обновляет материал по идентификатору. Операция доступна только администратору.
       operationId: updateMaterial
       security:
         - AccessCookieAuth: []
@@ -2960,7 +2783,7 @@ paths:
                   platform: dzen
                   type: video
                   title: Обновлённый видеообзор комплекса
-                  publishedAt: '2026-03-22T09:00:00.000Z'
+                  publishedAt: '2026-03-22'
                   durationSec: 240
                   url: https://dzen.ru/video/watch/abcdef
       responses:
@@ -2981,15 +2804,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/MaterialNotFound'
+
   /admin/materials/{materialId}/admin-status:
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Update material admin status
-      description: >-
-        Обновляет review-статус материала в административной библиотеке. Статус
-        не удаляет материал и сам по себе не меняет публичную видимость уже
-        существующих `PlaceMaterial` связей.
+      description: Обновляет review-статус материала в административной библиотеке. Статус не удаляет материал и сам по себе не меняет публичную видимость уже существующих `PlaceMaterial` связей.
       operationId: updateMaterialAdminStatus
       security:
         - AccessCookieAuth: []
@@ -3024,7 +2844,7 @@ paths:
                     platform: telegram
                     type: post
                     title: null
-                    publishedAt: '2026-03-20T10:30:00.000Z'
+                    publishedAt: '2026-03-20'
                     durationSec: null
                     url: https://t.me/amazing_ekb/321
                     source:
@@ -3033,8 +2853,8 @@ paths:
                       displayName: Amazing EKB Telegram
                       url: https://t.me/amazing_ekb
                     externalId: '321'
-                    text: Пост из Telegram-канала Amazing EKB
-                    excerpt: Пост из Telegram-канала Amazing EKB
+                    text: 'Пост из Telegram-канала Amazing EKB'
+                    excerpt: 'Пост из Telegram-канала Amazing EKB'
                     mediaKind: photo
                     mediaPreviewUrl: null
                     adminStatus: approved
@@ -3048,14 +2868,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/MaterialNotFound'
+
   /admin/places/{placeId}/pinned-material:
     patch:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Set pinned material for place
-      description: >-
-        Назначает закреплённый материал для места. Операция доступна только
-        администратору.
+      description: Назначает закреплённый материал для места. Операция доступна только администратору.
       operationId: setPinnedMaterial
       security:
         - AccessCookieAuth: []
@@ -3110,12 +2928,9 @@ paths:
                 materialNotFound:
                   $ref: '#/components/examples/MaterialNotFoundError'
     delete:
-      tags:
-        - Admin
+      tags: [Admin]
       summary: Clear pinned material for place
-      description: >-
-        Снимает закреплённый материал с места. Операция доступна только
-        администратору.
+      description: Снимает закреплённый материал с места. Операция доступна только администратору.
       operationId: clearPinnedMaterial
       security:
         - AccessCookieAuth: []

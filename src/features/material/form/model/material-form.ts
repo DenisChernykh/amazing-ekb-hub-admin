@@ -65,12 +65,23 @@ const materialFormFieldKeys: Array<keyof NormalizedMaterialFormValues> = [
   'url',
 ]
 
+/**
+ * Проверяет, применимо ли поле длительности к типу материала.
+ *
+ * @returns `true` только для видеоформатов, где backend ожидает duration.
+ */
+export function isMaterialDurationEnabled(
+  type: MaterialType | null | undefined,
+) {
+  return type === 'reel' || type === 'video'
+}
+
 const serializePublishedAt = (publishedAt: Dayjs | null | undefined) => {
   if (!publishedAt) {
     return null
   }
 
-  return publishedAt.format('YYYY-MM-DDTHH:mm:ssZ')
+  return publishedAt.format('YYYY-MM-DD')
 }
 
 const parsePublishedAtWallClock = (publishedAt: string) => {
@@ -79,14 +90,20 @@ const parsePublishedAtWallClock = (publishedAt: string) => {
 
 const normalizeMaterialFormValues = (
   values: MaterialFormValues,
-): NormalizedMaterialFormValues => ({
-  durationSec: values.durationSec ?? null,
-  platform: values.platform ?? null,
-  publishedAt: serializePublishedAt(values.publishedAt),
-  title: (values.title ?? '').trim(),
-  type: values.type ?? null,
-  url: (values.url ?? '').trim(),
-})
+): NormalizedMaterialFormValues => {
+  const type = values.type ?? null
+
+  return {
+    durationSec: isMaterialDurationEnabled(type)
+      ? (values.durationSec ?? null)
+      : null,
+    platform: values.platform ?? null,
+    publishedAt: serializePublishedAt(values.publishedAt),
+    title: (values.title ?? '').trim(),
+    type,
+    url: (values.url ?? '').trim(),
+  }
+}
 
 const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
   if (value === null) {
@@ -115,22 +132,27 @@ export function getMaterialFormInitialValues(
 /**
  * Преобразует значения формы в payload создания материала.
  *
- * @remarks `publishedAt` сериализуется с локальным смещением через `dayjs.format`,
- * без `toISOString()`, чтобы выбранный календарный день не сдвигался в UTC.
+ * @remarks `publishedAt` сериализуется как календарная дата `YYYY-MM-DD`,
+ * без времени и UTC-нормализации.
  */
 export function toCreateMaterialRequest(
   values: MaterialFormValues,
 ): CreateMaterialRequest {
   const normalizedValues = normalizeMaterialFormValues(values)
-
-  return {
-    durationSec: normalizedValues.durationSec,
+  const type = getRequiredValue(normalizedValues.type, 'type')
+  const request: CreateMaterialRequest = {
     platform: getRequiredValue(normalizedValues.platform, 'platform'),
     publishedAt: getRequiredValue(normalizedValues.publishedAt, 'publishedAt'),
     title: normalizedValues.title,
-    type: getRequiredValue(normalizedValues.type, 'type'),
+    type,
     url: normalizeMaterialUrl(values.url),
   }
+
+  if (isMaterialDurationEnabled(type)) {
+    request.durationSec = normalizedValues.durationSec
+  }
+
+  return request
 }
 
 /**
@@ -165,7 +187,10 @@ export function toUpdateMaterialRequest(
     )
   }
 
-  if (normalizedValues.durationSec !== normalizedInitialValues.durationSec) {
+  if (
+    isMaterialDurationEnabled(normalizedValues.type) &&
+    normalizedValues.durationSec !== normalizedInitialValues.durationSec
+  ) {
     request.durationSec = normalizedValues.durationSec
   }
 
@@ -198,6 +223,13 @@ export function getMaterialFormChangedFields(
 
   return materialFormFieldKeys.flatMap((field) => {
     const label = materialFormFieldLabels[field]
+
+    if (
+      field === 'durationSec' &&
+      !isMaterialDurationEnabled(normalizedValues.type)
+    ) {
+      return []
+    }
 
     if (normalizedValues[field] === normalizedInitialValues[field]) {
       return []

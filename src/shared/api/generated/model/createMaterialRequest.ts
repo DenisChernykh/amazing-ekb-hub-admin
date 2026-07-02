@@ -16,7 +16,7 @@ export type CreateMaterialRequest = {
   type: MaterialType;
   /** Заголовок материала. */
   title: string;
-  /** Момент публикации материала. */
+  /** Календарная дата публикации материала в формате `YYYY-MM-DD`. */
   publishedAt: string;
   /**
      * Длительность в секундах для видеоформатов.

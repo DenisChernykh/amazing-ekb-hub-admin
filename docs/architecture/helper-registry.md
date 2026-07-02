@@ -260,21 +260,22 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Material Form Feature
 
-| Helper                         | Location                                                         | Visibility | Contract                                                                                                 |
-| ------------------------------ | ---------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
-| `MaterialFormValues`           | `src/features/material/form/model/material-form.ts`              | exported   | Defines create/edit material form values before conversion to generated API payloads.                    |
-| `MaterialFormChangedField`     | `src/features/material/form/model/material-form.ts`              | exported   | Describes a normalized changed material field shown as an edit drawer diff chip.                         |
-| `getMaterialFormInitialValues` | `src/features/material/form/model/material-form.ts`              | exported   | Maps admin `Material` to form initial values.                                                            |
-| `toCreateMaterialRequest`      | `src/features/material/form/model/material-form.ts`              | exported   | Normalizes form values into `POST /admin/places/{placeId}/materials` payload with local offset datetime. |
-| `toUpdateMaterialRequest`      | `src/features/material/form/model/material-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/materials/{materialId}` payload from changed fields only.      |
-| `hasMaterialFormChanges`       | `src/features/material/form/model/material-form.ts`              | exported   | Detects whether normalized material form values differ from loaded server values.                        |
-| `getMaterialFormChangedFields` | `src/features/material/form/model/material-form.ts`              | exported   | Returns normalized changed field labels for edit drawer chips.                                           |
-| `MaterialFormChangedFields`    | `src/features/material/form/ui/material-form-changed-fields.tsx` | exported   | Renders material edit drawer changed-field chips.                                                        |
-| `MaterialFormErrorAlert`       | `src/features/material/form/ui/material-form-error-alert.tsx`    | exported   | Renders normalized create/edit material API errors without parsing backend field names.                  |
-| `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit material forms.                                         |
-| `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`     | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.               |
-| `EditMaterialDrawerActions`    | `src/features/material/edit/ui/edit-material-drawer-actions.tsx` | exported   | Renders cancel/save actions for the edit material drawer.                                                |
-| `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`         | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.  |
+| Helper                         | Location                                                         | Visibility | Contract                                                                                                       |
+| ------------------------------ | ---------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| `MaterialFormValues`           | `src/features/material/form/model/material-form.ts`              | exported   | Defines create/edit material form values before conversion to generated API payloads.                          |
+| `MaterialFormChangedField`     | `src/features/material/form/model/material-form.ts`              | exported   | Describes a normalized changed material field shown as an edit drawer diff chip.                               |
+| `isMaterialDurationEnabled`    | `src/features/material/form/model/material-form.ts`              | exported   | Detects whether material duration is applicable for the selected material type.                                |
+| `getMaterialFormInitialValues` | `src/features/material/form/model/material-form.ts`              | exported   | Maps admin `Material` to form initial values.                                                                  |
+| `toCreateMaterialRequest`      | `src/features/material/form/model/material-form.ts`              | exported   | Normalizes form values into `POST /admin/places/{placeId}/materials` payload with `YYYY-MM-DD` published date. |
+| `toUpdateMaterialRequest`      | `src/features/material/form/model/material-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/materials/{materialId}` payload from changed fields only.            |
+| `hasMaterialFormChanges`       | `src/features/material/form/model/material-form.ts`              | exported   | Detects whether normalized material form values differ from loaded server values.                              |
+| `getMaterialFormChangedFields` | `src/features/material/form/model/material-form.ts`              | exported   | Returns normalized changed field labels for edit drawer chips.                                                 |
+| `MaterialFormChangedFields`    | `src/features/material/form/ui/material-form-changed-fields.tsx` | exported   | Renders material edit drawer changed-field chips.                                                              |
+| `MaterialFormErrorAlert`       | `src/features/material/form/ui/material-form-error-alert.tsx`    | exported   | Renders normalized create/edit material API errors without parsing backend field names.                        |
+| `MaterialFormFields`           | `src/features/material/form/ui/material-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit material forms.                                               |
+| `CreateMaterialDrawer`         | `src/features/material/create/ui/create-material-drawer.tsx`     | exported   | Creates place materials in a guarded Ant Design drawer through the entity mutation bridge.                     |
+| `EditMaterialDrawerActions`    | `src/features/material/edit/ui/edit-material-drawer-actions.tsx` | exported   | Renders cancel/save actions for the edit material drawer.                                                      |
+| `EditMaterialDrawer`           | `src/features/material/edit/ui/edit-material-drawer.tsx`         | exported   | Edits material fields in a guarded Ant Design drawer with dirty diff chips and partial update payloads.        |
 
 ## Material Admin Status Feature
 

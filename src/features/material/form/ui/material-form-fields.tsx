@@ -4,7 +4,10 @@ import {
   getMaterialTypeOptions,
 } from '@/entities/material/ui/material-meta'
 import { DatePicker, Form, Input, InputNumber, Select } from 'antd'
-import type { MaterialFormValues } from '../model/material-form'
+import {
+  isMaterialDurationEnabled,
+  type MaterialFormValues,
+} from '../model/material-form'
 
 /**
  * Props набора полей формы материала.
@@ -56,30 +59,40 @@ export function MaterialFormFields({
       </Form.Item>
 
       <Form.Item<MaterialFormValues>
-        label="Момент публикации"
+        label="Дата публикации"
         name="publishedAt"
-        rules={[{ message: 'Выберите момент публикации', required: true }]}
+        rules={[{ message: 'Выберите дату публикации', required: true }]}
       >
         <DatePicker
-          aria-label="Момент публикации"
+          aria-label="Дата публикации"
           disabled={disabled}
-          format="DD.MM.YYYY HH:mm"
-          showTime={{ format: 'HH:mm' }}
+          format="DD.MM.YYYY"
           style={{ width: '100%' }}
         />
       </Form.Item>
 
       <Form.Item<MaterialFormValues>
-        label="Длительность, сек"
-        name="durationSec"
+        noStyle
+        shouldUpdate={(previousValues, currentValues) =>
+          previousValues.type !== currentValues.type
+        }
       >
-        <InputNumber
-          aria-label="Длительность, сек"
-          disabled={disabled}
-          min={0}
-          precision={0}
-          style={{ width: '100%' }}
-        />
+        {({ getFieldValue }) =>
+          isMaterialDurationEnabled(getFieldValue('type')) && (
+            <Form.Item<MaterialFormValues>
+              label="Длительность, сек"
+              name="durationSec"
+            >
+              <InputNumber
+                aria-label="Длительность, сек"
+                disabled={disabled}
+                min={0}
+                precision={0}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+          )
+        }
       </Form.Item>
 
       {showUrlField && (

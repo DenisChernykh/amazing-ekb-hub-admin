@@ -129,7 +129,7 @@ export const GetAdminPlaceDetail200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "redirectUrl": zod.string().nullable().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
 }).describe('Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.').nullable().describe('Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен.')
@@ -690,7 +690,7 @@ export const ListAdminMaterialLibrary200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Публичная ссылка на материал.'),
   "source": zod.strictObject({
@@ -756,7 +756,7 @@ export const ListAdminPlaceMaterials200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "redirectUrl": zod.string().nullable().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
 }).describe('Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.')).describe('Материалы места в стабильном порядке отображения.')
@@ -798,7 +798,7 @@ export const CreatePlaceMaterialBody = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().describe('Заголовок материала.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Момент публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullish().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Payload создания нового материала для места.')
@@ -809,7 +809,7 @@ export const CreatePlaceMaterial201Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Исходная внешняя ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Административный материал, связанный с местом. Содержит исходную внешнюю ссылку для внутренних сценариев управления.')
@@ -853,7 +853,7 @@ export const LinkPlaceMaterial200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Исходная внешняя ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Административный материал, связанный с местом. Содержит исходную внешнюю ссылку для внутренних сценариев управления.')
@@ -900,7 +900,7 @@ export const UpdatePlaceMaterialLink200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Исходная внешняя ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Административный материал, связанный с местом. Содержит исходную внешнюю ссылку для внутренних сценариев управления.')
@@ -968,7 +968,7 @@ export const UpdateMaterialBody = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).optional().describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).optional().describe('Тип материала.'),
   "title": zod.string().optional().describe('Новый заголовок материала.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).optional().describe('Новая дата публикации.'),
+  "publishedAt": zod.iso.date().optional().describe('Новая календарная дата публикации в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullish().describe('Новая длительность в секундах.'),
   "url": zod.url().optional().describe('Новая публичная ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Payload частичного обновления материала.')
@@ -979,7 +979,7 @@ export const UpdateMaterial200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Исходная внешняя ссылка на материал. Допускаются только абсолютные http\/https URL.')
 }).describe('Административный материал, связанный с местом. Содержит исходную внешнюю ссылку для внутренних сценариев управления.')
@@ -1025,7 +1025,7 @@ export const UpdateMaterialAdminStatus200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "url": zod.url().describe('Публичная ссылка на материал.'),
   "source": zod.strictObject({
@@ -1100,7 +1100,7 @@ export const SetPinnedMaterial200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "redirectUrl": zod.string().nullable().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
 }).describe('Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.').nullable().describe('Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен.')
@@ -1158,7 +1158,7 @@ export const ClearPinnedMaterial200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "redirectUrl": zod.string().nullable().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
 }).describe('Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.').nullable().describe('Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен.')

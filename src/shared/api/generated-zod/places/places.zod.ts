@@ -85,7 +85,7 @@ export const GetPlaceDetail200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "redirectUrl": zod.string().nullable().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
 }).describe('Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.').nullable().describe('Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен.')
@@ -130,7 +130,7 @@ export const ListPlaceMaterials200Response = zod.strictObject({
   "platform": zod.enum(['dzen', 'telegram', 'instagram']).describe('Платформа, на которой опубликован материал.'),
   "type": zod.enum(['post', 'reel', 'video']).describe('Тип материала.'),
   "title": zod.string().nullable().describe('Заголовок материала. Для импортированных материалов может быть `null`, если источник не дает надежный ручной title.'),
-  "publishedAt": zod.iso.datetime({"offset":true}).describe('Дата и время публикации материала.'),
+  "publishedAt": zod.iso.date().describe('Календарная дата публикации материала в формате `YYYY-MM-DD`.'),
   "durationSec": zod.number().nullable().describe('Длительность в секундах для видеоформатов.'),
   "redirectUrl": zod.string().nullable().describe('Same-origin redirect URL для публичного открытия материала без прямого внешнего href. Поле заполняется только для публично безопасных target URL.')
 }).describe('Публичный материал, связанный с местом. Исходный внешний URL не отдается; публичные клиенты должны использовать `redirectUrl`.')).describe('Материалы места в стабильном порядке отображения.')

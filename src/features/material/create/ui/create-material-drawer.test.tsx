@@ -31,18 +31,23 @@ vi.mock('antd', async () => {
     DatePicker: ({
       'aria-label': ariaLabel,
       onChange,
+      showTime,
       value,
     }: {
       'aria-label'?: string
       onChange?: (value: ReturnType<typeof dayjs> | null) => void
+      showTime?: boolean | object
       value?: ReturnType<typeof dayjs> | null
     }) => (
       <input
         aria-label={ariaLabel}
+        data-show-time={showTime ? 'true' : 'false'}
         onChange={(event) => {
           onChange?.(event.target.value ? dayjs(event.target.value) : null)
         }}
-        value={value?.format('YYYY-MM-DDTHH:mm') ?? ''}
+        value={
+          value?.format(showTime ? 'YYYY-MM-DDTHH:mm' : 'YYYY-MM-DD') ?? ''
+        }
       />
     ),
     Drawer: ({
@@ -156,8 +161,8 @@ describe('CreateMaterialDrawer', () => {
     fireEvent.change(screen.getByLabelText('Заголовок'), {
       target: { value: '  Новый обзор  ' },
     })
-    fireEvent.change(screen.getByLabelText('Момент публикации'), {
-      target: { value: '2026-03-20T00:30' },
+    fireEvent.change(screen.getByLabelText('Дата публикации'), {
+      target: { value: '2026-03-20' },
     })
     fireEvent.change(screen.getByLabelText('Длительность, сек'), {
       target: { value: '' },
@@ -181,6 +186,45 @@ describe('CreateMaterialDrawer', () => {
     })
   })
 
+  it('keeps date-only publication input for every material type', () => {
+    mockedUseCreatePlaceMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useCreatePlaceMaterialMutation>)
+
+    renderCreateDrawer()
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Тип' }), {
+      target: { value: 'video' },
+    })
+
+    expect(screen.getByLabelText('Дата публикации')).toHaveAttribute(
+      'data-show-time',
+      'false',
+    )
+    expect(screen.getByLabelText('Длительность, сек')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Тип' }), {
+      target: { value: 'post' },
+    })
+
+    expect(screen.getByLabelText('Дата публикации')).toHaveAttribute(
+      'data-show-time',
+      'false',
+    )
+    expect(screen.queryByLabelText('Длительность, сек')).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Тип' }), {
+      target: { value: 'reel' },
+    })
+
+    expect(screen.getByLabelText('Дата публикации')).toHaveAttribute(
+      'data-show-time',
+      'false',
+    )
+    expect(screen.getByLabelText('Длительность, сек')).toBeInTheDocument()
+  })
+
   it('keeps drawer open and renders normalized API errors', async () => {
     mockedUseCreatePlaceMaterialMutation.mockImplementation(
       (options) =>
@@ -190,8 +234,8 @@ describe('CreateMaterialDrawer', () => {
             options?.onError?.(
               new ApiClientError({
                 kind: 'validation',
-                message: 'publishedAt must be ISO datetime',
-                messages: ['publishedAt must be ISO datetime'],
+                message: 'publishedAt must be date',
+                messages: ['publishedAt must be date'],
                 status: 400,
               }),
             )
@@ -210,8 +254,8 @@ describe('CreateMaterialDrawer', () => {
     fireEvent.change(screen.getByLabelText('Заголовок'), {
       target: { value: 'Новый обзор' },
     })
-    fireEvent.change(screen.getByLabelText('Момент публикации'), {
-      target: { value: '2026-03-20T00:30' },
+    fireEvent.change(screen.getByLabelText('Дата публикации'), {
+      target: { value: '2026-03-20' },
     })
     fireEvent.change(screen.getByLabelText('Ссылка'), {
       target: { value: 'https://example.com/material/322' },
@@ -219,7 +263,7 @@ describe('CreateMaterialDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }))
 
     expect(
-      await screen.findByText('publishedAt must be ISO datetime'),
+      await screen.findByText('publishedAt must be date'),
     ).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Новый материал' })).toBeVisible()
   })
@@ -242,8 +286,8 @@ describe('CreateMaterialDrawer', () => {
     fireEvent.change(screen.getByLabelText('Заголовок'), {
       target: { value: 'Новый обзор' },
     })
-    fireEvent.change(screen.getByLabelText('Момент публикации'), {
-      target: { value: '2026-03-20T00:30' },
+    fireEvent.change(screen.getByLabelText('Дата публикации'), {
+      target: { value: '2026-03-20' },
     })
     fireEvent.change(screen.getByLabelText('Ссылка'), {
       target: { value: 'javascript://example.com/%0Aalert(1)' },

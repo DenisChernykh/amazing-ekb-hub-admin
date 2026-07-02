@@ -24,7 +24,7 @@ export type AdminMaterialLibraryItem = {
      * @nullable
      */
   title: string | null;
-  /** Дата и время публикации материала. */
+  /** Календарная дата публикации материала в формате `YYYY-MM-DD`. */
   publishedAt: string;
   /**
      * Длительность в секундах для видеоформатов.
