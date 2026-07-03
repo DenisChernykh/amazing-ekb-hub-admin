@@ -1,6 +1,10 @@
 import { createAppStore } from '@/app/store'
 import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
+import {
+  BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
+  saveBulkModerationDraftSelection,
+} from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
   PlaceListResponse,
@@ -10,7 +14,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PlacesList } from './places-list'
 
 vi.mock('@/entities/place/model/place-hooks', () => ({
@@ -95,6 +99,7 @@ const renderPlacesList = (route = '/places') => {
 
 describe('PlacesList', () => {
   beforeEach(() => {
+    window.sessionStorage.clear()
     mockedUsePlacesListQuery.mockReset()
     mockedUseUpdatePlaceStatusMutation.mockReset()
     mutateAsyncMock.mockReset()
@@ -104,6 +109,10 @@ describe('PlacesList', () => {
       mutate: vi.fn(),
       mutateAsync: mutateAsyncMock,
     } as unknown as ReturnType<typeof useUpdatePlaceStatusMutation>)
+  })
+
+  afterEach(() => {
+    window.sessionStorage.clear()
   })
 
   it('uses URL pagination params for places query', () => {
@@ -309,6 +318,42 @@ describe('PlacesList', () => {
     expect(screen.getByText('Выбрано: 1')).toBeInTheDocument()
   })
 
+  it('shows a restore prompt and restores only draft places from the loaded page', async () => {
+    mockedUsePlacesListQuery.mockReturnValue({
+      data: pageOnePlaces,
+      error: null,
+      isError: false,
+      isPending: false,
+    } as ReturnType<typeof usePlacesListQuery>)
+    saveBulkModerationDraftSelection([activePlace, hiddenPlace])
+
+    renderPlacesList('/places?page=1&pageSize=1')
+
+    expect(
+      screen.getByText('Есть сохраненный черновик выбора'),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Восстановить' }))
+
+    expect(screen.getByText('Выбрано: 1')).toBeInTheDocument()
+    expect(
+      JSON.parse(
+        window.sessionStorage.getItem(
+          BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
+        ) ?? '{}',
+      ),
+    ).toMatchObject({
+      places: [
+        {
+          id: 'place-1',
+          status: 'active',
+          title: 'Аквацентр',
+        },
+      ],
+      version: 1,
+    })
+  })
+
   it('runs bulk status change for selected places', async () => {
     mockedUsePlacesListQuery.mockReturnValue({
       data: places,
@@ -326,6 +371,11 @@ describe('PlacesList', () => {
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalledTimes(2)
     })
+    expect(
+      window.sessionStorage.getItem(
+        BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
+      ),
+    ).toBeNull()
     expect(mutateAsyncMock).toHaveBeenNthCalledWith(1, {
       data: { status: 'hidden' },
       pathParams: { placeId: 'place-1' },

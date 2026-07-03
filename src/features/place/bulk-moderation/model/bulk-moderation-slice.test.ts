@@ -6,6 +6,7 @@ import {
   selectBulkModerationQueueItems,
   selectBulkModerationSelectedCount,
   selectBulkModerationSelectedIds,
+  selectBulkModerationState,
   selectBulkModerationSucceededItems,
   type BulkModerationRootState,
 } from './bulk-moderation-slice'
@@ -228,5 +229,23 @@ describe('bulkModerationReducer', () => {
 
     expect(selectBulkModerationSelectedCount(createRootState(state))).toBe(0)
     expect(selectBulkModerationQueueItems(createRootState(state))).toEqual([])
+  })
+
+  it('restores draft selection without recreating queue or operation state', () => {
+    const state = bulkModerationReducer(
+      undefined,
+      bulkModerationActions.restoreDraftSelection([activePlace, hiddenPlace]),
+    )
+
+    expect(selectBulkModerationSelectedIds(createRootState(state))).toEqual([
+      'place-1',
+      'place-2',
+    ])
+    expect(selectBulkModerationQueueItems(createRootState(state))).toEqual([])
+    expect(selectBulkModerationState(createRootState(state))).toMatchObject({
+      operationKind: null,
+      operationStatus: 'idle',
+      operationTargetStatus: null,
+    })
   })
 })

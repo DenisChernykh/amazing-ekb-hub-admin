@@ -1,4 +1,5 @@
 import { useLoginSession } from '@/entities/session/model/session-hooks'
+import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import { LockOutlined, MailOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button, Form, Input } from 'antd'
@@ -14,6 +15,8 @@ type LoginFormProps = {
 
 /**
  * Ant Design форма входа, работающая только через session hooks.
+ *
+ * @remarks После успешного login очищает browser draft выбора bulk moderation перед переходом в приватную часть.
  */
 export function LoginForm({ onLoggedIn }: LoginFormProps) {
   const { message } = AntdApp.useApp()
@@ -21,7 +24,10 @@ export function LoginForm({ onLoggedIn }: LoginFormProps) {
     onError: (error) => {
       void message.error(normalizeApiError(error).message)
     },
-    onSuccess: onLoggedIn,
+    onSuccess: () => {
+      clearBulkModerationDraftSelection()
+      onLoggedIn()
+    },
   })
 
   const handleFinish = (values: LoginFormValues) => {

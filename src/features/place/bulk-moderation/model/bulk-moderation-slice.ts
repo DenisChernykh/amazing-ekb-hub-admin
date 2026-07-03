@@ -174,6 +174,17 @@ const bulkModerationSlice = createSlice({
     resetBulkModeration() {
       return initialState
     },
+    restoreDraftSelection(
+      state,
+      action: PayloadAction<BulkModerationSelectedPlace[]>,
+    ) {
+      state.selectedById = {}
+      state.selectedOrder = []
+
+      for (const place of action.payload) {
+        addSelectedPlace(state, place)
+      }
+    },
     retryFailedItems(state) {
       for (const item of Object.values(state.queueById)) {
         if (item.operationStatus === 'failed') {

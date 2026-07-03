@@ -1,8 +1,9 @@
 import { CurrentUserContext } from '@/entities/session/model/current-user'
 import { useCurrentSessionQuery } from '@/entities/session/model/session-hooks'
+import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { getApiErrorStatus } from '@/shared/api/client/api-error'
 import { Button, Flex, Layout, Result, Spin, Typography, theme } from 'antd'
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
 import styles from './require-auth.module.css'
 
@@ -41,10 +42,23 @@ function AuthStateScreen({ children }: AuthStateScreenProps) {
 
 /**
  * Защищает приватные маршруты, загружает текущую сессию и прокидывает пользователя через context.
+ *
+ * @remarks При auth/permission отказе очищает browser draft выбора bulk moderation, чтобы приватное UI-state не переживало logout/session loss.
  */
 export function RequireAuth() {
   const location = useLocation()
   const currentUserQuery = useCurrentSessionQuery()
+  const currentUserErrorStatus = currentUserQuery.isError
+    ? getApiErrorStatus(currentUserQuery.error)
+    : undefined
+  const shouldClearDraft =
+    currentUserErrorStatus === 401 || currentUserErrorStatus === 403
+
+  useEffect(() => {
+    if (shouldClearDraft) {
+      clearBulkModerationDraftSelection()
+    }
+  }, [shouldClearDraft])
 
   if (currentUserQuery.isPending) {
     return (
@@ -56,7 +70,7 @@ export function RequireAuth() {
   }
 
   if (currentUserQuery.isError) {
-    if (getApiErrorStatus(currentUserQuery.error) === 403) {
+    if (currentUserErrorStatus === 403) {
       return (
         <AuthStateScreen>
           <Result

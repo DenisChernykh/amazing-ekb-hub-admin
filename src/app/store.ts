@@ -1,13 +1,16 @@
+import { bulkModerationDraftMiddleware } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-middleware'
 import { bulkModerationReducer } from '@/features/place/bulk-moderation/model/bulk-moderation-slice'
 import { configureStore } from '@reduxjs/toolkit'
 
 /**
  * Создает Redux store приложения.
  *
- * @remarks Нужен отдельной фабрикой, чтобы тесты могли получать чистый store без общего состояния.
+ * @remarks Нужен отдельной фабрикой, чтобы тесты могли получать чистый store без общего состояния. Подключает middleware синхронизации bulk moderation draft с `sessionStorage`.
  */
 export const createAppStore = () =>
   configureStore({
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().prepend(bulkModerationDraftMiddleware),
     reducer: {
       bulkModeration: bulkModerationReducer,
     },
