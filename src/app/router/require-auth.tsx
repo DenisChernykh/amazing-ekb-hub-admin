@@ -43,17 +43,22 @@ function AuthStateScreen({ children }: AuthStateScreenProps) {
 /**
  * Защищает приватные маршруты, загружает текущую сессию и прокидывает пользователя через context.
  *
- * @remarks При потере backend-сессии очищает browser draft выбора bulk moderation, чтобы приватное UI-state не переживало logout/session loss.
+ * @remarks При auth/permission отказе очищает browser draft выбора bulk moderation, чтобы приватное UI-state не переживало logout/session loss.
  */
 export function RequireAuth() {
   const location = useLocation()
   const currentUserQuery = useCurrentSessionQuery()
+  const currentUserErrorStatus = currentUserQuery.isError
+    ? getApiErrorStatus(currentUserQuery.error)
+    : undefined
+  const shouldClearDraft =
+    currentUserErrorStatus === 401 || currentUserErrorStatus === 403
 
   useEffect(() => {
-    if (currentUserQuery.isError) {
+    if (shouldClearDraft) {
       clearBulkModerationDraftSelection()
     }
-  }, [currentUserQuery.isError])
+  }, [shouldClearDraft])
 
   if (currentUserQuery.isPending) {
     return (
@@ -65,7 +70,7 @@ export function RequireAuth() {
   }
 
   if (currentUserQuery.isError) {
-    if (getApiErrorStatus(currentUserQuery.error) === 403) {
+    if (currentUserErrorStatus === 403) {
       return (
         <AuthStateScreen>
           <Result

@@ -129,6 +129,29 @@ describe('RequireAuth', () => {
     })
   })
 
+  it('keeps bulk moderation draft for transient current-session errors', async () => {
+    mockedUseCurrentSessionQuery.mockReturnValue({
+      data: undefined,
+      error: new ApiClientError({
+        kind: 'server',
+        message: 'Internal server error',
+        status: 500,
+      }),
+      isError: true,
+      isPending: false,
+    } as ReturnType<typeof useCurrentSessionQuery>)
+    saveBulkModerationDraftSelection([activePlace])
+
+    renderProtectedRoute()
+
+    expect(await screen.findByText('Login route')).toBeInTheDocument()
+    expect(
+      window.sessionStorage.getItem(
+        BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
+      ),
+    ).not.toBeNull()
+  })
+
   it('shows forbidden state for permission errors', () => {
     mockedUseCurrentSessionQuery.mockReturnValue({
       data: undefined,

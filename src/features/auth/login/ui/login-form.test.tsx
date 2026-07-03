@@ -1,4 +1,9 @@
 import { useLoginSession } from '@/entities/session/model/session-hooks'
+import {
+  BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
+  saveBulkModerationDraftSelection,
+} from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
+import type { AuthMeResponse, PlaceSummary } from '@/shared/api/generated/model'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -13,9 +18,31 @@ vi.mock('@/entities/session/model/session-hooks', () => {
 
 const mockedUseLoginSession = vi.mocked(useLoginSession)
 
+const admin: AuthMeResponse = {
+  email: 'admin@example.test',
+  id: 'admin-1',
+  role: 'admin',
+}
+
+const activePlace: PlaceSummary = {
+  category: 'pools',
+  coverImageUrl: null,
+  id: 'place-1',
+  popularityWeight: 10,
+  status: 'active',
+  summary: 'Теплый бассейн',
+  tags: ['pool'],
+  title: 'Аквацентр',
+}
+
 describe('LoginForm', () => {
   beforeEach(() => {
+    window.sessionStorage.clear()
     mockedUseLoginSession.mockReset()
+  })
+
+  afterEach(() => {
+    window.sessionStorage.clear()
   })
 
   it('submits credentials to session login mutation', async () => {
@@ -41,5 +68,30 @@ describe('LoginForm', () => {
         password: 'unit-test-password',
       },
     })
+  })
+
+  it('clears bulk moderation draft before successful login redirect', () => {
+    const onLoggedIn = vi.fn()
+    mockedUseLoginSession.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useLoginSession>)
+    saveBulkModerationDraftSelection([activePlace])
+
+    render(
+      <AntdApp>
+        <LoginForm onLoggedIn={onLoggedIn} />
+      </AntdApp>,
+    )
+
+    const loginOptions = mockedUseLoginSession.mock.calls[0]?.[0]
+    loginOptions?.onSuccess?.(admin)
+
+    expect(onLoggedIn).toHaveBeenCalledTimes(1)
+    expect(
+      window.sessionStorage.getItem(
+        BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
+      ),
+    ).toBeNull()
   })
 })
