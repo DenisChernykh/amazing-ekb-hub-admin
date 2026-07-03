@@ -1,4 +1,5 @@
 import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
+import { BulkModerationDraftRestorePrompt } from '@/features/place/bulk-moderation/ui/bulk-moderation-draft-restore-prompt'
 import { BulkModerationToolbar } from '@/features/place/bulk-moderation/ui/bulk-moderation-toolbar'
 import type { PlaceListResponse } from '@/shared/api/generated/model'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
@@ -113,6 +114,8 @@ export function PlacesList() {
             value={statusFilter ?? 'all'}
           />
         </Flex>
+
+        <BulkModerationDraftRestorePrompt loadedPlaces={data.items} />
 
         <Flex className={styles.bulkToolbar}>
           <BulkModerationToolbar />
