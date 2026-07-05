@@ -3,8 +3,11 @@ import {
   getCategorySlugValidationError,
   type CategoryFormValues,
 } from '@/features/category/form/model/category-form'
-import { Form, Input } from 'antd'
-import styles from './category-form-fields.module.css'
+import { ColorPicker, Form, Input } from 'antd'
+import type { Color } from 'antd/es/color-picker'
+
+const getColorValueFromPicker = (color: Color) =>
+  color.toHexString().toLowerCase()
 
 /**
  * Props набора полей формы категории.
@@ -65,6 +68,7 @@ export function CategoryFormFields({
       <Form.Item<CategoryFormValues>
         label="Цвет бейджа"
         name="badgeBackgroundColor"
+        getValueFromEvent={getColorValueFromPicker}
         rules={[
           { message: 'Введите HEX-цвет', required: true, whitespace: true },
           {
@@ -82,12 +86,12 @@ export function CategoryFormFields({
           },
         ]}
       >
-        <Input
-          addonBefore="#"
-          aria-label="Цвет бейджа"
-          className={styles.colorInput}
+        <ColorPicker
+          disabledAlpha
+          disabledFormat
           disabled={disabled}
-          placeholder="faf0ed"
+          format="hex"
+          showText
         />
       </Form.Item>
     </>
