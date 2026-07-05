@@ -1,3 +1,4 @@
+import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { useUpdatePlaceMutation } from '@/entities/place/model/place-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import type { PlaceDetail } from '@/shared/api/generated/model'
@@ -15,6 +16,10 @@ import { EditPlaceForm } from './edit-place-form'
 
 vi.mock('@/entities/place/model/place-mutations', () => ({
   useUpdatePlaceMutation: vi.fn(),
+}))
+
+vi.mock('@/entities/category/model/category-hooks', () => ({
+  usePlaceCategoriesQuery: vi.fn(),
 }))
 
 vi.mock('antd', async () => {
@@ -102,9 +107,17 @@ vi.mock('antd', async () => {
 })
 
 const mockedUseUpdatePlaceMutation = vi.mocked(useUpdatePlaceMutation)
+const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
+
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
 
 const place: PlaceDetail = {
-  category: 'spa',
+  category: spaCategory,
   counters: {
     dzen: 1,
     instagram: 0,
@@ -142,6 +155,14 @@ const renderEditPlaceForm = () => {
 describe('EditPlaceForm', () => {
   beforeEach(() => {
     mockedUseUpdatePlaceMutation.mockReset()
+    mockedUsePlaceCategoriesQuery.mockReset()
+    mockedUsePlaceCategoriesQuery.mockReturnValue({
+      data: { items: [spaCategory] },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof usePlaceCategoriesQuery>)
   })
 
   it('renders initial place values with disabled save action', () => {
@@ -157,7 +178,7 @@ describe('EditPlaceForm', () => {
       'Скрытый SPA для проверки admin detail',
     )
     expect(screen.getByRole('combobox', { name: 'Категория' })).toHaveValue(
-      'spa',
+      'category_spa',
     )
     expect(screen.getByRole('combobox', { name: 'Теги' })).toHaveValue(
       'spa,hidden',
@@ -240,7 +261,7 @@ describe('EditPlaceForm', () => {
           isPending: false,
           mutate: () => {
             options?.onSuccess?.({
-              category: 'spa',
+              category: spaCategory,
               coverImageUrl: null,
               id: 'place-2',
               popularityWeight: 5,
@@ -276,7 +297,10 @@ describe('EditPlaceForm', () => {
               new ApiClientError({
                 kind: 'validation',
                 message: 'title must be a string',
-                messages: ['title must be a string', 'category must be valid'],
+                messages: [
+                  'title must be a string',
+                  'categoryId must be valid',
+                ],
                 status: 400,
               }),
             )
@@ -297,7 +321,7 @@ describe('EditPlaceForm', () => {
       within(alert).getByText('title must be a string'),
     ).toBeInTheDocument()
     expect(
-      within(alert).getByText('category must be valid'),
+      within(alert).getByText('categoryId must be valid'),
     ).toBeInTheDocument()
   })
 

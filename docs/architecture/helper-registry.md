@@ -75,25 +75,36 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useLogoutSession`          | `src/entities/session/model/session-hooks.ts` | exported   | Logs out through auth API and removes the current session query.    |
 | `getRoleMeta`               | `src/entities/session/ui/role-meta.ts`        | exported   | Maps backend `Role` to localized Ant Design tag metadata.           |
 
+## Category Entity
+
+| Helper                      | Location                                             | Visibility | Contract                                                                                |
+| --------------------------- | ---------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| `usePlaceCategoriesQuery`   | `src/entities/category/model/category-hooks.ts`      | exported   | Loads the admin place category list through the `/admin/categories` endpoint.           |
+| `useCreateCategoryMutation` | `src/entities/category/model/category-mutations.ts`  | exported   | Creates a place category and invalidates the admin category list cache.                 |
+| `useUpdateCategoryMutation` | `src/entities/category/model/category-mutations.ts`  | exported   | Updates a place category and invalidates category plus admin places list caches.        |
+| `useDeleteCategoryMutation` | `src/entities/category/model/category-mutations.ts`  | exported   | Deletes an unused place category and invalidates the admin category list cache.         |
+| `invalidateCategoryQueries` | `src/entities/category/model/category-mutations.ts`  | exported   | Invalidates the admin category list cache after category mutations.                     |
+| `CategoryColorSwatch`       | `src/entities/category/ui/category-color-swatch.tsx` | exported   | Renders a category HEX color as a compact swatch plus text value.                       |
+| `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`          | exported   | Formats category datetime strings for compact admin tables without timezone day shifts. |
+
 ## Place Entity
 
-| Helper                             | Location                                       | Visibility | Contract                                                                                        |
-| ---------------------------------- | ---------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| `PLACE_CATEGORY_VALUES`            | `src/entities/place/model/place-categories.ts` | exported   | Provides backend place categories in a stable order for UI controls.                            |
-| `getPlaceStatusFromValue`          | `src/entities/place/model/place-status.ts`     | exported   | Normalizes raw UI/URL values to supported backend place statuses.                               |
-| `useCreatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Creates a place through admin API and invalidates all admin places list query variants.         |
-| `useUpdatePlaceMutation`           | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.         |
-| `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Updates place publication status and invalidates admin places list/detail caches.               |
-| `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts`  | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.           |
-| `useSetPinnedMaterialMutation`     | `src/entities/place/model/place-mutations.ts`  | exported   | Sets a place pinned material through admin API and invalidates admin place detail cache.        |
-| `useClearPinnedMaterialMutation`   | `src/entities/place/model/place-mutations.ts`  | exported   | Clears a place pinned material through admin API and invalidates admin place detail cache.      |
-| `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates admin places list cache after admin place mutations.                                |
-| `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts`  | exported   | Invalidates one admin place detail cache after admin place mutations.                           |
-| `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`      | exported   | Loads the admin places list through the admin endpoint, including hidden places when requested. |
-| `useAdminPlaceDetailQuery`         | `src/entities/place/model/place-hooks.ts`      | exported   | Loads admin place detail independently of public visibility.                                    |
-| `getPlaceCategoryOptions`          | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend place categories to localized Ant Design select options.                           |
-| `getPlaceCategoryMeta`             | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceCategory` to localized Ant Design tag metadata.                              |
-| `getPlaceStatusMeta`               | `src/entities/place/ui/place-meta.ts`          | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                                |
+| Helper                             | Location                                      | Visibility | Contract                                                                                        |
+| ---------------------------------- | --------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `getPlaceStatusFromValue`          | `src/entities/place/model/place-status.ts`    | exported   | Normalizes raw UI/URL values to supported backend place statuses.                               |
+| `useCreatePlaceMutation`           | `src/entities/place/model/place-mutations.ts` | exported   | Creates a place through admin API and invalidates all admin places list query variants.         |
+| `useUpdatePlaceMutation`           | `src/entities/place/model/place-mutations.ts` | exported   | Updates place fields through admin API and invalidates admin places list/detail caches.         |
+| `useUpdatePlaceStatusMutation`     | `src/entities/place/model/place-mutations.ts` | exported   | Updates place publication status and invalidates admin places list/detail caches.               |
+| `useUploadPlaceCoverPhotoMutation` | `src/entities/place/model/place-mutations.ts` | exported   | Uploads/replaces a place cover photo and invalidates admin places list/detail caches.           |
+| `useSetPinnedMaterialMutation`     | `src/entities/place/model/place-mutations.ts` | exported   | Sets a place pinned material through admin API and invalidates admin place detail cache.        |
+| `useClearPinnedMaterialMutation`   | `src/entities/place/model/place-mutations.ts` | exported   | Clears a place pinned material through admin API and invalidates admin place detail cache.      |
+| `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts` | exported   | Invalidates admin places list cache after admin place mutations.                                |
+| `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts` | exported   | Invalidates one admin place detail cache after admin place mutations.                           |
+| `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`     | exported   | Loads the admin places list through the admin endpoint, including hidden places when requested. |
+| `useAdminPlaceDetailQuery`         | `src/entities/place/model/place-hooks.ts`     | exported   | Loads admin place detail independently of public visibility.                                    |
+| `getPlaceCategoryOptions`          | `src/entities/place/ui/place-meta.ts`         | exported   | Maps loaded backend category objects to Ant Design select options by `category.id`.             |
+| `getPlaceCategoryMeta`             | `src/entities/place/ui/place-meta.ts`         | exported   | Maps backend `PlaceCategory` objects to title/color tag metadata from server fields.            |
+| `getPlaceStatusMeta`               | `src/entities/place/ui/place-meta.ts`         | exported   | Maps backend `PlaceStatus` to localized Ant Design tag metadata.                                |
 
 ## Material Entity
 
@@ -199,6 +210,28 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `buildPlacesListStatusSearch`       | `src/widgets/places-list/model/pagination.ts`                    | exported   | Builds URL search params after changing status filter and resets the page to default.           |
 | `usePlacesListRowSelection`         | `src/widgets/places-list/model/use-places-list-row-selection.ts` | exported   | Builds Ant Design table row selection from the bulk moderation store and visible place rows.    |
 | `placesTableColumns`                | `src/widgets/places-list/ui/places-table-columns.tsx`            | exported   | Defines read-only Ant Design table columns for `PlaceSummary` rows with admin detail links.     |
+
+## Category Form Feature
+
+| Helper                            | Location                                                         | Visibility | Contract                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `CategoryFormValues`              | `src/features/category/form/model/category-form.ts`              | exported   | Defines create/edit category form values before conversion to generated API payloads.           |
+| `CategoryFormChangedField`        | `src/features/category/form/model/category-form.ts`              | exported   | Describes a normalized category field changed in the edit drawer.                               |
+| `getCategoryColorValidationError` | `src/features/category/form/model/category-form.ts`              | exported   | Returns the local validation message for category HEX badge colors.                             |
+| `getCategorySlugValidationError`  | `src/features/category/form/model/category-form.ts`              | exported   | Returns the local validation message for optional category slug values.                         |
+| `getCategoryFormInitialValues`    | `src/features/category/form/model/category-form.ts`              | exported   | Maps admin category data to edit form initial values.                                           |
+| `toCreateCategoryRequest`         | `src/features/category/form/model/category-form.ts`              | exported   | Normalizes category form values into `POST /admin/categories` payload.                          |
+| `toUpdateCategoryRequest`         | `src/features/category/form/model/category-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/categories/{categoryId}` payload from changed fields. |
+| `hasCategoryFormChanges`          | `src/features/category/form/model/category-form.ts`              | exported   | Detects whether normalized category form values differ from loaded server values.               |
+| `getCategoryFormChangedFields`    | `src/features/category/form/model/category-form.ts`              | exported   | Returns normalized changed category fields for edit drawer chips.                               |
+| `CategoryFormFields`              | `src/features/category/form/ui/category-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit category drawers.                              |
+| `CategoryFormErrorAlert`          | `src/features/category/form/ui/category-form-error-alert.tsx`    | exported   | Renders normalized create/edit category API errors.                                             |
+| `CategoryFormChangedFields`       | `src/features/category/form/ui/category-form-changed-fields.tsx` | exported   | Renders changed field chips for category edit drawer.                                           |
+| `CreateCategoryDrawer`            | `src/features/category/create/ui/create-category-drawer.tsx`     | exported   | Creates categories through the entity mutation bridge with dirty-close protection.              |
+| `EditCategoryDrawer`              | `src/features/category/edit/ui/edit-category-drawer.tsx`         | exported   | Edits category fields through the entity mutation bridge with dirty diff chips.                 |
+| `EditCategoryDrawerActions`       | `src/features/category/edit/ui/edit-category-drawer-actions.tsx` | exported   | Renders edit category drawer actions.                                                           |
+| `DeleteCategoryButton`            | `src/features/category/delete/ui/delete-category-button.tsx`     | exported   | Deletes unused categories after confirmation through the entity mutation bridge.                |
+| `CategoriesScreen`                | `src/widgets/categories/ui/categories-screen.tsx`                | exported   | Loads admin categories and hosts the category table plus create/edit drawers.                   |
 
 ## Place Form Feature
 

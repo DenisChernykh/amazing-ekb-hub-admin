@@ -35,8 +35,15 @@ const mockedUseUpdatePlaceStatusMutation = vi.mocked(
   useUpdatePlaceStatusMutation,
 )
 
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
+
 const updatedPlace: PlaceSummary = {
-  category: 'spa',
+  category: spaCategory,
   coverImageUrl: null,
   id: 'place-2',
   popularityWeight: 5,

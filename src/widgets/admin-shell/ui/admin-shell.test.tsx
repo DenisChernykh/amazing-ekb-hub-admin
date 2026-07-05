@@ -32,6 +32,10 @@ describe('AdminShell', () => {
       'href',
       '/places',
     )
+    expect(screen.getByRole('link', { name: 'Категории' })).toHaveAttribute(
+      'href',
+      '/categories',
+    )
     expect(screen.getByRole('link', { name: 'Материалы' })).toHaveAttribute(
       'href',
       '/materials',

@@ -1,3 +1,4 @@
+import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import {
   useCreatePlaceMutation,
   useUploadPlaceCoverPhotoMutation,
@@ -20,6 +21,10 @@ import { CreatePlaceForm } from './create-place-form'
 vi.mock('@/entities/place/model/place-mutations', () => ({
   useCreatePlaceMutation: vi.fn(),
   useUploadPlaceCoverPhotoMutation: vi.fn(),
+}))
+
+vi.mock('@/entities/category/model/category-hooks', () => ({
+  usePlaceCategoriesQuery: vi.fn(),
 }))
 
 const messageError = vi.fn()
@@ -141,9 +146,17 @@ const mockedUseCreatePlaceMutation = vi.mocked(useCreatePlaceMutation)
 const mockedUseUploadPlaceCoverPhotoMutation = vi.mocked(
   useUploadPlaceCoverPhotoMutation,
 )
+const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
+
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
 
 const createdPlace: PlaceSummary = {
-  category: 'spa',
+  category: spaCategory,
   coverImageUrl: null,
   id: 'place-1',
   popularityWeight: 7,
@@ -178,7 +191,7 @@ const fillRequiredPlaceFields = () => {
     target: { value: 'Тихий SPA' },
   })
   fireEvent.change(screen.getByRole('combobox', { name: 'Категория' }), {
-    target: { value: 'spa' },
+    target: { value: 'category_spa' },
   })
 }
 
@@ -188,6 +201,14 @@ describe('CreatePlaceForm', () => {
     messageSuccess.mockReset()
     mockedUseCreatePlaceMutation.mockReset()
     mockedUseUploadPlaceCoverPhotoMutation.mockReset()
+    mockedUsePlaceCategoriesQuery.mockReset()
+    mockedUsePlaceCategoriesQuery.mockReturnValue({
+      data: { items: [spaCategory] },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+    } as unknown as ReturnType<typeof usePlaceCategoriesQuery>)
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:cover-preview')
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined)
   })
@@ -221,7 +242,7 @@ describe('CreatePlaceForm', () => {
     await waitFor(() => {
       expect(createMutateAsync).toHaveBeenCalledWith({
         data: {
-          category: 'spa',
+          categoryId: 'category_spa',
           popularityWeight: 7,
           summary: 'Новый SPA в центре',
           tags: ['spa'],
@@ -252,7 +273,7 @@ describe('CreatePlaceForm', () => {
     await waitFor(() => {
       expect(createMutateAsync).toHaveBeenCalledWith({
         data: {
-          category: 'spa',
+          categoryId: 'category_spa',
           summary: '',
           tags: [],
           title: 'Тихий SPA',
@@ -330,7 +351,7 @@ describe('CreatePlaceForm', () => {
         new ApiClientError({
           kind: 'validation',
           message: 'title must be a string',
-          messages: ['title must be a string', 'category must be valid'],
+          messages: ['title must be a string', 'categoryId must be valid'],
           status: 400,
         }),
       ),
@@ -351,7 +372,7 @@ describe('CreatePlaceForm', () => {
       within(alert).getByText('title must be a string'),
     ).toBeInTheDocument()
     expect(
-      within(alert).getByText('category must be valid'),
+      within(alert).getByText('categoryId must be valid'),
     ).toBeInTheDocument()
     expect(uploadMutateAsync).not.toHaveBeenCalled()
   })

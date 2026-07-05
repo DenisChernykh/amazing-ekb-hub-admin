@@ -1,3 +1,4 @@
+import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
 import { Form, Input, InputNumber, Select } from 'antd'
 import type { PlaceFormValues } from '../model/place-form'
@@ -10,8 +11,6 @@ export type PlaceFormFieldsProps = {
   popularityWeightRequired?: boolean
 }
 
-const categoryOptions = getPlaceCategoryOptions()
-
 /**
  * Общие Ant Design поля для create/edit сценариев места.
  */
@@ -19,6 +18,13 @@ export function PlaceFormFields({
   disabled = false,
   popularityWeightRequired = false,
 }: PlaceFormFieldsProps) {
+  const categoriesQuery = usePlaceCategoriesQuery()
+  const categoryOptions = getPlaceCategoryOptions(
+    categoriesQuery.data?.items ?? [],
+  )
+  const isCategorySelectDisabled =
+    disabled || categoriesQuery.isPending || categoriesQuery.isError
+
   return (
     <>
       <Form.Item<PlaceFormValues>
@@ -38,12 +44,13 @@ export function PlaceFormFields({
 
       <Form.Item<PlaceFormValues>
         label="Категория"
-        name="category"
+        name="categoryId"
         rules={[{ required: true, message: 'Выберите категорию' }]}
       >
         <Select
           aria-label="Категория"
-          disabled={disabled}
+          disabled={isCategorySelectDisabled}
+          loading={categoriesQuery.isFetching}
           options={categoryOptions}
         />
       </Form.Item>

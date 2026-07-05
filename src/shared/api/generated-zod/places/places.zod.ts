@@ -9,6 +9,22 @@ import * as zod from 'zod';
 
 
 /**
+ * Возвращает публичный справочник категорий мест для фильтров и бейджей.
+ * @summary List place categories
+ */
+export const listPlaceCategories200ResponseItemsItemBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
+export const ListPlaceCategories200Response = zod.strictObject({
+  "items": zod.array(zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(listPlaceCategories200ResponseItemsItemBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'))
+}).describe('Публичный список категорий мест.')
+
+/**
  * Возвращает публичный список мест с пагинацией, поиском и фильтрацией по категории.
  * @summary List places
  */
@@ -27,8 +43,11 @@ export const ListPlacesQueryParams = zod.strictObject({
   "pageSize": zod.number().min(1).max(listPlacesQueryPageSizeMax).default(listPlacesQueryPageSizeDefault).describe('Размер страницы. Допустимый диапазон от `1` до `100`.'),
   "search": zod.string().max(listPlacesQuerySearchMax).optional().describe('Полнотекстовый поиск по названию и описанию места. Максимум 100 символов.'),
   "sort": zod.enum(['popular', 'title_asc']).default(listPlacesQuerySortDefault).describe('Режим сортировки списка мест.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).optional().describe('Фильтр по категории места.')
+  "categoryId": zod.string().optional().describe('Фильтр по идентификатору категории места.')
 })
+
+export const listPlaces200ResponseItemsItemCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
 
 export const ListPlaces200Response = zod.strictObject({
   "items": zod.array(zod.strictObject({
@@ -36,7 +55,12 @@ export const ListPlaces200Response = zod.strictObject({
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(listPlaces200ResponseItemsItemCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
@@ -65,12 +89,20 @@ export const GetPlaceDetailParams = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места.')
 })
 
+export const getPlaceDetail200ResponseCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const GetPlaceDetail200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(getPlaceDetail200ResponseCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),

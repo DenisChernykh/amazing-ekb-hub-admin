@@ -27,7 +27,11 @@ import type {
 import type {
   AdminMaterialLibraryItem,
   AdminMaterialLibraryListResponse,
+  AdminPlaceCategory,
+  AdminPlaceCategoryListResponse,
   AdminPlaceDetail,
+  CategoryConflictResponse,
+  CategoryNotFoundResponse,
   ClearPinnedMaterialPathParameters,
   ContentSource,
   ContentSourceConflictResponse,
@@ -35,9 +39,12 @@ import type {
   ContentSourceNotFoundResponse,
   CreateContentSourceRequest,
   CreateMaterialRequest,
+  CreatePlaceCategoryRequest,
   CreatePlaceMaterialPathParameters,
   CreatePlaceRequest,
+  DeletePlaceCategoryPathParameters,
   ForbiddenResponse,
+  GetAdminPlaceCategoryPathParameters,
   GetAdminPlaceDetailPathParameters,
   HidePlaceMaterialLinkPathParameters,
   ImportRun,
@@ -72,6 +79,8 @@ import type {
   UpdateMaterialAdminStatusRequest,
   UpdateMaterialPathParameters,
   UpdateMaterialRequest,
+  UpdatePlaceCategoryPathParameters,
+  UpdatePlaceCategoryRequest,
   UpdatePlaceMaterialLinkPathParameters,
   UpdatePlaceMaterialLinkRequest,
   UpdatePlacePathParameters,
@@ -91,6 +100,383 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
+ * Возвращает административный справочник категорий мест.
+ * @summary List admin place categories
+ */
+export const listAdminPlaceCategories = (
+
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AdminPlaceCategoryListResponse>(
+      {url: `/admin/categories`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getListAdminPlaceCategoriesQueryKey = () => {
+    return [
+    `/admin/categories`
+    ] as const;
+    }
+
+
+export const getListAdminPlaceCategoriesQueryOptions = <TData = Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminPlaceCategoriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminPlaceCategories>>> = ({ signal }) => listAdminPlaceCategories(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListAdminPlaceCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminPlaceCategories>>>
+export type ListAdminPlaceCategoriesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useListAdminPlaceCategories<TData = Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminPlaceCategories>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminPlaceCategories>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminPlaceCategories<TData = Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAdminPlaceCategories>>,
+          TError,
+          Awaited<ReturnType<typeof listAdminPlaceCategories>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListAdminPlaceCategories<TData = Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List admin place categories
+ */
+
+export function useListAdminPlaceCategories<TData = Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdminPlaceCategories>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListAdminPlaceCategoriesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Создает категорию места. Операция доступна только администратору.
+ * @summary Create place category
+ */
+export const createPlaceCategory = (
+    createPlaceCategoryRequest: BodyType<CreatePlaceCategoryRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AdminPlaceCategory>(
+      {url: `/admin/categories`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createPlaceCategoryRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getCreatePlaceCategoryMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPlaceCategory>>, TError,{data: BodyType<CreatePlaceCategoryRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPlaceCategory>>, TError,{data: BodyType<CreatePlaceCategoryRequest>}, TContext> => {
+
+const mutationKey = ['createPlaceCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPlaceCategory>>, {data: BodyType<CreatePlaceCategoryRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPlaceCategory(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePlaceCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof createPlaceCategory>>>
+    export type CreatePlaceCategoryMutationBody = BodyType<CreatePlaceCategoryRequest>
+    export type CreatePlaceCategoryMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryConflictResponse>
+
+    /**
+ * @summary Create place category
+ */
+export const useCreatePlaceCategory = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPlaceCategory>>, TError,{data: BodyType<CreatePlaceCategoryRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createPlaceCategory>>,
+        TError,
+        {data: BodyType<CreatePlaceCategoryRequest>},
+        TContext
+      > => {
+      return useMutation(getCreatePlaceCategoryMutationOptions(options), queryClient);
+    }
+    /**
+ * Возвращает категорию места по идентификатору.
+ * @summary Get admin place category
+ */
+export const getAdminPlaceCategory = (
+    { categoryId }: GetAdminPlaceCategoryPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AdminPlaceCategory>(
+      {url: `/admin/categories/${encodeURIComponent(String(categoryId))}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetAdminPlaceCategoryQueryKey = ({ categoryId }: GetAdminPlaceCategoryPathParameters,) => {
+    return [
+    `/admin/categories/${categoryId}`
+    ] as const;
+    }
+
+
+export const getGetAdminPlaceCategoryQueryOptions = <TData = Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>>({ categoryId }: GetAdminPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminPlaceCategoryQueryKey({ categoryId });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminPlaceCategory>>> = ({ signal }) => getAdminPlaceCategory({ categoryId }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(categoryId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAdminPlaceCategoryQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminPlaceCategory>>>
+export type GetAdminPlaceCategoryQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>
+
+
+export function useGetAdminPlaceCategory<TData = Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>>(
+ pathParams: GetAdminPlaceCategoryPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminPlaceCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminPlaceCategory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminPlaceCategory<TData = Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>>(
+ pathParams: GetAdminPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminPlaceCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminPlaceCategory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminPlaceCategory<TData = Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>>(
+ pathParams: GetAdminPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get admin place category
+ */
+
+export function useGetAdminPlaceCategory<TData = Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>>(
+ { categoryId }: GetAdminPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPlaceCategory>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAdminPlaceCategoryQueryOptions({ categoryId },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Частично обновляет категорию места.
+ * @summary Update place category
+ */
+export const updatePlaceCategory = (
+    { categoryId }: UpdatePlaceCategoryPathParameters,
+    updatePlaceCategoryRequest: BodyType<UpdatePlaceCategoryRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AdminPlaceCategory>(
+      {url: `/admin/categories/${encodeURIComponent(String(categoryId))}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updatePlaceCategoryRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getUpdatePlaceCategoryMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse | CategoryConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlaceCategory>>, TError,{pathParams: UpdatePlaceCategoryPathParameters;data: BodyType<UpdatePlaceCategoryRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePlaceCategory>>, TError,{pathParams: UpdatePlaceCategoryPathParameters;data: BodyType<UpdatePlaceCategoryRequest>}, TContext> => {
+
+const mutationKey = ['updatePlaceCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePlaceCategory>>, {pathParams: UpdatePlaceCategoryPathParameters;data: BodyType<UpdatePlaceCategoryRequest>}> = (props) => {
+          const {pathParams,data} = props ?? {};
+
+          return  updatePlaceCategory(pathParams,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePlaceCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlaceCategory>>>
+    export type UpdatePlaceCategoryMutationBody = BodyType<UpdatePlaceCategoryRequest>
+    export type UpdatePlaceCategoryMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse | CategoryConflictResponse>
+
+    /**
+ * @summary Update place category
+ */
+export const useUpdatePlaceCategory = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse | CategoryConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlaceCategory>>, TError,{pathParams: UpdatePlaceCategoryPathParameters;data: BodyType<UpdatePlaceCategoryRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePlaceCategory>>,
+        TError,
+        {pathParams: UpdatePlaceCategoryPathParameters;data: BodyType<UpdatePlaceCategoryRequest>},
+        TContext
+      > => {
+      return useMutation(getUpdatePlaceCategoryMutationOptions(options), queryClient);
+    }
+    /**
+ * Удаляет категорию места, если она не используется местами.
+ * @summary Delete place category
+ */
+export const deletePlaceCategory = (
+    { categoryId }: DeletePlaceCategoryPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<void>(
+      {url: `/admin/categories/${encodeURIComponent(String(categoryId))}`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+export const getDeletePlaceCategoryMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse | CategoryConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlaceCategory>>, TError,{pathParams: DeletePlaceCategoryPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePlaceCategory>>, TError,{pathParams: DeletePlaceCategoryPathParameters}, TContext> => {
+
+const mutationKey = ['deletePlaceCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePlaceCategory>>, {pathParams: DeletePlaceCategoryPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  deletePlaceCategory(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePlaceCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof deletePlaceCategory>>>
+
+    export type DeletePlaceCategoryMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse | CategoryConflictResponse>
+
+    /**
+ * @summary Delete place category
+ */
+export const useDeletePlaceCategory = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse | CategoryConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlaceCategory>>, TError,{pathParams: DeletePlaceCategoryPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePlaceCategory>>,
+        TError,
+        {pathParams: DeletePlaceCategoryPathParameters},
+        TContext
+      > => {
+      return useMutation(getDeletePlaceCategoryMutationOptions(options), queryClient);
+    }
+    /**
  * Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
  * @summary List admin places
  */
@@ -204,7 +590,7 @@ export const createPlace = (
 
 
 
-export const getCreatePlaceMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>,
+export const getCreatePlaceMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPlace>>, TError,{data: BodyType<CreatePlaceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createPlace>>, TError,{data: BodyType<CreatePlaceRequest>}, TContext> => {
 
@@ -233,12 +619,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreatePlaceMutationResult = NonNullable<Awaited<ReturnType<typeof createPlace>>>
     export type CreatePlaceMutationBody = BodyType<CreatePlaceRequest>
-    export type CreatePlaceMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>
+    export type CreatePlaceMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>
 
     /**
  * @summary Create place
  */
-export const useCreatePlace = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse>,
+export const useCreatePlace = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPlace>>, TError,{data: BodyType<CreatePlaceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createPlace>>,
@@ -362,7 +748,7 @@ export const updatePlace = (
 
 
 
-export const getUpdatePlaceMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>,
+export const getUpdatePlaceMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlace>>, TError,{pathParams: UpdatePlacePathParameters;data: BodyType<UpdatePlaceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updatePlace>>, TError,{pathParams: UpdatePlacePathParameters;data: BodyType<UpdatePlaceRequest>}, TContext> => {
 
@@ -391,12 +777,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdatePlaceMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlace>>>
     export type UpdatePlaceMutationBody = BodyType<UpdatePlaceRequest>
-    export type UpdatePlaceMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>
+    export type UpdatePlaceMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>
 
     /**
  * @summary Update place
  */
-export const useUpdatePlace = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | PlaceNotFoundResponse>,
+export const useUpdatePlace = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | NestErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlace>>, TError,{pathParams: UpdatePlacePathParameters;data: BodyType<UpdatePlaceRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updatePlace>>,

@@ -28,6 +28,7 @@ import type {
   ListPlacesParams,
   MaterialListResponse,
   MaterialNotFoundResponse,
+  PlaceCategoryListResponse,
   PlaceDetail,
   PlaceNotFoundResponse,
   PublicPlaceListResponse,
@@ -40,6 +41,99 @@ import type { ErrorType } from '../../client/orval-mutator';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+
+/**
+ * Возвращает публичный справочник категорий мест для фильтров и бейджей.
+ * @summary List place categories
+ */
+export const listPlaceCategories = (
+
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceCategoryListResponse>(
+      {url: `/categories`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getListPlaceCategoriesQueryKey = () => {
+    return [
+    `/categories`
+    ] as const;
+    }
+
+
+export const getListPlaceCategoriesQueryOptions = <TData = Awaited<ReturnType<typeof listPlaceCategories>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceCategories>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPlaceCategoriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPlaceCategories>>> = ({ signal }) => listPlaceCategories(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPlaceCategories>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListPlaceCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof listPlaceCategories>>>
+export type ListPlaceCategoriesQueryError = ErrorType<unknown>
+
+
+export function useListPlaceCategories<TData = Awaited<ReturnType<typeof listPlaceCategories>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceCategories>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listPlaceCategories>>,
+          TError,
+          Awaited<ReturnType<typeof listPlaceCategories>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListPlaceCategories<TData = Awaited<ReturnType<typeof listPlaceCategories>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceCategories>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listPlaceCategories>>,
+          TError,
+          Awaited<ReturnType<typeof listPlaceCategories>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListPlaceCategories<TData = Awaited<ReturnType<typeof listPlaceCategories>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceCategories>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List place categories
+ */
+
+export function useListPlaceCategories<TData = Awaited<ReturnType<typeof listPlaceCategories>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceCategories>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListPlaceCategoriesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
 
 
 

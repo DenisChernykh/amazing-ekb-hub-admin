@@ -32,7 +32,12 @@ const mockedUseUpdatePlaceStatusMutation = vi.mocked(
 const mutateAsyncMock = vi.fn()
 
 const activePlace: PlaceSummary = {
-  category: 'pools',
+  category: {
+    badgeBackgroundColor: '#dbeafe',
+    id: 'category_pools',
+    slug: 'pools',
+    title: 'Бассейны',
+  },
   coverImageUrl: null,
   id: 'place-1',
   popularityWeight: 10,
@@ -43,7 +48,12 @@ const activePlace: PlaceSummary = {
 }
 
 const hiddenPlace: PlaceSummary = {
-  category: 'spa',
+  category: {
+    badgeBackgroundColor: '#faf0ed',
+    id: 'category_spa',
+    slug: 'spa',
+    title: 'SPA',
+  },
   coverImageUrl: null,
   id: 'place-2',
   popularityWeight: 5,

@@ -69,8 +69,15 @@ const mockedUseUploadPlaceCoverPhotoMutation = vi.mocked(
   useUploadPlaceCoverPhotoMutation,
 )
 
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
+
 const updatedPlace: PlaceSummary = {
-  category: 'spa',
+  category: spaCategory,
   coverImageUrl: '/places/place-2/photo',
   id: 'place-2',
   popularityWeight: 5,

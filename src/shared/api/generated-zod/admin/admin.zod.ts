@@ -9,6 +9,216 @@ import * as zod from 'zod';
 
 
 /**
+ * Возвращает административный справочник категорий мест.
+ * @summary List admin place categories
+ */
+export const listAdminPlaceCategories200ResponseItemsItemOneBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
+export const ListAdminPlaceCategories200Response = zod.strictObject({
+  "items": zod.array(zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(listAdminPlaceCategories200ResponseItemsItemOneBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
+}))
+}).describe('Административный список категорий мест.')
+
+export const ListAdminPlaceCategories401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ListAdminPlaceCategories403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Создает категорию места. Операция доступна только администратору.
+ * @summary Create place category
+ */
+export const createPlaceCategoryBodySlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)\*$');
+export const createPlaceCategoryBodyBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-fA-F]{6}$');
+
+
+export const CreatePlaceCategoryBody = zod.strictObject({
+  "slug": zod.string().regex(createPlaceCategoryBodySlugRegExp).optional().describe('Необязательный ручной slug категории из lowercase букв, цифр и одиночных дефисов. Если поле отсутствует, backend генерирует slug из `title`.'),
+  "title": zod.string().describe('Название категории.'),
+  "badgeBackgroundColor": zod.string().regex(createPlaceCategoryBodyBadgeBackgroundColorRegExp).describe('Цвет фона бейджа. Backend сохраняет значение в lowercase.')
+}).describe('Payload создания категории места.')
+
+export const createPlaceCategory201ResponseOneBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
+export const CreatePlaceCategory201Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(createPlaceCategory201ResponseOneBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
+})
+
+export const CreatePlaceCategory400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreatePlaceCategory401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreatePlaceCategory403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreatePlaceCategory409Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Возвращает категорию места по идентификатору.
+ * @summary Get admin place category
+ */
+export const GetAdminPlaceCategoryParams = zod.strictObject({
+  "categoryId": zod.string().describe('Идентификатор категории места.')
+})
+
+export const getAdminPlaceCategory200ResponseOneBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
+export const GetAdminPlaceCategory200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(getAdminPlaceCategory200ResponseOneBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
+})
+
+export const GetAdminPlaceCategory401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetAdminPlaceCategory403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetAdminPlaceCategory404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Частично обновляет категорию места.
+ * @summary Update place category
+ */
+export const UpdatePlaceCategoryParams = zod.strictObject({
+  "categoryId": zod.string().describe('Идентификатор категории места.')
+})
+
+export const updatePlaceCategoryBodySlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)\*$');
+export const updatePlaceCategoryBodyBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-fA-F]{6}$');
+
+
+export const UpdatePlaceCategoryBody = zod.strictObject({
+  "slug": zod.string().regex(updatePlaceCategoryBodySlugRegExp).optional().describe('Новый slug категории.'),
+  "title": zod.string().optional().describe('Новое название категории.'),
+  "badgeBackgroundColor": zod.string().regex(updatePlaceCategoryBodyBadgeBackgroundColorRegExp).optional().describe('Новый цвет фона бейджа. Backend сохраняет значение в lowercase.')
+}).describe('Payload частичного обновления категории места.')
+
+export const updatePlaceCategory200ResponseOneBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
+export const UpdatePlaceCategory200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(updatePlaceCategory200ResponseOneBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
+})
+
+export const UpdatePlaceCategory400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceCategory401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceCategory403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceCategory404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UpdatePlaceCategory409Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Удаляет категорию места, если она не используется местами.
+ * @summary Delete place category
+ */
+export const DeletePlaceCategoryParams = zod.strictObject({
+  "categoryId": zod.string().describe('Идентификатор категории места.')
+})
+
+export const DeletePlaceCategory401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const DeletePlaceCategory403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const DeletePlaceCategory404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const DeletePlaceCategory409Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
  * Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
  * @summary List admin places
  */
@@ -26,13 +236,21 @@ export const ListAdminPlacesQueryParams = zod.strictObject({
   "status": zod.enum(['active', 'hidden']).optional().describe('Фильтр по статусу места. Если параметр отсутствует, возвращаются все статусы.')
 })
 
+export const listAdminPlaces200ResponseItemsItemCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const ListAdminPlaces200Response = zod.strictObject({
   "items": zod.array(zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(listAdminPlaces200ResponseItemsItemCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -68,16 +286,24 @@ export const CreatePlaceBody = zod.strictObject({
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().optional().describe('Короткое описание места. Если поле не передано, backend сохранит пустую строку.'),
   "tags": zod.array(zod.string()).optional().describe('Теги для поиска и фильтрации. Если поле не передано, backend сохранит пустой массив.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "categoryId": zod.string().describe('Идентификатор существующей категории места.'),
   "popularityWeight": zod.number().optional().describe('Начальный вес популярности. Если поле не передано, backend сохранит 0.')
 }).describe('Payload создания нового места.')
+
+export const createPlace201ResponseCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
 
 export const CreatePlace201Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(createPlace201ResponseCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -101,6 +327,12 @@ export const CreatePlace403Response = zod.strictObject({
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
+export const CreatePlace404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
 /**
  * Возвращает детальную карточку места для администратора независимо от публичного статуса места.
  * @summary Get admin place details
@@ -109,12 +341,20 @@ export const GetAdminPlaceDetailParams = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места.')
 })
 
+export const getAdminPlaceDetail200ResponseOneCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const GetAdminPlaceDetail200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(getAdminPlaceDetail200ResponseOneCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
@@ -165,16 +405,24 @@ export const UpdatePlaceBody = zod.strictObject({
   "title": zod.string().optional().describe('Новое название места.'),
   "summary": zod.string().optional().describe('Обновлённое краткое описание.'),
   "tags": zod.array(zod.string()).optional().describe('Новый набор тегов.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).optional().describe('Категория места в каталоге.'),
-  "popularityWeight": zod.number().optional().describe('Обновлённый вес популярности.')
+  "categoryId": zod.string().optional().describe('Новый идентификатор существующей категории места.'),
+  "popularityWeight": zod.number().optional().describe('Новый вес популярности.')
 }).describe('Payload частичного обновления места.')
+
+export const updatePlace200ResponseCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
 
 export const UpdatePlace200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(updatePlace200ResponseCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -216,12 +464,20 @@ export const UpdatePlaceStatusBody = zod.strictObject({
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.')
 }).describe('Payload изменения статуса места.')
 
+export const updatePlaceStatus200ResponseCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const UpdatePlaceStatus200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(updatePlaceStatus200ResponseCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -263,12 +519,20 @@ export const UploadPlaceCoverPhotoBody = zod.strictObject({
   "photo": zod.instanceof(File)
 }).describe('Multipart payload для загрузки cover-фото места.')
 
+export const uploadPlaceCoverPhoto200ResponseCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const UploadPlaceCoverPhoto200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(uploadPlaceCoverPhoto200ResponseCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -1080,12 +1344,20 @@ export const SetPinnedMaterialBody = zod.strictObject({
   "materialId": zod.string().describe('Идентификатор материала, который нужно закрепить.')
 }).describe('Payload назначения закреплённого материала для места.')
 
+export const setPinnedMaterial200ResponseOneCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const SetPinnedMaterial200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(setPinnedMaterial200ResponseOneCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
@@ -1138,12 +1410,20 @@ export const ClearPinnedMaterialParams = zod.strictObject({
   "placeId": zod.string().describe('Идентификатор места.')
 })
 
+export const clearPinnedMaterial200ResponseOneCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const ClearPinnedMaterial200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(clearPinnedMaterial200ResponseOneCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),

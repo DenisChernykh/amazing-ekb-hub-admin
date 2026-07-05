@@ -17,8 +17,15 @@ vi.mock('@/entities/session/model/session-hooks', () => ({
 
 const mockedUseLogoutSession = vi.mocked(useLogoutSession)
 
+const poolsCategory = {
+  badgeBackgroundColor: '#dbeafe',
+  id: 'category_pools',
+  slug: 'pools',
+  title: 'Бассейны',
+}
+
 const activePlace: PlaceSummary = {
-  category: 'pools',
+  category: poolsCategory,
   coverImageUrl: null,
   id: 'place-1',
   popularityWeight: 10,

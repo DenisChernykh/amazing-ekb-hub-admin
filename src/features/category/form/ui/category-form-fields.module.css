@@ -1,0 +1,3 @@
+.colorInput :global(.ant-input-group-addon) {
+  min-width: 44px;
+}
