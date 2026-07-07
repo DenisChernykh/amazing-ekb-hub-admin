@@ -1,6 +1,6 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
-import { Form, Input, InputNumber, Select } from 'antd'
+import { Alert, Form, Input, InputNumber, Select } from 'antd'
 import type { PlaceFormValues } from '../model/place-form'
 
 /**
@@ -54,6 +54,16 @@ export function PlaceFormFields({
           options={categoryOptions}
         />
       </Form.Item>
+
+      {categoriesQuery.isError && (
+        <Alert
+          showIcon
+          message={
+            categoriesQuery.error?.message || 'Не удалось загрузить категории'
+          }
+          type="error"
+        />
+      )}
 
       <Form.Item<PlaceFormValues> label="Теги" name="tags">
         <Select

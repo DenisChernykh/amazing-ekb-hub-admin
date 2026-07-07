@@ -11,7 +11,7 @@ import type {
   CreatePlaceCategoryRequest,
   UpdatePlaceCategoryRequest,
 } from '@/shared/api/generated/model'
-import type { QueryClient } from '@tanstack/react-query'
+import type { Query, QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 /**
@@ -68,6 +68,24 @@ const invalidatePlacesListQueries = (queryClient: QueryClient) => {
   })
 }
 
+// Category title/color are embedded into place details, whose generated keys are `/admin/places/{placeId}`.
+const isAdminPlaceDetailQuery = (query: Query) => {
+  const [rootKey] = query.queryKey
+  const [placesListRootKey] = getListAdminPlacesQueryKey()
+
+  return (
+    typeof rootKey === 'string' &&
+    typeof placesListRootKey === 'string' &&
+    rootKey.startsWith(`${placesListRootKey}/`)
+  )
+}
+
+const invalidateAdminPlaceDetailQueries = (queryClient: QueryClient) => {
+  return queryClient.invalidateQueries({
+    predicate: isAdminPlaceDetailQuery,
+  })
+}
+
 /**
  * Создает категорию места и обновляет кеш списка категорий.
  *
@@ -98,7 +116,7 @@ export function useCreateCategoryMutation(
  * Редактирует категорию места и обновляет зависимые admin-кеши.
  *
  * @remarks Обновление названия/цвета категории меняет отображение мест, поэтому
- * после успеха инвалидируется список мест вместе со справочником категорий.
+ * после успеха инвалидируются список мест, detail-карточки и справочник категорий.
  */
 export function useUpdateCategoryMutation(
   options?: UpdateCategoryMutationOptions,
@@ -119,6 +137,7 @@ export function useUpdateCategoryMutation(
       await Promise.all([
         invalidateCategoryQueries(queryClient),
         invalidatePlacesListQueries(queryClient),
+        invalidateAdminPlaceDetailQueries(queryClient),
       ])
       await options?.onSuccess?.(category)
     },

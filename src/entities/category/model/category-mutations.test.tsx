@@ -1,6 +1,7 @@
 import {
   createPlaceCategory,
   deletePlaceCategory,
+  getGetAdminPlaceDetailQueryKey,
   getListAdminPlaceCategoriesQueryKey,
   updatePlaceCategory,
 } from '@/shared/api/generated/admin/admin'
@@ -18,6 +19,9 @@ import {
 vi.mock('@/shared/api/generated/admin/admin', () => ({
   createPlaceCategory: vi.fn(),
   deletePlaceCategory: vi.fn(),
+  getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
+    `/admin/places/${placeId}`,
+  ]),
   getListAdminPlaceCategoriesQueryKey: vi.fn(() => ['/admin/categories']),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   updatePlaceCategory: vi.fn(),
@@ -121,6 +125,21 @@ describe('category mutations', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['/admin/places'],
     })
+
+    const detailInvalidation = invalidateQueries.mock.calls.find(
+      ([options]) => options !== undefined && 'predicate' in options,
+    )?.[0]
+
+    expect(
+      detailInvalidation?.predicate?.({
+        queryKey: getGetAdminPlaceDetailQueryKey({ placeId: 'place-1' }),
+      } as never),
+    ).toBe(true)
+    expect(
+      detailInvalidation?.predicate?.({
+        queryKey: ['/admin/places'],
+      } as never),
+    ).toBe(false)
   })
 
   it('deletes category with path params and invalidates category list', async () => {
