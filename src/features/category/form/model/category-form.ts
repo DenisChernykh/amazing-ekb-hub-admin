@@ -34,7 +34,7 @@ export type CategoryFormChangedField = {
 
 const categoryFormFieldLabels = {
   badgeBackgroundColor: 'Цвет',
-  slug: 'Slug',
+  slug: 'Ярлык',
   title: 'Название',
 } satisfies Record<keyof NormalizedCategoryFormValues, string>
 
@@ -88,9 +88,9 @@ export function getCategoryColorValidationError(value: string | undefined) {
 }
 
 /**
- * Возвращает ошибку локальной проверки slug категории.
+ * Возвращает ошибку локальной проверки ярлыка категории.
  *
- * @returns `null`, если slug пустой или заполнен в backend-формате.
+ * @returns `null`, если ярлык пустой или заполнен в backend-формате.
  */
 export function getCategorySlugValidationError(value: string | undefined) {
   const normalizedValue = (value ?? '').trim()
@@ -100,7 +100,7 @@ export function getCategorySlugValidationError(value: string | undefined) {
   }
 
   if (!categorySlugPattern.test(normalizedValue)) {
-    return 'Используйте lowercase буквы, цифры и одиночные дефисы'
+    return 'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe'
   }
 
   return null

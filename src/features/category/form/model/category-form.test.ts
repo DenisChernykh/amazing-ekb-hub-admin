@@ -4,6 +4,7 @@ import {
   getCategoryColorValidationError,
   getCategoryFormChangedFields,
   getCategoryFormInitialValues,
+  getCategorySlugValidationError,
   hasCategoryFormChanges,
   toCreateCategoryRequest,
   toUpdateCategoryRequest,
@@ -90,7 +91,7 @@ describe('category form helpers', () => {
         },
         initialValues,
       ),
-    ).toEqual([{ key: 'slug', label: 'Slug' }])
+    ).toEqual([{ key: 'slug', label: 'Ярлык' }])
   })
 
   it('returns user-facing HEX validation errors', () => {
@@ -99,5 +100,13 @@ describe('category form helpers', () => {
       'Укажите цвет в формате #RRGGBB',
     )
     expect(getCategoryColorValidationError('#FAF0ED')).toBeNull()
+  })
+
+  it('returns user-facing slug validation errors', () => {
+    expect(getCategorySlugValidationError('')).toBeNull()
+    expect(getCategorySlugValidationError('Семейное кафе')).toBe(
+      'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe',
+    )
+    expect(getCategorySlugValidationError('family-cafe')).toBeNull()
   })
 })

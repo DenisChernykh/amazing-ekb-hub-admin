@@ -36,7 +36,7 @@ export function getCategoriesTableColumns({
       render: (slug: AdminPlaceCategory['slug']) => (
         <Typography.Text code>{slug}</Typography.Text>
       ),
-      title: 'Slug',
+      title: 'Ярлык',
     },
     {
       dataIndex: 'badgeBackgroundColor',

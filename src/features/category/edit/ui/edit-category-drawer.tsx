@@ -144,6 +144,7 @@ export function EditCategoryDrawer({
 
         <CategoryFormFields
           disabled={updateCategoryMutation.isPending}
+          showSlug
           slugRequired
         />
 
