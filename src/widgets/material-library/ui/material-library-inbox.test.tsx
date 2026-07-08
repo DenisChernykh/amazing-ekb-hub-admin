@@ -280,26 +280,7 @@ describe('MaterialLibraryInbox', () => {
     expect(screen.getByText('Доступ запрещен')).toBeInTheDocument()
   })
 
-  it('renders empty state for filtered material library', () => {
-    mockedUseMaterialLibraryQuery.mockReturnValue({
-      data: { items: [] },
-      error: null,
-      isError: false,
-      isFetching: false,
-      isPending: false,
-    } as unknown as ReturnType<typeof useMaterialLibraryQuery>)
-
-    renderInbox('/materials?adminStatus=rejected')
-
-    expect(
-      screen.getByText('По выбранным фильтрам материалов не найдено'),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: 'Сбросить фильтры' }),
-    ).toBeInTheDocument()
-  }, 10000)
-
-  it('resets page when filtered material library is reset', async () => {
+  it('renders filtered empty state and resets page when reset', async () => {
     mockedUseMaterialLibraryQuery.mockReturnValue({
       data: {
         items: [],
@@ -314,6 +295,10 @@ describe('MaterialLibraryInbox', () => {
     } as unknown as ReturnType<typeof useMaterialLibraryQuery>)
 
     renderInbox('/materials?adminStatus=rejected&page=4&pageSize=50')
+
+    expect(
+      screen.getByText('По выбранным фильтрам материалов не найдено'),
+    ).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Сбросить фильтры' }))
 
