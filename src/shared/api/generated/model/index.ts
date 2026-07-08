@@ -8,6 +8,7 @@
 
 export * from './addFavoritePathParameters';
 export * from './adminMaterialLibraryItem';
+export * from './adminPlaceCategory';
 export * from './adminPlaceDetail';
 export * from './authLoginRequest';
 export * from './clearPinnedMaterialPathParameters';
@@ -16,8 +17,11 @@ export * from './contentSourcePlatform';
 export * from './contentSourceStatus';
 export * from './createContentSourceRequest';
 export * from './createMaterialRequest';
+export * from './createPlaceCategoryRequest';
 export * from './createPlaceMaterialPathParameters';
 export * from './createPlaceRequest';
+export * from './deletePlaceCategoryPathParameters';
+export * from './getAdminPlaceCategoryPathParameters';
 export * from './getAdminPlaceDetailPathParameters';
 export * from './getPlaceCoverPhotoPathParameters';
 export * from './getPlaceDetailPathParameters';
@@ -59,6 +63,8 @@ export * from './updateMaterialAdminStatusPathParameters';
 export * from './updateMaterialAdminStatusRequest';
 export * from './updateMaterialPathParameters';
 export * from './updateMaterialRequest';
+export * from './updatePlaceCategoryPathParameters';
+export * from './updatePlaceCategoryRequest';
 export * from './updatePlaceMaterialLinkPathParameters';
 export * from './updatePlaceMaterialLinkRequest';
 export * from './updatePlacePathParameters';

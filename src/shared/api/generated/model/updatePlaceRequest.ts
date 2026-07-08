@@ -5,7 +5,6 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { PlaceCategory } from './placeCategory';
 
 /**
  * Payload частичного обновления места.
@@ -17,7 +16,8 @@ export type UpdatePlaceRequest = {
   summary?: string;
   /** Новый набор тегов. */
   tags?: string[];
-  category?: PlaceCategory;
-  /** Обновлённый вес популярности. */
+  /** Новый идентификатор существующей категории места. */
+  categoryId?: string;
+  /** Новый вес популярности. */
   popularityWeight?: number;
 };

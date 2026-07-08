@@ -1,6 +1,5 @@
 import type {
   CreatePlaceRequest,
-  PlaceCategory,
   PlaceDetail,
   UpdatePlaceRequest,
 } from '@/shared/api/generated/model'
@@ -13,7 +12,7 @@ import type {
  * незаполненные и явно очищенные поля.
  */
 export type PlaceFormValues = {
-  category: PlaceCategory
+  categoryId: string
   popularityWeight?: number | null
   summary?: string
   tags?: string[]
@@ -21,7 +20,7 @@ export type PlaceFormValues = {
 }
 
 type NormalizedPlaceFormValues = {
-  category: PlaceCategory
+  categoryId: string
   popularityWeight: number | null
   summary: string
   tags: string[]
@@ -34,7 +33,7 @@ const normalizeTags = (tags: string[] | undefined) =>
 const normalizePlaceFormValues = (
   values: PlaceFormValues,
 ): NormalizedPlaceFormValues => ({
-  category: values.category,
+  categoryId: values.categoryId,
   popularityWeight: values.popularityWeight ?? null,
   summary: (values.summary ?? '').trim(),
   tags: normalizeTags(values.tags),
@@ -53,7 +52,7 @@ const areTagsEqual = (left: string[], right: string[]) => {
  */
 export function getPlaceFormInitialValues(place: PlaceDetail): PlaceFormValues {
   return {
-    category: place.category,
+    categoryId: place.category.id,
     popularityWeight: place.popularityWeight,
     summary: place.summary,
     tags: place.tags,
@@ -70,7 +69,7 @@ export function toCreatePlaceRequest(
   const normalizedValues = normalizePlaceFormValues(values)
 
   return {
-    category: normalizedValues.category,
+    categoryId: normalizedValues.categoryId,
     popularityWeight: normalizedValues.popularityWeight ?? undefined,
     summary: normalizedValues.summary,
     tags: normalizedValues.tags,
@@ -103,8 +102,8 @@ export function toUpdatePlaceRequest(
     request.tags = normalizedValues.tags
   }
 
-  if (normalizedValues.category !== normalizedInitialValues.category) {
-    request.category = normalizedValues.category
+  if (normalizedValues.categoryId !== normalizedInitialValues.categoryId) {
+    request.categoryId = normalizedValues.categoryId
   }
 
   if (
@@ -132,7 +131,7 @@ export function hasPlaceFormChanges(
     normalizedValues.title !== normalizedInitialValues.title ||
     normalizedValues.summary !== normalizedInitialValues.summary ||
     !areTagsEqual(normalizedValues.tags, normalizedInitialValues.tags) ||
-    normalizedValues.category !== normalizedInitialValues.category ||
+    normalizedValues.categoryId !== normalizedInitialValues.categoryId ||
     normalizedValues.popularityWeight !==
       normalizedInitialValues.popularityWeight
   )

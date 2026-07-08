@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ListPlacesSort } from '../model/listPlacesSort';
-import type { PlaceCategory } from '../model/placeCategory';
 import type { PageParameter } from './pageParameter';
 import type { PageSizeParameter } from './pageSizeParameter';
 
@@ -33,7 +32,7 @@ search?: string;
  */
 sort?: ListPlacesSort;
 /**
- * Фильтр по категории места.
+ * Фильтр по идентификатору категории места.
  */
-category?: PlaceCategory;
+categoryId?: string;
 };

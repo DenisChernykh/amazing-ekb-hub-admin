@@ -47,7 +47,12 @@ function NavigationProbe({ to }: { to: To }) {
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const place: PlaceDetail = {
-  category: 'spa',
+  category: {
+    badgeBackgroundColor: '#faf0ed',
+    id: 'category_spa',
+    slug: 'spa',
+    title: 'SPA',
+  },
   counters: {
     dzen: 1,
     instagram: 0,

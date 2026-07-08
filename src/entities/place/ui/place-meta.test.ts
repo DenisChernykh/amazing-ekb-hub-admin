@@ -5,9 +5,25 @@ import {
   getPlaceStatusMeta,
 } from './place-meta'
 
+const categories = [
+  {
+    badgeBackgroundColor: '#dbeafe',
+    id: 'category_pools',
+    slug: 'pools',
+    title: 'Бассейны',
+  },
+  {
+    badgeBackgroundColor: '#faf0ed',
+    id: 'category_spa',
+    slug: 'spa',
+    title: 'SPA',
+  },
+]
+
 describe('place meta', () => {
   it('returns localized category labels', () => {
-    expect(getPlaceCategoryMeta('pools')).toMatchObject({
+    expect(getPlaceCategoryMeta(categories[0])).toMatchObject({
+      color: '#dbeafe',
       label: 'Бассейны',
     })
   })
@@ -19,12 +35,9 @@ describe('place meta', () => {
   })
 
   it('returns category options for form controls', () => {
-    expect(getPlaceCategoryOptions()).toEqual([
-      { label: 'Бассейны', value: 'pools' },
-      { label: 'SPA', value: 'spa' },
-      { label: 'Кафе', value: 'cafe' },
-      { label: 'Отели', value: 'hotels' },
-      { label: 'Мастерские', value: 'workshops' },
+    expect(getPlaceCategoryOptions(categories)).toEqual([
+      { label: 'Бассейны', value: 'category_pools' },
+      { label: 'SPA', value: 'category_spa' },
     ])
   })
 })

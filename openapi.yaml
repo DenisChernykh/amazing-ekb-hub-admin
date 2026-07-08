@@ -43,6 +43,15 @@ components:
         type: string
       example: place_ekb_001
 
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      description: Идентификатор категории места.
+      schema:
+        type: string
+      example: category_spa
+
     MaterialId:
       name: materialId
       in: path
@@ -109,7 +118,11 @@ components:
           - термы
           - spa
           - бассейн
-        category: spa
+        category:
+          id: category_spa
+          slug: spa
+          title: SPA
+          badgeBackgroundColor: '#faf0ed'
         status: active
         popularityWeight: 95
         coverImageUrl: /v1/places/place_ekb_001/photo
@@ -124,7 +137,11 @@ components:
           - термы
           - spa
           - бассейн
-        category: spa
+        category:
+          id: category_spa
+          slug: spa
+          title: SPA
+          badgeBackgroundColor: '#faf0ed'
         status: active
         popularityWeight: 95
         coverImageUrl: /v1/places/place_ekb_001/photo
@@ -143,7 +160,11 @@ components:
           - термы
           - spa
           - бассейн
-        category: spa
+        category:
+          id: category_spa
+          slug: spa
+          title: SPA
+          badgeBackgroundColor: '#faf0ed'
         status: active
         popularityWeight: 95
         coverImageUrl: /v1/places/place_ekb_001/photo
@@ -171,7 +192,11 @@ components:
             tags:
               - термы
               - spa
-            category: spa
+            category:
+              id: category_spa
+              slug: spa
+              title: SPA
+              badgeBackgroundColor: '#faf0ed'
             status: active
             popularityWeight: 95
             coverImageUrl: /v1/places/place_ekb_001/photo
@@ -181,7 +206,11 @@ components:
             tags:
               - бассейн
               - family
-            category: pools
+            category:
+              id: category_pools
+              slug: pools
+              title: Бассейны
+              badgeBackgroundColor: '#dbeafe'
             status: active
             popularityWeight: 74
             coverImageUrl: null
@@ -199,7 +228,11 @@ components:
             tags:
               - термы
               - spa
-            category: spa
+            category:
+              id: category_spa
+              slug: spa
+              title: SPA
+              badgeBackgroundColor: '#faf0ed'
             status: active
             popularityWeight: 95
             coverImageUrl: /v1/places/place_ekb_001/photo
@@ -213,7 +246,11 @@ components:
             tags:
               - бассейн
               - family
-            category: pools
+            category:
+              id: category_pools
+              slug: pools
+              title: Бассейны
+              badgeBackgroundColor: '#dbeafe'
             status: active
             popularityWeight: 74
             coverImageUrl: null
@@ -224,6 +261,48 @@ components:
         total: 2
         page: 1
         pageSize: 20
+
+    PlaceCategory:
+      summary: Категория места
+      value:
+        id: category_spa
+        slug: spa
+        title: SPA
+        badgeBackgroundColor: '#faf0ed'
+
+    AdminPlaceCategory:
+      summary: Административная категория места
+      value:
+        id: category_spa
+        slug: spa
+        title: SPA
+        badgeBackgroundColor: '#faf0ed'
+        createdAt: '2026-07-03T10:00:00.000Z'
+        updatedAt: '2026-07-03T10:00:00.000Z'
+
+    PlaceCategoryListResponse:
+      summary: Публичный список категорий мест
+      value:
+        items:
+          - id: category_spa
+            slug: spa
+            title: SPA
+            badgeBackgroundColor: '#faf0ed'
+          - id: category_pools
+            slug: pools
+            title: Бассейны
+            badgeBackgroundColor: '#dbeafe'
+
+    AdminPlaceCategoryListResponse:
+      summary: Административный список категорий мест
+      value:
+        items:
+          - id: category_spa
+            slug: spa
+            title: SPA
+            badgeBackgroundColor: '#faf0ed'
+            createdAt: '2026-07-03T10:00:00.000Z'
+            updatedAt: '2026-07-03T10:00:00.000Z'
 
     Material:
       summary: Материал о месте
@@ -419,6 +498,27 @@ components:
         message: Place not found
         error: Not Found
 
+    CategoryNotFoundError:
+      summary: Категория не найдена
+      value:
+        statusCode: 404
+        message: Category not found
+        error: Not Found
+
+    CategoryConflictError:
+      summary: Категория уже существует
+      value:
+        statusCode: 409
+        message: Category with this slug already exists
+        error: Conflict
+
+    CategoryInUseError:
+      summary: Категория используется местами
+      value:
+        statusCode: 409
+        message: Category is used by places
+        error: Conflict
+
     MaterialNotFoundError:
       summary: Материал не найден
       value:
@@ -531,6 +631,28 @@ components:
             default:
               $ref: '#/components/examples/PlaceNotFoundError'
 
+    CategoryNotFound:
+      description: Указанная категория не найдена.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NestErrorResponse'
+          examples:
+            default:
+              $ref: '#/components/examples/CategoryNotFoundError'
+
+    CategoryConflict:
+      description: Категория конфликтует с существующей записью или используется местами.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NestErrorResponse'
+          examples:
+            duplicate:
+              $ref: '#/components/examples/CategoryConflictError'
+            inUse:
+              $ref: '#/components/examples/CategoryInUseError'
+
     MaterialNotFound:
       description: Указанный материал не найден.
       content:
@@ -591,10 +713,65 @@ components:
       example: admin
 
     PlaceCategory:
-      type: string
-      description: Категория места в каталоге.
-      enum: [pools, spa, cafe, hotels, workshops]
-      example: spa
+      type: object
+      description: Публичная категория места для фильтров и бейджей.
+      required: [id, slug, title, badgeBackgroundColor]
+      properties:
+        id:
+          type: string
+          description: Идентификатор категории.
+          example: category_spa
+        slug:
+          type: string
+          description: Человекочитаемый slug категории.
+          example: spa
+        title:
+          type: string
+          description: Название категории для интерфейса.
+          example: SPA
+        badgeBackgroundColor:
+          type: string
+          pattern: '^#[0-9a-f]{6}$'
+          description: Цвет фона бейджа категории в HEX-формате.
+          example: '#faf0ed'
+
+    AdminPlaceCategory:
+      allOf:
+        - $ref: '#/components/schemas/PlaceCategory'
+        - type: object
+          description: Административная категория места с системными датами.
+          required: [createdAt, updatedAt]
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+              description: Время создания категории.
+              example: '2026-07-03T10:00:00.000Z'
+            updatedAt:
+              type: string
+              format: date-time
+              description: Время последнего обновления категории.
+              example: '2026-07-03T10:00:00.000Z'
+
+    PlaceCategoryListResponse:
+      type: object
+      description: Публичный список категорий мест.
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceCategory'
+
+    AdminPlaceCategoryListResponse:
+      type: object
+      description: Административный список категорий мест.
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminPlaceCategory'
 
     PlaceStatus:
       type: string
@@ -1349,7 +1526,7 @@ components:
     CreatePlaceRequest:
       type: object
       description: Payload создания нового места.
-      required: [title, category]
+      required: [title, categoryId]
       properties:
         title:
           type: string
@@ -1368,8 +1545,10 @@ components:
             - термы
             - spa
             - бассейн
-        category:
-          $ref: '#/components/schemas/PlaceCategory'
+        categoryId:
+          type: string
+          description: Идентификатор существующей категории места.
+          example: category_spa
         popularityWeight:
           type: integer
           description: Начальный вес популярности. Если поле не передано, backend сохранит 0.
@@ -1395,12 +1574,53 @@ components:
           example:
             - термы
             - premium
-        category:
-          $ref: '#/components/schemas/PlaceCategory'
+        categoryId:
+          type: string
+          description: Новый идентификатор существующей категории места.
+          example: category_spa
         popularityWeight:
           type: integer
-          description: Обновлённый вес популярности.
+          description: Новый вес популярности.
           example: 99
+
+    CreatePlaceCategoryRequest:
+      type: object
+      description: Payload создания категории места.
+      required: [title, badgeBackgroundColor]
+      properties:
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          description: Необязательный ручной slug категории из lowercase букв, цифр и одиночных дефисов. Если поле отсутствует, backend генерирует slug из `title`.
+          example: family-spa
+        title:
+          type: string
+          description: Название категории.
+          example: Family SPA
+        badgeBackgroundColor:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+          description: Цвет фона бейджа. Backend сохраняет значение в lowercase.
+          example: '#FAF0ED'
+
+    UpdatePlaceCategoryRequest:
+      type: object
+      description: Payload частичного обновления категории места.
+      properties:
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          description: Новый slug категории.
+          example: family-spa
+        title:
+          type: string
+          description: Новое название категории.
+          example: Family SPA
+        badgeBackgroundColor:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+          description: Новый цвет фона бейджа. Backend сохраняет значение в lowercase.
+          example: '#DBEAFE'
 
     UpdatePlaceStatusRequest:
       type: object
@@ -1741,6 +1961,23 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /categories:
+    get:
+      tags: [Places]
+      summary: List place categories
+      description: Возвращает публичный справочник категорий мест для фильтров и бейджей.
+      operationId: listPlaceCategories
+      responses:
+        '200':
+          description: Список категорий мест.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceCategoryListResponse'
+              examples:
+                default:
+                  $ref: '#/components/examples/PlaceCategoryListResponse'
+
   /places:
     get:
       tags: [Places]
@@ -1767,13 +2004,13 @@ paths:
             enum: [popular, title_asc]
             default: popular
           example: title_asc
-        - name: category
+        - name: categoryId
           in: query
           required: false
-          description: Фильтр по категории места.
+          description: Фильтр по идентификатору категории места.
           schema:
-            $ref: '#/components/schemas/PlaceCategory'
-          example: spa
+            type: string
+          example: category_spa
       responses:
         '200':
           description: Пагинированный список мест.
@@ -1938,6 +2175,159 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /admin/categories:
+    get:
+      tags: [Admin]
+      summary: List admin place categories
+      description: Возвращает административный справочник категорий мест.
+      operationId: listAdminPlaceCategories
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      responses:
+        '200':
+          description: Список категорий мест.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPlaceCategoryListResponse'
+              examples:
+                default:
+                  $ref: '#/components/examples/AdminPlaceCategoryListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Admin]
+      summary: Create place category
+      description: Создает категорию места. Операция доступна только администратору.
+      operationId: createPlaceCategory
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      requestBody:
+        required: true
+        description: Данные новой категории.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlaceCategoryRequest'
+            examples:
+              default:
+                value:
+                  title: Family SPA
+                  badgeBackgroundColor: '#FAF0ED'
+      responses:
+        '201':
+          description: Категория создана.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPlaceCategory'
+              examples:
+                default:
+                  $ref: '#/components/examples/AdminPlaceCategory'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/CategoryConflict'
+
+  /admin/categories/{categoryId}:
+    get:
+      tags: [Admin]
+      summary: Get admin place category
+      description: Возвращает категорию места по идентификатору.
+      operationId: getAdminPlaceCategory
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '200':
+          description: Категория найдена.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPlaceCategory'
+              examples:
+                default:
+                  $ref: '#/components/examples/AdminPlaceCategory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
+    patch:
+      tags: [Admin]
+      summary: Update place category
+      description: Частично обновляет категорию места.
+      operationId: updatePlaceCategory
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      requestBody:
+        required: true
+        description: Поля категории для обновления.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlaceCategoryRequest'
+            examples:
+              default:
+                value:
+                  title: Family SPA
+                  badgeBackgroundColor: '#DBEAFE'
+      responses:
+        '200':
+          description: Категория обновлена.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPlaceCategory'
+              examples:
+                default:
+                  $ref: '#/components/examples/AdminPlaceCategory'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
+        '409':
+          $ref: '#/components/responses/CategoryConflict'
+    delete:
+      tags: [Admin]
+      summary: Delete place category
+      description: Удаляет категорию места, если она не используется местами.
+      operationId: deletePlaceCategory
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '204':
+          description: Категория удалена.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
+        '409':
+          $ref: '#/components/responses/CategoryConflict'
+
   /admin/places:
     get:
       tags: [Admin]
@@ -1997,7 +2387,7 @@ paths:
                     - термы
                     - spa
                     - бассейн
-                  category: spa
+                  categoryId: category_spa
                   popularityWeight: 95
       responses:
         '201':
@@ -2015,6 +2405,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
 
   /admin/places/{placeId}:
     get:
@@ -2068,7 +2460,7 @@ paths:
                   tags:
                     - термы
                     - premium
-                  category: spa
+                  categoryId: category_spa
                   popularityWeight: 99
       responses:
         '200':
@@ -2087,7 +2479,16 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/PlaceNotFound'
+          description: Место или категория не найдены.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NestErrorResponse'
+              examples:
+                place:
+                  $ref: '#/components/examples/PlaceNotFoundError'
+                category:
+                  $ref: '#/components/examples/CategoryNotFoundError'
 
   /admin/places/{placeId}/status:
     patch:

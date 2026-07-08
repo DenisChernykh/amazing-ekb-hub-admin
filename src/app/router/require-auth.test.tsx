@@ -23,8 +23,15 @@ const admin: AuthMeResponse = {
   role: 'admin',
 }
 
+const poolsCategory = {
+  badgeBackgroundColor: '#dbeafe',
+  id: 'category_pools',
+  slug: 'pools',
+  title: 'Бассейны',
+}
+
 const activePlace: PlaceSummary = {
-  category: 'pools',
+  category: poolsCategory,
   coverImageUrl: null,
   id: 'place-1',
   popularityWeight: 10,

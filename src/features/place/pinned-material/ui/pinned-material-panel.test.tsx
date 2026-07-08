@@ -77,6 +77,13 @@ const mockedUseClearPinnedMaterialMutation = vi.mocked(
   useClearPinnedMaterialMutation,
 )
 
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
+
 const materials: PublicMaterial[] = [
   {
     durationSec: null,
@@ -107,7 +114,7 @@ const untitledMaterial: PublicMaterial = {
 }
 
 const updatedPlace: PlaceDetail = {
-  category: 'spa',
+  category: spaCategory,
   counters: {
     dzen: 1,
     instagram: 0,

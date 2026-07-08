@@ -1,6 +1,5 @@
 import type { PlaceCategory, PlaceStatus } from '@/shared/api/generated/model'
 import type { TagProps } from 'antd'
-import { PLACE_CATEGORY_VALUES } from '../model/place-categories'
 
 /**
  * UI-метаданные места для отображения в Ant Design компонентах.
@@ -9,29 +8,6 @@ export type PlaceMeta = {
   color: TagProps['color']
   label: string
 }
-
-const categoryMeta = {
-  cafe: {
-    color: 'orange',
-    label: 'Кафе',
-  },
-  hotels: {
-    color: 'cyan',
-    label: 'Отели',
-  },
-  pools: {
-    color: 'blue',
-    label: 'Бассейны',
-  },
-  spa: {
-    color: 'purple',
-    label: 'SPA',
-  },
-  workshops: {
-    color: 'green',
-    label: 'Мастерские',
-  },
-} satisfies Record<PlaceCategory, PlaceMeta>
 
 const statusMeta = {
   active: {
@@ -45,10 +21,13 @@ const statusMeta = {
 } satisfies Record<PlaceStatus, PlaceMeta>
 
 /**
- * Возвращает локализованные UI-метаданные для backend-категории места.
+ * Возвращает UI-метаданные для серверной категории места.
  */
 export const getPlaceCategoryMeta = (category: PlaceCategory) =>
-  categoryMeta[category]
+  ({
+    color: category.badgeBackgroundColor,
+    label: category.title,
+  }) satisfies PlaceMeta
 
 /**
  * Возвращает локализованные UI-метаданные для backend-статуса места.
@@ -58,8 +37,8 @@ export const getPlaceStatusMeta = (status: PlaceStatus) => statusMeta[status]
 /**
  * Возвращает категории мест в формате options для Ant Design controls.
  */
-export const getPlaceCategoryOptions = () =>
-  PLACE_CATEGORY_VALUES.map((category) => ({
+export const getPlaceCategoryOptions = (categories: readonly PlaceCategory[]) =>
+  categories.map((category) => ({
     label: getPlaceCategoryMeta(category).label,
-    value: category,
+    value: category.id,
   }))

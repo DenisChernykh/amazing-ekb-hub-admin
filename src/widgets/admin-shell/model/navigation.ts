@@ -2,6 +2,7 @@ import {
   ApiOutlined,
   DashboardOutlined,
   FileTextOutlined,
+  TagsOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
 import { createElement, type ReactNode } from 'react'
@@ -31,6 +32,12 @@ export const adminNavigationItems = [
     key: 'places',
     label: 'Места',
     path: '/places',
+  },
+  {
+    icon: createElement(TagsOutlined),
+    key: 'categories',
+    label: 'Категории',
+    path: '/categories',
   },
   {
     icon: createElement(FileTextOutlined),

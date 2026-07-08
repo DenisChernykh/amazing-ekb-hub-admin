@@ -60,7 +60,12 @@ vi.mock('./place-materials-panel', () => ({
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const hiddenPlace: PlaceDetail = {
-  category: 'spa',
+  category: {
+    badgeBackgroundColor: '#faf0ed',
+    id: 'category_spa',
+    slug: 'spa',
+    title: 'SPA',
+  },
   counters: {
     dzen: 1,
     instagram: 0,

@@ -13,8 +13,15 @@ import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BulkModerationDraftRestorePrompt } from './bulk-moderation-draft-restore-prompt'
 
+const poolsCategory = {
+  badgeBackgroundColor: '#dbeafe',
+  id: 'category_pools',
+  slug: 'pools',
+  title: 'Бассейны',
+}
+
 const activePlace: PlaceSummary = {
-  category: 'pools',
+  category: poolsCategory,
   coverImageUrl: null,
   id: 'place-1',
   popularityWeight: 10,

@@ -44,8 +44,15 @@ const placeListResponse: PlaceListResponse = {
   total: 0,
 }
 
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
+
 const placeDetail: PlaceDetail = {
-  category: 'spa',
+  category: spaCategory,
   counters: {
     dzen: 0,
     instagram: 0,

@@ -5,7 +5,6 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { PlaceCategory } from './placeCategory';
 
 /**
  * Payload создания нового места.
@@ -17,7 +16,8 @@ export type CreatePlaceRequest = {
   summary?: string;
   /** Теги для поиска и фильтрации. Если поле не передано, backend сохранит пустой массив. */
   tags?: string[];
-  category: PlaceCategory;
+  /** Идентификатор существующей категории места. */
+  categoryId: string;
   /** Начальный вес популярности. Если поле не передано, backend сохранит 0. */
   popularityWeight?: number;
 };

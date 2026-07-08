@@ -57,8 +57,22 @@ const createWrapper = (queryClient: QueryClient) => {
   }
 }
 
+const spaCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
+
+const cafeCategory = {
+  badgeBackgroundColor: '#fef3c7',
+  id: 'category_cafe',
+  slug: 'cafe',
+  title: 'Кафе',
+}
+
 const placeSummary: PlaceSummary = {
-  category: 'spa',
+  category: spaCategory,
   coverImageUrl: null,
   id: 'place-1',
   popularityWeight: 7,
@@ -69,7 +83,7 @@ const placeSummary: PlaceSummary = {
 }
 
 const placeDetail: PlaceDetail = {
-  category: 'spa',
+  category: spaCategory,
   counters: {
     dzen: 0,
     instagram: 0,
@@ -112,7 +126,7 @@ describe('place mutations', () => {
 
     await result.current.mutateAsync({
       data: {
-        category: 'spa',
+        categoryId: 'category_spa',
         summary: 'Новый SPA',
         tags: ['spa'],
         title: 'SPA',
@@ -120,7 +134,7 @@ describe('place mutations', () => {
     })
 
     expect(mockedCreatePlace).toHaveBeenCalledWith({
-      category: 'spa',
+      categoryId: 'category_spa',
       summary: 'Новый SPA',
       tags: ['spa'],
       title: 'SPA',
@@ -148,7 +162,7 @@ describe('place mutations', () => {
     await expect(
       result.current.mutateAsync({
         data: {
-          category: 'spa',
+          categoryId: 'category_spa',
           title: 'SPA',
         },
       }),
@@ -202,7 +216,7 @@ describe('place mutations', () => {
     const detailQueryKey = ['/admin/places/place-3']
     const updatedPlace: PlaceSummary = {
       ...placeSummary,
-      category: 'cafe',
+      category: cafeCategory,
       id: 'place-3',
       title: 'Новая кофейня',
     }

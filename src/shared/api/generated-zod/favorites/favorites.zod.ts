@@ -12,13 +12,21 @@ import * as zod from 'zod';
  * Возвращает список избранных мест текущего аутентифицированного пользователя.
  * @summary List favorites
  */
+export const listFavorites200ResponseItemsItemCategoryBadgeBackgroundColorRegExp = new RegExp('^#[0-9a-f]{6}$');
+
+
 export const ListFavorites200Response = zod.strictObject({
   "items": zod.array(zod.strictObject({
   "id": zod.string().describe('Идентификатор места.'),
   "title": zod.string().describe('Название места.'),
   "summary": zod.string().describe('Короткое описание для каталога.'),
   "tags": zod.array(zod.string()).describe('Набор тегов для поиска и фильтрации.'),
-  "category": zod.enum(['pools', 'spa', 'cafe', 'hotels', 'workshops']).describe('Категория места в каталоге.'),
+  "category": zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "badgeBackgroundColor": zod.string().regex(listFavorites200ResponseItemsItemCategoryBadgeBackgroundColorRegExp).describe('Цвет фона бейджа категории в HEX-формате.')
+}).describe('Публичная категория места для фильтров и бейджей.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "popularityWeight": zod.number().describe('Вес популярности для сортировки.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')

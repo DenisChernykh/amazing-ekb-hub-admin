@@ -7,7 +7,10 @@
  */
 
 export * from './adminMaterialLibraryListResponse';
+export * from './adminPlaceCategoryListResponse';
 export * from './authMeResponse';
+export * from './categoryConflictResponse';
+export * from './categoryNotFoundResponse';
 export * from './contentSourceConflictResponse';
 export * from './contentSourceListResponse';
 export * from './contentSourceNotFoundResponse';
@@ -28,6 +31,7 @@ export * from './materialNotFoundResponse';
 export * from './nestErrorResponse';
 export * from './pageParameter';
 export * from './pageSizeParameter';
+export * from './placeCategoryListResponse';
 export * from './placeListResponse';
 export * from './placeNotFoundResponse';
 export * from './publicPlaceListResponse';

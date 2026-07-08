@@ -1,4 +1,4 @@
-import type { PlaceDetail } from '@/shared/api/generated/model'
+import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getPlaceFormInitialValues,
@@ -8,8 +8,22 @@ import {
   type PlaceFormValues,
 } from './place-form'
 
+const spaCategory: PlaceCategory = {
+  badgeBackgroundColor: '#faf0ed',
+  id: 'category_spa',
+  slug: 'spa',
+  title: 'SPA',
+}
+
+const cafeCategory: PlaceCategory = {
+  badgeBackgroundColor: '#fef3c7',
+  id: 'category_cafe',
+  slug: 'cafe',
+  title: 'Кафе',
+}
+
 const place: PlaceDetail = {
-  category: 'spa',
+  category: spaCategory,
   counters: {
     dzen: 1,
     instagram: 0,
@@ -28,7 +42,7 @@ const place: PlaceDetail = {
 describe('place form helpers', () => {
   it('maps place detail to form initial values', () => {
     expect(getPlaceFormInitialValues(place)).toEqual({
-      category: 'spa',
+      categoryId: 'category_spa',
       popularityWeight: 7,
       summary: 'SPA в центре',
       tags: ['spa', 'relax'],
@@ -38,7 +52,7 @@ describe('place form helpers', () => {
 
   it('normalizes create payload values', () => {
     const values: PlaceFormValues = {
-      category: 'spa',
+      categoryId: 'category_spa',
       popularityWeight: null,
       summary: '  Новый SPA в центре  ',
       tags: [' spa ', '', 'relax'],
@@ -46,7 +60,7 @@ describe('place form helpers', () => {
     }
 
     expect(toCreatePlaceRequest(values)).toEqual({
-      category: 'spa',
+      categoryId: 'category_spa',
       summary: 'Новый SPA в центре',
       tags: ['spa', 'relax'],
       title: 'Тихий SPA',
@@ -55,12 +69,12 @@ describe('place form helpers', () => {
 
   it('keeps empty optional summary and tags in create payload', () => {
     const values: PlaceFormValues = {
-      category: 'spa',
+      categoryId: 'category_spa',
       title: '  Тихий SPA  ',
     }
 
     expect(toCreatePlaceRequest(values)).toEqual({
-      category: 'spa',
+      categoryId: 'category_spa',
       summary: '',
       tags: [],
       title: 'Тихий SPA',
@@ -71,7 +85,7 @@ describe('place form helpers', () => {
     const initialValues = getPlaceFormInitialValues(place)
     const values: PlaceFormValues = {
       ...initialValues,
-      category: 'cafe',
+      categoryId: cafeCategory.id,
       popularityWeight: 11,
       summary: '  SPA с обновленным описанием  ',
       tags: [' spa ', 'city'],
@@ -79,7 +93,7 @@ describe('place form helpers', () => {
     }
 
     expect(toUpdatePlaceRequest(values, initialValues)).toEqual({
-      category: 'cafe',
+      categoryId: 'category_cafe',
       popularityWeight: 11,
       summary: 'SPA с обновленным описанием',
       tags: ['spa', 'city'],

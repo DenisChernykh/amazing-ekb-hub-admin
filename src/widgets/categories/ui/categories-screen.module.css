@@ -1,0 +1,19 @@
+.title {
+  margin: 0;
+}
+
+.card {
+  border-radius: 8px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.categoryCell {
+  min-width: 180px;
+}
+
+.actions {
+  min-width: 132px;
+}

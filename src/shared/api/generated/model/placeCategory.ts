@@ -7,6 +7,18 @@
  */
 
 /**
- * Категория места в каталоге.
+ * Публичная категория места для фильтров и бейджей.
  */
-export type PlaceCategory = 'pools' | 'spa' | 'cafe' | 'hotels' | 'workshops';
+export type PlaceCategory = {
+  /** Идентификатор категории. */
+  id: string;
+  /** Человекочитаемый slug категории. */
+  slug: string;
+  /** Название категории для интерфейса. */
+  title: string;
+  /**
+     * Цвет фона бейджа категории в HEX-формате.
+     * @pattern ^#[0-9a-f]{6}$
+     */
+  badgeBackgroundColor: string;
+};
