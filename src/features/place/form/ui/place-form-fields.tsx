@@ -1,14 +1,18 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
-import { Alert, Form, Input, InputNumber, Select } from 'antd'
-import type { PlaceFormValues } from '../model/place-form'
+import { Alert, Form, Input, Select } from 'antd'
+import {
+  getPlaceSlugValidationError,
+  type PlaceFormValues,
+} from '../model/place-form'
 
 /**
  * Props общего набора полей формы места.
  */
 export type PlaceFormFieldsProps = {
   disabled?: boolean
-  popularityWeightRequired?: boolean
+  showSlug?: boolean
+  slugRequired?: boolean
 }
 
 /**
@@ -16,7 +20,8 @@ export type PlaceFormFieldsProps = {
  */
 export function PlaceFormFields({
   disabled = false,
-  popularityWeightRequired = false,
+  showSlug = false,
+  slugRequired = false,
 }: PlaceFormFieldsProps) {
   const categoriesQuery = usePlaceCategoriesQuery()
   const categoryOptions = getPlaceCategoryOptions(
@@ -34,6 +39,44 @@ export function PlaceFormFields({
       >
         <Input autoComplete="off" disabled={disabled} />
       </Form.Item>
+
+      {showSlug && (
+        <Form.Item<PlaceFormValues>
+          extra="Часть публичного адреса места. При создании может быть заполнена автоматически."
+          label="Ярлык"
+          name="slug"
+          rules={[
+            ...(slugRequired
+              ? [
+                  {
+                    message: 'Введите ярлык',
+                    required: true,
+                    whitespace: true,
+                  },
+                ]
+              : []),
+            {
+              validator: async (_rule, value: unknown) => {
+                if (typeof value !== 'string') {
+                  return
+                }
+
+                const validationError = getPlaceSlugValidationError(value)
+
+                if (validationError) {
+                  throw new Error(validationError)
+                }
+              },
+            },
+          ]}
+        >
+          <Input
+            aria-label="Ярлык"
+            disabled={disabled}
+            placeholder="Например: quiet-spa"
+          />
+        </Form.Item>
+      )}
 
       <Form.Item<PlaceFormValues> label="Описание" name="summary">
         <Input.TextArea
@@ -73,18 +116,6 @@ export function PlaceFormFields({
           placeholder="Добавьте теги"
           tokenSeparators={[',']}
         />
-      </Form.Item>
-
-      <Form.Item<PlaceFormValues>
-        label="Вес популярности"
-        name="popularityWeight"
-        rules={
-          popularityWeightRequired
-            ? [{ required: true, message: 'Введите вес популярности' }]
-            : undefined
-        }
-      >
-        <InputNumber disabled={disabled} min={0} precision={0} />
       </Form.Item>
     </>
   )

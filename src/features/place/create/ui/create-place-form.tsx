@@ -114,7 +114,7 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
         </Form.Item>
       )}
 
-      <PlaceFormFields disabled={isPending || isCreateLocked} />
+      <PlaceFormFields disabled={isPending || isCreateLocked} showSlug />
 
       <PlaceCoverDraftPicker
         disabled={isPending || isCreateLocked}

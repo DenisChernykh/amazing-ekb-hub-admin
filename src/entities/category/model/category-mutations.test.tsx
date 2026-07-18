@@ -32,7 +32,6 @@ const mockedDeletePlaceCategory = vi.mocked(deletePlaceCategory)
 const mockedUpdatePlaceCategory = vi.mocked(updatePlaceCategory)
 
 const category: AdminPlaceCategory = {
-  badgeBackgroundColor: '#faf0ed',
   createdAt: '2026-07-03T10:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
@@ -78,14 +77,12 @@ describe('category mutations', () => {
     })
 
     result.current.mutate({
-      badgeBackgroundColor: '#FAF0ED',
       title: 'SPA',
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(mockedCreatePlaceCategory).toHaveBeenCalledWith({
-      badgeBackgroundColor: '#FAF0ED',
       title: 'SPA',
     })
     expect(invalidateQueries).toHaveBeenCalledWith({
@@ -105,7 +102,6 @@ describe('category mutations', () => {
     result.current.mutate({
       categoryId: 'category_spa',
       data: {
-        badgeBackgroundColor: '#DBEAFE',
         title: 'New SPA',
       },
     })
@@ -115,7 +111,6 @@ describe('category mutations', () => {
     expect(mockedUpdatePlaceCategory).toHaveBeenCalledWith(
       { categoryId: 'category_spa' },
       {
-        badgeBackgroundColor: '#DBEAFE',
         title: 'New SPA',
       },
     )

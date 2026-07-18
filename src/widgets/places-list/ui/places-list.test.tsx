@@ -33,14 +33,13 @@ const mutateAsyncMock = vi.fn()
 
 const activePlace: PlaceSummary = {
   category: {
-    badgeBackgroundColor: '#dbeafe',
     id: 'category_pools',
     slug: 'pools',
     title: 'Бассейны',
   },
   coverImageUrl: null,
   id: 'place-1',
-  popularityWeight: 10,
+  slug: 'aquacenter',
   status: 'active',
   summary: 'Теплый бассейн в центре Екатеринбурга',
   tags: ['pool', 'family'],
@@ -49,14 +48,13 @@ const activePlace: PlaceSummary = {
 
 const hiddenPlace: PlaceSummary = {
   category: {
-    badgeBackgroundColor: '#faf0ed',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
   },
   coverImageUrl: null,
   id: 'place-2',
-  popularityWeight: 5,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'Скрытый SPA для проверки admin list',
   tags: ['spa'],
@@ -191,6 +189,7 @@ describe('PlacesList', () => {
 
     expect(document.title).toBe('Места | Amazing EKB Admin')
     expect(screen.getByText('Аквацентр')).toBeInTheDocument()
+    expect(screen.queryByText('Вес')).not.toBeInTheDocument()
     expect(screen.getByText('Скрытый SPA')).toBeInTheDocument()
     expect(screen.getByText('Бассейны')).toBeInTheDocument()
     expect(screen.getByText('Опубликовано')).toBeInTheDocument()

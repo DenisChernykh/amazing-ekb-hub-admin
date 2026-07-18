@@ -10,14 +10,12 @@ import {
 } from './bulk-moderation-draft-storage'
 
 const poolsCategory = {
-  badgeBackgroundColor: '#dbeafe',
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
 }
 
 const spaCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -27,7 +25,7 @@ const activePlace: PlaceSummary = {
   category: poolsCategory,
   coverImageUrl: null,
   id: 'place-1',
-  popularityWeight: 10,
+  slug: 'aquacenter',
   status: 'active',
   summary: 'Теплый бассейн',
   tags: ['pool'],
@@ -38,7 +36,7 @@ const hiddenPlace: PlaceSummary = {
   category: spaCategory,
   coverImageUrl: null,
   id: 'place-2',
-  popularityWeight: 5,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'Скрытый SPA',
   tags: ['spa'],

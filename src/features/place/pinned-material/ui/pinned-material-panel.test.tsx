@@ -78,7 +78,6 @@ const mockedUseClearPinnedMaterialMutation = vi.mocked(
 )
 
 const spaCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -123,7 +122,7 @@ const updatedPlace: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-1',
   pinnedMaterial: materials[1] ?? null,
-  popularityWeight: 8,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'SPA',
   tags: ['spa'],

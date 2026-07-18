@@ -1,13 +1,8 @@
 import {
-  getCategoryColorValidationError,
   getCategorySlugValidationError,
   type CategoryFormValues,
 } from '@/features/category/form/model/category-form'
-import { ColorPicker, Form, Input } from 'antd'
-import type { Color } from 'antd/es/color-picker'
-
-const getColorValueFromPicker = (color: Color) =>
-  color.toHexString().toLowerCase()
+import { Form, Input } from 'antd'
 
 /**
  * Props набора полей формы категории.
@@ -80,36 +75,6 @@ export function CategoryFormFields({
           />
         </Form.Item>
       )}
-
-      <Form.Item<CategoryFormValues>
-        label="Цвет бейджа"
-        name="badgeBackgroundColor"
-        getValueFromEvent={getColorValueFromPicker}
-        rules={[
-          { message: 'Введите HEX-цвет', required: true, whitespace: true },
-          {
-            validator: async (_rule, value: unknown) => {
-              if (typeof value !== 'string') {
-                return
-              }
-
-              const validationError = getCategoryColorValidationError(value)
-
-              if (validationError) {
-                throw new Error(validationError)
-              }
-            },
-          },
-        ]}
-      >
-        <ColorPicker
-          disabledAlpha
-          disabledFormat
-          disabled={disabled}
-          format="hex"
-          showText
-        />
-      </Form.Item>
     </>
   )
 }

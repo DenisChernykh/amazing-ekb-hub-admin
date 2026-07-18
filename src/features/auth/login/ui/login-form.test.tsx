@@ -25,7 +25,6 @@ const admin: AuthMeResponse = {
 }
 
 const poolsCategory = {
-  badgeBackgroundColor: '#dbeafe',
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
@@ -35,7 +34,7 @@ const activePlace: PlaceSummary = {
   category: poolsCategory,
   coverImageUrl: null,
   id: 'place-1',
-  popularityWeight: 10,
+  slug: 'aquacenter',
   status: 'active',
   summary: 'Теплый бассейн',
   tags: ['pool'],

@@ -25,7 +25,7 @@ const statusMeta = {
  */
 export const getPlaceCategoryMeta = (category: PlaceCategory) =>
   ({
-    color: category.badgeBackgroundColor,
+    color: 'default',
     label: category.title,
   }) satisfies PlaceMeta
 

@@ -40,7 +40,6 @@ const mockedEditCategoryDrawer = vi.mocked(EditCategoryDrawer)
 const mockedDeleteCategoryButton = vi.mocked(DeleteCategoryButton)
 
 const spaCategory: AdminPlaceCategory = {
-  badgeBackgroundColor: '#faf0ed',
   createdAt: '2026-07-03T10:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
@@ -49,7 +48,6 @@ const spaCategory: AdminPlaceCategory = {
 }
 
 const poolsCategory: AdminPlaceCategory = {
-  badgeBackgroundColor: '#dbeafe',
   createdAt: '2026-07-03T11:00:00.000Z',
   id: 'category_pools',
   slug: 'pools',
@@ -84,7 +82,7 @@ describe('CategoriesScreen', () => {
     } as unknown as ReturnType<typeof usePlaceCategoriesQuery>)
   })
 
-  it('renders category table with color swatches and row actions', () => {
+  it('renders category table without the retired color field and with row actions', () => {
     renderScreen()
 
     expect(document.title).toBe('Категории | Amazing EKB Admin')
@@ -92,7 +90,7 @@ describe('CategoriesScreen', () => {
     expect(screen.getByText('Всего: 2')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()
     expect(screen.getByText('spa')).toBeInTheDocument()
-    expect(screen.getByText('#faf0ed')).toBeInTheDocument()
+    expect(screen.queryByText('Цвет бейджа')).not.toBeInTheDocument()
     expect(screen.getByText('Бассейны')).toBeInTheDocument()
     expect(screen.getByText('delete category_spa')).toBeInTheDocument()
   })

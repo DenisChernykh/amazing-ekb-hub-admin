@@ -7,13 +7,11 @@ import {
 
 const categories = [
   {
-    badgeBackgroundColor: '#dbeafe',
     id: 'category_pools',
     slug: 'pools',
     title: 'Бассейны',
   },
   {
-    badgeBackgroundColor: '#faf0ed',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
@@ -23,7 +21,7 @@ const categories = [
 describe('place meta', () => {
   it('returns localized category labels', () => {
     expect(getPlaceCategoryMeta(categories[0])).toMatchObject({
-      color: '#dbeafe',
+      color: 'default',
       label: 'Бассейны',
     })
   })

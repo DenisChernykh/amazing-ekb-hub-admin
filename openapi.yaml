@@ -43,6 +43,16 @@ components:
         type: string
       example: place_ekb_001
 
+    PlaceSlug:
+      name: placeSlug
+      in: path
+      required: true
+      description: Публичный slug места.
+      schema:
+        type: string
+        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+      example: baden-baden-uktus
+
     CategoryId:
       name: categoryId
       in: path
@@ -51,6 +61,16 @@ components:
       schema:
         type: string
       example: category_spa
+
+    CategorySlug:
+      name: categorySlug
+      in: path
+      required: true
+      description: Публичный slug категории места.
+      schema:
+        type: string
+        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+      example: spa
 
     MaterialId:
       name: materialId
@@ -122,10 +142,9 @@ components:
           id: category_spa
           slug: spa
           title: SPA
-          badgeBackgroundColor: '#faf0ed'
         status: active
-        popularityWeight: 95
-        coverImageUrl: /v1/places/place_ekb_001/photo
+        slug: baden-baden-uktus
+        coverImageUrl: /v1/places/baden-baden-uktus/photo
 
     PublicPlaceSummary:
       summary: Краткая публичная карточка места
@@ -141,10 +160,9 @@ components:
           id: category_spa
           slug: spa
           title: SPA
-          badgeBackgroundColor: '#faf0ed'
         status: active
-        popularityWeight: 95
-        coverImageUrl: /v1/places/place_ekb_001/photo
+        slug: baden-baden-uktus
+        coverImageUrl: /v1/places/baden-baden-uktus/photo
         counters:
           dzen: 12
           telegram: 7
@@ -164,10 +182,9 @@ components:
           id: category_spa
           slug: spa
           title: SPA
-          badgeBackgroundColor: '#faf0ed'
         status: active
-        popularityWeight: 95
-        coverImageUrl: /v1/places/place_ekb_001/photo
+        slug: baden-baden-uktus
+        coverImageUrl: /v1/places/baden-baden-uktus/photo
         pinnedMaterial:
           id: material_telegram_001
           placeId: place_ekb_001
@@ -196,10 +213,9 @@ components:
               id: category_spa
               slug: spa
               title: SPA
-              badgeBackgroundColor: '#faf0ed'
             status: active
-            popularityWeight: 95
-            coverImageUrl: /v1/places/place_ekb_001/photo
+            slug: baden-baden-uktus
+            coverImageUrl: /v1/places/baden-baden-uktus/photo
           - id: place_ekb_002
             title: The Pool
             summary: Современный бассейн с дорожками и семейной зоной.
@@ -210,9 +226,8 @@ components:
               id: category_pools
               slug: pools
               title: Бассейны
-              badgeBackgroundColor: '#dbeafe'
             status: active
-            popularityWeight: 74
+            slug: the-pool
             coverImageUrl: null
         total: 2
         page: 1
@@ -232,10 +247,9 @@ components:
               id: category_spa
               slug: spa
               title: SPA
-              badgeBackgroundColor: '#faf0ed'
             status: active
-            popularityWeight: 95
-            coverImageUrl: /v1/places/place_ekb_001/photo
+            slug: baden-baden-uktus
+            coverImageUrl: /v1/places/baden-baden-uktus/photo
             counters:
               dzen: 12
               telegram: 7
@@ -250,9 +264,8 @@ components:
               id: category_pools
               slug: pools
               title: Бассейны
-              badgeBackgroundColor: '#dbeafe'
             status: active
-            popularityWeight: 74
+            slug: the-pool
             coverImageUrl: null
             counters:
               dzen: 0
@@ -268,7 +281,6 @@ components:
         id: category_spa
         slug: spa
         title: SPA
-        badgeBackgroundColor: '#faf0ed'
 
     AdminPlaceCategory:
       summary: Административная категория места
@@ -276,7 +288,6 @@ components:
         id: category_spa
         slug: spa
         title: SPA
-        badgeBackgroundColor: '#faf0ed'
         createdAt: '2026-07-03T10:00:00.000Z'
         updatedAt: '2026-07-03T10:00:00.000Z'
 
@@ -287,11 +298,9 @@ components:
           - id: category_spa
             slug: spa
             title: SPA
-            badgeBackgroundColor: '#faf0ed'
           - id: category_pools
             slug: pools
             title: Бассейны
-            badgeBackgroundColor: '#dbeafe'
 
     AdminPlaceCategoryListResponse:
       summary: Административный список категорий мест
@@ -300,7 +309,6 @@ components:
           - id: category_spa
             slug: spa
             title: SPA
-            badgeBackgroundColor: '#faf0ed'
             createdAt: '2026-07-03T10:00:00.000Z'
             updatedAt: '2026-07-03T10:00:00.000Z'
 
@@ -714,8 +722,8 @@ components:
 
     PlaceCategory:
       type: object
-      description: Публичная категория места для фильтров и бейджей.
-      required: [id, slug, title, badgeBackgroundColor]
+      description: Публичная категория места для фильтров.
+      required: [id, slug, title]
       properties:
         id:
           type: string
@@ -729,11 +737,6 @@ components:
           type: string
           description: Название категории для интерфейса.
           example: SPA
-        badgeBackgroundColor:
-          type: string
-          pattern: '^#[0-9a-f]{6}$'
-          description: Цвет фона бейджа категории в HEX-формате.
-          example: '#faf0ed'
 
     AdminPlaceCategory:
       allOf:
@@ -879,21 +882,16 @@ components:
       type: object
       description: Краткая карточка места, используемая в списках.
       required:
-        [
-          id,
-          title,
-          summary,
-          tags,
-          category,
-          status,
-          popularityWeight,
-          coverImageUrl,
-        ]
+        [id, slug, title, summary, tags, category, status, coverImageUrl]
       properties:
         id:
           type: string
           description: Идентификатор места.
           example: place_ekb_001
+        slug:
+          type: string
+          description: Публичный slug места.
+          example: baden-baden-uktus
         title:
           type: string
           description: Название места.
@@ -915,15 +913,11 @@ components:
           $ref: '#/components/schemas/PlaceCategory'
         status:
           $ref: '#/components/schemas/PlaceStatus'
-        popularityWeight:
-          type: integer
-          description: Вес популярности для сортировки.
-          example: 95
         coverImageUrl:
           type: string
           nullable: true
           description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
-          example: /v1/places/place_ekb_001/photo
+          example: /v1/places/baden-baden-uktus/photo
 
     PublicPlaceSummary:
       type: object
@@ -931,12 +925,12 @@ components:
       required:
         [
           id,
+          slug,
           title,
           summary,
           tags,
           category,
           status,
-          popularityWeight,
           coverImageUrl,
           counters,
         ]
@@ -945,6 +939,10 @@ components:
           type: string
           description: Идентификатор места.
           example: place_ekb_001
+        slug:
+          type: string
+          description: Публичный slug места.
+          example: baden-baden-uktus
         title:
           type: string
           description: Название места.
@@ -966,15 +964,11 @@ components:
           $ref: '#/components/schemas/PlaceCategory'
         status:
           $ref: '#/components/schemas/PlaceStatus'
-        popularityWeight:
-          type: integer
-          description: Вес популярности для сортировки.
-          example: 95
         coverImageUrl:
           type: string
           nullable: true
           description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
-          example: /v1/places/place_ekb_001/photo
+          example: /v1/places/baden-baden-uktus/photo
         counters:
           type: object
           description: Количество материалов по платформам.
@@ -1393,12 +1387,12 @@ components:
       required:
         [
           id,
+          slug,
           title,
           summary,
           tags,
           category,
           status,
-          popularityWeight,
           coverImageUrl,
           counters,
           pinnedMaterial,
@@ -1408,6 +1402,10 @@ components:
           type: string
           description: Идентификатор места.
           example: place_ekb_001
+        slug:
+          type: string
+          description: Публичный slug места.
+          example: baden-baden-uktus
         title:
           type: string
           description: Название места.
@@ -1429,15 +1427,11 @@ components:
           $ref: '#/components/schemas/PlaceCategory'
         status:
           $ref: '#/components/schemas/PlaceStatus'
-        popularityWeight:
-          type: integer
-          description: Вес популярности для сортировки.
-          example: 95
         coverImageUrl:
           type: string
           nullable: true
           description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
-          example: /v1/places/place_ekb_001/photo
+          example: /v1/places/baden-baden-uktus/photo
         counters:
           type: object
           description: Количество материалов по платформам.
@@ -1528,6 +1522,11 @@ components:
       description: Payload создания нового места.
       required: [title, categoryId]
       properties:
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          description: Необязательный ручной slug. Если поле отсутствует, backend генерирует slug из title.
+          example: baden-baden-uktus
         title:
           type: string
           description: Название места.
@@ -1549,15 +1548,16 @@ components:
           type: string
           description: Идентификатор существующей категории места.
           example: category_spa
-        popularityWeight:
-          type: integer
-          description: Начальный вес популярности. Если поле не передано, backend сохранит 0.
-          example: 95
 
     UpdatePlaceRequest:
       type: object
       description: Payload частичного обновления места.
       properties:
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          description: Новый публичный slug места.
+          example: baden-baden-uktus-premium
         title:
           type: string
           description: Новое название места.
@@ -1578,15 +1578,11 @@ components:
           type: string
           description: Новый идентификатор существующей категории места.
           example: category_spa
-        popularityWeight:
-          type: integer
-          description: Новый вес популярности.
-          example: 99
 
     CreatePlaceCategoryRequest:
       type: object
       description: Payload создания категории места.
-      required: [title, badgeBackgroundColor]
+      required: [title]
       properties:
         slug:
           type: string
@@ -1597,11 +1593,6 @@ components:
           type: string
           description: Название категории.
           example: Family SPA
-        badgeBackgroundColor:
-          type: string
-          pattern: '^#[0-9a-fA-F]{6}$'
-          description: Цвет фона бейджа. Backend сохраняет значение в lowercase.
-          example: '#FAF0ED'
 
     UpdatePlaceCategoryRequest:
       type: object
@@ -1616,11 +1607,6 @@ components:
           type: string
           description: Новое название категории.
           example: Family SPA
-        badgeBackgroundColor:
-          type: string
-          pattern: '^#[0-9a-fA-F]{6}$'
-          description: Новый цвет фона бейджа. Backend сохраняет значение в lowercase.
-          example: '#DBEAFE'
 
     UpdatePlaceStatusRequest:
       type: object
@@ -1978,11 +1964,32 @@ paths:
                 default:
                   $ref: '#/components/examples/PlaceCategoryListResponse'
 
+  /categories/{categorySlug}:
+    get:
+      tags: [Places]
+      summary: Get place category
+      description: Возвращает публичную категорию места по её slug.
+      operationId: getPlaceCategory
+      parameters:
+        - $ref: '#/components/parameters/CategorySlug'
+      responses:
+        '200':
+          description: Категория места.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceCategory'
+              examples:
+                default:
+                  $ref: '#/components/examples/PlaceCategory'
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
+
   /places:
     get:
       tags: [Places]
       summary: List places
-      description: Возвращает публичный список мест с пагинацией, поиском и фильтрацией по категории.
+      description: Возвращает публичный список мест с пагинацией, поиском и фильтрацией по категории в стабильном порядке `title ASC, id ASC`.
       operationId: listPlaces
       parameters:
         - $ref: '#/components/parameters/Page'
@@ -1995,15 +2002,6 @@ paths:
             type: string
             maxLength: 100
           example: термы
-        - name: sort
-          in: query
-          required: false
-          description: Режим сортировки списка мест.
-          schema:
-            type: string
-            enum: [popular, title_asc]
-            default: popular
-          example: title_asc
         - name: categoryId
           in: query
           required: false
@@ -2024,14 +2022,14 @@ paths:
         '400':
           $ref: '#/components/responses/ValidationError'
 
-  /places/{placeId}:
+  /places/{placeSlug}:
     get:
       tags: [Places]
       summary: Get place details
-      description: Возвращает детальную карточку публичного места по его идентификатору.
+      description: Возвращает детальную карточку публичного места по его slug.
       operationId: getPlaceDetail
       parameters:
-        - $ref: '#/components/parameters/PlaceId'
+        - $ref: '#/components/parameters/PlaceSlug'
       responses:
         '200':
           description: Детальная карточка места.
@@ -2045,14 +2043,14 @@ paths:
         '404':
           $ref: '#/components/responses/PlaceNotFound'
 
-  /places/{placeId}/photo:
+  /places/{placeSlug}/photo:
     get:
       tags: [Places]
       summary: Get place cover photo
       description: Возвращает бинарное содержимое публичного cover-фото активного места.
       operationId: getPlaceCoverPhoto
       parameters:
-        - $ref: '#/components/parameters/PlaceId'
+        - $ref: '#/components/parameters/PlaceSlug'
       responses:
         '200':
           description: Бинарное содержимое публичного cover-фото.
@@ -2072,14 +2070,14 @@ paths:
         '404':
           $ref: '#/components/responses/PlaceNotFound'
 
-  /places/{placeId}/materials:
+  /places/{placeSlug}/materials:
     get:
       tags: [Places]
       summary: List place materials
       description: Возвращает до 100 материалов, связанных с указанным активным местом, с опциональным фильтром по платформе.
       operationId: listPlaceMaterials
       parameters:
-        - $ref: '#/components/parameters/PlaceId'
+        - $ref: '#/components/parameters/PlaceSlug'
         - name: platform
           in: query
           required: false
@@ -2217,7 +2215,6 @@ paths:
               default:
                 value:
                   title: Family SPA
-                  badgeBackgroundColor: '#FAF0ED'
       responses:
         '201':
           description: Категория создана.
@@ -2285,7 +2282,6 @@ paths:
               default:
                 value:
                   title: Family SPA
-                  badgeBackgroundColor: '#DBEAFE'
       responses:
         '200':
           description: Категория обновлена.
@@ -2388,7 +2384,7 @@ paths:
                     - spa
                     - бассейн
                   categoryId: category_spa
-                  popularityWeight: 95
+                  slug: baden-baden-uktus
       responses:
         '201':
           description: Место успешно создано.
@@ -2461,7 +2457,7 @@ paths:
                     - термы
                     - premium
                   categoryId: category_spa
-                  popularityWeight: 99
+                  slug: baden-baden-uktus-premium
       responses:
         '200':
           description: Место успешно обновлено.

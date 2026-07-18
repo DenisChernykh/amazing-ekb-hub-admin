@@ -110,7 +110,6 @@ const mockedUseUpdatePlaceMutation = vi.mocked(useUpdatePlaceMutation)
 const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -126,7 +125,7 @@ const place: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-2',
   pinnedMaterial: null,
-  popularityWeight: 5,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'Скрытый SPA для проверки admin detail',
   tags: ['spa', 'hidden'],
@@ -183,7 +182,7 @@ describe('EditPlaceForm', () => {
     expect(screen.getByRole('combobox', { name: 'Теги' })).toHaveValue(
       'spa,hidden',
     )
-    expect(screen.getByLabelText('Вес популярности')).toHaveValue(5)
+    expect(screen.getByLabelText('Ярлык')).toHaveValue('hidden-spa')
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
   })
 
@@ -264,7 +263,7 @@ describe('EditPlaceForm', () => {
               category: spaCategory,
               coverImageUrl: null,
               id: 'place-2',
-              popularityWeight: 5,
+              slug: 'hidden-spa',
               status: 'hidden',
               summary: 'Новое описание',
               tags: ['spa', 'hidden'],

@@ -46,10 +46,4 @@ export const placesTableColumns: TableProps<PlaceSummary>['columns'] = [
     ),
     title: 'Теги',
   },
-  {
-    align: 'right',
-    dataIndex: 'popularityWeight',
-    key: 'popularityWeight',
-    title: 'Вес',
-  },
 ]

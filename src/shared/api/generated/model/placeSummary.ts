@@ -14,6 +14,8 @@ import type { PlaceStatus } from './placeStatus';
 export type PlaceSummary = {
   /** Идентификатор места. */
   id: string;
+  /** Публичный slug места. */
+  slug: string;
   /** Название места. */
   title: string;
   /** Короткое описание для каталога. */
@@ -22,8 +24,6 @@ export type PlaceSummary = {
   tags: string[];
   category: PlaceCategory;
   status: PlaceStatus;
-  /** Вес популярности для сортировки. */
-  popularityWeight: number;
   /**
      * Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
      * @nullable

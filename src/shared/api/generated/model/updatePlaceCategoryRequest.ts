@@ -17,9 +17,4 @@ export type UpdatePlaceCategoryRequest = {
   slug?: string;
   /** Новое название категории. */
   title?: string;
-  /**
-     * Новый цвет фона бейджа. Backend сохраняет значение в lowercase.
-     * @pattern ^#[0-9a-fA-F]{6}$
-     */
-  badgeBackgroundColor?: string;
 };

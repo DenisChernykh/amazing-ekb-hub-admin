@@ -21,6 +21,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CategoryNotFoundResponse,
+  GetPlaceCategoryPathParameters,
   GetPlaceCoverPhotoPathParameters,
   GetPlaceDetailPathParameters,
   ListPlaceMaterialsParams,
@@ -28,6 +30,7 @@ import type {
   ListPlacesParams,
   MaterialListResponse,
   MaterialNotFoundResponse,
+  PlaceCategory,
   PlaceCategoryListResponse,
   PlaceDetail,
   PlaceNotFoundResponse,
@@ -138,7 +141,100 @@ export function useListPlaceCategories<TData = Awaited<ReturnType<typeof listPla
 
 
 /**
- * Возвращает публичный список мест с пагинацией, поиском и фильтрацией по категории.
+ * Возвращает публичную категорию места по её slug.
+ * @summary Get place category
+ */
+export const getPlaceCategory = (
+    { categorySlug }: GetPlaceCategoryPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceCategory>(
+      {url: `/categories/${encodeURIComponent(String(categorySlug))}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetPlaceCategoryQueryKey = ({ categorySlug }: GetPlaceCategoryPathParameters,) => {
+    return [
+    `/categories/${categorySlug}`
+    ] as const;
+    }
+
+
+export const getGetPlaceCategoryQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceCategory>>, TError = ErrorType<CategoryNotFoundResponse>>({ categorySlug }: GetPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategory>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlaceCategoryQueryKey({ categorySlug });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceCategory>>> = ({ signal }) => getPlaceCategory({ categorySlug }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(categorySlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlaceCategoryQueryResult = NonNullable<Awaited<ReturnType<typeof getPlaceCategory>>>
+export type GetPlaceCategoryQueryError = ErrorType<CategoryNotFoundResponse>
+
+
+export function useGetPlaceCategory<TData = Awaited<ReturnType<typeof getPlaceCategory>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ pathParams: GetPlaceCategoryPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlaceCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getPlaceCategory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaceCategory<TData = Awaited<ReturnType<typeof getPlaceCategory>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ pathParams: GetPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlaceCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getPlaceCategory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaceCategory<TData = Awaited<ReturnType<typeof getPlaceCategory>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ pathParams: GetPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategory>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get place category
+ */
+
+export function useGetPlaceCategory<TData = Awaited<ReturnType<typeof getPlaceCategory>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ { categorySlug }: GetPlaceCategoryPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategory>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPlaceCategoryQueryOptions({ categorySlug },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Возвращает публичный список мест с пагинацией, поиском и фильтрацией по категории в стабильном порядке `title ASC, id ASC`.
  * @summary List places
  */
 export const listPlaces = (
@@ -232,17 +328,17 @@ export function useListPlaces<TData = Awaited<ReturnType<typeof listPlaces>>, TE
 
 
 /**
- * Возвращает детальную карточку публичного места по его идентификатору.
+ * Возвращает детальную карточку публичного места по его slug.
  * @summary Get place details
  */
 export const getPlaceDetail = (
-    { placeId }: GetPlaceDetailPathParameters,
+    { placeSlug }: GetPlaceDetailPathParameters,
  options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
 ) => {
 
 
       return apiMutator<PlaceDetail>(
-      {url: `/places/${encodeURIComponent(String(placeId))}`, method: 'GET', signal
+      {url: `/places/${encodeURIComponent(String(placeSlug))}`, method: 'GET', signal
     },
       options);
     }
@@ -250,29 +346,29 @@ export const getPlaceDetail = (
 
 
 
-export const getGetPlaceDetailQueryKey = ({ placeId }: GetPlaceDetailPathParameters,) => {
+export const getGetPlaceDetailQueryKey = ({ placeSlug }: GetPlaceDetailPathParameters,) => {
     return [
-    `/places/${placeId}`
+    `/places/${placeSlug}`
     ] as const;
     }
 
 
-export const getGetPlaceDetailQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceDetail>>, TError = ErrorType<PlaceNotFoundResponse>>({ placeId }: GetPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+export const getGetPlaceDetailQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceDetail>>, TError = ErrorType<PlaceNotFoundResponse>>({ placeSlug }: GetPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPlaceDetailQueryKey({ placeId });
+  const queryKey =  queryOptions?.queryKey ?? getGetPlaceDetailQueryKey({ placeSlug });
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceDetail>>> = ({ signal }) => getPlaceDetail({ placeId }, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceDetail>>> = ({ signal }) => getPlaceDetail({ placeSlug }, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(placeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceDetail>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(placeSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceDetail>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetPlaceDetailQueryResult = NonNullable<Awaited<ReturnType<typeof getPlaceDetail>>>
@@ -308,11 +404,11 @@ export function useGetPlaceDetail<TData = Awaited<ReturnType<typeof getPlaceDeta
  */
 
 export function useGetPlaceDetail<TData = Awaited<ReturnType<typeof getPlaceDetail>>, TError = ErrorType<PlaceNotFoundResponse>>(
- { placeId }: GetPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ { placeSlug }: GetPlaceDetailPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceDetail>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetPlaceDetailQueryOptions({ placeId },options)
+  const queryOptions = getGetPlaceDetailQueryOptions({ placeSlug },options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -329,13 +425,13 @@ export function useGetPlaceDetail<TData = Awaited<ReturnType<typeof getPlaceDeta
  * @summary Get place cover photo
  */
 export const getPlaceCoverPhoto = (
-    { placeId }: GetPlaceCoverPhotoPathParameters,
+    { placeSlug }: GetPlaceCoverPhotoPathParameters,
  options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
 ) => {
 
 
       return apiMutator<Blob>(
-      {url: `/places/${encodeURIComponent(String(placeId))}/photo`, method: 'GET',
+      {url: `/places/${encodeURIComponent(String(placeSlug))}/photo`, method: 'GET',
         responseType: 'blob', signal
     },
       options);
@@ -344,29 +440,29 @@ export const getPlaceCoverPhoto = (
 
 
 
-export const getGetPlaceCoverPhotoQueryKey = ({ placeId }: GetPlaceCoverPhotoPathParameters,) => {
+export const getGetPlaceCoverPhotoQueryKey = ({ placeSlug }: GetPlaceCoverPhotoPathParameters,) => {
     return [
-    `/places/${placeId}/photo`
+    `/places/${placeSlug}/photo`
     ] as const;
     }
 
 
-export const getGetPlaceCoverPhotoQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError = ErrorType<PlaceNotFoundResponse>>({ placeId }: GetPlaceCoverPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+export const getGetPlaceCoverPhotoQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError = ErrorType<PlaceNotFoundResponse>>({ placeSlug }: GetPlaceCoverPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPlaceCoverPhotoQueryKey({ placeId });
+  const queryKey =  queryOptions?.queryKey ?? getGetPlaceCoverPhotoQueryKey({ placeSlug });
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceCoverPhoto>>> = ({ signal }) => getPlaceCoverPhoto({ placeId }, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceCoverPhoto>>> = ({ signal }) => getPlaceCoverPhoto({ placeSlug }, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(placeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(placeSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetPlaceCoverPhotoQueryResult = NonNullable<Awaited<ReturnType<typeof getPlaceCoverPhoto>>>
@@ -402,11 +498,11 @@ export function useGetPlaceCoverPhoto<TData = Awaited<ReturnType<typeof getPlace
  */
 
 export function useGetPlaceCoverPhoto<TData = Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError = ErrorType<PlaceNotFoundResponse>>(
- { placeId }: GetPlaceCoverPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ { placeSlug }: GetPlaceCoverPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCoverPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetPlaceCoverPhotoQueryOptions({ placeId },options)
+  const queryOptions = getGetPlaceCoverPhotoQueryOptions({ placeSlug },options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -423,14 +519,14 @@ export function useGetPlaceCoverPhoto<TData = Awaited<ReturnType<typeof getPlace
  * @summary List place materials
  */
 export const listPlaceMaterials = (
-    { placeId }: ListPlaceMaterialsPathParameters,
+    { placeSlug }: ListPlaceMaterialsPathParameters,
     params?: ListPlaceMaterialsParams,
  options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
 ) => {
 
 
       return apiMutator<MaterialListResponse>(
-      {url: `/places/${encodeURIComponent(String(placeId))}/materials`, method: 'GET',
+      {url: `/places/${encodeURIComponent(String(placeSlug))}/materials`, method: 'GET',
         params, signal
     },
       options);
@@ -439,31 +535,31 @@ export const listPlaceMaterials = (
 
 
 
-export const getListPlaceMaterialsQueryKey = ({ placeId }: ListPlaceMaterialsPathParameters,
+export const getListPlaceMaterialsQueryKey = ({ placeSlug }: ListPlaceMaterialsPathParameters,
     params?: ListPlaceMaterialsParams,) => {
     return [
-    `/places/${placeId}/materials`, ...(params ? [params] : [])
+    `/places/${placeSlug}/materials`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListPlaceMaterialsQueryOptions = <TData = Awaited<ReturnType<typeof listPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | PlaceNotFoundResponse>>({ placeId }: ListPlaceMaterialsPathParameters,
+export const getListPlaceMaterialsQueryOptions = <TData = Awaited<ReturnType<typeof listPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | PlaceNotFoundResponse>>({ placeSlug }: ListPlaceMaterialsPathParameters,
     params?: ListPlaceMaterialsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceMaterials>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListPlaceMaterialsQueryKey({ placeId },params);
+  const queryKey =  queryOptions?.queryKey ?? getListPlaceMaterialsQueryKey({ placeSlug },params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPlaceMaterials>>> = ({ signal }) => listPlaceMaterials({ placeId },params, requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPlaceMaterials>>> = ({ signal }) => listPlaceMaterials({ placeSlug },params, requestOptions, signal);
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(placeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPlaceMaterials>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(placeSlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPlaceMaterials>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ListPlaceMaterialsQueryResult = NonNullable<Awaited<ReturnType<typeof listPlaceMaterials>>>
@@ -502,12 +598,12 @@ export function useListPlaceMaterials<TData = Awaited<ReturnType<typeof listPlac
  */
 
 export function useListPlaceMaterials<TData = Awaited<ReturnType<typeof listPlaceMaterials>>, TError = ErrorType<ValidationErrorResponse | PlaceNotFoundResponse>>(
- { placeId }: ListPlaceMaterialsPathParameters,
+ { placeSlug }: ListPlaceMaterialsPathParameters,
     params?: ListPlaceMaterialsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPlaceMaterials>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListPlaceMaterialsQueryOptions({ placeId },params,options)
+  const queryOptions = getListPlaceMaterialsQueryOptions({ placeSlug },params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

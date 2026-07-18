@@ -10,6 +10,11 @@
  * Payload частичного обновления места.
  */
 export type UpdatePlaceRequest = {
+  /**
+     * Новый публичный slug места.
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  slug?: string;
   /** Новое название места. */
   title?: string;
   /** Обновлённое краткое описание. */
@@ -18,6 +23,4 @@ export type UpdatePlaceRequest = {
   tags?: string[];
   /** Новый идентификатор существующей категории места. */
   categoryId?: string;
-  /** Новый вес популярности. */
-  popularityWeight?: number;
 };

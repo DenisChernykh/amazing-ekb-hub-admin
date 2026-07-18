@@ -45,7 +45,6 @@ const placeListResponse: PlaceListResponse = {
 }
 
 const spaCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -61,7 +60,7 @@ const placeDetail: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-1',
   pinnedMaterial: null,
-  popularityWeight: 1,
+  slug: 'spa',
   status: 'active',
   summary: '',
   tags: [],

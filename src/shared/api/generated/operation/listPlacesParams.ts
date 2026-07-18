@@ -5,7 +5,6 @@
  * MVP backend API (OpenAPI-first)
  * OpenAPI spec version: 1.0.0
  */
-import type { ListPlacesSort } from '../model/listPlacesSort';
 import type { PageParameter } from './pageParameter';
 import type { PageSizeParameter } from './pageSizeParameter';
 
@@ -27,10 +26,6 @@ pageSize?: PageSizeParameter;
  * @maxLength 100
  */
 search?: string;
-/**
- * Режим сортировки списка мест.
- */
-sort?: ListPlacesSort;
 /**
  * Фильтр по идентификатору категории места.
  */
