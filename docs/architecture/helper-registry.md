@@ -34,6 +34,12 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `isOneOf`  | `src/shared/lib/type/is-one-of.ts` | exported   | Narrows unknown string values through a readonly literal allowlist.          |
 | `isRecord` | `src/shared/lib/type/is-record.ts` | exported   | Narrows unknown non-array objects before safely reading string-keyed fields. |
 
+## Shared Slug Helpers
+
+| Helper        | Location                      | Visibility | Contract                                                                |
+| ------------- | ----------------------------- | ---------- | ----------------------------------------------------------------------- |
+| `isValidSlug` | `src/shared/lib/slug/slug.ts` | exported   | Checks lowercase public slugs with digits and single hyphen separators. |
+
 ## Shared URL Helpers
 
 | Helper                      | Location                         | Visibility | Contract                                                                  |
@@ -77,15 +83,14 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Category Entity
 
-| Helper                      | Location                                             | Visibility | Contract                                                                                |
-| --------------------------- | ---------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
-| `usePlaceCategoriesQuery`   | `src/entities/category/model/category-hooks.ts`      | exported   | Loads the admin place category list through the `/admin/categories` endpoint.           |
-| `useCreateCategoryMutation` | `src/entities/category/model/category-mutations.ts`  | exported   | Creates a place category and invalidates the admin category list cache.                 |
-| `useUpdateCategoryMutation` | `src/entities/category/model/category-mutations.ts`  | exported   | Updates a place category and invalidates category plus admin places list caches.        |
-| `useDeleteCategoryMutation` | `src/entities/category/model/category-mutations.ts`  | exported   | Deletes an unused place category and invalidates the admin category list cache.         |
-| `invalidateCategoryQueries` | `src/entities/category/model/category-mutations.ts`  | exported   | Invalidates the admin category list cache after category mutations.                     |
-| `CategoryColorSwatch`       | `src/entities/category/ui/category-color-swatch.tsx` | exported   | Renders a category HEX color as a compact swatch plus text value.                       |
-| `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`          | exported   | Formats category datetime strings for compact admin tables without timezone day shifts. |
+| Helper                      | Location                                            | Visibility | Contract                                                                                |
+| --------------------------- | --------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| `usePlaceCategoriesQuery`   | `src/entities/category/model/category-hooks.ts`     | exported   | Loads the admin place category list through the `/admin/categories` endpoint.           |
+| `useCreateCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Creates a place category and invalidates the admin category list cache.                 |
+| `useUpdateCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Updates a place category and invalidates category plus admin places list caches.        |
+| `useDeleteCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Deletes an unused place category and invalidates the admin category list cache.         |
+| `invalidateCategoryQueries` | `src/entities/category/model/category-mutations.ts` | exported   | Invalidates the admin category list cache after category mutations.                     |
+| `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`         | exported   | Formats category datetime strings for compact admin tables without timezone day shifts. |
 
 ## Place Entity
 
@@ -213,31 +218,31 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Category Form Feature
 
-| Helper                            | Location                                                         | Visibility | Contract                                                                                        |
-| --------------------------------- | ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| `CategoryFormValues`              | `src/features/category/form/model/category-form.ts`              | exported   | Defines create/edit category form values before conversion to generated API payloads.           |
-| `CategoryFormChangedField`        | `src/features/category/form/model/category-form.ts`              | exported   | Describes a normalized category field changed in the edit drawer.                               |
-| `getCategoryColorValidationError` | `src/features/category/form/model/category-form.ts`              | exported   | Returns the local validation message for category HEX badge colors.                             |
-| `getCategorySlugValidationError`  | `src/features/category/form/model/category-form.ts`              | exported   | Returns the local validation message for optional category slug values.                         |
-| `getCategoryFormInitialValues`    | `src/features/category/form/model/category-form.ts`              | exported   | Maps admin category data to edit form initial values.                                           |
-| `toCreateCategoryRequest`         | `src/features/category/form/model/category-form.ts`              | exported   | Normalizes category form values into `POST /admin/categories` payload.                          |
-| `toUpdateCategoryRequest`         | `src/features/category/form/model/category-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/categories/{categoryId}` payload from changed fields. |
-| `hasCategoryFormChanges`          | `src/features/category/form/model/category-form.ts`              | exported   | Detects whether normalized category form values differ from loaded server values.               |
-| `getCategoryFormChangedFields`    | `src/features/category/form/model/category-form.ts`              | exported   | Returns normalized changed category fields for edit drawer chips.                               |
-| `CategoryFormFields`              | `src/features/category/form/ui/category-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit category drawers.                              |
-| `CategoryFormErrorAlert`          | `src/features/category/form/ui/category-form-error-alert.tsx`    | exported   | Renders normalized create/edit category API errors.                                             |
-| `CategoryFormChangedFields`       | `src/features/category/form/ui/category-form-changed-fields.tsx` | exported   | Renders changed field chips for category edit drawer.                                           |
-| `CreateCategoryDrawer`            | `src/features/category/create/ui/create-category-drawer.tsx`     | exported   | Creates categories through the entity mutation bridge with dirty-close protection.              |
-| `EditCategoryDrawer`              | `src/features/category/edit/ui/edit-category-drawer.tsx`         | exported   | Edits category fields through the entity mutation bridge with dirty diff chips.                 |
-| `EditCategoryDrawerActions`       | `src/features/category/edit/ui/edit-category-drawer-actions.tsx` | exported   | Renders edit category drawer actions.                                                           |
-| `DeleteCategoryButton`            | `src/features/category/delete/ui/delete-category-button.tsx`     | exported   | Deletes unused categories after confirmation through the entity mutation bridge.                |
-| `CategoriesScreen`                | `src/widgets/categories/ui/categories-screen.tsx`                | exported   | Loads admin categories and hosts the category table plus create/edit drawers.                   |
+| Helper                           | Location                                                         | Visibility | Contract                                                                                        |
+| -------------------------------- | ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `CategoryFormValues`             | `src/features/category/form/model/category-form.ts`              | exported   | Defines create/edit category form values before conversion to generated API payloads.           |
+| `CategoryFormChangedField`       | `src/features/category/form/model/category-form.ts`              | exported   | Describes a normalized category field changed in the edit drawer.                               |
+| `getCategorySlugValidationError` | `src/features/category/form/model/category-form.ts`              | exported   | Returns the local validation message for optional category slug values.                         |
+| `getCategoryFormInitialValues`   | `src/features/category/form/model/category-form.ts`              | exported   | Maps admin category data to edit form initial values.                                           |
+| `toCreateCategoryRequest`        | `src/features/category/form/model/category-form.ts`              | exported   | Normalizes category form values into `POST /admin/categories` payload.                          |
+| `toUpdateCategoryRequest`        | `src/features/category/form/model/category-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/categories/{categoryId}` payload from changed fields. |
+| `hasCategoryFormChanges`         | `src/features/category/form/model/category-form.ts`              | exported   | Detects whether normalized category form values differ from loaded server values.               |
+| `getCategoryFormChangedFields`   | `src/features/category/form/model/category-form.ts`              | exported   | Returns normalized changed category fields for edit drawer chips.                               |
+| `CategoryFormFields`             | `src/features/category/form/ui/category-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit category drawers.                              |
+| `CategoryFormErrorAlert`         | `src/features/category/form/ui/category-form-error-alert.tsx`    | exported   | Renders normalized create/edit category API errors.                                             |
+| `CategoryFormChangedFields`      | `src/features/category/form/ui/category-form-changed-fields.tsx` | exported   | Renders changed field chips for category edit drawer.                                           |
+| `CreateCategoryDrawer`           | `src/features/category/create/ui/create-category-drawer.tsx`     | exported   | Creates categories through the entity mutation bridge with dirty-close protection.              |
+| `EditCategoryDrawer`             | `src/features/category/edit/ui/edit-category-drawer.tsx`         | exported   | Edits category fields through the entity mutation bridge with dirty diff chips.                 |
+| `EditCategoryDrawerActions`      | `src/features/category/edit/ui/edit-category-drawer-actions.tsx` | exported   | Renders edit category drawer actions.                                                           |
+| `DeleteCategoryButton`           | `src/features/category/delete/ui/delete-category-button.tsx`     | exported   | Deletes unused categories after confirmation through the entity mutation bridge.                |
+| `CategoriesScreen`               | `src/widgets/categories/ui/categories-screen.tsx`                | exported   | Loads admin categories and hosts the category table plus create/edit drawers.                   |
 
 ## Place Form Feature
 
 | Helper                           | Location                                                              | Visibility | Contract                                                                                                                                               |
 | -------------------------------- | --------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `PlaceFormValues`                | `src/features/place/form/model/place-form.ts`                         | exported   | Defines create/edit place form values, including optional `summary`/`tags`, before conversion to generated API payloads.                               |
+| `getPlaceSlugValidationError`    | `src/features/place/form/model/place-form.ts`                         | exported   | Returns the local validation message for optional place slug values.                                                                                   |
 | `getPlaceFormInitialValues`      | `src/features/place/form/model/place-form.ts`                         | exported   | Maps admin `PlaceDetail` to form initial values.                                                                                                       |
 | `toCreatePlaceRequest`           | `src/features/place/form/model/place-form.ts`                         | exported   | Normalizes form values into `POST /admin/places` payload, preserving empty optional `summary`/`tags` as `''` and `[]`.                                 |
 | `toUpdatePlaceRequest`           | `src/features/place/form/model/place-form.ts`                         | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only, including explicit clears for optional `summary`/`tags`. |

@@ -58,14 +58,12 @@ const createWrapper = (queryClient: QueryClient) => {
 }
 
 const spaCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
 }
 
 const cafeCategory = {
-  badgeBackgroundColor: '#fef3c7',
   id: 'category_cafe',
   slug: 'cafe',
   title: 'Кафе',
@@ -75,7 +73,7 @@ const placeSummary: PlaceSummary = {
   category: spaCategory,
   coverImageUrl: null,
   id: 'place-1',
-  popularityWeight: 7,
+  slug: 'new-spa',
   status: 'active',
   summary: 'Новый SPA в центре',
   tags: ['spa'],
@@ -92,7 +90,7 @@ const placeDetail: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-1',
   pinnedMaterial: null,
-  popularityWeight: 8,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'SPA без закрепления',
   tags: ['spa'],

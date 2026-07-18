@@ -1,4 +1,3 @@
-import { CategoryColorSwatch } from '@/entities/category/ui/category-color-swatch'
 import { formatCategoryDateTime } from '@/entities/category/ui/category-meta'
 import { DeleteCategoryButton } from '@/features/category/delete/ui/delete-category-button'
 import type { AdminPlaceCategory } from '@/shared/api/generated/model'
@@ -37,14 +36,6 @@ export function getCategoriesTableColumns({
         <Typography.Text code>{slug}</Typography.Text>
       ),
       title: 'Ярлык',
-    },
-    {
-      dataIndex: 'badgeBackgroundColor',
-      key: 'badgeBackgroundColor',
-      render: (color: AdminPlaceCategory['badgeBackgroundColor']) => (
-        <CategoryColorSwatch color={color} />
-      ),
-      title: 'Цвет бейджа',
     },
     {
       dataIndex: 'updatedAt',

@@ -2,6 +2,7 @@ import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getPlaceFormInitialValues,
+  getPlaceSlugValidationError,
   hasPlaceFormChanges,
   toCreatePlaceRequest,
   toUpdatePlaceRequest,
@@ -9,14 +10,12 @@ import {
 } from './place-form'
 
 const spaCategory: PlaceCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
 }
 
 const cafeCategory: PlaceCategory = {
-  badgeBackgroundColor: '#fef3c7',
   id: 'category_cafe',
   slug: 'cafe',
   title: 'Кафе',
@@ -32,7 +31,7 @@ const place: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-1',
   pinnedMaterial: null,
-  popularityWeight: 7,
+  slug: 'quiet-spa',
   status: 'active',
   summary: 'SPA в центре',
   tags: ['spa', 'relax'],
@@ -43,7 +42,7 @@ describe('place form helpers', () => {
   it('maps place detail to form initial values', () => {
     expect(getPlaceFormInitialValues(place)).toEqual({
       categoryId: 'category_spa',
-      popularityWeight: 7,
+      slug: 'quiet-spa',
       summary: 'SPA в центре',
       tags: ['spa', 'relax'],
       title: 'Тихий SPA',
@@ -53,7 +52,7 @@ describe('place form helpers', () => {
   it('normalizes create payload values', () => {
     const values: PlaceFormValues = {
       categoryId: 'category_spa',
-      popularityWeight: null,
+      slug: ' new-quiet-spa ',
       summary: '  Новый SPA в центре  ',
       tags: [' spa ', '', 'relax'],
       title: '  Тихий SPA  ',
@@ -61,6 +60,7 @@ describe('place form helpers', () => {
 
     expect(toCreatePlaceRequest(values)).toEqual({
       categoryId: 'category_spa',
+      slug: 'new-quiet-spa',
       summary: 'Новый SPA в центре',
       tags: ['spa', 'relax'],
       title: 'Тихий SPA',
@@ -86,7 +86,7 @@ describe('place form helpers', () => {
     const values: PlaceFormValues = {
       ...initialValues,
       categoryId: cafeCategory.id,
-      popularityWeight: 11,
+      slug: 'quiet-spa-premium',
       summary: '  SPA с обновленным описанием  ',
       tags: [' spa ', 'city'],
       title: '  Тихий SPA  ',
@@ -94,7 +94,7 @@ describe('place form helpers', () => {
 
     expect(toUpdatePlaceRequest(values, initialValues)).toEqual({
       categoryId: 'category_cafe',
-      popularityWeight: 11,
+      slug: 'quiet-spa-premium',
       summary: 'SPA с обновленным описанием',
       tags: ['spa', 'city'],
     })
@@ -126,5 +126,13 @@ describe('place form helpers', () => {
       summary: '',
       tags: [],
     })
+  })
+
+  it('returns user-facing slug validation errors', () => {
+    expect(getPlaceSlugValidationError('')).toBeNull()
+    expect(getPlaceSlugValidationError('Тихий SPA')).toBe(
+      'Используйте маленькие латинские буквы, цифры и дефисы, например quiet-spa',
+    )
+    expect(getPlaceSlugValidationError('quiet-spa')).toBeNull()
   })
 })

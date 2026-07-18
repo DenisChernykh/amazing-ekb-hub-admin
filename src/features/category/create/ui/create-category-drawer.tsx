@@ -90,7 +90,6 @@ export function CreateCategoryDrawer({
     >
       <Form<CategoryFormValues>
         form={form}
-        initialValues={{ badgeBackgroundColor: '#faf0ed' }}
         layout="vertical"
         name="create-category"
         onFinish={handleFinish}

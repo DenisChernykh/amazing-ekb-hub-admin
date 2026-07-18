@@ -104,7 +104,8 @@ export function EditPlaceForm({
 
       <PlaceFormFields
         disabled={updatePlaceMutation.isPending}
-        popularityWeightRequired
+        showSlug
+        slugRequired
       />
 
       <Flex gap={8} justify="end" wrap>

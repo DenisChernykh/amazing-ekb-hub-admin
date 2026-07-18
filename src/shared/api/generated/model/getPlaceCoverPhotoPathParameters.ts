@@ -7,5 +7,5 @@
  */
 
 export type GetPlaceCoverPhotoPathParameters = {
- placeId: string,
+ placeSlug: string,
  }

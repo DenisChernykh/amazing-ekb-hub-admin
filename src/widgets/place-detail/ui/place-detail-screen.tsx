@@ -117,6 +117,7 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
           <Descriptions.Item label="Категория">
             <PlaceCategoryTag category={place.category} />
           </Descriptions.Item>
+          <Descriptions.Item label="Ярлык">{place.slug}</Descriptions.Item>
           <Descriptions.Item label="Описание">
             {place.summary}
           </Descriptions.Item>
@@ -126,9 +127,6 @@ export function PlaceDetailScreen({ placeId }: PlaceDetailScreenProps) {
                 <Tag key={tag}>{tag}</Tag>
               ))}
             </Space>
-          </Descriptions.Item>
-          <Descriptions.Item label="Вес популярности">
-            {place.popularityWeight}
           </Descriptions.Item>
           <Descriptions.Item label="Счетчики материалов">
             <Space size={[8, 4]} wrap>

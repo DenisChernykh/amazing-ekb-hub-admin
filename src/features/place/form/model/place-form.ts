@@ -3,6 +3,7 @@ import type {
   PlaceDetail,
   UpdatePlaceRequest,
 } from '@/shared/api/generated/model'
+import { isValidSlug } from '@/shared/lib/slug/slug'
 
 /**
  * Значения общей формы создания и редактирования места.
@@ -13,7 +14,7 @@ import type {
  */
 export type PlaceFormValues = {
   categoryId: string
-  popularityWeight?: number | null
+  slug?: string
   summary?: string
   tags?: string[]
   title: string
@@ -21,7 +22,7 @@ export type PlaceFormValues = {
 
 type NormalizedPlaceFormValues = {
   categoryId: string
-  popularityWeight: number | null
+  slug: string | null
   summary: string
   tags: string[]
   title: string
@@ -30,11 +31,17 @@ type NormalizedPlaceFormValues = {
 const normalizeTags = (tags: string[] | undefined) =>
   tags?.map((tag) => tag.trim()).filter(Boolean) ?? []
 
+const trimOptionalValue = (value: string | undefined) => {
+  const trimmedValue = (value ?? '').trim()
+
+  return trimmedValue ? trimmedValue : null
+}
+
 const normalizePlaceFormValues = (
   values: PlaceFormValues,
 ): NormalizedPlaceFormValues => ({
   categoryId: values.categoryId,
-  popularityWeight: values.popularityWeight ?? null,
+  slug: trimOptionalValue(values.slug),
   summary: (values.summary ?? '').trim(),
   tags: normalizeTags(values.tags),
   title: values.title.trim(),
@@ -53,7 +60,7 @@ const areTagsEqual = (left: string[], right: string[]) => {
 export function getPlaceFormInitialValues(place: PlaceDetail): PlaceFormValues {
   return {
     categoryId: place.category.id,
-    popularityWeight: place.popularityWeight,
+    slug: place.slug,
     summary: place.summary,
     tags: place.tags,
     title: place.title,
@@ -68,13 +75,18 @@ export function toCreatePlaceRequest(
 ): CreatePlaceRequest {
   const normalizedValues = normalizePlaceFormValues(values)
 
-  return {
+  const request: CreatePlaceRequest = {
     categoryId: normalizedValues.categoryId,
-    popularityWeight: normalizedValues.popularityWeight ?? undefined,
     summary: normalizedValues.summary,
     tags: normalizedValues.tags,
     title: normalizedValues.title,
   }
+
+  if (normalizedValues.slug !== null) {
+    request.slug = normalizedValues.slug
+  }
+
+  return request
 }
 
 /**
@@ -106,12 +118,12 @@ export function toUpdatePlaceRequest(
     request.categoryId = normalizedValues.categoryId
   }
 
-  if (
-    normalizedValues.popularityWeight !== null &&
-    normalizedValues.popularityWeight !==
-      normalizedInitialValues.popularityWeight
-  ) {
-    request.popularityWeight = normalizedValues.popularityWeight
+  if (normalizedValues.slug !== normalizedInitialValues.slug) {
+    if (normalizedValues.slug === null) {
+      throw new Error('Place form field "slug" is required')
+    }
+
+    request.slug = normalizedValues.slug
   }
 
   return request
@@ -132,7 +144,25 @@ export function hasPlaceFormChanges(
     normalizedValues.summary !== normalizedInitialValues.summary ||
     !areTagsEqual(normalizedValues.tags, normalizedInitialValues.tags) ||
     normalizedValues.categoryId !== normalizedInitialValues.categoryId ||
-    normalizedValues.popularityWeight !==
-      normalizedInitialValues.popularityWeight
+    normalizedValues.slug !== normalizedInitialValues.slug
   )
+}
+
+/**
+ * Возвращает ошибку локальной проверки публичного slug места.
+ *
+ * @returns `null`, если slug пустой или соответствует backend-формату.
+ */
+export function getPlaceSlugValidationError(value: string | undefined) {
+  const normalizedValue = (value ?? '').trim()
+
+  if (!normalizedValue) {
+    return null
+  }
+
+  if (!isValidSlug(normalizedValue)) {
+    return 'Используйте маленькие латинские буквы, цифры и дефисы, например quiet-spa'
+  }
+
+  return null
 }

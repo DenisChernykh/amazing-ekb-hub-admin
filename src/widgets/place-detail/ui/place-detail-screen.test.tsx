@@ -61,7 +61,6 @@ const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const hiddenPlace: PlaceDetail = {
   category: {
-    badgeBackgroundColor: '#faf0ed',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
@@ -74,7 +73,7 @@ const hiddenPlace: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-2',
   pinnedMaterial: null,
-  popularityWeight: 5,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'Скрытый SPA для проверки admin detail',
   tags: ['spa', 'hidden'],
@@ -122,6 +121,8 @@ describe('PlaceDetailScreen', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Скрыто')).toBeInTheDocument()
     expect(screen.getByText('SPA')).toBeInTheDocument()
+    expect(screen.getByText('hidden-spa')).toBeInTheDocument()
+    expect(screen.queryByText('Вес популярности')).not.toBeInTheDocument()
     expect(
       screen.getByText('Скрытый SPA для проверки admin detail'),
     ).toBeInTheDocument()

@@ -7,5 +7,5 @@
  */
 
 export type GetPlaceDetailPathParameters = {
- placeId: string,
+ placeSlug: string,
  }

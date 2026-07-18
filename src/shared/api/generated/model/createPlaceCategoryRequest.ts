@@ -17,9 +17,4 @@ export type CreatePlaceCategoryRequest = {
   slug?: string;
   /** Название категории. */
   title: string;
-  /**
-     * Цвет фона бейджа. Backend сохраняет значение в lowercase.
-     * @pattern ^#[0-9a-fA-F]{6}$
-     */
-  badgeBackgroundColor: string;
 };

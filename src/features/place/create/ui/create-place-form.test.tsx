@@ -149,7 +149,6 @@ const mockedUseUploadPlaceCoverPhotoMutation = vi.mocked(
 const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
-  badgeBackgroundColor: '#faf0ed',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -159,7 +158,7 @@ const createdPlace: PlaceSummary = {
   category: spaCategory,
   coverImageUrl: null,
   id: 'place-1',
-  popularityWeight: 7,
+  slug: 'quiet-spa',
   status: 'active',
   summary: 'Новый SPA в центре',
   tags: ['spa'],
@@ -234,16 +233,12 @@ describe('CreatePlaceForm', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Теги' }), {
       target: { value: 'spa' },
     })
-    fireEvent.change(screen.getByLabelText('Вес популярности'), {
-      target: { value: '7' },
-    })
     fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
 
     await waitFor(() => {
       expect(createMutateAsync).toHaveBeenCalledWith({
         data: {
           categoryId: 'category_spa',
-          popularityWeight: 7,
           summary: 'Новый SPA в центре',
           tags: ['spa'],
           title: 'Тихий SPA',

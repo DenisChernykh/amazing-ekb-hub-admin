@@ -10,6 +10,11 @@
  * Payload создания нового места.
  */
 export type CreatePlaceRequest = {
+  /**
+     * Необязательный ручной slug. Если поле отсутствует, backend генерирует slug из title.
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  slug?: string;
   /** Название места. */
   title: string;
   /** Короткое описание места. Если поле не передано, backend сохранит пустую строку. */
@@ -18,6 +23,4 @@ export type CreatePlaceRequest = {
   tags?: string[];
   /** Идентификатор существующей категории места. */
   categoryId: string;
-  /** Начальный вес популярности. Если поле не передано, backend сохранит 0. */
-  popularityWeight?: number;
 };

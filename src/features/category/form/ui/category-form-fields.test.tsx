@@ -6,7 +6,7 @@ import { CategoryFormFields } from './category-form-fields'
 describe('CategoryFormFields', () => {
   it('hides the slug field by default for category creation', () => {
     render(
-      <Form initialValues={{ badgeBackgroundColor: '#faf0ed' }}>
+      <Form>
         <CategoryFormFields />
       </Form>,
     )
@@ -21,7 +21,7 @@ describe('CategoryFormFields', () => {
 
   it('renders the slug field as a user-facing label when enabled', () => {
     render(
-      <Form initialValues={{ badgeBackgroundColor: '#faf0ed' }}>
+      <Form>
         <CategoryFormFields showSlug />
       </Form>,
     )
@@ -37,9 +37,9 @@ describe('CategoryFormFields', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders badge color as a color picker instead of a manual HEX input', () => {
+  it('does not render the removed badge color control', () => {
     const { container } = render(
-      <Form initialValues={{ badgeBackgroundColor: '#faf0ed' }}>
+      <Form>
         <CategoryFormFields />
       </Form>,
     )
@@ -47,6 +47,6 @@ describe('CategoryFormFields', () => {
     expect(
       screen.queryByRole('textbox', { name: 'Цвет бейджа' }),
     ).not.toBeInTheDocument()
-    expect(container.querySelector('.ant-color-picker-trigger')).not.toBeNull()
+    expect(container.querySelector('.ant-color-picker-trigger')).toBeNull()
   })
 })

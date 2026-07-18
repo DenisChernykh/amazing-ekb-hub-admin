@@ -3,9 +3,7 @@ import type {
   CreatePlaceCategoryRequest,
   UpdatePlaceCategoryRequest,
 } from '@/shared/api/generated/model'
-
-const categoryColorPattern = /^#[0-9a-fA-F]{6}$/
-const categorySlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+import { isValidSlug } from '@/shared/lib/slug/slug'
 
 /**
  * Значения общей формы создания и редактирования категории места.
@@ -13,13 +11,11 @@ const categorySlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
  * @remarks Поля допускают `undefined`, пока Ant Design Form еще не прошла required-валидацию.
  */
 export type CategoryFormValues = {
-  badgeBackgroundColor?: string
   slug?: string
   title?: string
 }
 
 type NormalizedCategoryFormValues = {
-  badgeBackgroundColor: string
   slug: string | null
   title: string
 }
@@ -33,7 +29,6 @@ export type CategoryFormChangedField = {
 }
 
 const categoryFormFieldLabels = {
-  badgeBackgroundColor: 'Цвет',
   slug: 'Ярлык',
   title: 'Название',
 } satisfies Record<keyof NormalizedCategoryFormValues, string>
@@ -41,7 +36,6 @@ const categoryFormFieldLabels = {
 const categoryFormFieldKeys: Array<keyof NormalizedCategoryFormValues> = [
   'title',
   'slug',
-  'badgeBackgroundColor',
 ]
 
 const trimOptionalValue = (value: string | undefined) => {
@@ -53,9 +47,6 @@ const trimOptionalValue = (value: string | undefined) => {
 const normalizeCategoryFormValues = (
   values: CategoryFormValues,
 ): NormalizedCategoryFormValues => ({
-  badgeBackgroundColor: (values.badgeBackgroundColor ?? '')
-    .trim()
-    .toLowerCase(),
   slug: trimOptionalValue(values.slug),
   title: (values.title ?? '').trim(),
 })
@@ -66,25 +57,6 @@ const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
   }
 
   return value
-}
-
-/**
- * Возвращает ошибку локальной проверки HEX-цвета категории.
- *
- * @returns `null`, если цвет заполнен в формате `#RRGGBB`.
- */
-export function getCategoryColorValidationError(value: string | undefined) {
-  const normalizedValue = (value ?? '').trim()
-
-  if (!normalizedValue) {
-    return 'Введите HEX-цвет'
-  }
-
-  if (!categoryColorPattern.test(normalizedValue)) {
-    return 'Укажите цвет в формате #RRGGBB'
-  }
-
-  return null
 }
 
 /**
@@ -99,7 +71,7 @@ export function getCategorySlugValidationError(value: string | undefined) {
     return null
   }
 
-  if (!categorySlugPattern.test(normalizedValue)) {
+  if (!isValidSlug(normalizedValue)) {
     return 'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe'
   }
 
@@ -113,7 +85,6 @@ export function getCategoryFormInitialValues(
   category: AdminPlaceCategory,
 ): CategoryFormValues {
   return {
-    badgeBackgroundColor: category.badgeBackgroundColor,
     slug: category.slug,
     title: category.title,
   }
@@ -127,7 +98,6 @@ export function toCreateCategoryRequest(
 ): CreatePlaceCategoryRequest {
   const normalizedValues = normalizeCategoryFormValues(values)
   const request: CreatePlaceCategoryRequest = {
-    badgeBackgroundColor: normalizedValues.badgeBackgroundColor,
     title: normalizedValues.title,
   }
 
@@ -155,13 +125,6 @@ export function toUpdateCategoryRequest(
 
   if (normalizedValues.slug !== normalizedInitialValues.slug) {
     request.slug = getRequiredValue(normalizedValues.slug, 'slug')
-  }
-
-  if (
-    normalizedValues.badgeBackgroundColor !==
-    normalizedInitialValues.badgeBackgroundColor
-  ) {
-    request.badgeBackgroundColor = normalizedValues.badgeBackgroundColor
   }
 
   return request

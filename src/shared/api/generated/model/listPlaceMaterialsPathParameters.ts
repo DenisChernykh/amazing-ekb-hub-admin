@@ -7,5 +7,5 @@
  */
 
 export type ListPlaceMaterialsPathParameters = {
- placeId: string,
+ placeSlug: string,
  }

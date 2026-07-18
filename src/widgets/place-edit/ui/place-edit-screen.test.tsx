@@ -48,7 +48,6 @@ const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const place: PlaceDetail = {
   category: {
-    badgeBackgroundColor: '#faf0ed',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
@@ -61,7 +60,7 @@ const place: PlaceDetail = {
   coverImageUrl: null,
   id: 'place-2',
   pinnedMaterial: null,
-  popularityWeight: 5,
+  slug: 'hidden-spa',
   status: 'hidden',
   summary: 'Скрытый SPA для проверки admin detail',
   tags: ['spa', 'hidden'],
