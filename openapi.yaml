@@ -609,6 +609,14 @@ components:
         message: Telegram import is already running for this content source
         error: Conflict
 
+    ActivePlaceImportConflictError:
+      summary: У администратора уже есть активный импорт места
+      value:
+        statusCode: 409
+        code: active_place_import_exists
+        operationId: cmrvo_place_import_001
+        message: An active place import already exists
+
     PinnedMaterialBadRequestError:
       summary: Материал не принадлежит месту
       value:
@@ -902,6 +910,25 @@ components:
           type: string
           description: Стандартное HTTP reason summary от NestJS.
           example: Bad Request
+
+    ActivePlaceImportConflictResponse:
+      type: object
+      additionalProperties: false
+      description: Конфликт запуска с идентификатором operation, которую frontend должен восстановить.
+      required: [statusCode, code, operationId, message]
+      properties:
+        statusCode:
+          type: integer
+          enum: [409]
+        code:
+          type: string
+          enum: [active_place_import_exists]
+        operationId:
+          type: string
+          description: Идентификатор уже существующей active operation текущего администратора.
+        message:
+          type: string
+          enum: [An active place import already exists]
 
     AuthLoginRequest:
       type: object
@@ -2740,7 +2767,43 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
         '409':
-          description: У администратора уже есть активная operation.
+          description: У администратора уже есть активная operation; response содержит её ID для восстановления frontend route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivePlaceImportConflictResponse'
+              examples:
+                default:
+                  $ref: '#/components/examples/ActivePlaceImportConflictError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /admin/place-imports/active:
+    get:
+      tags: [Admin]
+      summary: Get current active place import
+      description: Однократный recovery lookup при входе на стартовую страницу импорта; polling и SSE этот endpoint не заменяет.
+      operationId: getActivePlaceImport
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      responses:
+        '200':
+          description: Единственная active operation текущего администратора.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportOperation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: У текущего администратора нет active operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NestErrorResponse'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
 

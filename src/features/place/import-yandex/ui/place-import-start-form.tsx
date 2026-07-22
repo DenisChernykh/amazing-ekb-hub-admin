@@ -1,4 +1,7 @@
-import { useStartPlaceImportMutation } from '@/entities/place-import/model/place-import-mutations'
+import {
+  getActivePlaceImportConflictOperationId,
+  useStartPlaceImportMutation,
+} from '@/entities/place-import/model/place-import-mutations'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import { getHttpUrlValidationError } from '@/shared/lib/url/safe-url'
 import { ImportOutlined } from '@ant-design/icons'
@@ -14,7 +17,16 @@ export function PlaceImportStartForm({ onStarted }: PlaceImportStartFormProps) {
   const [form] = Form.useForm<{ url: string }>()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const mutation = useStartPlaceImportMutation({
-    onError: (error) => setErrorMessage(normalizeApiError(error).message),
+    onError: (error) => {
+      const activeOperationId = getActivePlaceImportConflictOperationId(error)
+
+      if (activeOperationId) {
+        onStarted(activeOperationId)
+        return
+      }
+
+      setErrorMessage(normalizeApiError(error).message)
+    },
     onSuccess: (operation) => onStarted(operation.id),
   })
 
