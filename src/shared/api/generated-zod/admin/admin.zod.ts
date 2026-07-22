@@ -319,7 +319,78 @@ export const StartYandexMapsPlaceImport403Response = zod.strictObject({
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
+export const StartYandexMapsPlaceImport409Response = zod.strictObject({
+  "statusCode": zod.literal(409),
+  "code": zod.enum(['active_place_import_exists']),
+  "operationId": zod.string().describe('Идентификатор уже существующей active operation текущего администратора.'),
+  "message": zod.enum(['An active place import already exists'])
+}).describe('Конфликт запуска с идентификатором operation, которую frontend должен восстановить.')
+
 export const StartYandexMapsPlaceImport503Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Однократный recovery lookup при входе на стартовую страницу импорта; polling и SSE этот endpoint не заменяет.
+ * @summary Get current active place import
+ */
+
+export const getActivePlaceImport200ResponseAttemptMin = 0;
+
+
+
+export const GetActivePlaceImport200Response = zod.strictObject({
+  "id": zod.string(),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "version": zod.number().min(1),
+  "attempt": zod.number().min(getActivePlaceImport200ResponseAttemptMin),
+  "sourceUrl": zod.url().describe('Sanitized URL без credentials, fragment и произвольных query-параметров.'),
+  "title": zod.string().nullable(),
+  "mapsUrl": zod.url().nullable(),
+  "organizationId": zod.string().nullable(),
+  "category": zod.strictObject({
+  "id": zod.string().nullable(),
+  "title": zod.string(),
+  "status": zod.enum(['draft', 'active']).nullable(),
+  "resolution": zod.enum(['existing', 'will_create', 'created'])
+}).nullable(),
+  "possibleDuplicate": zod.strictObject({
+  "placeId": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "captchaExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "previewExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "outcome": zod.enum(['created', 'already_exists']).nullable(),
+  "resultPlaceId": zod.string().nullable(),
+  "error": zod.strictObject({
+  "code": zod.enum(['invalid_url', 'not_organization_url', 'redirect_not_allowed', 'source_not_found', 'captcha_session_expired', 'source_blocked', 'source_timeout', 'parse_failed', 'missing_title', 'missing_primary_category', 'missing_organization_id', 'category_conflict', 'external_identity_conflict', 'confirmation_expired', 'internal_error']),
+  "message": zod.string().describe('Безопасная диагностика без URL query, HTML, cookies, screenshot\/HAR и browser state.')
+}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
+}).describe('Read-only snapshot; preview-поля нельзя подменить при confirm.')
+
+export const GetActivePlaceImport401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetActivePlaceImport403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetActivePlaceImport404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetActivePlaceImport503Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')

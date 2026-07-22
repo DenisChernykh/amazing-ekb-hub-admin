@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ActivePlaceImportConflictResponse,
   AdminMaterialLibraryItem,
   AdminMaterialLibraryListResponse,
   AdminPlaceCategory,
@@ -580,7 +581,7 @@ export const startYandexMapsPlaceImport = (
 
 
 
-export const getStartYandexMapsPlaceImportMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>,
+export const getStartYandexMapsPlaceImportMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ActivePlaceImportConflictResponse | ServiceUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, TError,{data: BodyType<StartPlaceImportRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
 ): UseMutationOptions<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, TError,{data: BodyType<StartPlaceImportRequest>}, TContext> => {
 
@@ -609,12 +610,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type StartYandexMapsPlaceImportMutationResult = NonNullable<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>>
     export type StartYandexMapsPlaceImportMutationBody = BodyType<StartPlaceImportRequest>
-    export type StartYandexMapsPlaceImportMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>
+    export type StartYandexMapsPlaceImportMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ActivePlaceImportConflictResponse | ServiceUnavailableResponse>
 
     /**
  * @summary Start Yandex Maps place import
  */
-export const useStartYandexMapsPlaceImport = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>,
+export const useStartYandexMapsPlaceImport = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | ActivePlaceImportConflictResponse | ServiceUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, TError,{data: BodyType<StartPlaceImportRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof startYandexMapsPlaceImport>>,
@@ -625,6 +626,99 @@ export const useStartYandexMapsPlaceImport = <TError = ErrorType<ValidationError
       return useMutation(getStartYandexMapsPlaceImportMutationOptions(options), queryClient);
     }
     /**
+ * Однократный recovery lookup при входе на стартовую страницу импорта; polling и SSE этот endpoint не заменяет.
+ * @summary Get current active place import
+ */
+export const getActivePlaceImport = (
+
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportOperation>(
+      {url: `/admin/place-imports/active`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetActivePlaceImportQueryKey = () => {
+    return [
+    `/admin/place-imports/active`
+    ] as const;
+    }
+
+
+export const getGetActivePlaceImportQueryOptions = <TData = Awaited<ReturnType<typeof getActivePlaceImport>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse | ServiceUnavailableResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getActivePlaceImport>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetActivePlaceImportQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getActivePlaceImport>>> = ({ signal }) => getActivePlaceImport(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getActivePlaceImport>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetActivePlaceImportQueryResult = NonNullable<Awaited<ReturnType<typeof getActivePlaceImport>>>
+export type GetActivePlaceImportQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse | ServiceUnavailableResponse>
+
+
+export function useGetActivePlaceImport<TData = Awaited<ReturnType<typeof getActivePlaceImport>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse | ServiceUnavailableResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getActivePlaceImport>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getActivePlaceImport>>,
+          TError,
+          Awaited<ReturnType<typeof getActivePlaceImport>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetActivePlaceImport<TData = Awaited<ReturnType<typeof getActivePlaceImport>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse | ServiceUnavailableResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getActivePlaceImport>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getActivePlaceImport>>,
+          TError,
+          Awaited<ReturnType<typeof getActivePlaceImport>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetActivePlaceImport<TData = Awaited<ReturnType<typeof getActivePlaceImport>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse | ServiceUnavailableResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getActivePlaceImport>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current active place import
+ */
+
+export function useGetActivePlaceImport<TData = Awaited<ReturnType<typeof getActivePlaceImport>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NestErrorResponse | ServiceUnavailableResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getActivePlaceImport>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetActivePlaceImportQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * @summary Get place import operation
  */
 export const getPlaceImportOperation = (

@@ -1,5 +1,6 @@
 import { isTerminalPlaceImportStatus } from '@/entities/place-import/model/place-import-cache'
 import {
+  useActivePlaceImportQuery,
   usePlaceImportEvents,
   usePlaceImportOperationQuery,
 } from '@/entities/place-import/model/place-import-hooks'
@@ -8,13 +9,14 @@ import { PlaceImportActions } from '@/features/place/import-yandex/ui/place-impo
 import { PlaceImportCaptchaPanel } from '@/features/place/import-yandex/ui/place-import-captcha-panel'
 import { PlaceImportPreview } from '@/features/place/import-yandex/ui/place-import-preview'
 import { PlaceImportStartForm } from '@/features/place/import-yandex/ui/place-import-start-form'
+import { getApiErrorStatus } from '@/shared/api/client/api-error'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
   ScreenLoadingState,
 } from '@/shared/ui/screen-state/screen-state'
 import { Alert, Card, Flex, Spin, Statistic, Tag, Typography } from 'antd'
-import { Link, Navigate, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 
 /** Экран запуска и URL-driven resume операции импорта места из Яндекс Карт. */
 export function PlaceImportYandexScreen({
@@ -22,26 +24,68 @@ export function PlaceImportYandexScreen({
 }: {
   operationId?: string
 }) {
-  const navigate = useNavigate()
-  const operationQuery = usePlaceImportOperationQuery(operationId ?? '')
-  const operation = operationQuery.data
-  const events = usePlaceImportEvents(operation)
-
   if (!operationId) {
+    return <PlaceImportYandexStartScreen />
+  }
+
+  return <PlaceImportYandexOperationScreen operationId={operationId} />
+}
+
+function PlaceImportYandexStartScreen() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const activeQuery = useActivePlaceImportQuery(location.key)
+
+  if (activeQuery.isPending) {
     return (
       <Flex gap={16} vertical>
         <DocumentTitle title="Импорт из Яндекс Карт" />
-        <Typography.Title level={2}>Импорт из Яндекс Карт</Typography.Title>
-        <Card>
-          <PlaceImportStartForm
-            onStarted={(startedOperationId) =>
-              navigate(`/places/import/yandex/${startedOperationId}`)
-            }
-          />
-        </Card>
+        <ScreenLoadingState title="Проверяем активный импорт" />
       </Flex>
     )
   }
+
+  if (activeQuery.isSuccess) {
+    return (
+      <Navigate replace to={`/places/import/yandex/${activeQuery.data.id}`} />
+    )
+  }
+
+  const hasNoActiveImport =
+    activeQuery.isError && getApiErrorStatus(activeQuery.error) === 404
+
+  if (activeQuery.isError && !hasNoActiveImport) {
+    return (
+      <Flex gap={16} vertical>
+        <DocumentTitle title="Импорт из Яндекс Карт" />
+        <ScreenApiErrorState error={activeQuery.error} />
+      </Flex>
+    )
+  }
+
+  return (
+    <Flex gap={16} vertical>
+      <DocumentTitle title="Импорт из Яндекс Карт" />
+      <Typography.Title level={2}>Импорт из Яндекс Карт</Typography.Title>
+      <Card>
+        <PlaceImportStartForm
+          onStarted={(startedOperationId) =>
+            navigate(`/places/import/yandex/${startedOperationId}`)
+          }
+        />
+      </Card>
+    </Flex>
+  )
+}
+
+function PlaceImportYandexOperationScreen({
+  operationId,
+}: {
+  operationId: string
+}) {
+  const operationQuery = usePlaceImportOperationQuery(operationId)
+  const operation = operationQuery.data
+  const events = usePlaceImportEvents(operation)
 
   if (operationQuery.isPending) {
     return (

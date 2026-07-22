@@ -3,6 +3,7 @@ import {
   type ApiClientError,
 } from '@/shared/api/client/api-error'
 import {
+  getActivePlaceImport,
   getGetPlaceImportOperationQueryKey,
   getPlaceImportOperation,
   readPlaceImportEvents,
@@ -31,6 +32,18 @@ export function usePlaceImportOperationQuery(operationId: string) {
     queryFn: ({ signal }) =>
       getPlaceImportOperation({ operationId }, undefined, signal),
     queryKey: getGetPlaceImportOperationQueryKey({ operationId }),
+  })
+}
+
+/** Однократно ищет активную operation для одного входа на стартовый route импорта. */
+export function useActivePlaceImportQuery(routeEntryKey: string) {
+  return useQuery<PlaceImportOperation, ApiClientError>({
+    queryFn: () => getActivePlaceImport(),
+    queryKey: ['/admin/place-imports/active', routeEntryKey],
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    retry: false,
   })
 }
 
