@@ -25,6 +25,7 @@ const admin: AuthMeResponse = {
 }
 
 const poolsCategory = {
+  coverImageUrl: null,
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',

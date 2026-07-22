@@ -33,6 +33,7 @@ const mutateAsyncMock = vi.fn()
 
 const activePlace: PlaceSummary = {
   category: {
+    coverImageUrl: null,
     id: 'category_pools',
     slug: 'pools',
     title: 'Бассейны',
@@ -48,6 +49,7 @@ const activePlace: PlaceSummary = {
 
 const hiddenPlace: PlaceSummary = {
   category: {
+    coverImageUrl: null,
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',

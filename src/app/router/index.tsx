@@ -6,6 +6,7 @@ import { MaterialsPage } from '@/pages/materials/ui/materials-page'
 import { NotFoundPage } from '@/pages/not-found/ui/not-found-page'
 import { PlaceDetailPage } from '@/pages/place-detail/ui/place-detail-page'
 import { PlaceEditPage } from '@/pages/place-edit/ui/place-edit-page'
+import { PlaceImportYandexPage } from '@/pages/place-import-yandex/ui/place-import-yandex-page'
 import { PlacesCreatePage } from '@/pages/places-create/ui/places-create-page'
 import { PlacesPage } from '@/pages/places/ui/places-page'
 import { AdminShell } from '@/widgets/admin-shell/ui/admin-shell'
@@ -47,6 +48,14 @@ export const protectedRouteChildren = [
   {
     path: '/places/new',
     element: <PlacesCreatePage />,
+  },
+  {
+    path: '/places/import/yandex',
+    element: <PlaceImportYandexPage />,
+  },
+  {
+    path: '/places/import/yandex/:operationId',
+    element: <PlaceImportYandexPage />,
   },
   {
     path: '*',

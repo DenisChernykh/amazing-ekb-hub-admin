@@ -91,6 +91,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useDeleteCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Deletes an unused place category and invalidates the admin category list cache.         |
 | `invalidateCategoryQueries` | `src/entities/category/model/category-mutations.ts` | exported   | Invalidates the admin category list cache after category mutations.                     |
 | `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`         | exported   | Formats category datetime strings for compact admin tables without timezone day shifts. |
+| `CategoryStatusTag`         | `src/entities/category/ui/category-status-tag.tsx`  | exported   | Renders active/draft category status metadata.                                          |
 
 ## Place Entity
 
@@ -105,6 +106,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useClearPinnedMaterialMutation`   | `src/entities/place/model/place-mutations.ts` | exported   | Clears a place pinned material through admin API and invalidates admin place detail cache.      |
 | `invalidatePlacesListQueries`      | `src/entities/place/model/place-mutations.ts` | exported   | Invalidates admin places list cache after admin place mutations.                                |
 | `invalidateAdminPlaceDetailQuery`  | `src/entities/place/model/place-mutations.ts` | exported   | Invalidates one admin place detail cache after admin place mutations.                           |
+| `invalidatePlaceCategoryQueries`   | `src/entities/place/model/place-mutations.ts` | exported   | Invalidates admin categories after publishing a place can activate its draft category.          |
 | `usePlacesListQuery`               | `src/entities/place/model/place-hooks.ts`     | exported   | Loads the admin places list through the admin endpoint, including hidden places when requested. |
 | `useAdminPlaceDetailQuery`         | `src/entities/place/model/place-hooks.ts`     | exported   | Loads admin place detail independently of public visibility.                                    |
 | `getPlaceCategoryOptions`          | `src/entities/place/ui/place-meta.ts`         | exported   | Maps loaded backend category objects to Ant Design select options by `category.id`.             |
@@ -195,6 +197,30 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `getImportRunStatusMeta`                         | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Maps backend `ImportRunStatus` to localized Ant Design tag metadata.                                            |
 | `formatImportRunCounts`                          | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats import run counters in a stable display order.                                                          |
 | `formatImportRunDateTime`                        | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats nullable import run datetime values for compact admin tables.                                           |
+
+## Place Import Entity and Feature
+
+| Helper                                     | Location                                                             | Visibility | Contract                                                                                                    |
+| ------------------------------------------ | -------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| `isTerminalPlaceImportStatus`              | `src/entities/place-import/model/place-import-cache.ts`              | exported   | Detects completed, failed, expired, and cancelled operation snapshots.                                      |
+| `syncPlaceImportOperationCache`            | `src/entities/place-import/model/place-import-cache.ts`              | exported   | Monotonically writes authoritative operation snapshots without allowing an older version to regress cache.  |
+| `invalidatePlaceImportResultQueries`       | `src/entities/place-import/model/place-import-cache.ts`              | exported   | Invalidates admin place and category lists after a completed import.                                        |
+| `parsePlaceImportEventData`                | `src/entities/place-import/model/place-import-events-parser.ts`      | exported   | Parses one SSE payload through the generated polling-response Zod contract.                                 |
+| `subscribeToPlaceImportEvents`             | `src/entities/place-import/model/place-import-events-transport.ts`   | exported   | Opens credentialed native EventSource with an operation-version reconnect cursor.                           |
+| `usePlaceImportOperationQuery`             | `src/entities/place-import/model/place-import-hooks.ts`              | exported   | Loads the durable operation snapshot used to resume an import route after reload.                           |
+| `usePlaceImportEvents`                     | `src/entities/place-import/model/place-import-hooks.ts`              | exported   | Syncs an active operation over SSE and falls back to non-overlapping journal polling until terminal status. |
+| `useStartPlaceImportMutation`              | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Starts one Yandex Maps place import and seeds the operation cache.                                          |
+| `useConfirmPlaceImportMutation`            | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Confirms immutable preview and invalidates the admin places list.                                           |
+| `useCancelPlaceImportMutation`             | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Durably cancels an operation and syncs its terminal snapshot.                                               |
+| `useCreatePlaceImportViewerAccessMutation` | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Creates one-time CAPTCHA viewer access.                                                                     |
+| `useRevokePlaceImportViewerAccessMutation` | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Revokes the current CAPTCHA viewer capability/session.                                                      |
+| `PlaceImportStatusTag`                     | `src/entities/place-import/ui/place-import-meta.tsx`                 | exported   | Renders localized Ant Design metadata for an operation status.                                              |
+| `useCaptchaViewer`                         | `src/features/place/import-yandex/model/use-captcha-viewer.ts`       | exported   | Coordinates popup creation, capability navigation, TTL expiry, and explicit revoke.                         |
+| `PlaceImportStartForm`                     | `src/features/place/import-yandex/ui/place-import-start-form.tsx`    | exported   | Validates a safe HTTP URL and starts the import scenario.                                                   |
+| `PlaceImportCaptchaPanel`                  | `src/features/place/import-yandex/ui/place-import-captcha-panel.tsx` | exported   | Renders CAPTCHA popup actions and access countdown.                                                         |
+| `PlaceImportPreview`                       | `src/features/place/import-yandex/ui/place-import-preview.tsx`       | exported   | Renders immutable imported fields, category resolution, and possible duplicate warning.                     |
+| `PlaceImportActions`                       | `src/features/place/import-yandex/ui/place-import-actions.tsx`       | exported   | Confirms preview creation or durably cancels an active operation.                                           |
+| `PlaceImportYandexScreen`                  | `src/widgets/place-import-yandex/ui/place-import-yandex-screen.tsx`  | exported   | Composes start, resume, progress, CAPTCHA, preview, terminal, and result-navigation states.                 |
 
 ## Auth UI
 

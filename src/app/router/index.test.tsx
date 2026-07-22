@@ -14,6 +14,8 @@ describe('protectedRouteChildren', () => {
       '/places/:placeId',
       '/places/:placeId/edit',
       '/places/new',
+      '/places/import/yandex',
+      '/places/import/yandex/:operationId',
       '*',
     ])
   })

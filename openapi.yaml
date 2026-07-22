@@ -90,6 +90,15 @@ components:
         type: string
       example: source_telegram_001
 
+    PlaceImportOperationId:
+      name: operationId
+      in: path
+      required: true
+      description: Идентификатор операции автоматического создания места.
+      schema:
+        type: string
+      example: cmrvo_place_import_001
+
     Page:
       name: page
       in: query
@@ -142,6 +151,7 @@ components:
           id: category_spa
           slug: spa
           title: SPA
+          coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
         status: active
         slug: baden-baden-uktus
         coverImageUrl: /v1/places/baden-baden-uktus/photo
@@ -160,6 +170,7 @@ components:
           id: category_spa
           slug: spa
           title: SPA
+          coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
         status: active
         slug: baden-baden-uktus
         coverImageUrl: /v1/places/baden-baden-uktus/photo
@@ -182,9 +193,11 @@ components:
           id: category_spa
           slug: spa
           title: SPA
+          coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
         status: active
         slug: baden-baden-uktus
         coverImageUrl: /v1/places/baden-baden-uktus/photo
+        mapsUrl: https://yandex.ru/maps/org/baden_baden/123456789
         pinnedMaterial:
           id: material_telegram_001
           placeId: place_ekb_001
@@ -213,6 +226,7 @@ components:
               id: category_spa
               slug: spa
               title: SPA
+              coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
             status: active
             slug: baden-baden-uktus
             coverImageUrl: /v1/places/baden-baden-uktus/photo
@@ -226,10 +240,34 @@ components:
               id: category_pools
               slug: pools
               title: Бассейны
+              coverImageUrl: /v1/categories/pools/photo?v=4e8a65a4732f
             status: active
             slug: the-pool
             coverImageUrl: null
         total: 2
+        page: 1
+        pageSize: 20
+
+    AdminPlaceListResponse:
+      summary: Административный пагинированный список мест
+      value:
+        items:
+          - id: place_ekb_001
+            title: Bаден-Баден Уктус
+            summary: Термальный комплекс с открытыми бассейнами и SPA-зоной.
+            tags:
+              - термы
+              - spa
+            category:
+              id: category_spa
+              slug: spa
+              title: SPA
+              coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
+            status: hidden
+            slug: baden-baden-uktus
+            coverImageUrl: /v1/places/baden-baden-uktus/photo
+            mapsUrl: https://yandex.ru/maps/org/baden_baden/123456789
+        total: 1
         page: 1
         pageSize: 20
 
@@ -247,6 +285,7 @@ components:
               id: category_spa
               slug: spa
               title: SPA
+              coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
             status: active
             slug: baden-baden-uktus
             coverImageUrl: /v1/places/baden-baden-uktus/photo
@@ -264,6 +303,7 @@ components:
               id: category_pools
               slug: pools
               title: Бассейны
+              coverImageUrl: /v1/categories/pools/photo?v=4e8a65a4732f
             status: active
             slug: the-pool
             coverImageUrl: null
@@ -281,6 +321,7 @@ components:
         id: category_spa
         slug: spa
         title: SPA
+        coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
 
     AdminPlaceCategory:
       summary: Административная категория места
@@ -288,6 +329,8 @@ components:
         id: category_spa
         slug: spa
         title: SPA
+        status: active
+        coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
         createdAt: '2026-07-03T10:00:00.000Z'
         updatedAt: '2026-07-03T10:00:00.000Z'
 
@@ -298,9 +341,11 @@ components:
           - id: category_spa
             slug: spa
             title: SPA
+            coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
           - id: category_pools
             slug: pools
             title: Бассейны
+            coverImageUrl: null
 
     AdminPlaceCategoryListResponse:
       summary: Административный список категорий мест
@@ -309,6 +354,8 @@ components:
           - id: category_spa
             slug: spa
             title: SPA
+            status: active
+            coverImageUrl: /v1/categories/spa/photo?v=23b991827df4
             createdAt: '2026-07-03T10:00:00.000Z'
             updatedAt: '2026-07-03T10:00:00.000Z'
 
@@ -723,7 +770,7 @@ components:
     PlaceCategory:
       type: object
       description: Публичная категория места для фильтров.
-      required: [id, slug, title]
+      required: [id, slug, title, coverImageUrl]
       properties:
         id:
           type: string
@@ -737,14 +784,24 @@ components:
           type: string
           description: Название категории для интерфейса.
           example: SPA
+        coverImageUrl:
+          type: string
+          nullable: true
+          description: Versioned URL cover-фотографии категории или `null`, если фото отсутствует.
+          example: /v1/categories/spa/photo?v=23b991827df4
 
     AdminPlaceCategory:
       allOf:
         - $ref: '#/components/schemas/PlaceCategory'
         - type: object
           description: Административная категория места с системными датами.
-          required: [createdAt, updatedAt]
+          required: [status, createdAt, updatedAt]
           properties:
+            status:
+              type: string
+              enum: [draft, active]
+              description: Draft-категория скрыта из public API до публикации первого места.
+              example: active
             createdAt:
               type: string
               format: date-time
@@ -918,6 +975,19 @@ components:
           nullable: true
           description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
           example: /v1/places/baden-baden-uktus/photo
+
+    AdminPlaceSummary:
+      allOf:
+        - $ref: '#/components/schemas/PlaceSummary'
+        - type: object
+          required: [mapsUrl]
+          properties:
+            mapsUrl:
+              type: string
+              format: uri
+              nullable: true
+              description: Canonical Yandex Maps URL импортированного места; `null` для мест без такой external reference.
+              example: https://yandex.ru/maps/org/baden_baden/123456789
 
     PublicPlaceSummary:
       type: object
@@ -1394,6 +1464,7 @@ components:
           category,
           status,
           coverImageUrl,
+          mapsUrl,
           counters,
           pinnedMaterial,
         ]
@@ -1432,6 +1503,12 @@ components:
           nullable: true
           description: Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.
           example: /v1/places/baden-baden-uktus/photo
+        mapsUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Canonical URL карточки Яндекс Карт, если место создано через импорт.
+          example: https://yandex.ru/maps/org/baden_baden/123456789
         counters:
           type: object
           description: Количество материалов по платформам.
@@ -1470,6 +1547,29 @@ components:
           description: Элементы текущей страницы.
           items:
             $ref: '#/components/schemas/PlaceSummary'
+        total:
+          type: integer
+          description: Общее количество доступных элементов.
+          example: 2
+        page:
+          type: integer
+          description: Текущая страница.
+          example: 1
+        pageSize:
+          type: integer
+          description: Размер страницы.
+          example: 20
+
+    AdminPlaceListResponse:
+      type: object
+      description: Административный пагинированный список мест с nullable Yandex Maps URL.
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          description: Элементы текущей страницы.
+          items:
+            $ref: '#/components/schemas/AdminPlaceSummary'
         total:
           type: integer
           description: Общее количество доступных элементов.
@@ -1615,6 +1715,223 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/PlaceStatus'
+
+    StartPlaceImportRequest:
+      type: object
+      additionalProperties: false
+      description: Ссылка на одну карточку организации Яндекс Карт.
+      required: [url]
+      properties:
+        url:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          format: uri
+          example: https://yandex.ru/maps/org/aqua_city/123456789
+
+    PlaceImportStatus:
+      type: string
+      enum:
+        [
+          queued,
+          parsing,
+          awaiting_captcha,
+          preview_ready,
+          completed,
+          failed,
+          expired,
+          cancelled,
+        ]
+
+    PlaceImportCategoryResolution:
+      type: string
+      enum: [existing, will_create, created]
+
+    PlaceImportOutcome:
+      type: string
+      nullable: true
+      enum: [created, already_exists]
+
+    PlaceImportErrorCode:
+      type: string
+      enum:
+        [
+          invalid_url,
+          not_organization_url,
+          redirect_not_allowed,
+          source_not_found,
+          captcha_session_expired,
+          source_blocked,
+          source_timeout,
+          parse_failed,
+          missing_title,
+          missing_primary_category,
+          missing_organization_id,
+          category_conflict,
+          external_identity_conflict,
+          confirmation_expired,
+          internal_error,
+        ]
+
+    PlaceImportCategoryPreview:
+      type: object
+      required: [id, title, status, resolution]
+      properties:
+        id:
+          type: string
+          nullable: true
+        title:
+          type: string
+        status:
+          type: string
+          nullable: true
+          enum: [draft, active]
+        resolution:
+          $ref: '#/components/schemas/PlaceImportCategoryResolution'
+
+    PlaceImportPossibleDuplicate:
+      type: object
+      required: [placeId, title]
+      properties:
+        placeId:
+          type: string
+        title:
+          type: string
+
+    PlaceImportError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: '#/components/schemas/PlaceImportErrorCode'
+        message:
+          type: string
+          description: Безопасная диагностика без URL query, HTML, cookies, screenshot/HAR и browser state.
+
+    PlaceImportOperation:
+      type: object
+      description: Read-only snapshot; preview-поля нельзя подменить при confirm.
+      required:
+        [
+          id,
+          status,
+          version,
+          attempt,
+          sourceUrl,
+          title,
+          mapsUrl,
+          organizationId,
+          category,
+          possibleDuplicate,
+          captchaExpiresAt,
+          previewExpiresAt,
+          outcome,
+          resultPlaceId,
+          error,
+          createdAt,
+          updatedAt,
+        ]
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/PlaceImportStatus'
+        version:
+          type: integer
+          minimum: 1
+        attempt:
+          type: integer
+          minimum: 0
+        sourceUrl:
+          type: string
+          format: uri
+          description: Sanitized URL без credentials, fragment и произвольных query-параметров.
+        title:
+          type: string
+          nullable: true
+        mapsUrl:
+          type: string
+          format: uri
+          nullable: true
+        organizationId:
+          type: string
+          nullable: true
+        category:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/PlaceImportCategoryPreview'
+        possibleDuplicate:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/PlaceImportPossibleDuplicate'
+        captchaExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        previewExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        outcome:
+          $ref: '#/components/schemas/PlaceImportOutcome'
+        resultPlaceId:
+          type: string
+          nullable: true
+        error:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/PlaceImportError'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PlaceImportEvent:
+      type: object
+      required: [id, operationId, seq, type, version, status, createdAt]
+      properties:
+        id:
+          type: string
+        operationId:
+          type: string
+        seq:
+          type: integer
+          minimum: 1
+        type:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        status:
+          $ref: '#/components/schemas/PlaceImportStatus'
+        createdAt:
+          type: string
+          format: date-time
+
+    PlaceImportEventsResponse:
+      type: object
+      required: [operation, events]
+      properties:
+        operation:
+          $ref: '#/components/schemas/PlaceImportOperation'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceImportEvent'
+
+    PlaceImportViewerAccess:
+      type: object
+      required: [viewerUrl, expiresAt]
+      properties:
+        viewerUrl:
+          type: string
+          format: uri
+          description: URL отдельного viewer-origin; one-time capability находится только во fragment.
+        expiresAt:
+          type: string
+          format: date-time
 
     CreateContentSourceRequest:
       type: object
@@ -1985,6 +2302,33 @@ paths:
         '404':
           $ref: '#/components/responses/CategoryNotFound'
 
+  /categories/{categorySlug}/photo:
+    get:
+      tags: [Places]
+      summary: Get place category photo
+      description: Возвращает бинарную cover-фотографию категории с сохранённым MIME-типом. Неизвестная категория, пустые metadata и отсутствующий файл возвращают 404.
+      operationId: getPlaceCategoryPhoto
+      parameters:
+        - $ref: '#/components/parameters/CategorySlug'
+      responses:
+        '200':
+          description: Бинарное содержимое cover-фотографии категории.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
+
   /places:
     get:
       tags: [Places]
@@ -2324,6 +2668,274 @@ paths:
         '409':
           $ref: '#/components/responses/CategoryConflict'
 
+  /admin/categories/{categoryId}/photo:
+    post:
+      tags: [Admin]
+      summary: Upload place category photo
+      description: Загружает или заменяет cover-фотографию категории. Принимаются JPEG, PNG и WebP размером не более 5 MB.
+      operationId: uploadPlaceCategoryPhoto
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo]
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: JPEG, PNG или WebP файл размером не более 5 MB.
+      responses:
+        '200':
+          description: Фотография загружена, category metadata и versioned URL обновлены.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPlaceCategory'
+              examples:
+                default:
+                  $ref: '#/components/examples/AdminPlaceCategory'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CategoryNotFound'
+
+  /admin/place-imports/yandex-maps:
+    post:
+      tags: [Admin]
+      summary: Start Yandex Maps place import
+      description: |
+        Создает durable queued operation для одной карточки организации. URL проверяется и очищается до persistence. Endpoint требует trusted Origin/Referer; feature по умолчанию выключена.
+      operationId: startYandexMapsPlaceImport
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartPlaceImportRequest'
+      responses:
+        '202':
+          description: Operation committed; delivery может быть повторена dispatcher-ом.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportOperation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: У администратора уже есть активная operation.
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /admin/place-imports/{operationId}:
+    get:
+      tags: [Admin]
+      summary: Get place import operation
+      operationId: getPlaceImportOperation
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+      responses:
+        '200':
+          description: Текущий source-of-truth snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportOperation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Operation не найдена или принадлежит другому пользователю.
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /admin/place-imports/{operationId}/events:
+    get:
+      tags: [Admin]
+      summary: Read place import journal
+      description: Polling fallback и reconnect delta после известной operation version.
+      operationId: readPlaceImportEvents
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+        - name: afterVersion
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Snapshot и append-only journal delta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportEventsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Operation не найдена.
+
+  /admin/place-imports/{operationId}/events/stream:
+    get:
+      tags: [Admin]
+      summary: Stream place import updates
+      description: |
+        SSE `place-import.updated` использует subscribe → read → read handshake, Redis version hints и периодическое PostgreSQL reconciliation. Terminal status закрывает stream.
+      operationId: streamPlaceImportEvents
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+        - name: afterVersion
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: SSE stream; `data` соответствует PlaceImportEventsResponse.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: |
+                id: 3
+                event: place-import.updated
+                data: {"operation":{"id":"cmrvo_place_import_001","status":"preview_ready","version":3},"events":[]}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/place-imports/{operationId}/confirm:
+    post:
+      tags: [Admin]
+      summary: Confirm immutable place import preview
+      description: Без request body атомарно создает hidden Place, external reference и при необходимости draft-категорию. Требует trusted Origin/Referer.
+      operationId: confirmPlaceImport
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+      responses:
+        '201':
+          description: Создано hidden место либо возвращено строго существующее.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportOperation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Operation не найдена.
+        '409':
+          description: Preview не готов или обнаружен external identity conflict.
+        '410':
+          description: Preview TTL истёк.
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /admin/place-imports/{operationId}/cancel:
+    post:
+      tags: [Admin]
+      summary: Cancel place import
+      description: Durable cancellation; Redis notification является только latency hint. Требует trusted Origin/Referer.
+      operationId: cancelPlaceImport
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+      responses:
+        '201':
+          description: Cancelled или ранее terminal snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportOperation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Operation не найдена.
+
+  /admin/place-imports/{operationId}/viewer-access:
+    post:
+      tags: [Admin]
+      summary: Create one-time CAPTCHA viewer access
+      description: Выдает один capability во fragment отдельного viewer-origin. Повторная выдача блокируется до revoke/expiry.
+      operationId: createPlaceImportViewerAccess
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+      responses:
+        '201':
+          description: Viewer capability создан.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceImportViewerAccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: CAPTCHA state/solver lease не допускает выдачу.
+    delete:
+      tags: [Admin]
+      summary: Revoke CAPTCHA viewer access
+      operationId: revokePlaceImportViewerAccess
+      security:
+        - AccessCookieAuth: []
+      x-required-role: admin
+      parameters:
+        - $ref: '#/components/parameters/PlaceImportOperationId'
+      responses:
+        '204':
+          description: Capability/session удалены, старый WebSocket закрывается.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Активный solver lease отсутствует.
+
   /admin/places:
     get:
       tags: [Admin]
@@ -2349,10 +2961,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlaceListResponse'
+                $ref: '#/components/schemas/AdminPlaceListResponse'
               examples:
                 default:
-                  $ref: '#/components/examples/PlaceListResponse'
+                  $ref: '#/components/examples/AdminPlaceListResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
         '401':

@@ -17,6 +17,8 @@ export const ListAdminPlaceCategories200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
   "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.'),
+  "status": zod.enum(['draft', 'active']).describe('Draft-категория скрыта из public API до публикации первого места.'),
   "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
   "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
 }))
@@ -50,6 +52,8 @@ export const CreatePlaceCategory201Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
   "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.'),
+  "status": zod.enum(['draft', 'active']).describe('Draft-категория скрыта из public API до публикации первого места.'),
   "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
   "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
 })
@@ -90,6 +94,8 @@ export const GetAdminPlaceCategory200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
   "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.'),
+  "status": zod.enum(['draft', 'active']).describe('Draft-категория скрыта из public API до публикации первого места.'),
   "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
   "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
 })
@@ -132,6 +138,8 @@ export const UpdatePlaceCategory200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
   "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.'),
+  "status": zod.enum(['draft', 'active']).describe('Draft-категория скрыта из public API до публикации первого места.'),
   "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
   "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
 })
@@ -199,6 +207,456 @@ export const DeletePlaceCategory409Response = zod.strictObject({
 }).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
 
 /**
+ * Загружает или заменяет cover-фотографию категории. Принимаются JPEG, PNG и WebP размером не более 5 MB.
+ * @summary Upload place category photo
+ */
+export const UploadPlaceCategoryPhotoParams = zod.strictObject({
+  "categoryId": zod.string().describe('Идентификатор категории места.')
+})
+
+export const UploadPlaceCategoryPhotoBody = zod.strictObject({
+  "photo": zod.instanceof(File)
+})
+
+export const UploadPlaceCategoryPhoto200Response = zod.strictObject({
+  "id": zod.string().describe('Идентификатор категории.'),
+  "slug": zod.string().describe('Человекочитаемый slug категории.'),
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.'),
+  "status": zod.enum(['draft', 'active']).describe('Draft-категория скрыта из public API до публикации первого места.'),
+  "createdAt": zod.iso.datetime({"offset":true}).describe('Время создания категории.'),
+  "updatedAt": zod.iso.datetime({"offset":true}).describe('Время последнего обновления категории.')
+})
+
+export const UploadPlaceCategoryPhoto400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UploadPlaceCategoryPhoto401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UploadPlaceCategoryPhoto403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const UploadPlaceCategoryPhoto404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Создает durable queued operation для одной карточки организации. URL проверяется и очищается до persistence. Endpoint требует trusted Origin/Referer; feature по умолчанию выключена.
+
+ * @summary Start Yandex Maps place import
+ */
+export const startYandexMapsPlaceImportBodyUrlMax = 2048;
+
+
+
+export const StartYandexMapsPlaceImportBody = zod.strictObject({
+  "url": zod.url().min(1).max(startYandexMapsPlaceImportBodyUrlMax)
+}).describe('Ссылка на одну карточку организации Яндекс Карт.')
+
+
+export const startYandexMapsPlaceImport202ResponseAttemptMin = 0;
+
+
+
+export const StartYandexMapsPlaceImport202Response = zod.strictObject({
+  "id": zod.string(),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "version": zod.number().min(1),
+  "attempt": zod.number().min(startYandexMapsPlaceImport202ResponseAttemptMin),
+  "sourceUrl": zod.url().describe('Sanitized URL без credentials, fragment и произвольных query-параметров.'),
+  "title": zod.string().nullable(),
+  "mapsUrl": zod.url().nullable(),
+  "organizationId": zod.string().nullable(),
+  "category": zod.strictObject({
+  "id": zod.string().nullable(),
+  "title": zod.string(),
+  "status": zod.enum(['draft', 'active']).nullable(),
+  "resolution": zod.enum(['existing', 'will_create', 'created'])
+}).nullable(),
+  "possibleDuplicate": zod.strictObject({
+  "placeId": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "captchaExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "previewExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "outcome": zod.enum(['created', 'already_exists']).nullable(),
+  "resultPlaceId": zod.string().nullable(),
+  "error": zod.strictObject({
+  "code": zod.enum(['invalid_url', 'not_organization_url', 'redirect_not_allowed', 'source_not_found', 'captcha_session_expired', 'source_blocked', 'source_timeout', 'parse_failed', 'missing_title', 'missing_primary_category', 'missing_organization_id', 'category_conflict', 'external_identity_conflict', 'confirmation_expired', 'internal_error']),
+  "message": zod.string().describe('Безопасная диагностика без URL query, HTML, cookies, screenshot\/HAR и browser state.')
+}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
+}).describe('Read-only snapshot; preview-поля нельзя подменить при confirm.')
+
+export const StartYandexMapsPlaceImport400Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const StartYandexMapsPlaceImport401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const StartYandexMapsPlaceImport403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const StartYandexMapsPlaceImport503Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * @summary Get place import operation
+ */
+export const GetPlaceImportOperationParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+
+export const getPlaceImportOperation200ResponseAttemptMin = 0;
+
+
+
+export const GetPlaceImportOperation200Response = zod.strictObject({
+  "id": zod.string(),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "version": zod.number().min(1),
+  "attempt": zod.number().min(getPlaceImportOperation200ResponseAttemptMin),
+  "sourceUrl": zod.url().describe('Sanitized URL без credentials, fragment и произвольных query-параметров.'),
+  "title": zod.string().nullable(),
+  "mapsUrl": zod.url().nullable(),
+  "organizationId": zod.string().nullable(),
+  "category": zod.strictObject({
+  "id": zod.string().nullable(),
+  "title": zod.string(),
+  "status": zod.enum(['draft', 'active']).nullable(),
+  "resolution": zod.enum(['existing', 'will_create', 'created'])
+}).nullable(),
+  "possibleDuplicate": zod.strictObject({
+  "placeId": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "captchaExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "previewExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "outcome": zod.enum(['created', 'already_exists']).nullable(),
+  "resultPlaceId": zod.string().nullable(),
+  "error": zod.strictObject({
+  "code": zod.enum(['invalid_url', 'not_organization_url', 'redirect_not_allowed', 'source_not_found', 'captcha_session_expired', 'source_blocked', 'source_timeout', 'parse_failed', 'missing_title', 'missing_primary_category', 'missing_organization_id', 'category_conflict', 'external_identity_conflict', 'confirmation_expired', 'internal_error']),
+  "message": zod.string().describe('Безопасная диагностика без URL query, HTML, cookies, screenshot\/HAR и browser state.')
+}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
+}).describe('Read-only snapshot; preview-поля нельзя подменить при confirm.')
+
+export const GetPlaceImportOperation401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetPlaceImportOperation403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const GetPlaceImportOperation503Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Polling fallback и reconnect delta после известной operation version.
+ * @summary Read place import journal
+ */
+export const ReadPlaceImportEventsParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+export const readPlaceImportEventsQueryAfterVersionDefault = 0;
+export const readPlaceImportEventsQueryAfterVersionMin = 0;
+
+
+
+export const ReadPlaceImportEventsQueryParams = zod.strictObject({
+  "afterVersion": zod.number().min(readPlaceImportEventsQueryAfterVersionMin).default(readPlaceImportEventsQueryAfterVersionDefault)
+})
+
+
+export const readPlaceImportEvents200ResponseOperationAttemptMin = 0;
+
+
+
+
+
+export const ReadPlaceImportEvents200Response = zod.strictObject({
+  "operation": zod.strictObject({
+  "id": zod.string(),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "version": zod.number().min(1),
+  "attempt": zod.number().min(readPlaceImportEvents200ResponseOperationAttemptMin),
+  "sourceUrl": zod.url().describe('Sanitized URL без credentials, fragment и произвольных query-параметров.'),
+  "title": zod.string().nullable(),
+  "mapsUrl": zod.url().nullable(),
+  "organizationId": zod.string().nullable(),
+  "category": zod.strictObject({
+  "id": zod.string().nullable(),
+  "title": zod.string(),
+  "status": zod.enum(['draft', 'active']).nullable(),
+  "resolution": zod.enum(['existing', 'will_create', 'created'])
+}).nullable(),
+  "possibleDuplicate": zod.strictObject({
+  "placeId": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "captchaExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "previewExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "outcome": zod.enum(['created', 'already_exists']).nullable(),
+  "resultPlaceId": zod.string().nullable(),
+  "error": zod.strictObject({
+  "code": zod.enum(['invalid_url', 'not_organization_url', 'redirect_not_allowed', 'source_not_found', 'captcha_session_expired', 'source_blocked', 'source_timeout', 'parse_failed', 'missing_title', 'missing_primary_category', 'missing_organization_id', 'category_conflict', 'external_identity_conflict', 'confirmation_expired', 'internal_error']),
+  "message": zod.string().describe('Безопасная диагностика без URL query, HTML, cookies, screenshot\/HAR и browser state.')
+}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
+}).describe('Read-only snapshot; preview-поля нельзя подменить при confirm.'),
+  "events": zod.array(zod.strictObject({
+  "id": zod.string(),
+  "operationId": zod.string(),
+  "seq": zod.number().min(1),
+  "type": zod.string(),
+  "version": zod.number().min(1),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "createdAt": zod.iso.datetime({"offset":true})
+}))
+})
+
+export const ReadPlaceImportEvents401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ReadPlaceImportEvents403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * SSE `place-import.updated` использует subscribe → read → read handshake, Redis version hints и периодическое PostgreSQL reconciliation. Terminal status закрывает stream.
+
+ * @summary Stream place import updates
+ */
+export const StreamPlaceImportEventsParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+export const streamPlaceImportEventsQueryAfterVersionDefault = 0;
+export const streamPlaceImportEventsQueryAfterVersionMin = 0;
+
+
+
+export const StreamPlaceImportEventsQueryParams = zod.strictObject({
+  "afterVersion": zod.number().min(streamPlaceImportEventsQueryAfterVersionMin).default(streamPlaceImportEventsQueryAfterVersionDefault)
+})
+
+export const StreamPlaceImportEvents401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const StreamPlaceImportEvents403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Без request body атомарно создает hidden Place, external reference и при необходимости draft-категорию. Требует trusted Origin/Referer.
+ * @summary Confirm immutable place import preview
+ */
+export const ConfirmPlaceImportParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+
+export const confirmPlaceImport201ResponseAttemptMin = 0;
+
+
+
+export const ConfirmPlaceImport201Response = zod.strictObject({
+  "id": zod.string(),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "version": zod.number().min(1),
+  "attempt": zod.number().min(confirmPlaceImport201ResponseAttemptMin),
+  "sourceUrl": zod.url().describe('Sanitized URL без credentials, fragment и произвольных query-параметров.'),
+  "title": zod.string().nullable(),
+  "mapsUrl": zod.url().nullable(),
+  "organizationId": zod.string().nullable(),
+  "category": zod.strictObject({
+  "id": zod.string().nullable(),
+  "title": zod.string(),
+  "status": zod.enum(['draft', 'active']).nullable(),
+  "resolution": zod.enum(['existing', 'will_create', 'created'])
+}).nullable(),
+  "possibleDuplicate": zod.strictObject({
+  "placeId": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "captchaExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "previewExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "outcome": zod.enum(['created', 'already_exists']).nullable(),
+  "resultPlaceId": zod.string().nullable(),
+  "error": zod.strictObject({
+  "code": zod.enum(['invalid_url', 'not_organization_url', 'redirect_not_allowed', 'source_not_found', 'captcha_session_expired', 'source_blocked', 'source_timeout', 'parse_failed', 'missing_title', 'missing_primary_category', 'missing_organization_id', 'category_conflict', 'external_identity_conflict', 'confirmation_expired', 'internal_error']),
+  "message": zod.string().describe('Безопасная диагностика без URL query, HTML, cookies, screenshot\/HAR и browser state.')
+}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
+}).describe('Read-only snapshot; preview-поля нельзя подменить при confirm.')
+
+export const ConfirmPlaceImport401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ConfirmPlaceImport403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const ConfirmPlaceImport503Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Durable cancellation; Redis notification является только latency hint. Требует trusted Origin/Referer.
+ * @summary Cancel place import
+ */
+export const CancelPlaceImportParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+
+export const cancelPlaceImport201ResponseAttemptMin = 0;
+
+
+
+export const CancelPlaceImport201Response = zod.strictObject({
+  "id": zod.string(),
+  "status": zod.enum(['queued', 'parsing', 'awaiting_captcha', 'preview_ready', 'completed', 'failed', 'expired', 'cancelled']),
+  "version": zod.number().min(1),
+  "attempt": zod.number().min(cancelPlaceImport201ResponseAttemptMin),
+  "sourceUrl": zod.url().describe('Sanitized URL без credentials, fragment и произвольных query-параметров.'),
+  "title": zod.string().nullable(),
+  "mapsUrl": zod.url().nullable(),
+  "organizationId": zod.string().nullable(),
+  "category": zod.strictObject({
+  "id": zod.string().nullable(),
+  "title": zod.string(),
+  "status": zod.enum(['draft', 'active']).nullable(),
+  "resolution": zod.enum(['existing', 'will_create', 'created'])
+}).nullable(),
+  "possibleDuplicate": zod.strictObject({
+  "placeId": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "captchaExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "previewExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "outcome": zod.enum(['created', 'already_exists']).nullable(),
+  "resultPlaceId": zod.string().nullable(),
+  "error": zod.strictObject({
+  "code": zod.enum(['invalid_url', 'not_organization_url', 'redirect_not_allowed', 'source_not_found', 'captcha_session_expired', 'source_blocked', 'source_timeout', 'parse_failed', 'missing_title', 'missing_primary_category', 'missing_organization_id', 'category_conflict', 'external_identity_conflict', 'confirmation_expired', 'internal_error']),
+  "message": zod.string().describe('Безопасная диагностика без URL query, HTML, cookies, screenshot\/HAR и browser state.')
+}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
+}).describe('Read-only snapshot; preview-поля нельзя подменить при confirm.')
+
+export const CancelPlaceImport401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CancelPlaceImport403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Выдает один capability во fragment отдельного viewer-origin. Повторная выдача блокируется до revoke/expiry.
+ * @summary Create one-time CAPTCHA viewer access
+ */
+export const CreatePlaceImportViewerAccessParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+export const CreatePlaceImportViewerAccess201Response = zod.strictObject({
+  "viewerUrl": zod.url().describe('URL отдельного viewer-origin; one-time capability находится только во fragment.'),
+  "expiresAt": zod.iso.datetime({"offset":true})
+})
+
+export const CreatePlaceImportViewerAccess401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const CreatePlaceImportViewerAccess403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * @summary Revoke CAPTCHA viewer access
+ */
+export const RevokePlaceImportViewerAccessParams = zod.strictObject({
+  "operationId": zod.string().describe('Идентификатор операции автоматического создания места.')
+})
+
+export const RevokePlaceImportViewerAccess401Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+export const RevokePlaceImportViewerAccess403Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
  * Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
  * @summary List admin places
  */
@@ -226,15 +684,17 @@ export const ListAdminPlaces200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
-  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
-}).describe('Краткая карточка места, используемая в списках.')).describe('Элементы текущей страницы.'),
+  "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "mapsUrl": zod.url().nullable().describe('Canonical Yandex Maps URL импортированного места; `null` для мест без такой external reference.')
+})).describe('Элементы текущей страницы.'),
   "total": zod.number().describe('Общее количество доступных элементов.'),
   "page": zod.number().describe('Текущая страница.'),
   "pageSize": zod.number().describe('Размер страницы.')
-}).describe('Пагинированный список мест.')
+}).describe('Административный пагинированный список мест с nullable Yandex Maps URL.')
 
 export const ListAdminPlaces400Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
@@ -278,7 +738,8 @@ export const CreatePlace201Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -325,10 +786,12 @@ export const GetAdminPlaceDetail200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "mapsUrl": zod.url().nullable().describe('Canonical URL карточки Яндекс Карт, если место создано через импорт.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),
@@ -392,7 +855,8 @@ export const UpdatePlace200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -443,7 +907,8 @@ export const UpdatePlaceStatus200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -494,7 +959,8 @@ export const UploadPlaceCoverPhoto200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')
@@ -1315,10 +1781,12 @@ export const SetPinnedMaterial200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "mapsUrl": zod.url().nullable().describe('Canonical URL карточки Яндекс Карт, если место создано через импорт.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),
@@ -1377,10 +1845,12 @@ export const ClearPinnedMaterial200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "mapsUrl": zod.url().nullable().describe('Canonical URL карточки Яндекс Карт, если место создано через импорт.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),

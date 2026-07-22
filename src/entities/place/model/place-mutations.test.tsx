@@ -3,6 +3,7 @@ import {
   clearPinnedMaterial,
   createPlace,
   getGetAdminPlaceDetailQueryKey,
+  getListAdminPlaceCategoriesQueryKey,
   getListAdminPlacesQueryKey,
   setPinnedMaterial,
   updatePlace,
@@ -29,6 +30,7 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
     `/admin/places/${placeId}`,
   ]),
+  getListAdminPlaceCategoriesQueryKey: vi.fn(() => ['/admin/categories']),
   getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
   setPinnedMaterial: vi.fn(),
   updatePlace: vi.fn(),
@@ -58,12 +60,14 @@ const createWrapper = (queryClient: QueryClient) => {
 }
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
 }
 
 const cafeCategory = {
+  coverImageUrl: null,
   id: 'category_cafe',
   slug: 'cafe',
   title: 'Кафе',
@@ -81,6 +85,7 @@ const placeSummary: PlaceSummary = {
 }
 
 const placeDetail: PlaceDetail = {
+  mapsUrl: null,
   category: spaCategory,
   counters: {
     dzen: 0,
@@ -109,6 +114,9 @@ describe('place mutations', () => {
       ({ placeId }) => [`/admin/places/${placeId}`],
     )
     vi.mocked(getListAdminPlacesQueryKey).mockReturnValue(['/admin/places'])
+    vi.mocked(getListAdminPlaceCategoriesQueryKey).mockReturnValue([
+      '/admin/categories',
+    ])
   })
 
   it('creates place through generated fetcher and invalidates places list queries', async () => {
@@ -172,6 +180,7 @@ describe('place mutations', () => {
     const queryClient = new QueryClient()
     const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
     const detailQueryKey = ['/admin/places/place-2']
+    const categoryQueryKey = ['/admin/categories']
     const updatedPlace: PlaceSummary = {
       ...placeSummary,
       id: 'place-2',
@@ -181,6 +190,7 @@ describe('place mutations', () => {
     const onSuccess = vi.fn()
     queryClient.setQueryData(listQueryKey, { items: [], page: 1, pageSize: 10 })
     queryClient.setQueryData(detailQueryKey, updatedPlace)
+    queryClient.setQueryData(categoryQueryKey, { items: [] })
     mockedUpdatePlaceStatus.mockResolvedValue(updatedPlace)
 
     const { result } = renderHook(
@@ -203,6 +213,10 @@ describe('place mutations', () => {
     ).toBe(true)
     expect(
       queryClient.getQueryCache().find({ queryKey: detailQueryKey })?.state
+        .isInvalidated,
+    ).toBe(true)
+    expect(
+      queryClient.getQueryCache().find({ queryKey: categoryQueryKey })?.state
         .isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(updatedPlace)

@@ -8,12 +8,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAppStore } from './store'
 
 const poolsCategory = {
+  coverImageUrl: null,
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
 }
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',

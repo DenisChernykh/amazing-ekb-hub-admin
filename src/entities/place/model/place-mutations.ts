@@ -3,6 +3,7 @@ import {
   clearPinnedMaterial,
   createPlace,
   getGetAdminPlaceDetailQueryKey,
+  getListAdminPlaceCategoriesQueryKey,
   getListAdminPlacesQueryKey,
   setPinnedMaterial,
   updatePlace,
@@ -90,6 +91,13 @@ export const invalidateAdminPlaceDetailQuery = (
   })
 }
 
+/** Инвалидирует категории после публикации места, активирующей draft category. */
+export const invalidatePlaceCategoryQueries = (queryClient: QueryClient) => {
+  return queryClient.invalidateQueries({
+    queryKey: getListAdminPlaceCategoriesQueryKey(),
+  })
+}
+
 /**
  * Создает место через admin API и обновляет кеш списка мест после успеха.
  *
@@ -143,6 +151,9 @@ export function useUpdatePlaceStatusMutation(
           queryClient,
           variables.pathParams.placeId,
         ),
+        ...(variables.data.status === 'active'
+          ? [invalidatePlaceCategoryQueries(queryClient)]
+          : []),
       ])
       await options?.onSuccess?.(place)
     },

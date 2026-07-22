@@ -31,6 +31,11 @@ export type PlaceDetail = {
      * @nullable
      */
   coverImageUrl: string | null;
+  /**
+     * Canonical URL карточки Яндекс Карт, если место создано через импорт.
+     * @nullable
+     */
+  mapsUrl: string | null;
   /** Количество материалов по платформам. */
   counters: PlaceDetailCounters;
   /** Закреплённый материал места, если он назначен. Исходный внешний URL не отдается; клиенты должны использовать только `redirectUrl`, когда он доступен. */

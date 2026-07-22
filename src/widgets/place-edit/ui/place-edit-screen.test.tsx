@@ -47,7 +47,9 @@ function NavigationProbe({ to }: { to: To }) {
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
 const place: PlaceDetail = {
+  mapsUrl: null,
   category: {
+    coverImageUrl: null,
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',

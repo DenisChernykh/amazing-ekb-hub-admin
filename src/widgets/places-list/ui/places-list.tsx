@@ -1,7 +1,7 @@
 import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
 import { BulkModerationDraftRestorePrompt } from '@/features/place/bulk-moderation/ui/bulk-moderation-draft-restore-prompt'
 import { BulkModerationToolbar } from '@/features/place/bulk-moderation/ui/bulk-moderation-toolbar'
-import type { PlaceListResponse } from '@/shared/api/generated/model'
+import type { AdminPlaceListResponse } from '@/shared/api/generated/operation'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -23,7 +23,7 @@ import { PlacesListHeader } from './places-list-header'
 import styles from './places-list.module.css'
 import { PlacesTable } from './places-table'
 
-const emptyPlacesResponse: PlaceListResponse = {
+const emptyPlacesResponse: AdminPlaceListResponse = {
   items: [],
   page: 1,
   pageSize: 10,

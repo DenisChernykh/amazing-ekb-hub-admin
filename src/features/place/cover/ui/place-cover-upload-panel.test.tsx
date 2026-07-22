@@ -70,6 +70,7 @@ const mockedUseUploadPlaceCoverPhotoMutation = vi.mocked(
 )
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
