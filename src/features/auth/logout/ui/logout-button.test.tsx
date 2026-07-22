@@ -18,6 +18,7 @@ vi.mock('@/entities/session/model/session-hooks', () => ({
 const mockedUseLogoutSession = vi.mocked(useLogoutSession)
 
 const poolsCategory = {
+  coverImageUrl: null,
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',

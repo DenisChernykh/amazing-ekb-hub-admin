@@ -12,12 +12,14 @@ import {
 } from './bulk-moderation-slice'
 
 const poolsCategory = {
+  coverImageUrl: null,
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
 }
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',

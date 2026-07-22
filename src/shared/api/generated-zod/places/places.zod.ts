@@ -16,7 +16,8 @@ export const ListPlaceCategories200Response = zod.strictObject({
   "items": zod.array(zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'))
 }).describe('Публичный список категорий мест.')
 
@@ -34,10 +35,28 @@ export const GetPlaceCategoryParams = zod.strictObject({
 export const GetPlaceCategory200Response = zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.')
 
 export const GetPlaceCategory404Response = zod.strictObject({
+  "statusCode": zod.number().describe('HTTP status code ответа.'),
+  "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
+  "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
+}).describe('Стандартный JSON body, который NestJS возвращает для `HttpException`.')
+
+/**
+ * Возвращает бинарную cover-фотографию категории с сохранённым MIME-типом. Неизвестная категория, пустые metadata и отсутствующий файл возвращают 404.
+ * @summary Get place category photo
+ */
+export const getPlaceCategoryPhotoPathCategorySlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)\*$');
+
+
+export const GetPlaceCategoryPhotoParams = zod.strictObject({
+  "categorySlug": zod.string().regex(getPlaceCategoryPhotoPathCategorySlugRegExp).describe('Публичный slug категории места.')
+})
+
+export const GetPlaceCategoryPhoto404Response = zod.strictObject({
   "statusCode": zod.number().describe('HTTP status code ответа.'),
   "message": zod.union([zod.string(),zod.array(zod.string())]).describe('Сообщение ошибки. Для DTO validation NestJS обычно возвращает массив строк.'),
   "error": zod.string().optional().describe('Стандартное HTTP reason summary от NestJS.')
@@ -74,7 +93,8 @@ export const ListPlaces200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
@@ -115,10 +135,12 @@ export const GetPlaceDetail200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.'),
+  "mapsUrl": zod.url().nullable().describe('Canonical URL карточки Яндекс Карт, если место создано через импорт.'),
   "counters": zod.strictObject({
   "dzen": zod.number(),
   "telegram": zod.number(),

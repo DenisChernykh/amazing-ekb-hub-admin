@@ -22,7 +22,8 @@ export const ListFavorites200Response = zod.strictObject({
   "category": zod.strictObject({
   "id": zod.string().describe('Идентификатор категории.'),
   "slug": zod.string().describe('Человекочитаемый slug категории.'),
-  "title": zod.string().describe('Название категории для интерфейса.')
+  "title": zod.string().describe('Название категории для интерфейса.'),
+  "coverImageUrl": zod.string().nullable().describe('Versioned URL cover-фотографии категории или `null`, если фото отсутствует.')
 }).describe('Публичная категория места для фильтров.'),
   "status": zod.enum(['active', 'hidden']).describe('Статус публикации места.'),
   "coverImageUrl": zod.string().nullable().describe('Публичный cover-фото места. Если фото отсутствует или не должно отдаться публично, возвращается `null`.')

@@ -14,6 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BulkModerationDraftRestorePrompt } from './bulk-moderation-draft-restore-prompt'
 
 const poolsCategory = {
+  coverImageUrl: null,
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',

@@ -23,6 +23,7 @@ import type {
 import type {
   CategoryNotFoundResponse,
   GetPlaceCategoryPathParameters,
+  GetPlaceCategoryPhotoPathParameters,
   GetPlaceCoverPhotoPathParameters,
   GetPlaceDetailPathParameters,
   ListPlaceMaterialsParams,
@@ -222,6 +223,100 @@ export function useGetPlaceCategory<TData = Awaited<ReturnType<typeof getPlaceCa
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPlaceCategoryQueryOptions({ categorySlug },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Возвращает бинарную cover-фотографию категории с сохранённым MIME-типом. Неизвестная категория, пустые metadata и отсутствующий файл возвращают 404.
+ * @summary Get place category photo
+ */
+export const getPlaceCategoryPhoto = (
+    { categorySlug }: GetPlaceCategoryPhotoPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<Blob>(
+      {url: `/categories/${encodeURIComponent(String(categorySlug))}/photo`, method: 'GET',
+        responseType: 'blob', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetPlaceCategoryPhotoQueryKey = ({ categorySlug }: GetPlaceCategoryPhotoPathParameters,) => {
+    return [
+    `/categories/${categorySlug}/photo`
+    ] as const;
+    }
+
+
+export const getGetPlaceCategoryPhotoQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError = ErrorType<CategoryNotFoundResponse>>({ categorySlug }: GetPlaceCategoryPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlaceCategoryPhotoQueryKey({ categorySlug });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>> = ({ signal }) => getPlaceCategoryPhoto({ categorySlug }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(categorySlug), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlaceCategoryPhotoQueryResult = NonNullable<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>>
+export type GetPlaceCategoryPhotoQueryError = ErrorType<CategoryNotFoundResponse>
+
+
+export function useGetPlaceCategoryPhoto<TData = Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ pathParams: GetPlaceCategoryPhotoPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlaceCategoryPhoto>>,
+          TError,
+          Awaited<ReturnType<typeof getPlaceCategoryPhoto>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaceCategoryPhoto<TData = Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ pathParams: GetPlaceCategoryPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlaceCategoryPhoto>>,
+          TError,
+          Awaited<ReturnType<typeof getPlaceCategoryPhoto>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaceCategoryPhoto<TData = Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ pathParams: GetPlaceCategoryPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get place category photo
+ */
+
+export function useGetPlaceCategoryPhoto<TData = Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError = ErrorType<CategoryNotFoundResponse>>(
+ { categorySlug }: GetPlaceCategoryPhotoPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceCategoryPhoto>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPlaceCategoryPhotoQueryOptions({ categorySlug },options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

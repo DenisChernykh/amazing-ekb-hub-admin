@@ -16,4 +16,9 @@ export type PlaceCategory = {
   slug: string;
   /** Название категории для интерфейса. */
   title: string;
+  /**
+     * Versioned URL cover-фотографии категории или `null`, если фото отсутствует.
+     * @nullable
+     */
+  coverImageUrl: string | null;
 };

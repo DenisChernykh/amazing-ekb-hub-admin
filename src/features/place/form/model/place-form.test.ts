@@ -10,18 +10,21 @@ import {
 } from './place-form'
 
 const spaCategory: PlaceCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
 }
 
 const cafeCategory: PlaceCategory = {
+  coverImageUrl: null,
   id: 'category_cafe',
   slug: 'cafe',
   title: 'Кафе',
 }
 
 const place: PlaceDetail = {
+  mapsUrl: null,
   category: spaCategory,
   counters: {
     dzen: 1,

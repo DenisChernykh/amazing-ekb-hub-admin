@@ -78,6 +78,7 @@ const mockedUseClearPinnedMaterialMutation = vi.mocked(
 )
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -113,6 +114,7 @@ const untitledMaterial: PublicMaterial = {
 }
 
 const updatedPlace: PlaceDetail = {
+  mapsUrl: null,
   category: spaCategory,
   counters: {
     dzen: 1,

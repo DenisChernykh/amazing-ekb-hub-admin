@@ -6,10 +6,10 @@ import {
   listAdminPlaces,
 } from '@/shared/api/generated/admin/admin'
 import type {
+  AdminPlaceDetail,
   ListAdminPlacesParams,
-  PlaceDetail,
-  PlaceListResponse,
 } from '@/shared/api/generated/model'
+import type { AdminPlaceListResponse } from '@/shared/api/generated/operation'
 import { useQuery } from '@tanstack/react-query'
 
 /**
@@ -19,7 +19,7 @@ import { useQuery } from '@tanstack/react-query'
  * transport-слой напрямую и список мог показывать `hidden` places.
  */
 export function usePlacesListQuery(params: ListAdminPlacesParams) {
-  return useQuery<PlaceListResponse, ApiClientError>({
+  return useQuery<AdminPlaceListResponse, ApiClientError>({
     queryFn: ({ signal }) => listAdminPlaces(params, undefined, signal),
     queryKey: getListAdminPlacesQueryKey(params),
   })
@@ -31,7 +31,7 @@ export function usePlacesListQuery(params: ListAdminPlacesParams) {
  * @remarks Использует generated fetcher и query key внутри entity-level hook.
  */
 export function useAdminPlaceDetailQuery(placeId: string) {
-  return useQuery<PlaceDetail, ApiClientError>({
+  return useQuery<AdminPlaceDetail, ApiClientError>({
     enabled: Boolean(placeId),
     queryFn: ({ signal }) =>
       getAdminPlaceDetail({ placeId }, undefined, signal),

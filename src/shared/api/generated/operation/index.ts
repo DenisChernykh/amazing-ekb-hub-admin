@@ -8,6 +8,7 @@
 
 export * from './adminMaterialLibraryListResponse';
 export * from './adminPlaceCategoryListResponse';
+export * from './adminPlaceListResponse';
 export * from './authMeResponse';
 export * from './categoryConflictResponse';
 export * from './categoryNotFoundResponse';
@@ -32,11 +33,15 @@ export * from './nestErrorResponse';
 export * from './pageParameter';
 export * from './pageSizeParameter';
 export * from './placeCategoryListResponse';
+export * from './placeImportEventsResponse';
 export * from './placeListResponse';
 export * from './placeNotFoundResponse';
 export * from './publicPlaceListResponse';
+export * from './readPlaceImportEventsParams';
 export * from './serviceUnavailableResponse';
+export * from './streamPlaceImportEventsParams';
 export * from './telegramImportAlreadyRunningResponse';
 export * from './tooManyRequestsResponse';
 export * from './unauthorizedResponse';
+export * from './uploadPlaceCategoryPhotoBody';
 export * from './validationErrorResponse';

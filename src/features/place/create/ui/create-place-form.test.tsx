@@ -149,6 +149,7 @@ const mockedUseUploadPlaceCoverPhotoMutation = vi.mocked(
 const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',

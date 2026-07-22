@@ -30,9 +30,12 @@ import type {
   AdminPlaceCategory,
   AdminPlaceCategoryListResponse,
   AdminPlaceDetail,
+  AdminPlaceListResponse,
+  CancelPlaceImportPathParameters,
   CategoryConflictResponse,
   CategoryNotFoundResponse,
   ClearPinnedMaterialPathParameters,
+  ConfirmPlaceImportPathParameters,
   ContentSource,
   ContentSourceConflictResponse,
   ContentSourceListResponse,
@@ -40,12 +43,14 @@ import type {
   CreateContentSourceRequest,
   CreateMaterialRequest,
   CreatePlaceCategoryRequest,
+  CreatePlaceImportViewerAccessPathParameters,
   CreatePlaceMaterialPathParameters,
   CreatePlaceRequest,
   DeletePlaceCategoryPathParameters,
   ForbiddenResponse,
   GetAdminPlaceCategoryPathParameters,
   GetAdminPlaceDetailPathParameters,
+  GetPlaceImportOperationPathParameters,
   HidePlaceMaterialLinkPathParameters,
   ImportRun,
   ImportRunListResponse,
@@ -62,13 +67,22 @@ import type {
   MaterialListResponse,
   MaterialNotFoundResponse,
   NestErrorResponse,
-  PlaceListResponse,
+  PlaceImportEventsResponse,
+  PlaceImportOperation,
+  PlaceImportViewerAccess,
   PlaceNotFoundResponse,
   PlacePhotoUploadRequest,
   PlaceSummary,
+  ReadPlaceImportEventsParams,
+  ReadPlaceImportEventsPathParameters,
+  RevokePlaceImportViewerAccessPathParameters,
+  ServiceUnavailableResponse,
   SetPinnedMaterialPathParameters,
   SetPinnedMaterialRequest,
+  StartPlaceImportRequest,
   StreamImportRunEventsPathParameters,
+  StreamPlaceImportEventsParams,
+  StreamPlaceImportEventsPathParameters,
   TelegramImportAlreadyRunningResponse,
   UnauthorizedResponse,
   UpdateContentSourcePathParameters,
@@ -87,6 +101,8 @@ import type {
   UpdatePlaceRequest,
   UpdatePlaceStatusPathParameters,
   UpdatePlaceStatusRequest,
+  UploadPlaceCategoryPhotoBody,
+  UploadPlaceCategoryPhotoPathParameters,
   UploadPlaceCoverPhotoPathParameters,
   ValidationErrorResponse
 } from '../model';
@@ -477,6 +493,680 @@ export const useDeletePlaceCategory = <TError = ErrorType<UnauthorizedResponse |
       return useMutation(getDeletePlaceCategoryMutationOptions(options), queryClient);
     }
     /**
+ * Загружает или заменяет cover-фотографию категории. Принимаются JPEG, PNG и WebP размером не более 5 MB.
+ * @summary Upload place category photo
+ */
+export const uploadPlaceCategoryPhoto = (
+    { categoryId }: UploadPlaceCategoryPhotoPathParameters,
+    uploadPlaceCategoryPhotoBody: BodyType<UploadPlaceCategoryPhotoBody>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+      const formData = new FormData();
+formData.append(`photo`, uploadPlaceCategoryPhotoBody.photo);
+
+      return apiMutator<AdminPlaceCategory>(
+      {url: `/admin/categories/${encodeURIComponent(String(categoryId))}/photo`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
+    },
+      options);
+    }
+
+
+
+export const getUploadPlaceCategoryPhotoMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadPlaceCategoryPhoto>>, TError,{pathParams: UploadPlaceCategoryPhotoPathParameters;data: BodyType<UploadPlaceCategoryPhotoBody>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadPlaceCategoryPhoto>>, TError,{pathParams: UploadPlaceCategoryPhotoPathParameters;data: BodyType<UploadPlaceCategoryPhotoBody>}, TContext> => {
+
+const mutationKey = ['uploadPlaceCategoryPhoto'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadPlaceCategoryPhoto>>, {pathParams: UploadPlaceCategoryPhotoPathParameters;data: BodyType<UploadPlaceCategoryPhotoBody>}> = (props) => {
+          const {pathParams,data} = props ?? {};
+
+          return  uploadPlaceCategoryPhoto(pathParams,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadPlaceCategoryPhotoMutationResult = NonNullable<Awaited<ReturnType<typeof uploadPlaceCategoryPhoto>>>
+    export type UploadPlaceCategoryPhotoMutationBody = BodyType<UploadPlaceCategoryPhotoBody>
+    export type UploadPlaceCategoryPhotoMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>
+
+    /**
+ * @summary Upload place category photo
+ */
+export const useUploadPlaceCategoryPhoto = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | CategoryNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadPlaceCategoryPhoto>>, TError,{pathParams: UploadPlaceCategoryPhotoPathParameters;data: BodyType<UploadPlaceCategoryPhotoBody>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadPlaceCategoryPhoto>>,
+        TError,
+        {pathParams: UploadPlaceCategoryPhotoPathParameters;data: BodyType<UploadPlaceCategoryPhotoBody>},
+        TContext
+      > => {
+      return useMutation(getUploadPlaceCategoryPhotoMutationOptions(options), queryClient);
+    }
+    /**
+ * Создает durable queued operation для одной карточки организации. URL проверяется и очищается до persistence. Endpoint требует trusted Origin/Referer; feature по умолчанию выключена.
+
+ * @summary Start Yandex Maps place import
+ */
+export const startYandexMapsPlaceImport = (
+    startPlaceImportRequest: BodyType<StartPlaceImportRequest>,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportOperation>(
+      {url: `/admin/place-imports/yandex-maps`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: startPlaceImportRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getStartYandexMapsPlaceImportMutationOptions = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, TError,{data: BodyType<StartPlaceImportRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, TError,{data: BodyType<StartPlaceImportRequest>}, TContext> => {
+
+const mutationKey = ['startYandexMapsPlaceImport'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, {data: BodyType<StartPlaceImportRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  startYandexMapsPlaceImport(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartYandexMapsPlaceImportMutationResult = NonNullable<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>>
+    export type StartYandexMapsPlaceImportMutationBody = BodyType<StartPlaceImportRequest>
+    export type StartYandexMapsPlaceImportMutationError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>
+
+    /**
+ * @summary Start Yandex Maps place import
+ */
+export const useStartYandexMapsPlaceImport = <TError = ErrorType<ValidationErrorResponse | UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startYandexMapsPlaceImport>>, TError,{data: BodyType<StartPlaceImportRequest>}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startYandexMapsPlaceImport>>,
+        TError,
+        {data: BodyType<StartPlaceImportRequest>},
+        TContext
+      > => {
+      return useMutation(getStartYandexMapsPlaceImportMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Get place import operation
+ */
+export const getPlaceImportOperation = (
+    { operationId }: GetPlaceImportOperationPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportOperation>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetPlaceImportOperationQueryKey = ({ operationId }: GetPlaceImportOperationPathParameters,) => {
+    return [
+    `/admin/place-imports/${operationId}`
+    ] as const;
+    }
+
+
+export const getGetPlaceImportOperationQueryOptions = <TData = Awaited<ReturnType<typeof getPlaceImportOperation>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>>({ operationId }: GetPlaceImportOperationPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceImportOperation>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlaceImportOperationQueryKey({ operationId });
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaceImportOperation>>> = ({ signal }) => getPlaceImportOperation({ operationId }, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(operationId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaceImportOperation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlaceImportOperationQueryResult = NonNullable<Awaited<ReturnType<typeof getPlaceImportOperation>>>
+export type GetPlaceImportOperationQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>
+
+
+export function useGetPlaceImportOperation<TData = Awaited<ReturnType<typeof getPlaceImportOperation>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>>(
+ pathParams: GetPlaceImportOperationPathParameters, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceImportOperation>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlaceImportOperation>>,
+          TError,
+          Awaited<ReturnType<typeof getPlaceImportOperation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaceImportOperation<TData = Awaited<ReturnType<typeof getPlaceImportOperation>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>>(
+ pathParams: GetPlaceImportOperationPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceImportOperation>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlaceImportOperation>>,
+          TError,
+          Awaited<ReturnType<typeof getPlaceImportOperation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaceImportOperation<TData = Awaited<ReturnType<typeof getPlaceImportOperation>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>>(
+ pathParams: GetPlaceImportOperationPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceImportOperation>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get place import operation
+ */
+
+export function useGetPlaceImportOperation<TData = Awaited<ReturnType<typeof getPlaceImportOperation>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>>(
+ { operationId }: GetPlaceImportOperationPathParameters, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaceImportOperation>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPlaceImportOperationQueryOptions({ operationId },options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Polling fallback и reconnect delta после известной operation version.
+ * @summary Read place import journal
+ */
+export const readPlaceImportEvents = (
+    { operationId }: ReadPlaceImportEventsPathParameters,
+    params?: ReadPlaceImportEventsParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportEventsResponse>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}/events`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getReadPlaceImportEventsQueryKey = ({ operationId }: ReadPlaceImportEventsPathParameters,
+    params?: ReadPlaceImportEventsParams,) => {
+    return [
+    `/admin/place-imports/${operationId}/events`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getReadPlaceImportEventsQueryOptions = <TData = Awaited<ReturnType<typeof readPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>>({ operationId }: ReadPlaceImportEventsPathParameters,
+    params?: ReadPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPlaceImportEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getReadPlaceImportEventsQueryKey({ operationId },params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof readPlaceImportEvents>>> = ({ signal }) => readPlaceImportEvents({ operationId },params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(operationId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof readPlaceImportEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ReadPlaceImportEventsQueryResult = NonNullable<Awaited<ReturnType<typeof readPlaceImportEvents>>>
+export type ReadPlaceImportEventsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>
+
+
+export function useReadPlaceImportEvents<TData = Awaited<ReturnType<typeof readPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>>(
+ pathParams: ReadPlaceImportEventsPathParameters,
+    params: undefined |  ReadPlaceImportEventsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPlaceImportEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof readPlaceImportEvents>>,
+          TError,
+          Awaited<ReturnType<typeof readPlaceImportEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReadPlaceImportEvents<TData = Awaited<ReturnType<typeof readPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>>(
+ pathParams: ReadPlaceImportEventsPathParameters,
+    params?: ReadPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPlaceImportEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof readPlaceImportEvents>>,
+          TError,
+          Awaited<ReturnType<typeof readPlaceImportEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReadPlaceImportEvents<TData = Awaited<ReturnType<typeof readPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>>(
+ pathParams: ReadPlaceImportEventsPathParameters,
+    params?: ReadPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPlaceImportEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Read place import journal
+ */
+
+export function useReadPlaceImportEvents<TData = Awaited<ReturnType<typeof readPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>>(
+ { operationId }: ReadPlaceImportEventsPathParameters,
+    params?: ReadPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readPlaceImportEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getReadPlaceImportEventsQueryOptions({ operationId },params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * SSE `place-import.updated` использует subscribe → read → read handshake, Redis version hints и периодическое PostgreSQL reconciliation. Terminal status закрывает stream.
+
+ * @summary Stream place import updates
+ */
+export const streamPlaceImportEvents = (
+    { operationId }: StreamPlaceImportEventsPathParameters,
+    params?: StreamPlaceImportEventsParams,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<string>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}/events/stream`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getStreamPlaceImportEventsQueryKey = ({ operationId }: StreamPlaceImportEventsPathParameters,
+    params?: StreamPlaceImportEventsParams,) => {
+    return [
+    `/admin/place-imports/${operationId}/events/stream`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getStreamPlaceImportEventsQueryOptions = <TData = Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>({ operationId }: StreamPlaceImportEventsPathParameters,
+    params?: StreamPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStreamPlaceImportEventsQueryKey({ operationId },params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof streamPlaceImportEvents>>> = ({ signal }) => streamPlaceImportEvents({ operationId },params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(operationId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type StreamPlaceImportEventsQueryResult = NonNullable<Awaited<ReturnType<typeof streamPlaceImportEvents>>>
+export type StreamPlaceImportEventsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+
+
+export function useStreamPlaceImportEvents<TData = Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamPlaceImportEventsPathParameters,
+    params: undefined |  StreamPlaceImportEventsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamPlaceImportEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamPlaceImportEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamPlaceImportEvents<TData = Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamPlaceImportEventsPathParameters,
+    params?: StreamPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof streamPlaceImportEvents>>,
+          TError,
+          Awaited<ReturnType<typeof streamPlaceImportEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useStreamPlaceImportEvents<TData = Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ pathParams: StreamPlaceImportEventsPathParameters,
+    params?: StreamPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Stream place import updates
+ */
+
+export function useStreamPlaceImportEvents<TData = Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ { operationId }: StreamPlaceImportEventsPathParameters,
+    params?: StreamPlaceImportEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof streamPlaceImportEvents>>, TError, TData>>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getStreamPlaceImportEventsQueryOptions({ operationId },params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Без request body атомарно создает hidden Place, external reference и при необходимости draft-категорию. Требует trusted Origin/Referer.
+ * @summary Confirm immutable place import preview
+ */
+export const confirmPlaceImport = (
+    { operationId }: ConfirmPlaceImportPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportOperation>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}/confirm`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getConfirmPlaceImportMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmPlaceImport>>, TError,{pathParams: ConfirmPlaceImportPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmPlaceImport>>, TError,{pathParams: ConfirmPlaceImportPathParameters}, TContext> => {
+
+const mutationKey = ['confirmPlaceImport'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmPlaceImport>>, {pathParams: ConfirmPlaceImportPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  confirmPlaceImport(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmPlaceImportMutationResult = NonNullable<Awaited<ReturnType<typeof confirmPlaceImport>>>
+
+    export type ConfirmPlaceImportMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>
+
+    /**
+ * @summary Confirm immutable place import preview
+ */
+export const useConfirmPlaceImport = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void | ServiceUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmPlaceImport>>, TError,{pathParams: ConfirmPlaceImportPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmPlaceImport>>,
+        TError,
+        {pathParams: ConfirmPlaceImportPathParameters},
+        TContext
+      > => {
+      return useMutation(getConfirmPlaceImportMutationOptions(options), queryClient);
+    }
+    /**
+ * Durable cancellation; Redis notification является только latency hint. Требует trusted Origin/Referer.
+ * @summary Cancel place import
+ */
+export const cancelPlaceImport = (
+    { operationId }: CancelPlaceImportPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportOperation>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}/cancel`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getCancelPlaceImportMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelPlaceImport>>, TError,{pathParams: CancelPlaceImportPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelPlaceImport>>, TError,{pathParams: CancelPlaceImportPathParameters}, TContext> => {
+
+const mutationKey = ['cancelPlaceImport'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelPlaceImport>>, {pathParams: CancelPlaceImportPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  cancelPlaceImport(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelPlaceImportMutationResult = NonNullable<Awaited<ReturnType<typeof cancelPlaceImport>>>
+
+    export type CancelPlaceImportMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>
+
+    /**
+ * @summary Cancel place import
+ */
+export const useCancelPlaceImport = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelPlaceImport>>, TError,{pathParams: CancelPlaceImportPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof cancelPlaceImport>>,
+        TError,
+        {pathParams: CancelPlaceImportPathParameters},
+        TContext
+      > => {
+      return useMutation(getCancelPlaceImportMutationOptions(options), queryClient);
+    }
+    /**
+ * Выдает один capability во fragment отдельного viewer-origin. Повторная выдача блокируется до revoke/expiry.
+ * @summary Create one-time CAPTCHA viewer access
+ */
+export const createPlaceImportViewerAccess = (
+    { operationId }: CreatePlaceImportViewerAccessPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PlaceImportViewerAccess>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}/viewer-access`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getCreatePlaceImportViewerAccessMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPlaceImportViewerAccess>>, TError,{pathParams: CreatePlaceImportViewerAccessPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPlaceImportViewerAccess>>, TError,{pathParams: CreatePlaceImportViewerAccessPathParameters}, TContext> => {
+
+const mutationKey = ['createPlaceImportViewerAccess'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPlaceImportViewerAccess>>, {pathParams: CreatePlaceImportViewerAccessPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  createPlaceImportViewerAccess(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePlaceImportViewerAccessMutationResult = NonNullable<Awaited<ReturnType<typeof createPlaceImportViewerAccess>>>
+
+    export type CreatePlaceImportViewerAccessMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>
+
+    /**
+ * @summary Create one-time CAPTCHA viewer access
+ */
+export const useCreatePlaceImportViewerAccess = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPlaceImportViewerAccess>>, TError,{pathParams: CreatePlaceImportViewerAccessPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createPlaceImportViewerAccess>>,
+        TError,
+        {pathParams: CreatePlaceImportViewerAccessPathParameters},
+        TContext
+      > => {
+      return useMutation(getCreatePlaceImportViewerAccessMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Revoke CAPTCHA viewer access
+ */
+export const revokePlaceImportViewerAccess = (
+    { operationId }: RevokePlaceImportViewerAccessPathParameters,
+ options?: SecondParameter<typeof apiMutator>,signal?: AbortSignal
+) => {
+
+
+      return apiMutator<void>(
+      {url: `/admin/place-imports/${encodeURIComponent(String(operationId))}/viewer-access`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+export const getRevokePlaceImportViewerAccessMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokePlaceImportViewerAccess>>, TError,{pathParams: RevokePlaceImportViewerAccessPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokePlaceImportViewerAccess>>, TError,{pathParams: RevokePlaceImportViewerAccessPathParameters}, TContext> => {
+
+const mutationKey = ['revokePlaceImportViewerAccess'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokePlaceImportViewerAccess>>, {pathParams: RevokePlaceImportViewerAccessPathParameters}> = (props) => {
+          const {pathParams} = props ?? {};
+
+          return  revokePlaceImportViewerAccess(pathParams,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokePlaceImportViewerAccessMutationResult = NonNullable<Awaited<ReturnType<typeof revokePlaceImportViewerAccess>>>
+
+    export type RevokePlaceImportViewerAccessMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>
+
+    /**
+ * @summary Revoke CAPTCHA viewer access
+ */
+export const useRevokePlaceImportViewerAccess = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokePlaceImportViewerAccess>>, TError,{pathParams: RevokePlaceImportViewerAccessPathParameters}, TContext>, request?: SecondParameter<typeof apiMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revokePlaceImportViewerAccess>>,
+        TError,
+        {pathParams: RevokePlaceImportViewerAccessPathParameters},
+        TContext
+      > => {
+      return useMutation(getRevokePlaceImportViewerAccessMutationOptions(options), queryClient);
+    }
+    /**
  * Возвращает административный список мест с пагинацией и опциональной фильтрацией по статусу. Если `status` не указан, возвращаются и активные, и скрытые места.
  * @summary List admin places
  */
@@ -486,7 +1176,7 @@ export const listAdminPlaces = (
 ) => {
 
 
-      return apiMutator<PlaceListResponse>(
+      return apiMutator<AdminPlaceListResponse>(
       {url: `/admin/places`, method: 'GET',
         params, signal
     },

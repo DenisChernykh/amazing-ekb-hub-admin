@@ -1,7 +1,13 @@
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import type { PlaceSummary } from '@/shared/api/generated/model'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -36,6 +42,7 @@ const mockedUseUpdatePlaceStatusMutation = vi.mocked(
 )
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
@@ -96,6 +103,12 @@ describe('PlaceStatusPanel', () => {
 
     fireEvent.click(screen.getByText('Опубликовано'))
     fireEvent.click(screen.getByRole('button', { name: /Опубликовать/ }))
+    expect(screen.getByText('Опубликовать место?')).toBeInTheDocument()
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Опубликовать',
+      }),
+    )
 
     await waitFor(() => {
       expect(mutate).toHaveBeenCalledWith({
@@ -133,6 +146,11 @@ describe('PlaceStatusPanel', () => {
 
     fireEvent.click(screen.getByText('Опубликовано'))
     fireEvent.click(screen.getByRole('button', { name: /Опубликовать/ }))
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Опубликовать',
+      }),
+    )
 
     await waitFor(() => {
       expect(messageSuccess).toHaveBeenCalledWith('Место опубликовано')
@@ -160,13 +178,20 @@ describe('PlaceStatusPanel', () => {
 
     fireEvent.click(screen.getByText('Опубликовано'))
     fireEvent.click(screen.getByRole('button', { name: /Опубликовать/ }))
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Опубликовать',
+      }),
+    )
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Status unavailable',
     )
     expect(messageError).toHaveBeenCalledWith('Status unavailable')
     expect(
-      screen.getByRole('button', { name: /Опубликовать/ }),
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Опубликовать',
+      }),
     ).not.toBeDisabled()
   })
 })

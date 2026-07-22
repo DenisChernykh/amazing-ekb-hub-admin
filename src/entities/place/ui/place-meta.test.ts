@@ -7,11 +7,13 @@ import {
 
 const categories = [
   {
+    coverImageUrl: null,
     id: 'category_pools',
     slug: 'pools',
     title: 'Бассейны',
   },
   {
+    coverImageUrl: null,
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',

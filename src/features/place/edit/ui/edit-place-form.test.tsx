@@ -110,12 +110,14 @@ const mockedUseUpdatePlaceMutation = vi.mocked(useUpdatePlaceMutation)
 const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
 }
 
 const place: PlaceDetail = {
+  mapsUrl: null,
   category: spaCategory,
   counters: {
     dzen: 1,

@@ -4,10 +4,8 @@ import {
   getListAdminPlacesQueryKey,
   listAdminPlaces,
 } from '@/shared/api/generated/admin/admin'
-import type {
-  PlaceDetail,
-  PlaceListResponse,
-} from '@/shared/api/generated/model'
+import type { PlaceDetail } from '@/shared/api/generated/model'
+import type { AdminPlaceListResponse } from '@/shared/api/generated/operation'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -37,7 +35,7 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
 const mockedListAdminPlaces = vi.mocked(listAdminPlaces)
 const mockedGetAdminPlaceDetail = vi.mocked(getAdminPlaceDetail)
 
-const placeListResponse: PlaceListResponse = {
+const placeListResponse: AdminPlaceListResponse = {
   items: [],
   page: 1,
   pageSize: 10,
@@ -45,12 +43,14 @@ const placeListResponse: PlaceListResponse = {
 }
 
 const spaCategory = {
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
 }
 
 const placeDetail: PlaceDetail = {
+  mapsUrl: null,
   category: spaCategory,
   counters: {
     dzen: 0,

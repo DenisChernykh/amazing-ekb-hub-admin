@@ -1,4 +1,5 @@
 import { formatCategoryDateTime } from '@/entities/category/ui/category-meta'
+import { CategoryStatusTag } from '@/entities/category/ui/category-status-tag'
 import { DeleteCategoryButton } from '@/features/category/delete/ui/delete-category-button'
 import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { EditOutlined } from '@ant-design/icons'
@@ -43,6 +44,14 @@ export function getCategoriesTableColumns({
       render: (value: AdminPlaceCategory['updatedAt']) =>
         formatCategoryDateTime(value),
       title: 'Обновлена',
+    },
+    {
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: AdminPlaceCategory['status']) => (
+        <CategoryStatusTag status={status} />
+      ),
+      title: 'Статус',
     },
     {
       key: 'actions',

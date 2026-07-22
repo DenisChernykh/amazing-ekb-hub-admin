@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   Flex,
+  Modal,
   Segmented,
   Space,
   Typography,
@@ -73,6 +74,7 @@ export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
   const { message } = AntdApp.useApp()
   const [selectedStatus, setSelectedStatus] = useState<PlaceStatus>(status)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false)
   const selectedAction = statusAction[selectedStatus]
   const isChanged = selectedStatus !== status
   const updateStatusMutation = useUpdatePlaceStatusMutation({
@@ -82,6 +84,7 @@ export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
       void message.error(apiError.message)
     },
     onSuccess: (place) => {
+      setIsPublishConfirmOpen(false)
       setErrorMessage(null)
       void message.success(statusAction[place.status].successMessage)
     },
@@ -98,6 +101,16 @@ export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
 
   const handleApply = () => {
     setErrorMessage(null)
+
+    if (selectedStatus === 'active') {
+      setIsPublishConfirmOpen(true)
+      return
+    }
+
+    applyStatus()
+  }
+
+  const applyStatus = () => {
     updateStatusMutation.mutate({
       data: { status: selectedStatus },
       pathParams: { placeId },
@@ -123,7 +136,7 @@ export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
           {statusHint[selectedStatus]}
         </Typography.Text>
 
-        {errorMessage && <Alert message={errorMessage} showIcon type="error" />}
+        {errorMessage && <Alert showIcon title={errorMessage} type="error" />}
 
         <Flex justify="end">
           <Button
@@ -137,6 +150,19 @@ export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
           </Button>
         </Flex>
       </Flex>
+
+      <Modal
+        cancelText="Отмена"
+        confirmLoading={updateStatusMutation.isPending}
+        okText="Опубликовать"
+        onCancel={() => setIsPublishConfirmOpen(false)}
+        onOk={applyStatus}
+        open={isPublishConfirmOpen}
+        title="Опубликовать место?"
+      >
+        Место станет доступно в публичном каталоге. Если оно использует
+        draft-категорию, категория также станет активной.
+      </Modal>
     </Card>
   )
 }

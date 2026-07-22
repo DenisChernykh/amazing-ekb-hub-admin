@@ -11,8 +11,10 @@ import {
 
 const category: AdminPlaceCategory = {
   createdAt: '2026-07-03T10:00:00.000Z',
+  coverImageUrl: null,
   id: 'category_spa',
   slug: 'spa',
+  status: 'active',
   title: 'SPA',
   updatedAt: '2026-07-03T10:00:00.000Z',
 }
