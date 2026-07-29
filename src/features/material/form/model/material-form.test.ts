@@ -1,8 +1,8 @@
-import type { Material } from '@/shared/api/generated/model'
 import {
   CreatePlaceMaterialBody,
   UpdateMaterialBody,
 } from '@/shared/api/generated-zod/admin/admin.zod'
+import type { Material } from '@/shared/api/generated/model'
 import dayjs from 'dayjs'
 import { describe, expect, it } from 'vitest'
 import {

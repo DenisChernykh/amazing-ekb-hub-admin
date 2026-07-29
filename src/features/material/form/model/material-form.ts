@@ -3,25 +3,12 @@ import type {
   CreateMaterialRequest,
   Material,
   MaterialType,
-  Platform,
   UpdateMaterialRequest,
 } from '@/shared/api/generated/model'
 import dayjs, { type Dayjs } from 'dayjs'
+import type { MaterialFormValues } from './material-form-schema'
 
-/**
- * Значения общей формы создания и редактирования материала.
- *
- * @remarks Nullable поля отражают UI controls до required-валидации Zod.
- * Payload builders ожидают валидные значения формы.
- */
-export type MaterialFormValues = {
-  durationSec: number | null
-  platform: Platform | null
-  publishedAt: Dayjs | null
-  title: string
-  type: MaterialType | null
-  url: string
-}
+export type { MaterialFormValues } from './material-form-schema'
 
 type NormalizedMaterialFormValues = {
   durationSec: number | null

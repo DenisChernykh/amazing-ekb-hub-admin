@@ -12,8 +12,8 @@ import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
-import { FormProvider, useWatch } from 'react-hook-form'
 import { useEffect, useState } from 'react'
+import { FormProvider, useWatch } from 'react-hook-form'
 
 /**
  * Props формы редактирования места.
@@ -44,6 +44,8 @@ export function EditPlaceForm({
   const initialValues = getPlaceFormInitialValues(place)
   const form = useZodForm(editPlaceFormSchema, {
     defaultValues: initialValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   })
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const values = useWatch({
@@ -99,7 +101,7 @@ export function EditPlaceForm({
         onSubmit={form.handleSubmit(handleFinish)}
       >
         {Boolean(errorMessages.length) && (
-          <Form.Item>
+          <Form.Item layout="vertical">
             <PlaceFormErrorAlert
               messages={errorMessages}
               title="Не удалось обновить место"

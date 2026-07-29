@@ -13,8 +13,8 @@ import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { ContentSource } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
-import { FormProvider, useWatch } from 'react-hook-form'
 import { useState } from 'react'
+import { FormProvider, useWatch } from 'react-hook-form'
 import { EditContentSourceDrawerActions } from './edit-content-source-drawer-actions'
 
 /**

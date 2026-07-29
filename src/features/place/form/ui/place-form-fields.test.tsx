@@ -59,9 +59,7 @@ describe('PlaceFormFields', () => {
       isPending: false,
     } as unknown as ReturnType<typeof usePlaceCategoriesQuery>)
 
-    render(
-      <PlaceFormFieldsHarness />,
-    )
+    render(<PlaceFormFieldsHarness />)
 
     expect(screen.getByRole('alert')).toHaveTextContent(
       'Не удалось загрузить категории',
@@ -76,6 +74,18 @@ describe('PlaceFormFields', () => {
 
     expect(await screen.findByText('Введите название')).toBeInTheDocument()
     expect(await screen.findByText('Выберите категорию')).toBeInTheDocument()
+  })
+
+  it('focuses the invalid category Select after submit', async () => {
+    render(<PlaceFormFieldsHarness />)
+
+    fireEvent.change(screen.getByLabelText('Название'), {
+      target: { value: 'Тихий SPA' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+
+    expect(await screen.findByText('Выберите категорию')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Категория' })).toHaveFocus()
   })
 
   it('shows exact slug guidance from the create schema', async () => {

@@ -13,8 +13,8 @@ import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
-import { FormProvider } from 'react-hook-form'
 import { useState } from 'react'
+import { FormProvider } from 'react-hook-form'
 import { CreatePlacePartialSuccessAlert } from './create-place-partial-success-alert'
 
 type CreatePlaceFormProps = {
@@ -49,6 +49,8 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
       tags: [],
       title: '',
     },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   })
   const createPlaceMutation = useCreatePlaceMutation()
   const uploadCoverMutation = useUploadPlaceCoverPhotoMutation()
@@ -109,7 +111,7 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
         onSubmit={form.handleSubmit(handleFinish)}
       >
         {Boolean(errorMessages.length) && (
-          <Form.Item>
+          <Form.Item layout="vertical">
             <PlaceFormErrorAlert
               messages={errorMessages}
               title="Не удалось создать место"
@@ -118,7 +120,7 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
         )}
 
         {partialSuccess && (
-          <Form.Item>
+          <Form.Item layout="vertical">
             <CreatePlacePartialSuccessAlert
               messages={partialSuccess.messages}
               placeId={partialSuccess.placeId}

@@ -1,8 +1,8 @@
-import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
 import {
   CreatePlaceBody,
   UpdatePlaceBody,
 } from '@/shared/api/generated-zod/admin/admin.zod'
+import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getPlaceFormInitialValues,
@@ -11,10 +11,7 @@ import {
   toUpdatePlaceRequest,
   type PlaceFormValues,
 } from './place-form'
-import {
-  createPlaceFormSchema,
-  editPlaceFormSchema,
-} from './place-form-schema'
+import { createPlaceFormSchema, editPlaceFormSchema } from './place-form-schema'
 
 const spaCategory: PlaceCategory = {
   coverImageUrl: null,
@@ -60,7 +57,9 @@ describe('place form helpers', () => {
           title: '',
         })
         .error?.issues.map((issue) => issue.message),
-    ).toEqual(expect.arrayContaining(['Введите название', 'Выберите категорию']))
+    ).toEqual(
+      expect.arrayContaining(['Введите название', 'Выберите категорию']),
+    )
   })
 
   it('requires a slug when editing a place', () => {

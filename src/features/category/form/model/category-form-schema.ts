@@ -10,10 +10,10 @@ const categorySlugGuidance =
 const isGeneratedCreateSlug = (value: string) =>
   !value || CreatePlaceCategoryBody.shape.slug.unwrap().safeParse(value).success
 
-const optionalCategorySlugSchema = z.string().trim().refine(
-  isGeneratedCreateSlug,
-  categorySlugGuidance,
-)
+const optionalCategorySlugSchema = z
+  .string()
+  .trim()
+  .refine(isGeneratedCreateSlug, categorySlugGuidance)
 
 /** Zod-схема create-формы категории. */
 export const createCategoryFormSchema = z.strictObject({

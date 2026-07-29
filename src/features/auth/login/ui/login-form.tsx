@@ -1,9 +1,9 @@
 import { useLoginSession } from '@/entities/session/model/session-hooks'
-import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import {
   loginFormSchema,
   type LoginFormValues,
 } from '@/features/auth/login/model/login-form-schema'
+import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
@@ -50,7 +50,7 @@ export function LoginForm({ onLoggedIn }: LoginFormProps) {
         noValidate
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <RhfFormItem control={form.control} label="Email" name="email" required>
+        <RhfFormItem control={form.control} label="Email" name="email">
           {(field, controlProps) => (
             <Input
               aria-describedby={controlProps['aria-describedby']}
@@ -68,7 +68,7 @@ export function LoginForm({ onLoggedIn }: LoginFormProps) {
           )}
         </RhfFormItem>
 
-        <RhfFormItem control={form.control} label="Пароль" name="password" required>
+        <RhfFormItem control={form.control} label="Пароль" name="password">
           {(field, controlProps) => (
             <Input.Password
               aria-describedby={controlProps['aria-describedby']}

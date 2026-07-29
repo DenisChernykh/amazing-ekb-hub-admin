@@ -15,6 +15,7 @@ vi.mock('@/entities/content-source/model/content-source-mutations', () => ({
 
 vi.mock('antd', async () => {
   const actual = await vi.importActual<typeof import('antd')>('antd')
+  const { forwardRef } = await vi.importActual<typeof import('react')>('react')
 
   const App = ({ children }: { children: ReactNode }) => <div>{children}</div>
   App.useApp = () => ({
@@ -26,6 +27,39 @@ vi.mock('antd', async () => {
       confirm: modalConfirm,
     },
   })
+
+  const Select = forwardRef<
+    HTMLSelectElement,
+    {
+      'aria-label'?: string
+      disabled?: boolean
+      onChange?: (value: string) => void
+      options?: Array<{ label: string; value: string }>
+      value?: string
+    }
+  >(
+    (
+      { 'aria-label': ariaLabel, disabled, onChange, options = [], value },
+      ref,
+    ) => (
+      <select
+        aria-label={ariaLabel}
+        disabled={disabled}
+        onChange={(event) => {
+          onChange?.(event.target.value)
+        }}
+        ref={ref}
+        value={value ?? ''}
+      >
+        <option value="" />
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    ),
+  )
 
   return {
     ...actual,
@@ -49,35 +83,7 @@ vi.mock('antd', async () => {
           {children}
         </section>
       ) : null,
-    Select: ({
-      'aria-label': ariaLabel,
-      disabled,
-      onChange,
-      options = [],
-      value,
-    }: {
-      'aria-label'?: string
-      disabled?: boolean
-      onChange?: (value: string) => void
-      options?: Array<{ label: string; value: string }>
-      value?: string
-    }) => (
-      <select
-        aria-label={ariaLabel}
-        disabled={disabled}
-        onChange={(event) => {
-          onChange?.(event.target.value)
-        }}
-        value={value ?? ''}
-      >
-        <option value="" />
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    ),
+    Select,
   }
 })
 
@@ -119,6 +125,26 @@ describe('CreateContentSourceDrawer', () => {
     expect(screen.getByText('Введите название')).toBeInTheDocument()
     expect(screen.getByText('Введите ссылку')).toBeInTheDocument()
     expect(mutate).not.toHaveBeenCalled()
+  })
+
+  it('focuses the invalid platform Select after submit', async () => {
+    mockedUseCreateContentSourceMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useCreateContentSourceMutation>)
+
+    renderCreateDrawer()
+
+    fireEvent.change(screen.getByLabelText('Название'), {
+      target: { value: 'Amazing EKB Telegram' },
+    })
+    fireEvent.change(screen.getByLabelText('Ссылка'), {
+      target: { value: 'https://t.me/amazing_ekb' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
+
+    expect(await screen.findByText('Выберите платформу')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Платформа' })).toHaveFocus()
   })
 
   it('submits normalized create content source payload', async () => {

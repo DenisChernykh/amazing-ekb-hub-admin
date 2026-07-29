@@ -34,7 +34,7 @@ export function MaterialFormFields({
 
   return (
     <>
-      <RhfFormItem control={control} label="Платформа" name="platform" required>
+      <RhfFormItem control={control} label="Платформа" name="platform">
         {(field, controlProps) => (
           <Select
             aria-describedby={controlProps['aria-describedby']}
@@ -52,7 +52,7 @@ export function MaterialFormFields({
         )}
       </RhfFormItem>
 
-      <RhfFormItem control={control} label="Тип" name="type" required>
+      <RhfFormItem control={control} label="Тип" name="type">
         {(field, controlProps) => (
           <Select
             aria-describedby={controlProps['aria-describedby']}
@@ -70,7 +70,7 @@ export function MaterialFormFields({
         )}
       </RhfFormItem>
 
-      <RhfFormItem control={control} label="Заголовок" name="title" required>
+      <RhfFormItem control={control} label="Заголовок" name="title">
         {(field, controlProps) => (
           <Input
             aria-describedby={controlProps['aria-describedby']}
@@ -87,12 +87,7 @@ export function MaterialFormFields({
         )}
       </RhfFormItem>
 
-      <RhfFormItem
-        control={control}
-        label="Дата публикации"
-        name="publishedAt"
-        required
-      >
+      <RhfFormItem control={control} label="Дата публикации" name="publishedAt">
         {(field, controlProps) => (
           <DatePicker
             aria-describedby={controlProps['aria-describedby']}
@@ -138,7 +133,7 @@ export function MaterialFormFields({
       )}
 
       {showUrlField && (
-        <RhfFormItem control={control} label="Ссылка" name="url" required>
+        <RhfFormItem control={control} label="Ссылка" name="url">
           {(field, controlProps) => (
             <Input
               aria-describedby={controlProps['aria-describedby']}

@@ -17,14 +17,14 @@ Proposal for a separate starter task. This admin branch does not modify
 
 ## Evidence from Admin Flows
 
-| Flow           | Evidence                                                                                       |
-| -------------- | ---------------------------------------------------------------------------------------------- |
-| Login          | Generated email contract plus exact Russian required and email messages.                       |
-| Category       | Optional create slug, required edit slug and normalized partial PATCH.                         |
-| Content source | Nullable select default, HTTP URL validation and explicit `null` clears.                       |
-| Material       | `Dayjs` UI value, conditional duration and edit models without URL.                            |
-| Place          | Nullable category, tag normalization, cover partial success and external dirty blocker.        |
-| Yandex import  | Trimmed HTTP URL plus structured active-operation `409` recovery.                              |
+| Flow           | Evidence                                                                                |
+| -------------- | --------------------------------------------------------------------------------------- |
+| Login          | Generated email contract plus exact Russian required and email messages.                |
+| Category       | Optional create slug, required edit slug and normalized partial PATCH.                  |
+| Content source | Nullable select default, HTTP URL validation and explicit `null` clears.                |
+| Material       | `Dayjs` UI value, conditional duration and edit models without URL.                     |
+| Place          | Nullable category, tag normalization, cover partial success and external dirty blocker. |
+| Yandex import  | Trimmed HTTP URL plus structured active-operation `409` recovery.                       |
 
 ## Starter Boundary
 

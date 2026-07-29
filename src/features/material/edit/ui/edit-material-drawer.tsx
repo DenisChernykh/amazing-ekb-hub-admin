@@ -18,8 +18,8 @@ import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
-import { FormProvider, useWatch } from 'react-hook-form'
 import { useState } from 'react'
+import { FormProvider, useWatch } from 'react-hook-form'
 import { EditMaterialDrawerActions } from './edit-material-drawer-actions'
 
 /**
@@ -52,7 +52,11 @@ export function EditMaterialDrawer({
   const schema = showUrlField
     ? editMaterialWithUrlFormSchema
     : editMaterialWithoutUrlFormSchema
-  const form = useZodForm(schema, { defaultValues: initialValues })
+  const form = useZodForm(schema, {
+    defaultValues: initialValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
   const values = useWatch({ control: form.control })
   const isDirty = hasMaterialFormChanges(values, initialValues)
   const changedFields = getMaterialFormChangedFields(values, initialValues)
@@ -121,36 +125,36 @@ export function EditMaterialDrawer({
     >
       <FormProvider {...form}>
         <form
-        name="edit-material"
+          name="edit-material"
           noValidate
           onSubmit={form.handleSubmit(handleSubmit)}
         >
-        {Boolean(errorMessages.length) && (
-          <Form.Item>
-            <MaterialFormErrorAlert
-              messages={errorMessages}
-              title="Не удалось обновить материал"
-            />
-          </Form.Item>
-        )}
+          {Boolean(errorMessages.length) && (
+            <Form.Item layout="vertical">
+              <MaterialFormErrorAlert
+                messages={errorMessages}
+                title="Не удалось обновить материал"
+              />
+            </Form.Item>
+          )}
 
-        {Boolean(changedFields.length) && (
-          <Form.Item>
-            <MaterialFormChangedFields fields={changedFields} />
-          </Form.Item>
-        )}
+          {Boolean(changedFields.length) && (
+            <Form.Item layout="vertical">
+              <MaterialFormChangedFields fields={changedFields} />
+            </Form.Item>
+          )}
 
-        <MaterialFormFields
-          control={form.control}
-          disabled={updateMaterialMutation.isPending}
-          showUrlField={showUrlField}
-        />
+          <MaterialFormFields
+            control={form.control}
+            disabled={updateMaterialMutation.isPending}
+            showUrlField={showUrlField}
+          />
 
-        <EditMaterialDrawerActions
-          isDirty={isDirty}
-          isPending={updateMaterialMutation.isPending}
-          onCancel={requestClose}
-        />
+          <EditMaterialDrawerActions
+            isDirty={isDirty}
+            isPending={updateMaterialMutation.isPending}
+            onCancel={requestClose}
+          />
         </form>
       </FormProvider>
     </Drawer>

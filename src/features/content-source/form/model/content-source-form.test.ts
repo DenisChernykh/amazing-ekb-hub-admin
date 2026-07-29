@@ -1,8 +1,8 @@
-import type { ContentSource } from '@/shared/api/generated/model'
 import {
   CreateContentSourceBody,
   UpdateContentSourceBody,
 } from '@/shared/api/generated-zod/admin/admin.zod'
+import type { ContentSource } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getContentSourceFormChangedFields,

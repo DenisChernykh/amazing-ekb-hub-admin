@@ -65,10 +65,7 @@ describe('LoginForm', () => {
       </AntdApp>,
     )
 
-    await userEvent.type(
-      screen.getByLabelText('Email'),
-      ' admin@example.test ',
-    )
+    await userEvent.type(screen.getByLabelText('Email'), ' admin@example.test ')
     await userEvent.type(screen.getByLabelText('Пароль'), 'unit-test-password')
     await userEvent.click(screen.getByRole('button', { name: 'Войти' }))
 

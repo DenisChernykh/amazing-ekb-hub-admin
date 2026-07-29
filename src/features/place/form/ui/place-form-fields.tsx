@@ -31,7 +31,7 @@ export function PlaceFormFields({
 
   return (
     <>
-      <RhfFormItem control={control} label="Название" name="title" required>
+      <RhfFormItem control={control} label="Название" name="title">
         {(field, controlProps) => (
           <Input
             aria-describedby={controlProps['aria-describedby']}
@@ -89,12 +89,7 @@ export function PlaceFormFields({
         )}
       </RhfFormItem>
 
-      <RhfFormItem
-        control={control}
-        label="Категория"
-        name="categoryId"
-        required
-      >
+      <RhfFormItem control={control} label="Категория" name="categoryId">
         {(field, controlProps) => (
           <Select
             aria-describedby={controlProps['aria-describedby']}
@@ -106,6 +101,7 @@ export function PlaceFormFields({
             onBlur={field.onBlur}
             onChange={(value) => field.onChange(value ?? null)}
             options={categoryOptions}
+            ref={field.ref}
             status={controlProps.status}
             value={field.value}
           />

@@ -10,8 +10,8 @@ import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
-import { FormProvider } from 'react-hook-form'
 import { useState } from 'react'
+import { FormProvider } from 'react-hook-form'
 
 const categoryCreateDefaultValues: CategoryFormValues = {
   slug: '',
@@ -105,7 +105,7 @@ export function CreateCategoryDrawer({
           onSubmit={form.handleSubmit(handleSubmit)}
         >
           {Boolean(errorMessages.length) && (
-            <Form.Item>
+            <Form.Item layout="vertical">
               <CategoryFormErrorAlert
                 messages={errorMessages}
                 title="Не удалось создать категорию"

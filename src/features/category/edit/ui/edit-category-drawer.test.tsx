@@ -96,9 +96,7 @@ describe('EditCategoryDrawer', () => {
 
     renderEditDrawer()
 
-    expect(screen.getByRole('textbox', { name: 'Название' })).toHaveValue(
-      'SPA',
-    )
+    expect(screen.getByRole('textbox', { name: 'Название' })).toHaveValue('SPA')
     expect(screen.getByRole('textbox', { name: 'Ярлык' })).toHaveValue('spa')
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
   })
@@ -181,7 +179,10 @@ describe('EditCategoryDrawer', () => {
     renderEditDrawer()
     const user = userEvent.setup()
 
-    await user.type(screen.getByRole('textbox', { name: 'Название' }), ' updated')
+    await user.type(
+      screen.getByRole('textbox', { name: 'Название' }),
+      ' updated',
+    )
     await user.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
 
     expect(modalConfirm).toHaveBeenCalledWith(

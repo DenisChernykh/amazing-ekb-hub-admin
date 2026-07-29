@@ -33,12 +33,13 @@ export function ContentSourceFormFields({
             onBlur={field.onBlur}
             onChange={field.onChange}
             options={getContentSourcePlatformOptions()}
+            ref={field.ref}
             value={field.value}
           />
         )}
       </RhfFormItem>
 
-      <RhfFormItem control={control} label="Название" name="displayName" required>
+      <RhfFormItem control={control} label="Название" name="displayName">
         {(field, controlProps) => (
           <Input
             {...controlProps}
@@ -52,7 +53,7 @@ export function ContentSourceFormFields({
         )}
       </RhfFormItem>
 
-      <RhfFormItem control={control} label="Ссылка" name="url" required>
+      <RhfFormItem control={control} label="Ссылка" name="url">
         {(field, controlProps) => (
           <Input
             {...controlProps}

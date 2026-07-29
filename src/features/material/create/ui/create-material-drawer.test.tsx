@@ -1,6 +1,7 @@
 import { useCreatePlaceMaterialMutation } from '@/entities/material/model/material-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -324,24 +325,25 @@ describe('CreateMaterialDrawer', () => {
     expect(mutate).not.toHaveBeenCalled()
   })
 
-  it('asks confirmation before closing a dirty create drawer', () => {
+  it('asks confirmation before closing a dirty create drawer', async () => {
     mockedUseCreatePlaceMaterialMutation.mockReturnValue({
       isPending: false,
       mutate: vi.fn(),
     } as unknown as ReturnType<typeof useCreatePlaceMaterialMutation>)
 
     renderCreateDrawer()
+    const user = userEvent.setup()
 
-    fireEvent.change(screen.getByLabelText('Заголовок'), {
-      target: { value: 'Черновик' },
+    await user.type(screen.getByLabelText('Заголовок'), 'Черновик')
+    await user.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
+
+    await waitFor(() => {
+      expect(modalConfirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          okText: 'Закрыть',
+          title: 'Закрыть без сохранения?',
+        }),
+      )
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
-
-    expect(modalConfirm).toHaveBeenCalledWith(
-      expect.objectContaining({
-        okText: 'Закрыть',
-        title: 'Закрыть без сохранения?',
-      }),
-    )
   })
 })

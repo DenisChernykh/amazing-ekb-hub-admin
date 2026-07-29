@@ -34,7 +34,9 @@ export const createContentSourceFormSchema = z.strictObject(
 )
 
 /** Zod-схема edit-формы content source. */
-export const editContentSourceFormSchema = z.strictObject(contentSourceFormShape)
+export const editContentSourceFormSchema = z.strictObject(
+  contentSourceFormShape,
+)
 
 /** Значения общей RHF формы content source. */
 export type ContentSourceFormValues = z.input<

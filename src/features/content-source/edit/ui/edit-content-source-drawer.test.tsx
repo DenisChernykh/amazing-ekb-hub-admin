@@ -183,10 +183,7 @@ describe('EditContentSourceDrawer', () => {
     const user = userEvent.setup()
 
     await user.clear(screen.getByLabelText('Название'))
-    await user.type(
-      screen.getByLabelText('Название'),
-      ' Amazing EKB Telegram ',
-    )
+    await user.type(screen.getByLabelText('Название'), ' Amazing EKB Telegram ')
 
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
     expect(screen.getAllByText('Название')).toHaveLength(1)

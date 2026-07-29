@@ -10,8 +10,8 @@ import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { ContentSource } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
-import { FormProvider } from 'react-hook-form'
 import { useState } from 'react'
+import { FormProvider } from 'react-hook-form'
 
 const contentSourceCreateDefaultValues: ContentSourceFormValues = {
   channelId: '',

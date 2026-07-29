@@ -129,54 +129,54 @@ Expected:
 `src/shared/config/zod-locale.test.ts` must assert the currently installed Zod 4 Russian fallback exactly:
 
 ```ts
-import { z } from "zod";
-import "./zod-locale";
+import { z } from 'zod'
+import './zod-locale'
 
-describe("zod locale", () => {
-  it("uses the Russian locale for built-in validation issues", () => {
-    const result = z.string().min(3).safeParse("");
+describe('zod locale', () => {
+  it('uses the Russian locale for built-in validation issues', () => {
+    const result = z.string().min(3).safeParse('')
 
     expect(result.error?.issues[0]?.message).toBe(
-      "Слишком маленькое значение: ожидалось, что string будет иметь >=3 символа",
-    );
-  });
-});
+      'Слишком маленькое значение: ожидалось, что string будет иметь >=3 символа',
+    )
+  })
+})
 ```
 
 `src/shared/lib/form/use-zod-form.test.tsx` must submit a value with surrounding spaces and prove that the handler receives the Zod output:
 
 ```tsx
 const schema = z.strictObject({
-  title: z.string().trim().min(1, "Введите название"),
-});
+  title: z.string().trim().min(1, 'Введите название'),
+})
 
 function TestForm({
   onSubmit,
 }: {
-  onSubmit: (value: { title: string }) => void;
+  onSubmit: (value: { title: string }) => void
 }) {
   const form = useZodForm(schema, {
-    defaultValues: { title: "" },
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
+    defaultValues: { title: '' },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
-      <input aria-label="Название" {...form.register("title")} />
+      <input aria-label="Название" {...form.register('title')} />
       <button type="submit">Сохранить</button>
     </form>
-  );
+  )
 }
 ```
 
 Test interaction:
 
 ```ts
-await userEvent.type(screen.getByLabelText("Название"), "  SPA  ");
-await userEvent.click(screen.getByRole("button", { name: "Сохранить" }));
-expect(onSubmit).toHaveBeenCalled();
-expect(onSubmit.mock.calls[0]?.[0]).toEqual({ title: "SPA" });
+await userEvent.type(screen.getByLabelText('Название'), '  SPA  ')
+await userEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+expect(onSubmit).toHaveBeenCalled()
+expect(onSubmit.mock.calls[0]?.[0]).toEqual({ title: 'SPA' })
 ```
 
 `src/shared/ui/form/rhf-form-item.test.tsx` must:
@@ -202,24 +202,24 @@ Expected: FAIL because the three production modules do not exist.
 Create `src/shared/config/zod-locale.ts`:
 
 ```ts
-import { z } from "zod";
-import { ru } from "zod/locales";
+import { z } from 'zod'
+import { ru } from 'zod/locales'
 
-z.config(ru());
+z.config(ru())
 ```
 
 Make the locale the first application side-effect import in `src/main.tsx`:
 
 ```ts
-import "@/shared/config/zod-locale";
-import App from "@/App";
+import '@/shared/config/zod-locale'
+import App from '@/App'
 ```
 
 Make it the first import in `src/test/setup.ts`:
 
 ```ts
-import "@/shared/config/zod-locale";
-import "@testing-library/jest-dom/vitest";
+import '@/shared/config/zod-locale'
+import '@testing-library/jest-dom/vitest'
 ```
 
 Do not import the initializer from generated files or individual feature schemas.
@@ -229,21 +229,21 @@ Do not import the initializer from generated files or individual feature schemas
 Use the following contract in `src/shared/lib/form/use-zod-form.ts`:
 
 ```ts
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useForm,
   type FieldValues,
   type UseFormProps,
   type UseFormReturn,
-} from "react-hook-form";
-import { z } from "zod";
+} from 'react-hook-form'
+import { z } from 'zod'
 
-type ZodFormSchema = z.ZodType<FieldValues, FieldValues>;
+type ZodFormSchema = z.ZodType<FieldValues, FieldValues>
 
 type UseZodFormOptions<TSchema extends ZodFormSchema> = Omit<
   UseFormProps<z.input<TSchema>, unknown, z.output<TSchema>>,
-  "resolver"
->;
+  'resolver'
+>
 
 /**
  * Создаёт React Hook Form с типизированным Zod resolver.
@@ -258,7 +258,7 @@ export function useZodForm<TSchema extends ZodFormSchema>(
   return useForm<z.input<TSchema>, unknown, z.output<TSchema>>({
     ...options,
     resolver: zodResolver(schema),
-  });
+  })
 }
 ```
 
@@ -269,23 +269,23 @@ Do not add a type assertion to satisfy resolver typing. If the installed resolve
 `src/shared/ui/form/rhf-form-item.tsx` must expose a render prop instead of adapting AntD event signatures:
 
 ```tsx
-import { Form, type FormItemProps } from "antd";
-import { useId, type ReactNode } from "react";
+import { Form, type FormItemProps } from 'antd'
+import { useId, type ReactNode } from 'react'
 import {
   useController,
   type Control,
   type ControllerRenderProps,
   type FieldPath,
   type FieldValues,
-} from "react-hook-form";
+} from 'react-hook-form'
 
 /** Accessibility и validation props для конкретного AntD control. */
 export type RhfControlStatusProps = {
-  "aria-describedby"?: string;
-  "aria-invalid": boolean;
-  id: string;
-  status?: "error";
-};
+  'aria-describedby'?: string
+  'aria-invalid': boolean
+  id: string
+  status?: 'error'
+}
 
 /** Props presentation adapter между RHF field state и AntD `Form.Item`. */
 export type RhfFormItemProps<
@@ -294,16 +294,16 @@ export type RhfFormItemProps<
   TTransformedValues = TFieldValues,
 > = Omit<
   FormItemProps,
-  "children" | "help" | "htmlFor" | "name" | "rules" | "validateStatus"
+  'children' | 'help' | 'htmlFor' | 'name' | 'rules' | 'validateStatus'
 > & {
   children: (
     field: ControllerRenderProps<TFieldValues, TName>,
     controlProps: RhfControlStatusProps,
-  ) => ReactNode;
-  control: Control<TFieldValues, unknown, TTransformedValues>;
-  controlId?: string;
-  name: TName;
-};
+  ) => ReactNode
+  control: Control<TFieldValues, unknown, TTransformedValues>
+  controlId?: string
+  name: TName
+}
 
 /**
  * Отображает RHF field error через AntD `Form.Item` и связывает его с control.
@@ -319,10 +319,10 @@ export function RhfFormItem<
   name,
   ...formItemProps
 }: RhfFormItemProps<TFieldValues, TName, TTransformedValues>) {
-  const generatedId = useId();
-  const { field, fieldState } = useController({ control, name });
-  const inputId = controlId ?? generatedId;
-  const errorId = fieldState.error ? `${inputId}-error` : undefined;
+  const generatedId = useId()
+  const { field, fieldState } = useController({ control, name })
+  const inputId = controlId ?? generatedId
+  const errorId = fieldState.error ? `${inputId}-error` : undefined
 
   return (
     <Form.Item
@@ -334,16 +334,16 @@ export function RhfFormItem<
       }
       htmlFor={inputId}
       layout="vertical"
-      validateStatus={fieldState.error ? "error" : undefined}
+      validateStatus={fieldState.error ? 'error' : undefined}
     >
       {children(field, {
-        "aria-describedby": errorId,
-        "aria-invalid": fieldState.invalid,
+        'aria-describedby': errorId,
+        'aria-invalid': fieldState.invalid,
         id: inputId,
-        status: fieldState.invalid ? "error" : undefined,
+        status: fieldState.invalid ? 'error' : undefined,
       })}
     </Form.Item>
-  );
+  )
 }
 ```
 
@@ -364,26 +364,26 @@ Expected: PASS for locale, transformed submit output, exact error copy and ARIA 
 Create `src/features/auth/login/model/login-form-schema.ts` with generated transport reuse and explicit current copy:
 
 ```ts
-import { LoginBody } from "@/shared/api/generated-zod/auth/auth.zod";
-import { z } from "zod";
+import { LoginBody } from '@/shared/api/generated-zod/auth/auth.zod'
+import { z } from 'zod'
 
 const loginEmailSchema = z
   .string()
   .trim()
-  .min(1, "Введите email")
+  .min(1, 'Введите email')
   .refine(
     (email) => LoginBody.shape.email.safeParse(email).success,
-    "Введите корректный email",
-  );
+    'Введите корректный email',
+  )
 
 /** Zod-схема значений формы входа администратора. */
 export const loginFormSchema = z.strictObject({
   email: loginEmailSchema,
-  password: LoginBody.shape.password.min(1, "Введите пароль"),
-});
+  password: LoginBody.shape.password.min(1, 'Введите пароль'),
+})
 
 /** Значения RHF формы входа до и после Zod validation. */
-export type LoginFormValues = z.input<typeof loginFormSchema>;
+export type LoginFormValues = z.input<typeof loginFormSchema>
 ```
 
 Extend `login-form.test.tsx` with:
@@ -434,8 +434,8 @@ The submit boundary must remain:
 
 ```ts
 const handleSubmit = (values: LoginFormValues) => {
-  loginMutation.mutate({ data: values });
-};
+  loginMutation.mutate({ data: values })
+}
 ```
 
 Run:
@@ -496,31 +496,31 @@ Add tests that prove:
 
 ```ts
 expect(
-  createCategoryFormSchema.safeParse({ slug: "", title: "" }).error?.issues[0]
+  createCategoryFormSchema.safeParse({ slug: '', title: '' }).error?.issues[0]
     ?.message,
-).toBe("Введите название");
+).toBe('Введите название')
 
 expect(
-  editCategoryFormSchema.safeParse({ slug: "", title: "SPA" }).error?.issues[0]
+  editCategoryFormSchema.safeParse({ slug: '', title: 'SPA' }).error?.issues[0]
     ?.message,
-).toBe("Введите ярлык");
+).toBe('Введите ярлык')
 
 expect(
-  editCategoryFormSchema.safeParse({ slug: "Семейное кафе", title: "SPA" })
+  editCategoryFormSchema.safeParse({ slug: 'Семейное кафе', title: 'SPA' })
     .error?.issues[0]?.message,
 ).toBe(
-  "Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe",
-);
+  'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe',
+)
 ```
 
 For every existing builder case, capture the request and parse it:
 
 ```ts
-const request = toCreateCategoryRequest(values);
-expect(CreatePlaceCategoryBody.parse(request)).toEqual(request);
+const request = toCreateCategoryRequest(values)
+expect(CreatePlaceCategoryBody.parse(request)).toEqual(request)
 
-const update = toUpdateCategoryRequest(values, initialValues);
-expect(UpdatePlaceCategoryBody.parse(update)).toEqual(update);
+const update = toUpdateCategoryRequest(values, initialValues)
+expect(UpdatePlaceCategoryBody.parse(update)).toEqual(update)
 ```
 
 Run:
@@ -547,39 +547,38 @@ Core structure:
 
 ```ts
 const isGeneratedCreateSlug = (value: string) =>
-  !value ||
-  CreatePlaceCategoryBody.shape.slug.unwrap().safeParse(value).success;
+  !value || CreatePlaceCategoryBody.shape.slug.unwrap().safeParse(value).success
 
 const optionalCategorySlugSchema = z
   .string()
   .trim()
   .refine(
     isGeneratedCreateSlug,
-    "Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe",
-  );
+    'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe',
+  )
 
 /** Zod-схема create-формы категории. */
 export const createCategoryFormSchema = z.strictObject({
   slug: optionalCategorySlugSchema,
-  title: CreatePlaceCategoryBody.shape.title.trim().min(1, "Введите название"),
-});
+  title: CreatePlaceCategoryBody.shape.title.trim().min(1, 'Введите название'),
+})
 
 /** Zod-схема edit-формы категории. */
 export const editCategoryFormSchema = z.strictObject({
   slug: z
     .string()
     .trim()
-    .min(1, "Введите ярлык")
+    .min(1, 'Введите ярлык')
     .refine(
       (value) =>
         UpdatePlaceCategoryBody.shape.slug.unwrap().safeParse(value).success,
-      "Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe",
+      'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe',
     ),
   title: createCategoryFormSchema.shape.title,
-});
+})
 
 /** Значения общей RHF формы категории. */
-export type CategoryFormValues = z.input<typeof editCategoryFormSchema>;
+export type CategoryFormValues = z.input<typeof editCategoryFormSchema>
 ```
 
 Update `category-form.ts` to import the type from this file. Keep the create
@@ -587,9 +586,9 @@ defaults private in `create-category-drawer.tsx`:
 
 ```ts
 const categoryCreateDefaultValues: CategoryFormValues = {
-  slug: "",
-  title: "",
-};
+  slug: '',
+  title: '',
+}
 ```
 
 Remove the now-unused exported `getCategorySlugValidationError`; the feature
@@ -625,11 +624,11 @@ Create form:
 
 ```ts
 const form = useZodForm(createCategoryFormSchema, {
-  defaultValues: { slug: "", title: "" },
-  mode: "onChange",
-  reValidateMode: "onChange",
-});
-const { isDirty } = form.formState;
+  defaultValues: { slug: '', title: '' },
+  mode: 'onChange',
+  reValidateMode: 'onChange',
+})
+const { isDirty } = form.formState
 ```
 
 Use `form.reset()` on successful mutation and clean close. Use native form submit. Keep the existing modal copy and API alert unchanged.
@@ -646,18 +645,18 @@ New component tests must prove:
 Use:
 
 ```ts
-const initialValues = getCategoryFormInitialValues(category);
+const initialValues = getCategoryFormInitialValues(category)
 const form = useZodForm(editCategoryFormSchema, {
   defaultValues: initialValues,
-  mode: "onChange",
-  reValidateMode: "onChange",
-});
+  mode: 'onChange',
+  reValidateMode: 'onChange',
+})
 const values = useWatch({
   control: form.control,
   compute: (currentValues) => currentValues,
-});
-const changedFields = getCategoryFormChangedFields(values, initialValues);
-const isDirty = changedFields.length > 0;
+})
+const changedFields = getCategoryFormChangedFields(values, initialValues)
+const isDirty = changedFields.length > 0
 ```
 
 Remove local `isDirty` and `changedFields` state. Use `form.reset(initialValues)` for close/success. Keep the no-diff guard and partial request builder.
@@ -716,32 +715,32 @@ Add exact validation cases:
 expect(
   createContentSourceFormSchema
     .safeParse({
-      channelId: "",
-      displayName: "",
-      externalId: "",
-      handle: "",
+      channelId: '',
+      displayName: '',
+      externalId: '',
+      handle: '',
       platform: null,
-      url: "",
+      url: '',
     })
     .error?.issues.map((issue) => issue.message),
 ).toEqual(
   expect.arrayContaining([
-    "Выберите платформу",
-    "Введите название",
-    "Введите ссылку",
+    'Выберите платформу',
+    'Введите название',
+    'Введите ссылку',
   ]),
-);
+)
 
 expect(
   createContentSourceFormSchema.safeParse({
-    channelId: "",
-    displayName: "Unsafe",
-    externalId: "",
-    handle: "",
-    platform: "telegram",
-    url: "javascript://example.com/alert",
+    channelId: '',
+    displayName: 'Unsafe',
+    externalId: '',
+    handle: '',
+    platform: 'telegram',
+    url: 'javascript://example.com/alert',
   }).error?.issues[0]?.message,
-).toBe("Введите ссылку с протоколом http или https");
+).toBe('Введите ссылку с протоколом http или https')
 ```
 
 Parse create/update builder outputs with `CreateContentSourceBody` and `UpdateContentSourceBody`.
@@ -761,29 +760,29 @@ Build shared UI shape:
 ```ts
 const requiredPlatformSchema = z
   .union([CreateContentSourceBody.shape.platform, z.null()])
-  .refine((platform) => platform !== null, "Выберите платформу");
+  .refine((platform) => platform !== null, 'Выберите платформу')
 
 const sourceUrlSchema = z
   .string()
   .trim()
-  .min(1, "Введите ссылку")
+  .min(1, 'Введите ссылку')
   .refine(
     (url) =>
       CreateContentSourceBody.shape.url.safeParse(url).success &&
       isSafeHttpUrl(url),
-    "Введите ссылку с протоколом http или https",
-  );
+    'Введите ссылку с протоколом http или https',
+  )
 
 const contentSourceFormShape = {
   channelId: z.string().trim(),
   displayName: CreateContentSourceBody.shape.displayName
     .trim()
-    .min(1, "Введите название"),
+    .min(1, 'Введите название'),
   externalId: z.string().trim(),
   handle: z.string().trim(),
   platform: requiredPlatformSchema,
   url: sourceUrlSchema,
-};
+}
 ```
 
 Export separate strict create/edit schemas even though their current shapes match, so operation requirements can diverge without changing consumers. Derive `ContentSourceFormValues` from the create schema.
@@ -893,16 +892,16 @@ Core assertions:
 expect(
   editMaterialWithoutUrlFormSchema.safeParse({
     durationSec: null,
-    platform: "telegram",
-    publishedAt: dayjs("2026-03-20"),
-    title: "Пост",
-    type: "post",
-    url: "",
+    platform: 'telegram',
+    publishedAt: dayjs('2026-03-20'),
+    title: 'Пост',
+    type: 'post',
+    url: '',
   }).success,
-).toBe(true);
+).toBe(true)
 
-expect(CreatePlaceMaterialBody.parse(createRequest)).toEqual(createRequest);
-expect(UpdateMaterialBody.parse(updateRequest)).toEqual(updateRequest);
+expect(CreatePlaceMaterialBody.parse(createRequest)).toEqual(createRequest)
+expect(UpdateMaterialBody.parse(updateRequest)).toEqual(updateRequest)
 ```
 
 Run:
@@ -922,11 +921,11 @@ const publishedAtSchema = z
   .union([
     z.custom<Dayjs>(
       (value) => dayjs.isDayjs(value) && value.isValid(),
-      "Выберите дату публикации",
+      'Выберите дату публикации',
     ),
     z.null(),
   ])
-  .refine((value) => value !== null, "Выберите дату публикации");
+  .refine((value) => value !== null, 'Выберите дату публикации')
 ```
 
 Build `platform` and `type` as generated enum + `null` unions with exact
@@ -941,15 +940,15 @@ Build URL variants:
 const requiredMaterialUrlSchema = z
   .string()
   .trim()
-  .min(1, "Введите ссылку")
+  .min(1, 'Введите ссылку')
   .refine(
     (url) =>
       CreatePlaceMaterialBody.shape.url.safeParse(url).success &&
       isSafeMaterialUrl(url),
-    "Введите ссылку с протоколом http или https",
-  );
+    'Введите ссылку с протоколом http или https',
+  )
 
-const materialWithoutUrlSchema = z.string();
+const materialWithoutUrlSchema = z.string()
 ```
 
 Export three strict object schemas. All three must infer the same `MaterialFormValues` field types; only runtime validation differs for `url`.
@@ -963,8 +962,8 @@ Replace AntD `shouldUpdate` with:
 ```ts
 const materialType = useWatch({
   control,
-  name: "type",
-});
+  name: 'type',
+})
 ```
 
 Render duration with boolean `&&`. Wire:
@@ -1008,10 +1007,10 @@ Add one empty-submit assertion containing all exact required messages.
 Keep:
 
 ```ts
-const showUrlField = typeof material.url === "string";
+const showUrlField = typeof material.url === 'string'
 const schema = showUrlField
   ? editMaterialWithUrlFormSchema
-  : editMaterialWithoutUrlFormSchema;
+  : editMaterialWithoutUrlFormSchema
 ```
 
 Pass `schema` to `useZodForm`; use complete `getMaterialFormInitialValues`. Derive values, dirty and chips with `useWatch` plus existing helpers. Remove local dirty/chip state.
@@ -1075,23 +1074,23 @@ expect(
   createPlaceFormSchema
     .safeParse({
       categoryId: null,
-      slug: "",
-      summary: "",
+      slug: '',
+      summary: '',
       tags: [],
-      title: "",
+      title: '',
     })
     .error?.issues.map((issue) => issue.message),
-).toEqual(expect.arrayContaining(["Введите название", "Выберите категорию"]));
+).toEqual(expect.arrayContaining(['Введите название', 'Выберите категорию']))
 
 expect(
   editPlaceFormSchema.safeParse({
-    categoryId: "category_spa",
-    slug: "",
-    summary: "",
+    categoryId: 'category_spa',
+    slug: '',
+    summary: '',
     tags: [],
-    title: "SPA",
+    title: 'SPA',
   }).error?.issues[0]?.message,
-).toBe("Введите ярлык");
+).toBe('Введите ярлык')
 ```
 
 Assert the exact slug guidance and parse all create/update builder outputs through `CreatePlaceBody`/`UpdatePlaceBody`.
@@ -1124,7 +1123,7 @@ Use exact slug message:
 Derive:
 
 ```ts
-export type PlaceFormValues = z.input<typeof editPlaceFormSchema>;
+export type PlaceFormValues = z.input<typeof editPlaceFormSchema>
 ```
 
 Change `PlaceFormValues.categoryId` semantics to `string | null`. In the request builder, keep a private `getRequiredValue` guard before assigning `categoryId`. Initial server values remain strings.
@@ -1190,16 +1189,16 @@ Derive current values:
 const values = useWatch({
   control: form.control,
   compute: (currentValues) => currentValues,
-});
-const isDirty = hasPlaceFormChanges(values, initialValues);
+})
+const isDirty = hasPlaceFormChanges(values, initialValues)
 ```
 
 Use exactly one new effect:
 
 ```ts
 useEffect(() => {
-  onDirtyChange?.(isDirty);
-}, [isDirty, onDirtyChange]);
+  onDirtyChange?.(isDirty)
+}, [isDirty, onDirtyChange])
 ```
 
 Update the component TSDoc `@remarks` to explain:
@@ -1264,13 +1263,13 @@ Schema tests may live in the existing component test file because the schema has
 
 ```ts
 expect(
-  placeImportStartSchema.safeParse({ url: "" }).error?.issues[0]?.message,
-).toBe("Вставьте ссылку на карточку организации");
+  placeImportStartSchema.safeParse({ url: '' }).error?.issues[0]?.message,
+).toBe('Вставьте ссылку на карточку организации')
 
 expect(
-  placeImportStartSchema.safeParse({ url: "javascript:alert(1)" }).error
+  placeImportStartSchema.safeParse({ url: 'javascript:alert(1)' }).error
     ?.issues[0]?.message,
-).toBe("Введите ссылку с протоколом http или https");
+).toBe('Введите ссылку с протоколом http или https')
 ```
 
 Add component tests:
@@ -1292,26 +1291,26 @@ Expected: FAIL until schema and RHF wiring exist.
 Create:
 
 ```ts
-import { StartYandexMapsPlaceImportBody } from "@/shared/api/generated-zod/admin/admin.zod";
-import { isSafeHttpUrl } from "@/shared/lib/url/safe-url";
-import { z } from "zod";
+import { StartYandexMapsPlaceImportBody } from '@/shared/api/generated-zod/admin/admin.zod'
+import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
+import { z } from 'zod'
 
 /** Zod-схема URL для запуска импорта одной карточки Яндекс Карт. */
 export const placeImportStartSchema = z.strictObject({
   url: z
     .string()
     .trim()
-    .min(1, "Вставьте ссылку на карточку организации")
+    .min(1, 'Вставьте ссылку на карточку организации')
     .refine(
       (url) =>
         StartYandexMapsPlaceImportBody.shape.url.safeParse(url).success &&
         isSafeHttpUrl(url),
-      "Введите ссылку с протоколом http или https",
+      'Введите ссылку с протоколом http или https',
     ),
-});
+})
 
 /** Значения RHF формы запуска импорта. */
-export type PlaceImportStartValues = z.input<typeof placeImportStartSchema>;
+export type PlaceImportStartValues = z.input<typeof placeImportStartSchema>
 ```
 
 The generated schema supplies URL/max-length transport constraints; the shared helper narrows the scheme to `http`/`https`.
@@ -1331,9 +1330,9 @@ Submit the already-trimmed schema output:
 
 ```ts
 const handleSubmit = ({ url }: PlaceImportStartValues) => {
-  setErrorMessage(null);
-  mutation.mutate({ url });
-};
+  setErrorMessage(null)
+  mutation.mutate({ url })
+}
 ```
 
 - [ ] **Step 4: Reconcile the helper registry with the final schema APIs**

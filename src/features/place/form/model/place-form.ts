@@ -118,7 +118,10 @@ export function toUpdatePlaceRequest(
   }
 
   if (normalizedValues.categoryId !== normalizedInitialValues.categoryId) {
-    request.categoryId = getRequiredValue(normalizedValues.categoryId, 'categoryId')
+    request.categoryId = getRequiredValue(
+      normalizedValues.categoryId,
+      'categoryId',
+    )
   }
 
   if (normalizedValues.slug !== normalizedInitialValues.slug) {

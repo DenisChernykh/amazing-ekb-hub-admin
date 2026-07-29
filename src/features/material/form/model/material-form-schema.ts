@@ -43,20 +43,36 @@ const materialFormShape = {
   type: requiredMaterialTypeSchema,
 }
 
-/** Zod-схема значений создания материала с обязательной исходной ссылкой. */
-export const createMaterialFormSchema = z.strictObject({
+/**
+ * Общая входная Zod-схема значений формы материала до сценарной валидации URL.
+ *
+ * @remarks Сохраняет UI-контракты `Dayjs`, nullable select-значений и nullable
+ * длительности для RHF create/edit сценариев.
+ */
+export const materialFormInputSchema = z.strictObject({
   ...materialFormShape,
+  url: z.string(),
+})
+
+/**
+ * Входные значения общей формы создания и редактирования материала.
+ *
+ * @remarks Выведен из общей Zod-схемы, поэтому сохраняет native UI-значения
+ * до нормализации в API payload.
+ */
+export type MaterialFormValues = z.input<typeof materialFormInputSchema>
+
+/** Zod-схема значений создания материала с обязательной исходной ссылкой. */
+export const createMaterialFormSchema = materialFormInputSchema.extend({
   url: requiredMaterialUrlSchema,
 })
 
 /** Zod-схема редактирования материала, когда исходная ссылка доступна в read-модели. */
-export const editMaterialWithUrlFormSchema = z.strictObject({
-  ...materialFormShape,
+export const editMaterialWithUrlFormSchema = materialFormInputSchema.extend({
   url: requiredMaterialUrlSchema,
 })
 
 /** Zod-схема редактирования материала из списка без исходной ссылки. */
-export const editMaterialWithoutUrlFormSchema = z.strictObject({
-  ...materialFormShape,
+export const editMaterialWithoutUrlFormSchema = materialFormInputSchema.extend({
   url: materialWithoutUrlSchema,
 })

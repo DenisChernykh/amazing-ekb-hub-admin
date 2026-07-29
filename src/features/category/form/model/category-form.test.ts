@@ -1,8 +1,8 @@
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import {
   CreatePlaceCategoryBody,
   UpdatePlaceCategoryBody,
 } from '@/shared/api/generated-zod/admin/admin.zod'
+import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getCategoryFormChangedFields,
@@ -122,5 +122,4 @@ describe('category form helpers', () => {
       ),
     ).toEqual([{ key: 'slug', label: 'Ярлык' }])
   })
-
 })

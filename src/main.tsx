@@ -1,5 +1,5 @@
-import '@/shared/config/zod-locale'
 import App from '@/App'
+import '@/shared/config/zod-locale'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

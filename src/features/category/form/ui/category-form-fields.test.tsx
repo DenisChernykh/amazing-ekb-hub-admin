@@ -1,8 +1,8 @@
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { FormProvider } from 'react-hook-form'
 import { describe, expect, it } from 'vitest'
 import { editCategoryFormSchema } from '../model/category-form-schema'
-import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { CategoryFormFields } from './category-form-fields'
 
 const renderCategoryFormFields = (showSlug = false) => {

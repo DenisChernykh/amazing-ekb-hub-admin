@@ -27,7 +27,7 @@ export function CategoryFormFields({
 }: CategoryFormFieldsProps) {
   return (
     <>
-      <RhfFormItem control={control} label="Название" name="title" required>
+      <RhfFormItem control={control} label="Название" name="title">
         {(field, controlProps) => (
           <Input
             {...controlProps}
