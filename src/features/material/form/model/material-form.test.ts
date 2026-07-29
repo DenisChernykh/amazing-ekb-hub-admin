@@ -166,7 +166,7 @@ describe('material form helpers', () => {
 
   it('normalizes create payload and stores selected calendar date', () => {
     const values: MaterialFormValues = {
-      durationSec: undefined,
+      durationSec: null,
       platform: 'telegram',
       publishedAt: dayjs('2026-03-20T00:30:00'),
       title: '  Новый обзор  ',

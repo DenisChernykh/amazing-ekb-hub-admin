@@ -7,10 +7,16 @@ import {
 } from 'react-hook-form'
 import { z } from 'zod'
 
-type ZodFormSchema = z.ZodType<FieldValues, FieldValues>
+type ZodFormInput<TSchema extends z.ZodType> =
+  z.input<TSchema> extends FieldValues ? z.input<TSchema> : never
 
-type UseZodFormOptions<TSchema extends ZodFormSchema> = Omit<
-  UseFormProps<z.input<TSchema>, unknown, z.output<TSchema>>,
+type ZodFormSchema<TSchema extends z.ZodType> = z.ZodType<
+  z.output<TSchema>,
+  ZodFormInput<TSchema>
+>
+
+type UseZodFormOptions<TSchema extends z.ZodType> = Omit<
+  UseFormProps<ZodFormInput<TSchema>, unknown, z.output<TSchema>>,
   'resolver'
 >
 
@@ -20,12 +26,14 @@ type UseZodFormOptions<TSchema extends ZodFormSchema> = Omit<
  * @remarks Hook не задаёт validation mode, default values или submit policy:
  * их явно определяет владелец конкретной формы.
  */
-export function useZodForm<TSchema extends ZodFormSchema>(
-  schema: TSchema,
+export function useZodForm<TSchema extends z.ZodType>(
+  schema: TSchema & ZodFormSchema<TSchema>,
   options: UseZodFormOptions<TSchema>,
-): UseFormReturn<z.input<TSchema>, unknown, z.output<TSchema>> {
-  return useForm<z.input<TSchema>, unknown, z.output<TSchema>>({
+): UseFormReturn<ZodFormInput<TSchema>, unknown, z.output<TSchema>> {
+  return useForm<ZodFormInput<TSchema>, unknown, z.output<TSchema>>({
     ...options,
-    resolver: zodResolver(schema),
+    resolver: zodResolver<ZodFormInput<TSchema>, unknown, z.output<TSchema>>(
+      schema,
+    ),
   })
 }

@@ -122,6 +122,8 @@ describe('place form helpers', () => {
   it('keeps empty optional summary and tags in create payload', () => {
     const values: PlaceFormValues = {
       categoryId: 'category_spa',
+      slug: '',
+      summary: '',
       title: '  Тихий SPA  ',
     }
 

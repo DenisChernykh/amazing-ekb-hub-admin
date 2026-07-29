@@ -3,6 +3,7 @@ import type {
   CreateMaterialRequest,
   Material,
   MaterialType,
+  Platform,
   UpdateMaterialRequest,
 } from '@/shared/api/generated/model'
 import dayjs, { type Dayjs } from 'dayjs'

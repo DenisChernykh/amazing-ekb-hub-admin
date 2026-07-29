@@ -57,7 +57,8 @@ export function EditMaterialDrawer({
     mode: 'onChange',
     reValidateMode: 'onChange',
   })
-  const values = useWatch({ control: form.control })
+  useWatch({ control: form.control })
+  const values = form.getValues()
   const isDirty = hasMaterialFormChanges(values, initialValues)
   const changedFields = getMaterialFormChangedFields(values, initialValues)
   const [errorMessages, setErrorMessages] = useState<string[]>([])
