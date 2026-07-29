@@ -1,81 +1,112 @@
 import { getContentSourcePlatformOptions } from '@/entities/content-source/ui/content-source-meta'
-import { getHttpUrlValidationError } from '@/shared/lib/url/safe-url'
-import { Form, Input, Select } from 'antd'
-import type { ContentSourceFormValues } from '../model/content-source-form'
+import type { ContentSourceFormValues } from '@/features/content-source/form/model/content-source-form'
+import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
+import { Input, Select } from 'antd'
+import type { Control } from 'react-hook-form'
 
 /**
  * Props набора полей формы content source.
  */
 export type ContentSourceFormFieldsProps = {
+  /** RHF control владельца create/edit формы source. */
+  control: Control<ContentSourceFormValues>
   disabled?: boolean
   platformDisabled?: boolean
 }
 
 /**
- * Общие Ant Design поля создания и редактирования content source.
+ * Общие RHF-поля создания и редактирования content source.
  */
 export function ContentSourceFormFields({
+  control,
   disabled,
   platformDisabled,
 }: ContentSourceFormFieldsProps) {
   return (
     <>
-      <Form.Item<ContentSourceFormValues>
-        label="Платформа"
-        name="platform"
-        rules={[{ message: 'Выберите платформу', required: true }]}
-      >
-        <Select
-          aria-label="Платформа"
-          disabled={disabled || platformDisabled}
-          options={getContentSourcePlatformOptions()}
-        />
-      </Form.Item>
+      <RhfFormItem control={control} label="Платформа" name="platform">
+        {(field, controlProps) => (
+          <Select
+            {...controlProps}
+            aria-label="Платформа"
+            disabled={disabled || platformDisabled}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            options={getContentSourcePlatformOptions()}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<ContentSourceFormValues>
-        label="Название"
-        name="displayName"
-        rules={[
-          { message: 'Введите название', required: true, whitespace: true },
-        ]}
-      >
-        <Input aria-label="Название" disabled={disabled} />
-      </Form.Item>
+      <RhfFormItem control={control} label="Название" name="displayName" required>
+        {(field, controlProps) => (
+          <Input
+            {...controlProps}
+            aria-label="Название"
+            disabled={disabled}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={field.ref}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<ContentSourceFormValues>
-        label="Ссылка"
-        name="url"
-        rules={[
-          { message: 'Введите ссылку', required: true, whitespace: true },
-          {
-            validator: async (_rule, value: unknown) => {
-              if (typeof value !== 'string') {
-                return
-              }
+      <RhfFormItem control={control} label="Ссылка" name="url" required>
+        {(field, controlProps) => (
+          <Input
+            {...controlProps}
+            aria-label="Ссылка"
+            disabled={disabled}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={field.ref}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-              const validationError = getHttpUrlValidationError(value)
+      <RhfFormItem control={control} label="External ID" name="externalId">
+        {(field, controlProps) => (
+          <Input
+            {...controlProps}
+            aria-label="External ID"
+            disabled={disabled}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={field.ref}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-              if (validationError) {
-                throw new Error(validationError)
-              }
-            },
-          },
-        ]}
-      >
-        <Input aria-label="Ссылка" disabled={disabled} />
-      </Form.Item>
+      <RhfFormItem control={control} label="Handle" name="handle">
+        {(field, controlProps) => (
+          <Input
+            {...controlProps}
+            aria-label="Handle"
+            disabled={disabled}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={field.ref}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<ContentSourceFormValues> label="External ID" name="externalId">
-        <Input aria-label="External ID" disabled={disabled} />
-      </Form.Item>
-
-      <Form.Item<ContentSourceFormValues> label="Handle" name="handle">
-        <Input aria-label="Handle" disabled={disabled} />
-      </Form.Item>
-
-      <Form.Item<ContentSourceFormValues> label="Channel ID" name="channelId">
-        <Input aria-label="Channel ID" disabled={disabled} />
-      </Form.Item>
+      <RhfFormItem control={control} label="Channel ID" name="channelId">
+        {(field, controlProps) => (
+          <Input
+            {...controlProps}
+            aria-label="Channel ID"
+            disabled={disabled}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={field.ref}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
     </>
   )
 }

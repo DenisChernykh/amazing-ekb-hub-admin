@@ -3,12 +3,24 @@ import {
   toCreateContentSourceRequest,
   type ContentSourceFormValues,
 } from '@/features/content-source/form/model/content-source-form'
+import { createContentSourceFormSchema } from '@/features/content-source/form/model/content-source-form-schema'
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { ContentSource } from '@/shared/api/generated/model'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
+import { FormProvider } from 'react-hook-form'
 import { useState } from 'react'
+
+const contentSourceCreateDefaultValues: ContentSourceFormValues = {
+  channelId: '',
+  displayName: '',
+  externalId: '',
+  handle: '',
+  platform: null,
+  url: '',
+}
 
 /**
  * Props drawer-а создания content source.
@@ -30,9 +42,13 @@ export function CreateContentSourceDrawer({
   open,
 }: CreateContentSourceDrawerProps) {
   const { message, modal } = AntdApp.useApp()
-  const [form] = Form.useForm<ContentSourceFormValues>()
+  const form = useZodForm(createContentSourceFormSchema, {
+    defaultValues: contentSourceCreateDefaultValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
+  const { isDirty } = form.formState
   const [errorMessages, setErrorMessages] = useState<string[]>([])
-  const [isDirty, setIsDirty] = useState(false)
   const createSourceMutation = useCreateContentSourceMutation({
     onError: (error) => {
       const apiError = normalizeApiError(error)
@@ -41,8 +57,7 @@ export function CreateContentSourceDrawer({
     },
     onSuccess: (contentSource) => {
       setErrorMessages([])
-      setIsDirty(false)
-      form.resetFields()
+      form.reset()
       void message.success('Источник создан')
       onCreated?.(contentSource)
       onClose()
@@ -51,8 +66,7 @@ export function CreateContentSourceDrawer({
 
   const closeClean = () => {
     setErrorMessages([])
-    setIsDirty(false)
-    form.resetFields()
+    form.reset()
     onClose()
   }
 
@@ -75,7 +89,7 @@ export function CreateContentSourceDrawer({
     })
   }
 
-  const handleFinish = (values: ContentSourceFormValues) => {
+  const handleSubmit = (values: ContentSourceFormValues) => {
     setErrorMessages([])
     createSourceMutation.mutate(toCreateContentSourceRequest(values))
   }
@@ -88,43 +102,43 @@ export function CreateContentSourceDrawer({
       title="Новый источник"
       width={520}
     >
-      <Form<ContentSourceFormValues>
-        form={form}
-        layout="vertical"
-        name="create-content-source"
-        onFinish={handleFinish}
-        onValuesChange={() => {
-          setIsDirty(true)
-        }}
-        requiredMark={false}
-      >
-        {Boolean(errorMessages.length) && (
-          <Form.Item>
-            <ContentSourceFormErrorAlert
-              messages={errorMessages}
-              title="Не удалось создать источник"
-            />
-          </Form.Item>
-        )}
+      <FormProvider {...form}>
+        <form
+          name="create-content-source"
+          noValidate
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          {Boolean(errorMessages.length) && (
+            <Form.Item layout="vertical">
+              <ContentSourceFormErrorAlert
+                messages={errorMessages}
+                title="Не удалось создать источник"
+              />
+            </Form.Item>
+          )}
 
-        <ContentSourceFormFields disabled={createSourceMutation.isPending} />
-
-        <Flex gap={8} justify="end" wrap>
-          <Button
+          <ContentSourceFormFields
+            control={form.control}
             disabled={createSourceMutation.isPending}
-            onClick={requestClose}
-          >
-            Отмена
-          </Button>
-          <Button
-            htmlType="submit"
-            loading={createSourceMutation.isPending}
-            type="primary"
-          >
-            Создать
-          </Button>
-        </Flex>
-      </Form>
+          />
+
+          <Flex gap={8} justify="end" wrap>
+            <Button
+              disabled={createSourceMutation.isPending}
+              onClick={requestClose}
+            >
+              Отмена
+            </Button>
+            <Button
+              htmlType="submit"
+              loading={createSourceMutation.isPending}
+              type="primary"
+            >
+              Создать
+            </Button>
+          </Flex>
+        </form>
+      </FormProvider>
     </Drawer>
   )
 }

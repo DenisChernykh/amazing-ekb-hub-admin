@@ -5,20 +5,9 @@ import type {
   UpdateContentSourceRequest,
 } from '@/shared/api/generated/model'
 import { normalizeHttpUrl } from '@/shared/lib/url/safe-url'
+import type { ContentSourceFormValues } from './content-source-form-schema'
 
-/**
- * Значения общей формы создания и редактирования content source.
- *
- * @remarks Поля допускают `undefined`, пока Ant Design Form еще не прошла required-валидацию.
- */
-export type ContentSourceFormValues = {
-  channelId?: string
-  displayName?: string
-  externalId?: string
-  handle?: string
-  platform?: ContentSourcePlatform
-  url?: string
-}
+export type { ContentSourceFormValues } from './content-source-form-schema'
 
 type NormalizedContentSourceFormValues = {
   channelId: string | null
@@ -50,8 +39,8 @@ const contentSourceFormFieldKeys: Array<
   keyof NormalizedContentSourceFormValues
 > = ['channelId', 'displayName', 'externalId', 'handle', 'platform', 'url']
 
-const trimOptionalValue = (value: string | undefined) => {
-  const trimmedValue = (value ?? '').trim()
+const trimOptionalValue = (value: string) => {
+  const trimmedValue = value.trim()
 
   return trimmedValue ? trimmedValue : null
 }
@@ -60,11 +49,11 @@ const normalizeContentSourceFormValues = (
   values: ContentSourceFormValues,
 ): NormalizedContentSourceFormValues => ({
   channelId: trimOptionalValue(values.channelId),
-  displayName: (values.displayName ?? '').trim(),
+  displayName: values.displayName.trim(),
   externalId: trimOptionalValue(values.externalId),
   handle: trimOptionalValue(values.handle),
-  platform: values.platform ?? null,
-  url: (values.url ?? '').trim(),
+  platform: values.platform,
+  url: values.url.trim(),
 })
 
 const getRequiredValue = <T>(value: T | null, fieldName: string): T => {

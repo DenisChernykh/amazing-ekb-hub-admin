@@ -1,10 +1,13 @@
 import { useCreateContentSourceMutation } from '@/entities/content-source/model/content-source-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CreateContentSourceDrawer } from './create-content-source-drawer'
+
+const modalConfirm = vi.fn()
 
 vi.mock('@/entities/content-source/model/content-source-mutations', () => ({
   useCreateContentSourceMutation: vi.fn(),
@@ -20,7 +23,7 @@ vi.mock('antd', async () => {
       success: vi.fn(),
     },
     modal: {
-      confirm: vi.fn(),
+      confirm: modalConfirm,
     },
   })
 
@@ -97,7 +100,25 @@ const renderCreateDrawer = () => {
 
 describe('CreateContentSourceDrawer', () => {
   beforeEach(() => {
+    modalConfirm.mockReset()
     mockedUseCreateContentSourceMutation.mockReset()
+  })
+
+  it('shows exact required errors and skips mutation for an empty submit', async () => {
+    const mutate = vi.fn()
+    mockedUseCreateContentSourceMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useCreateContentSourceMutation>)
+
+    renderCreateDrawer()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
+
+    expect(await screen.findByText('Выберите платформу')).toBeInTheDocument()
+    expect(screen.getByText('Введите название')).toBeInTheDocument()
+    expect(screen.getByText('Введите ссылку')).toBeInTheDocument()
+    expect(mutate).not.toHaveBeenCalled()
   })
 
   it('submits normalized create content source payload', async () => {
@@ -199,5 +220,26 @@ describe('CreateContentSourceDrawer', () => {
 
     expect(await screen.findByText(/http или https/)).toBeInTheDocument()
     expect(mutate).not.toHaveBeenCalled()
+  })
+
+  it('asks before closing a source with unsaved changes', async () => {
+    mockedUseCreateContentSourceMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useCreateContentSourceMutation>)
+
+    renderCreateDrawer()
+    const user = userEvent.setup()
+
+    await user.type(screen.getByLabelText('Название'), 'Amazing EKB Telegram')
+    await user.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
+
+    expect(modalConfirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: 'Несохраненный источник будет потерян.',
+        okText: 'Закрыть',
+        title: 'Закрыть без сохранения?',
+      }),
+    )
   })
 })

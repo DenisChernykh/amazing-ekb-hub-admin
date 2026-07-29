@@ -1,6 +1,7 @@
 import { useUpdateContentSourceMutation } from '@/entities/content-source/model/content-source-mutations'
 import type { ContentSource } from '@/shared/api/generated/model'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -172,18 +173,36 @@ describe('EditContentSourceDrawer', () => {
     })
   })
 
-  it('asks confirmation before closing dirty drawer', () => {
+  it('keeps save disabled and hides changed chips for whitespace-only values', async () => {
     mockedUseUpdateContentSourceMutation.mockReturnValue({
       isPending: false,
       mutate: vi.fn(),
     } as unknown as ReturnType<typeof useUpdateContentSourceMutation>)
 
     renderEditDrawer()
+    const user = userEvent.setup()
 
-    fireEvent.change(screen.getByLabelText('Название'), {
-      target: { value: 'Updated source' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
+    await user.clear(screen.getByLabelText('Название'))
+    await user.type(
+      screen.getByLabelText('Название'),
+      ' Amazing EKB Telegram ',
+    )
+
+    expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
+    expect(screen.getAllByText('Название')).toHaveLength(1)
+  })
+
+  it('asks confirmation before closing dirty drawer', async () => {
+    mockedUseUpdateContentSourceMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUpdateContentSourceMutation>)
+
+    renderEditDrawer()
+    const user = userEvent.setup()
+
+    await user.type(screen.getByLabelText('Название'), ' updated')
+    await user.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
 
     expect(modalConfirm).toHaveBeenCalledWith(
       expect.objectContaining({
