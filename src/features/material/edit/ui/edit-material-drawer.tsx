@@ -5,15 +5,20 @@ import {
   hasMaterialFormChanges,
   toUpdateMaterialRequest,
   type EditableMaterial,
-  type MaterialFormChangedField,
   type MaterialFormValues,
 } from '@/features/material/form/model/material-form'
+import {
+  editMaterialWithoutUrlFormSchema,
+  editMaterialWithUrlFormSchema,
+} from '@/features/material/form/model/material-form-schema'
 import { MaterialFormChangedFields } from '@/features/material/form/ui/material-form-changed-fields'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
+import { FormProvider, useWatch } from 'react-hook-form'
 import { useState } from 'react'
 import { EditMaterialDrawerActions } from './edit-material-drawer-actions'
 
@@ -42,14 +47,16 @@ export function EditMaterialDrawer({
   placeId,
 }: EditMaterialDrawerProps) {
   const { message, modal } = AntdApp.useApp()
-  const [form] = Form.useForm<MaterialFormValues>()
   const initialValues = getMaterialFormInitialValues(material)
   const showUrlField = typeof material.url === 'string'
+  const schema = showUrlField
+    ? editMaterialWithUrlFormSchema
+    : editMaterialWithoutUrlFormSchema
+  const form = useZodForm(schema, { defaultValues: initialValues })
+  const values = useWatch({ control: form.control })
+  const isDirty = hasMaterialFormChanges(values, initialValues)
+  const changedFields = getMaterialFormChangedFields(values, initialValues)
   const [errorMessages, setErrorMessages] = useState<string[]>([])
-  const [isDirty, setIsDirty] = useState(false)
-  const [changedFields, setChangedFields] = useState<
-    MaterialFormChangedField[]
-  >([])
   const updateMaterialMutation = useUpdateMaterialMutation({
     onError: (error) => {
       const apiError = normalizeApiError(error)
@@ -58,25 +65,15 @@ export function EditMaterialDrawer({
     },
     onSuccess: (updatedMaterial) => {
       setErrorMessages([])
-      setIsDirty(false)
-      setChangedFields([])
       void message.success('Материал обновлен')
       onUpdated?.(updatedMaterial)
       onClose()
     },
   })
 
-  const updateDirtyState = () => {
-    const values = form.getFieldsValue()
-    setIsDirty(hasMaterialFormChanges(values, initialValues))
-    setChangedFields(getMaterialFormChangedFields(values, initialValues))
-  }
-
   const closeClean = () => {
     setErrorMessages([])
-    setIsDirty(false)
-    setChangedFields([])
-    form.resetFields()
+    form.reset()
     onClose()
   }
 
@@ -99,12 +96,10 @@ export function EditMaterialDrawer({
     })
   }
 
-  const handleFinish = (values: MaterialFormValues) => {
+  const handleSubmit = (values: MaterialFormValues) => {
     const data = toUpdateMaterialRequest(values, initialValues)
 
     if (!Object.keys(data).length) {
-      setIsDirty(false)
-      setChangedFields([])
       return
     }
 
@@ -124,15 +119,12 @@ export function EditMaterialDrawer({
       title="Редактирование материала"
       width={520}
     >
-      <Form<MaterialFormValues>
-        form={form}
-        initialValues={initialValues}
-        layout="vertical"
+      <FormProvider {...form}>
+        <form
         name="edit-material"
-        onFinish={handleFinish}
-        onValuesChange={updateDirtyState}
-        requiredMark={false}
-      >
+          noValidate
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
         {Boolean(errorMessages.length) && (
           <Form.Item>
             <MaterialFormErrorAlert
@@ -149,6 +141,7 @@ export function EditMaterialDrawer({
         )}
 
         <MaterialFormFields
+          control={form.control}
           disabled={updateMaterialMutation.isPending}
           showUrlField={showUrlField}
         />
@@ -158,7 +151,8 @@ export function EditMaterialDrawer({
           isPending={updateMaterialMutation.isPending}
           onCancel={requestClose}
         />
-      </Form>
+        </form>
+      </FormProvider>
     </Drawer>
   )
 }

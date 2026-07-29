@@ -11,16 +11,16 @@ import dayjs, { type Dayjs } from 'dayjs'
 /**
  * Значения общей формы создания и редактирования материала.
  *
- * @remarks Поля допускают `undefined`, пока Ant Design Form еще не прошла
- * required-валидацию. Payload builders ожидают валидные значения формы.
+ * @remarks Nullable поля отражают UI controls до required-валидации Zod.
+ * Payload builders ожидают валидные значения формы.
  */
 export type MaterialFormValues = {
-  durationSec?: number | null
-  platform?: Platform
-  publishedAt?: Dayjs | null
-  title?: string
-  type?: MaterialType
-  url?: string
+  durationSec: number | null
+  platform: Platform | null
+  publishedAt: Dayjs | null
+  title: string
+  type: MaterialType | null
+  url: string
 }
 
 type NormalizedMaterialFormValues = {
