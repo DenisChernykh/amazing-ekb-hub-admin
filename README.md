@@ -40,11 +40,22 @@ pnpm run api:update
 pnpm run api:check
 ```
 
-`api:sync` по умолчанию читает committed specification соседнего локального
-backend checkout:
-`../backend-codex/docs/api/specification.yaml`. Из временного admin worktree
-путь вычисляется относительно primary admin worktree. Другой локальный файл
-можно передать явно через `OPENAPI_SPEC_SOURCE`.
+Validation-схемы синхронизируются из сгенерированного code-first OpenAPI
+artifact соседнего локального backend checkout:
+`../backend-codex/docs/api/openapi.json`. Из временного admin worktree путь
+вычисляется относительно primary admin worktree. Пока backend-ветка находится
+в отдельном worktree, её artifact можно передать явно:
+
+```bash
+OPENAPI_SPEC_SOURCE=/absolute/path/to/backend-worktree/docs/api/openapi.json \
+  pnpm run api:update
+```
+
+Сам artifact собирается в backend командой `pnpm run openapi:generate`; admin
+только валидирует, сохраняет локальный snapshot в `openapi/openapi.json` и
+запускает Orval для generated Zod. Существующий runtime API client продолжает
+генерироваться из `openapi.yaml`; его миграция на новый backend-контракт не
+входит в RHF/Zod-рефакторинг.
 
 ## Documentation
 

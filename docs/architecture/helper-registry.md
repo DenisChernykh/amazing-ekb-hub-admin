@@ -12,8 +12,10 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 | Helper                       | Location                         | Visibility | Contract                                                                                                 |
 | ---------------------------- | -------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
-| `resolvePairedBackendSource` | `scripts/api/openapi-source.mjs` | exported   | Resolves the local sibling backend OpenAPI specification from either the primary admin worktree or cwd.  |
-| `readOpenApiSource`          | `scripts/api/sync-openapi.mjs`   | private    | Reads an explicitly configured local/file/HTTP source without changing the default local-first contract. |
+| `resolvePairedBackendSource` | `scripts/api/openapi-source.mjs` | exported   | Resolves the local sibling backend generated OpenAPI JSON from either the primary admin worktree or cwd. |
+| `validateOpenApiDocument`    | `scripts/api/sync-openapi.mjs`   | exported   | Rejects non-OpenAPI JSON and snapshots missing operations required by the admin SPA.                     |
+| `readOpenApiSource`          | `scripts/api/sync-openapi.mjs`   | exported   | Reads an explicitly configured local/file/HTTP source without changing the default local-first contract. |
+| `syncOpenApi`                | `scripts/api/sync-openapi.mjs`   | exported   | Validates and writes the local OpenAPI JSON snapshot in the project Prettier format.                     |
 
 ## Shared API Client
 

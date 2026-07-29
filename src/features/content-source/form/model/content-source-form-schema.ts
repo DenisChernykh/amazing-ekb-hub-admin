@@ -1,9 +1,9 @@
-import { CreateContentSourceBody } from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminContentSourcesCreateBody } from '@/shared/api/generated-zod/admin-content-sources/admin-content-sources.zod'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { z } from 'zod'
 
 const requiredPlatformSchema = z
-  .union([CreateContentSourceBody.shape.platform, z.null()])
+  .union([AdminContentSourcesCreateBody.shape.platform, z.null()])
   .refine((platform) => platform !== null, 'Выберите платформу')
 
 const sourceUrlSchema = z
@@ -12,16 +12,18 @@ const sourceUrlSchema = z
   .min(1, 'Введите ссылку')
   .refine(
     (url) =>
-      CreateContentSourceBody.shape.url.safeParse(url).success &&
+      AdminContentSourcesCreateBody.shape.url.safeParse(url).success &&
       isSafeHttpUrl(url),
     'Введите ссылку с протоколом http или https',
   )
 
 const contentSourceFormShape = {
   channelId: z.string().trim(),
-  displayName: CreateContentSourceBody.shape.displayName
+  displayName: z
+    .string()
     .trim()
-    .min(1, 'Введите название'),
+    .min(1, 'Введите название')
+    .pipe(AdminContentSourcesCreateBody.shape.displayName),
   externalId: z.string().trim(),
   handle: z.string().trim(),
   platform: requiredPlatformSchema,

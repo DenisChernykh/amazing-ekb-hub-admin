@@ -1,6 +1,46 @@
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
+import { format } from 'prettier'
 import { describe, expect, it } from 'vitest'
 import { resolvePairedBackendSource } from './openapi-source.mjs'
+import { syncOpenApi, validateOpenApiDocument } from './sync-openapi.mjs'
+
+const validOpenApiDocument = {
+  openapi: '3.0.3',
+  paths: {
+    '/v1/auth/login': {
+      post: { operationId: 'authLogin', tags: ['auth'] },
+    },
+    '/v1/admin/categories': {
+      post: { operationId: 'adminCategoriesCreate' },
+    },
+    '/v1/admin/categories/{categoryId}': {
+      patch: { operationId: 'adminCategoriesUpdate' },
+    },
+    '/v1/admin/content-sources': {
+      post: { operationId: 'adminContentSourcesCreate' },
+    },
+    '/v1/admin/content-sources/{sourceId}': {
+      patch: { operationId: 'adminContentSourcesUpdate' },
+    },
+    '/v1/admin/materials/{materialId}': {
+      patch: { operationId: 'adminMaterialsUpdate' },
+    },
+    '/v1/admin/places': {
+      post: { operationId: 'adminPlacesCreate' },
+    },
+    '/v1/admin/places/{placeId}': {
+      patch: { operationId: 'adminPlacesUpdate' },
+    },
+    '/v1/admin/places/{placeId}/materials': {
+      post: { operationId: 'adminPlaceMaterialsCreate' },
+    },
+    '/v1/admin/place-imports/yandex-maps': {
+      post: { operationId: 'adminPlaceImportsStart' },
+    },
+  },
+}
 
 describe('OpenAPI source resolution', () => {
   it('resolves the sibling local backend from the primary admin worktree', () => {
@@ -19,7 +59,7 @@ describe('OpenAPI source resolution', () => {
         ].join('\n'),
       }),
     ).toBe(
-      '/Users/developer/projects/amazing-ekb-hub/backend-codex/docs/api/specification.yaml',
+      '/Users/developer/projects/amazing-ekb-hub/backend-codex/docs/api/openapi.json',
     )
   })
 
@@ -28,6 +68,39 @@ describe('OpenAPI source resolution', () => {
       resolvePairedBackendSource({
         cwd: '/workspace/admin-codex',
       }),
-    ).toBe(resolve('/workspace/backend-codex/docs/api/specification.yaml'))
+    ).toBe(resolve('/workspace/backend-codex/docs/api/openapi.json'))
+  })
+})
+
+describe('OpenAPI document validation', () => {
+  it('accepts the generated backend contract with required admin operations', () => {
+    expect(validateOpenApiDocument(validOpenApiDocument)).toBeDefined()
+  })
+
+  it('rejects a contract without a required admin operation', () => {
+    expect(() =>
+      validateOpenApiDocument({
+        openapi: '3.0.3',
+        paths: {},
+      }),
+    ).toThrow('POST /v1/auth/login')
+  })
+
+  it('writes a snapshot accepted by the project formatter', async () => {
+    const directory = await mkdtemp(resolve(tmpdir(), 'admin-openapi-sync-'))
+    const source = resolve(directory, 'source.json')
+    const destination = resolve(directory, 'snapshot.json')
+    const raw = JSON.stringify(validOpenApiDocument, null, 2)
+
+    try {
+      await writeFile(source, raw)
+      await syncOpenApi({ source, destination })
+
+      expect(await readFile(destination, 'utf8')).toBe(
+        await format(raw, { parser: 'json' }),
+      )
+    } finally {
+      await rm(directory, { recursive: true })
+    }
   })
 })

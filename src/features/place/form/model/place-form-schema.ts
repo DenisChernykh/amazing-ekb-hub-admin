@@ -1,11 +1,11 @@
-import { CreatePlaceBody } from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminPlacesCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
 import { z } from 'zod'
 
 const PLACE_SLUG_GUIDANCE =
   'Используйте маленькие латинские буквы, цифры и дефисы, например quiet-spa'
 
 const isGeneratedSlug = (value: string) =>
-  CreatePlaceBody.shape.slug.safeParse(value).success
+  AdminPlacesCreateBody.shape.slug.safeParse(value).success
 
 const placeSlugSchema = z
   .string()
@@ -14,16 +14,18 @@ const placeSlugSchema = z
     message: PLACE_SLUG_GUIDANCE,
   })
 
-const placeTitleSchema = CreatePlaceBody.shape.title
+const placeTitleSchema = z
+  .string()
   .trim()
   .min(1, 'Введите название')
+  .pipe(AdminPlacesCreateBody.shape.title)
 
 const placeCategorySchema = z
-  .union([CreatePlaceBody.shape.categoryId, z.null()])
+  .union([AdminPlacesCreateBody.shape.categoryId, z.null()])
   .refine((value) => value !== null, { message: 'Выберите категорию' })
 
-const placeSummarySchema = CreatePlaceBody.shape.summary.unwrap().trim()
-const placeTagsSchema = CreatePlaceBody.shape.tags.unwrap().default([])
+const placeSummarySchema = AdminPlacesCreateBody.shape.summary.unwrap().trim()
+const placeTagsSchema = AdminPlacesCreateBody.shape.tags.unwrap().default([])
 
 /** Схема значений формы создания места с необязательным ручным slug. */
 export const createPlaceFormSchema = z.object({

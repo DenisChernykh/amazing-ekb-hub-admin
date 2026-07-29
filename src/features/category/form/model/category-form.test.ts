@@ -1,7 +1,7 @@
 import {
-  CreatePlaceCategoryBody,
-  UpdatePlaceCategoryBody,
-} from '@/shared/api/generated-zod/admin/admin.zod'
+  AdminCategoriesCreateBody,
+  AdminCategoriesUpdateBody,
+} from '@/shared/api/generated-zod/admin-categories/admin-categories.zod'
 import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
@@ -62,7 +62,7 @@ describe('category form helpers', () => {
       slug: 'spa',
       title: 'SPA',
     })
-    expect(CreatePlaceCategoryBody.parse(request)).toEqual(request)
+    expect(AdminCategoriesCreateBody.parse(request)).toEqual(request)
 
     const requestWithoutSlug = toCreateCategoryRequest({
       slug: '',
@@ -72,7 +72,7 @@ describe('category form helpers', () => {
     expect(requestWithoutSlug).toEqual({
       title: 'Бассейны',
     })
-    expect(CreatePlaceCategoryBody.parse(requestWithoutSlug)).toEqual(
+    expect(AdminCategoriesCreateBody.parse(requestWithoutSlug)).toEqual(
       requestWithoutSlug,
     )
   })
@@ -97,7 +97,7 @@ describe('category form helpers', () => {
     expect(request).toEqual({
       title: 'New SPA',
     })
-    expect(UpdatePlaceCategoryBody.parse(request)).toEqual(request)
+    expect(AdminCategoriesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('detects changed fields after normalization', () => {

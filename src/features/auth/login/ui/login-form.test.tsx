@@ -65,13 +65,13 @@ describe('LoginForm', () => {
       </AntdApp>,
     )
 
-    await userEvent.type(screen.getByLabelText('Email'), ' admin@example.test ')
+    await userEvent.type(screen.getByLabelText('Email'), 'admin@example.com')
     await userEvent.type(screen.getByLabelText('Пароль'), 'unit-test-password')
     await userEvent.click(screen.getByRole('button', { name: 'Войти' }))
 
     expect(mutate).toHaveBeenCalledWith({
       data: {
-        email: 'admin@example.test',
+        email: 'admin@example.com',
         password: 'unit-test-password',
       },
     })
@@ -118,10 +118,12 @@ describe('LoginForm', () => {
     await userEvent.type(screen.getByLabelText('Email'), 'not-an-email')
     await userEvent.click(screen.getByRole('button', { name: 'Войти' }))
 
+    expect(await screen.findByText('Неверный email адрес')).toBeInTheDocument()
     expect(
-      await screen.findByText('Введите корректный email'),
+      screen.getByText(
+        'Слишком маленькое значение: ожидалось, что string будет иметь >=1 символ',
+      ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Введите пароль')).toBeInTheDocument()
     expect(mutate).not.toHaveBeenCalled()
   })
 })

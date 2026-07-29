@@ -1,4 +1,4 @@
-import { StartYandexMapsPlaceImportBody } from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminPlaceImportsStartBody } from '@/shared/api/generated-zod/admin-place-imports/admin-place-imports.zod'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { z } from 'zod'
 
@@ -12,7 +12,7 @@ export const placeImportStartSchema = z.strictObject({
     .min(1, 'Вставьте ссылку на карточку организации')
     .refine(
       (url) =>
-        StartYandexMapsPlaceImportBody.shape.url.safeParse(url).success &&
+        AdminPlaceImportsStartBody.shape.url.safeParse(url).success &&
         isSafeHttpUrl(url),
       'Введите ссылку с протоколом http или https',
     ),

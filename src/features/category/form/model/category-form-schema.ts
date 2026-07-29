@@ -1,14 +1,16 @@
 import {
-  CreatePlaceCategoryBody,
-  UpdatePlaceCategoryBody,
-} from '@/shared/api/generated-zod/admin/admin.zod'
+  AdminCategoriesCreateBody,
+  AdminCategoriesUpdateBody,
+} from '@/shared/api/generated-zod/admin-categories/admin-categories.zod'
 import { z } from 'zod'
 
 const categorySlugGuidance =
   'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe'
 
 const isGeneratedCreateSlug = (value: string) =>
-  !value || CreatePlaceCategoryBody.shape.slug.unwrap().safeParse(value).success
+  !value ||
+  AdminCategoriesCreateBody.shape.slug.unwrap().unwrap().safeParse(value)
+    .success
 
 const optionalCategorySlugSchema = z
   .string()
@@ -18,7 +20,11 @@ const optionalCategorySlugSchema = z
 /** Zod-схема create-формы категории. */
 export const createCategoryFormSchema = z.strictObject({
   slug: optionalCategorySlugSchema,
-  title: CreatePlaceCategoryBody.shape.title.trim().min(1, 'Введите название'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Введите название')
+    .pipe(AdminCategoriesCreateBody.shape.title),
 })
 
 /** Zod-схема edit-формы категории. */
@@ -29,7 +35,7 @@ export const editCategoryFormSchema = z.strictObject({
     .min(1, 'Введите ярлык')
     .refine(
       (value) =>
-        UpdatePlaceCategoryBody.shape.slug.unwrap().safeParse(value).success,
+        AdminCategoriesUpdateBody.shape.slug.unwrap().safeParse(value).success,
       categorySlugGuidance,
     ),
   title: createCategoryFormSchema.shape.title,

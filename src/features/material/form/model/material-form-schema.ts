@@ -1,14 +1,14 @@
 import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
-import { CreatePlaceMaterialBody } from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminPlaceMaterialsCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
 import dayjs, { type Dayjs } from 'dayjs'
 import { z } from 'zod'
 
 const requiredPlatformSchema = z
-  .union([CreatePlaceMaterialBody.shape.platform, z.null()])
+  .union([AdminPlaceMaterialsCreateBody.shape.platform, z.null()])
   .refine((value) => value !== null, 'Выберите платформу')
 
 const requiredMaterialTypeSchema = z
-  .union([CreatePlaceMaterialBody.shape.type, z.null()])
+  .union([AdminPlaceMaterialsCreateBody.shape.type, z.null()])
   .refine((value) => value !== null, 'Выберите тип материала')
 
 const publishedAtSchema = z
@@ -28,7 +28,7 @@ const requiredMaterialUrlSchema = z
   .refine(
     (url) =>
       url.length === 0 ||
-      (CreatePlaceMaterialBody.shape.url.safeParse(url).success &&
+      (AdminPlaceMaterialsCreateBody.shape.url.safeParse(url).success &&
         isSafeMaterialUrl(url)),
     'Введите ссылку с протоколом http или https',
   )
@@ -36,10 +36,14 @@ const requiredMaterialUrlSchema = z
 const materialWithoutUrlSchema = z.string()
 
 const materialFormShape = {
-  durationSec: CreatePlaceMaterialBody.shape.durationSec.unwrap(),
+  durationSec: AdminPlaceMaterialsCreateBody.shape.durationSec.unwrap(),
   platform: requiredPlatformSchema,
   publishedAt: publishedAtSchema,
-  title: CreatePlaceMaterialBody.shape.title.trim().min(1, 'Введите заголовок'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Введите заголовок')
+    .pipe(AdminPlaceMaterialsCreateBody.shape.title),
   type: requiredMaterialTypeSchema,
 }
 

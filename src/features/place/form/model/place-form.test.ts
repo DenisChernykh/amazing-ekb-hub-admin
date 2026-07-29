@@ -1,7 +1,7 @@
 import {
-  CreatePlaceBody,
-  UpdatePlaceBody,
-} from '@/shared/api/generated-zod/admin/admin.zod'
+  AdminPlacesCreateBody,
+  AdminPlacesUpdateBody,
+} from '@/shared/api/generated-zod/admin-places/admin-places.zod'
 import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
@@ -116,7 +116,7 @@ describe('place form helpers', () => {
       tags: ['spa', 'relax'],
       title: 'Тихий SPA',
     })
-    expect(CreatePlaceBody.parse(request)).toEqual(request)
+    expect(AdminPlacesCreateBody.parse(request)).toEqual(request)
   })
 
   it('keeps empty optional summary and tags in create payload', () => {
@@ -135,7 +135,7 @@ describe('place form helpers', () => {
       tags: [],
       title: 'Тихий SPA',
     })
-    expect(CreatePlaceBody.parse(request)).toEqual(request)
+    expect(AdminPlacesCreateBody.parse(request)).toEqual(request)
   })
 
   it('builds partial update payload only from changed normalized fields', () => {
@@ -157,7 +157,7 @@ describe('place form helpers', () => {
       summary: 'SPA с обновленным описанием',
       tags: ['spa', 'city'],
     })
-    expect(UpdatePlaceBody.parse(request)).toEqual(request)
+    expect(AdminPlacesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('treats whitespace-only differences as unchanged', () => {
@@ -173,7 +173,7 @@ describe('place form helpers', () => {
     const request = toUpdatePlaceRequest(values, initialValues)
 
     expect(request).toEqual({})
-    expect(UpdatePlaceBody.parse(request)).toEqual(request)
+    expect(AdminPlacesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('builds update payload for cleared optional summary and tags', () => {
@@ -191,6 +191,6 @@ describe('place form helpers', () => {
       summary: '',
       tags: [],
     })
-    expect(UpdatePlaceBody.parse(request)).toEqual(request)
+    expect(AdminPlacesUpdateBody.parse(request)).toEqual(request)
   })
 })

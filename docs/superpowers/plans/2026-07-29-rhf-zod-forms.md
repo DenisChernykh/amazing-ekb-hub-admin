@@ -12,7 +12,14 @@
 
 - Работать только в `/private/tmp/admin-codex-rhf-zod-forms` на ветке `refactor/rhf-zod-forms`; база — `origin/stage` commit `dc8e3475857748fdcb3c6da7f67d964da0c86180`.
 - Мигрировать одним атомарным срезом все flow: login; category create/edit; content source create/edit; material create/edit; place create/edit; Yandex import start.
-- Не менять backend, `openapi.yaml`, `src/shared/api/generated/**` и `src/shared/api/generated-zod/**`.
+- Не менять backend, `openapi.yaml` и `src/shared/api/generated/**`.
+- Синхронизировать validation snapshot только из локального code-first backend
+  artifact `docs/api/openapi.json` и регенерировать
+  `src/shared/api/generated-zod/**` через Orval; generated-файлы вручную не
+  редактировать.
+- Существующий runtime API client продолжает генерироваться из
+  `openapi.yaml`. Полная миграция admin на новый backend contract, включая
+  DTO, auth/CSRF и operation names, не входит в этот RHF/Zod-рефакторинг.
 - Не менять API payload, entity mutation/cache contracts, server error presentation, cover upload sequence и active-import recovery.
 - Не добавлять backend field error → `setError` mapping.
 - Добавить только `@hookform/resolvers`; не добавлять form framework поверх RHF.
@@ -53,6 +60,18 @@
 - Create `src/shared/ui/form/rhf-form-item.test.tsx`: error/status/ARIA/focus contract.
 - Modify `src/main.tsx`, `src/test/setup.ts`, `package.json`, `pnpm-lock.yaml`.
 - Modify `docs/architecture/helper-registry.md`.
+
+### Backend validation contract
+
+- Modify `orval.config.ts`: оставить runtime client на `openapi.yaml`, а
+  generated Zod перевести на `openapi/openapi.json`.
+- Modify `scripts/api/openapi-source.mjs`,
+  `scripts/api/sync-openapi.mjs` и их focused tests: локальный backend artifact
+  является default source и проверяется на операции всех мигрируемых форм.
+- Create `openapi/openapi.json` синхронизацией из локального backend worktree.
+- Regenerate `src/shared/api/generated-zod/**` без ручных правок.
+- Modify `README.md` и design spec: зафиксировать dual-input границу и
+  `OPENAPI_SPEC_SOURCE` override.
 
 ### Feature schemas
 
@@ -100,7 +119,7 @@
 
 **Interfaces:**
 
-- Consumes: generated `LoginBody`; RHF `useForm`, `useController`, `Control`; Zod `z.input`/`z.output`; AntD `Form.Item`.
+- Consumes: generated `AuthLoginBody`; RHF `useForm`, `useController`, `Control`; Zod `z.input`/`z.output`; AntD `Form.Item`.
 - Produces:
   - `useZodForm<TSchema>(schema, options): UseFormReturn<z.input<TSchema>, unknown, z.output<TSchema>>`;
   - `RhfFormItem<TFieldValues, TName, TTransformedValues>`;
@@ -361,32 +380,22 @@ Expected: PASS for locale, transformed submit output, exact error copy and ARIA 
 
 - [ ] **Step 7: Add the login feature schema and failing form assertions**
 
-Create `src/features/auth/login/model/login-form-schema.ts` with generated transport reuse and explicit current copy:
+Create `src/features/auth/login/model/login-form-schema.ts` by reusing the
+generated backend transport schema directly, like `react-starter`:
 
 ```ts
-import { LoginBody } from '@/shared/api/generated-zod/auth/auth.zod'
+import { AuthLoginBody } from '@/shared/api/generated-zod/auth/auth.zod'
 import { z } from 'zod'
 
-const loginEmailSchema = z
-  .string()
-  .trim()
-  .min(1, 'Введите email')
-  .refine(
-    (email) => LoginBody.shape.email.safeParse(email).success,
-    'Введите корректный email',
-  )
-
-/** Zod-схема значений формы входа администратора. */
-export const loginFormSchema = z.strictObject({
-  email: loginEmailSchema,
-  password: LoginBody.shape.password.min(1, 'Введите пароль'),
-})
+/** Сгенерированная из backend OpenAPI Zod-схема формы входа администратора. */
+export const loginFormSchema = AuthLoginBody
 
 /** Значения RHF формы входа до и после Zod validation. */
 export type LoginFormValues = z.input<typeof loginFormSchema>
 ```
 
-Extend `login-form.test.tsx` with:
+Extend `login-form.test.tsx` with assertions for the exact Russian messages
+produced by the generated schema and global Zod locale:
 
 ```ts
 it('shows exact local validation messages and blocks an invalid login', async () => {
@@ -1291,7 +1300,7 @@ Expected: FAIL until schema and RHF wiring exist.
 Create:
 
 ```ts
-import { StartYandexMapsPlaceImportBody } from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminPlaceImportsStartBody } from '@/shared/api/generated-zod/admin-place-imports/admin-place-imports.zod'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { z } from 'zod'
 
@@ -1303,7 +1312,7 @@ export const placeImportStartSchema = z.strictObject({
     .min(1, 'Вставьте ссылку на карточку организации')
     .refine(
       (url) =>
-        StartYandexMapsPlaceImportBody.shape.url.safeParse(url).success &&
+        AdminPlaceImportsStartBody.shape.url.safeParse(url).success &&
         isSafeHttpUrl(url),
       'Введите ссылку с протоколом http или https',
     ),
@@ -1424,7 +1433,7 @@ git commit -m "refactor(place-import): migrate start form to RHF Zod"
 
 - Inspect: all files changed since `origin/stage`.
 - Modify: only files named by combined review findings.
-- Do not modify: generated API/Zod directories.
+- Do not manually modify: generated API/Zod directories.
 
 **Interfaces:**
 
@@ -1441,7 +1450,8 @@ git diff --stat origin/stage...HEAD
 rg -n 'Form\.useForm|onFinish=|onValuesChange=|rules=' src/features/auth/login src/features/category src/features/content-source src/features/material src/features/place
 rg -n --pcre2 '<Form(?:<[^>]+>)?[ >]' src/features/auth/login src/features/category src/features/content-source src/features/material src/features/place
 rg -n 'useEffect\(' src/features/auth/login src/features/category src/features/content-source src/features/material src/features/place
-git diff --exit-code origin/stage -- src/shared/api/generated src/shared/api/generated-zod
+git diff --exit-code origin/stage -- src/shared/api/generated
+git status --short openapi/openapi.json src/shared/api/generated-zod
 ```
 
 Expected:
@@ -1449,7 +1459,9 @@ Expected:
 - no legacy form-store/rules/root-Form matches in the ten migrated flow;
 - `Form.Item` may remain in shared adapter, alert/chip/layout wrappers and cover picker;
 - only existing cover object-URL effect and the documented edit-place blocker effect are present in this migration scope;
-- generated diff command exits 0.
+- runtime generated client diff command exits 0;
+- validation snapshot and generated Zod are present as expected generated
+  changes from the local backend contract.
 
 Also inspect every new/changed export against `docs/architecture/tsdoc-guidelines.md` and verify helper-registry entries match final signatures.
 
@@ -1561,16 +1573,20 @@ Run:
 
 ```bash
 git status -sb
-git diff --check origin/stage...HEAD
-git diff --name-only origin/stage...HEAD -- src/shared/api/generated src/shared/api/generated-zod
+git diff --check origin/stage...HEAD -- . ':(exclude)src/shared/api/generated-zod/**'
+git diff --name-only origin/stage...HEAD -- src/shared/api/generated
+git diff --name-only origin/stage...HEAD -- openapi/openapi.json src/shared/api/generated-zod
 rg -n 'Form\.useForm|onFinish=|onValuesChange=|rules=' src/features/auth/login src/features/category src/features/content-source src/features/material src/features/place
 ```
 
 Expected:
 
 - clean worktree;
-- no whitespace errors;
-- no generated files;
+- no whitespace errors in hand-written files; Orval-generated Zod output is
+  excluded from manual whitespace normalization;
+- no runtime generated client files;
+- only the expected local validation snapshot and Orval-generated Zod files in
+  the validation-generated set;
 - no legacy form store/rules in migrated flow;
 - branch remains local and unpushed.
 

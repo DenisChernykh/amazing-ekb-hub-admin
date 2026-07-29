@@ -18,13 +18,19 @@ Design утверждён в диалоге до записи этого док�
 
 - `react-hook-form`;
 - Zod 4;
-- Orval, который из локального `openapi.yaml` генерирует API-клиент и
+- Orval, который из локального `openapi/openapi.json` генерирует
   operation-level Zod-схемы в `src/shared/api/generated-zod`.
 
-`openapi.yaml` синхронизируется из committed specification соседнего
-`backend-codex`, а не из production endpoint. Из временного admin worktree
-paired backend вычисляется относительно primary admin worktree; иной локальный
-checkout можно передать через `OPENAPI_SPEC_SOURCE`.
+`openapi/openapi.json` синхронизируется из code-first artifact
+`docs/api/openapi.json` соседнего `backend-codex`, а не из production endpoint.
+Из временного admin worktree paired backend вычисляется относительно primary
+admin worktree; иной локальный checkout можно передать через
+`OPENAPI_SPEC_SOURCE`.
+
+Существующий runtime API client остаётся сгенерированным из `openapi.yaml`.
+Переход всего admin на новый backend PR contract меняет DTO, auth/CSRF и
+operation names, поэтому является отдельной задачей и не смешивается с
+внутренней миграцией form state.
 
 Текущая OpenAPI Zod-генерация описывает транспортный контракт, но не всю
 семантику пользовательского ввода. Например, обязательное OpenAPI-свойство
@@ -54,7 +60,7 @@ Form с Zod resolver, сохранить AntD как визуальный сло
 
 ## Не входит в scope
 
-- изменение backend или `openapi.yaml`;
+- изменение backend;
 - ручное редактирование generated API/Zod-файлов;
 - изменение API payload или mutation/cache contracts;
 - раскладывание backend validation errors по отдельным RHF-полям;

@@ -1,7 +1,5 @@
-import {
-  CreatePlaceMaterialBody,
-  UpdateMaterialBody,
-} from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminMaterialsUpdateBody } from '@/shared/api/generated-zod/admin-materials/admin-materials.zod'
+import { AdminPlaceMaterialsCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
 import type { Material } from '@/shared/api/generated/model'
 import dayjs from 'dayjs'
 import { describe, expect, it } from 'vitest'
@@ -184,7 +182,7 @@ describe('material form helpers', () => {
       url: 'https://t.me/amazing_ekb/322',
     })
     expect(request.publishedAt).toBe('2026-03-20')
-    expect(CreatePlaceMaterialBody.parse(request)).toEqual(request)
+    expect(AdminPlaceMaterialsCreateBody.parse(request)).toEqual(request)
   })
 
   it('omits duration and stores post calendar date', () => {
@@ -207,7 +205,7 @@ describe('material form helpers', () => {
     })
     expect(request).not.toHaveProperty('durationSec')
     expect(request.publishedAt).toBe('2026-03-20')
-    expect(CreatePlaceMaterialBody.parse(request)).toEqual(request)
+    expect(AdminPlaceMaterialsCreateBody.parse(request)).toEqual(request)
   })
 
   it('rejects unsafe material URLs before building create payload', () => {
@@ -242,7 +240,7 @@ describe('material form helpers', () => {
       title: 'Обновленный обзор',
       url: 'https://t.me/amazing_ekb/999',
     })
-    expect(UpdateMaterialBody.parse(request)).toEqual(request)
+    expect(AdminMaterialsUpdateBody.parse(request)).toEqual(request)
   })
 
   it('clears duration when changing a video material to post', () => {

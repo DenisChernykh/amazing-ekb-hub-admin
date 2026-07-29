@@ -1,7 +1,7 @@
 import {
-  CreateContentSourceBody,
-  UpdateContentSourceBody,
-} from '@/shared/api/generated-zod/admin/admin.zod'
+  AdminContentSourcesCreateBody,
+  AdminContentSourcesUpdateBody,
+} from '@/shared/api/generated-zod/admin-content-sources/admin-content-sources.zod'
 import type { ContentSource } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
@@ -96,7 +96,7 @@ describe('content source form helpers', () => {
       platform: 'telegram',
       url: 'https://t.me/amazing_ekb',
     })
-    expect(CreateContentSourceBody.parse(request)).toEqual(request)
+    expect(AdminContentSourcesCreateBody.parse(request)).toEqual(request)
   })
 
   it('maps source to initial form values', () => {
@@ -129,7 +129,7 @@ describe('content source form helpers', () => {
       externalId: null,
       handle: 'new_handle',
     })
-    expect(UpdateContentSourceBody.parse(request)).toEqual(request)
+    expect(AdminContentSourcesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('detects changed fields after normalization', () => {

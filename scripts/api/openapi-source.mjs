@@ -7,7 +7,7 @@ import { resolve } from 'node:path'
  * worktree, чтобы не искать backend внутри `/private/tmp`.
  */
 export function resolvePairedBackendSource({ cwd, worktreeList }) {
-  const fallback = resolve(cwd, '../backend-codex/docs/api/specification.yaml')
+  const fallback = resolve(cwd, '../backend-codex/docs/api/openapi.json')
   const primaryWorktree = worktreeList
     ?.split('\n')
     .find((line) => line.startsWith('worktree '))
@@ -15,5 +15,5 @@ export function resolvePairedBackendSource({ cwd, worktreeList }) {
 
   return primaryWorktree === undefined
     ? fallback
-    : resolve(primaryWorktree, '../backend-codex/docs/api/specification.yaml')
+    : resolve(primaryWorktree, '../backend-codex/docs/api/openapi.json')
 }
