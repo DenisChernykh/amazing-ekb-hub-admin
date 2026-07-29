@@ -62,6 +62,7 @@ export function PlaceImportStartForm({ onStarted }: PlaceImportStartFormProps) {
           control={form.control}
           label="Ссылка Яндекс Карт"
           name="url"
+          required
         >
           {(field, controlProps) => (
             <Input

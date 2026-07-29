@@ -39,6 +39,11 @@ describe('PlaceImportStartForm', () => {
     } as unknown as ReturnType<typeof useStartPlaceImportMutation>)
 
     render(<PlaceImportStartForm onStarted={vi.fn()} />)
+
+    expect(screen.getByText('Ссылка Яндекс Карт').closest('label')).toHaveClass(
+      'ant-form-item-required',
+    )
+
     fireEvent.change(screen.getByLabelText('Ссылка Яндекс Карт'), {
       target: { value: 'javascript:alert(1)' },
     })
