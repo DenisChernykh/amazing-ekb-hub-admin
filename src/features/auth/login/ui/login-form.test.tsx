@@ -65,7 +65,10 @@ describe('LoginForm', () => {
       </AntdApp>,
     )
 
-    await userEvent.type(screen.getByLabelText('Email'), 'admin@example.test')
+    await userEvent.type(
+      screen.getByLabelText('Email'),
+      ' admin@example.test ',
+    )
     await userEvent.type(screen.getByLabelText('Пароль'), 'unit-test-password')
     await userEvent.click(screen.getByRole('button', { name: 'Войти' }))
 
@@ -100,5 +103,28 @@ describe('LoginForm', () => {
         BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
       ),
     ).toBeNull()
+  })
+
+  it('shows exact local validation messages and blocks an invalid login', async () => {
+    const mutate = vi.fn()
+    mockedUseLoginSession.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useLoginSession>)
+
+    render(
+      <AntdApp>
+        <LoginForm onLoggedIn={vi.fn()} />
+      </AntdApp>,
+    )
+
+    await userEvent.type(screen.getByLabelText('Email'), 'not-an-email')
+    await userEvent.click(screen.getByRole('button', { name: 'Войти' }))
+
+    expect(
+      await screen.findByText('Введите корректный email'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Введите пароль')).toBeInTheDocument()
+    expect(mutate).not.toHaveBeenCalled()
   })
 })

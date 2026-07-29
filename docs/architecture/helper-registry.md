@@ -27,6 +27,18 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | ---------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
 | `parsePositiveInteger` | `src/shared/lib/number/parse-positive-integer.ts` | exported   | Parses positive integer URL/form values and returns a caller-provided fallback. |
 
+## Shared Form Helpers
+
+| Helper       | Location                                      | Visibility | Contract                                                                                                    |
+| ------------ | --------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| `useZodForm` | `src/shared/lib/form/use-zod-form.ts`         | exported   | Creates a typed RHF instance from a Zod schema while preserving separate input/output types and caller-owned form policy. |
+
+## Shared UI
+
+| Helper        | Location                                  | Visibility | Contract                                                                                       |
+| ------------- | ----------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `RhfFormItem` | `src/shared/ui/form/rhf-form-item.tsx`    | exported   | Maps one RHF field/error to an accessible AntD `Form.Item` through an explicit control render prop. |
+
 ## Shared Type Helpers
 
 | Helper     | Location                           | Visibility | Contract                                                                     |
