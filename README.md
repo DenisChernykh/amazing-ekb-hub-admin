@@ -40,6 +40,12 @@ pnpm run api:update
 pnpm run api:check
 ```
 
+`api:sync` по умолчанию читает committed specification соседнего локального
+backend checkout:
+`../backend-codex/docs/api/specification.yaml`. Из временного admin worktree
+путь вычисляется относительно primary admin worktree. Другой локальный файл
+можно передать явно через `OPENAPI_SPEC_SOURCE`.
+
 ## Documentation
 
 - [Project Feature Gap](docs/product/project-feature-gap.md): что умеет backend, что покрыто public frontend/admin SPA, каких фич не хватает.

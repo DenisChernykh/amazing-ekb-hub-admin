@@ -8,6 +8,13 @@ Before adding a helper, search this file and the referenced source file. Reuse t
 
 Do not move helpers to `shared` only because they are small. Move them when the behavior is repeated or expresses a shared contract.
 
+## API Tooling
+
+| Helper                       | Location                         | Visibility | Contract                                                                                                 |
+| ---------------------------- | -------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| `resolvePairedBackendSource` | `scripts/api/openapi-source.mjs` | exported   | Resolves the local sibling backend OpenAPI specification from either the primary admin worktree or cwd.  |
+| `readOpenApiSource`          | `scripts/api/sync-openapi.mjs`   | private    | Reads an explicitly configured local/file/HTTP source without changing the default local-first contract. |
+
 ## Shared API Client
 
 | Helper              | Location                                 | Visibility | Contract                                                                                                                       |

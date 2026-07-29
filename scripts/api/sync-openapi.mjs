@@ -1,13 +1,30 @@
 #!/usr/bin/env node
 
+import { execFileSync } from 'node:child_process'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { resolvePairedBackendSource } from './openapi-source.mjs'
 
-const DEFAULT_SPEC_SOURCE = 'https://api.strelchukgo.ru/docs/openapi.yaml'
 const DEFAULT_SPEC_OUTPUT = 'openapi.yaml'
 
-const source = process.env.OPENAPI_SPEC_SOURCE ?? DEFAULT_SPEC_SOURCE
+const readWorktreeList = () => {
+  try {
+    return execFileSync('git', ['worktree', 'list', '--porcelain'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    })
+  } catch {
+    return undefined
+  }
+}
+
+const source =
+  process.env.OPENAPI_SPEC_SOURCE ??
+  resolvePairedBackendSource({
+    cwd: process.cwd(),
+    worktreeList: readWorktreeList(),
+  })
 const output = process.env.OPENAPI_SPEC_OUTPUT ?? DEFAULT_SPEC_OUTPUT
 const outputPath = resolve(process.cwd(), output)
 

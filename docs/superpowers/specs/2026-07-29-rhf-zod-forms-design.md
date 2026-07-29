@@ -21,6 +21,11 @@ Design утверждён в диалоге до записи этого док�
 - Orval, который из локального `openapi.yaml` генерирует API-клиент и
   operation-level Zod-схемы в `src/shared/api/generated-zod`.
 
+`openapi.yaml` синхронизируется из committed specification соседнего
+`backend-codex`, а не из production endpoint. Из временного admin worktree
+paired backend вычисляется относительно primary admin worktree; иной локальный
+checkout можно передать через `OPENAPI_SPEC_SOURCE`.
+
 Текущая OpenAPI Zod-генерация описывает транспортный контракт, но не всю
 семантику пользовательского ввода. Например, обязательное OpenAPI-свойство
 типа `string` становится `z.string()` и принимает пустую строку, если в
