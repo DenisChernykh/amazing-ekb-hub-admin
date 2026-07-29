@@ -5,12 +5,15 @@ import {
   toUpdatePlaceRequest,
   type PlaceFormValues,
 } from '@/features/place/form/model/place-form'
+import { editPlaceFormSchema } from '@/features/place/form/model/place-form-schema'
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
-import { useState } from 'react'
+import { FormProvider, useWatch } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 
 /**
  * Props формы редактирования места.
@@ -25,7 +28,11 @@ export type EditPlaceFormProps = {
 /**
  * Ant Design форма редактирования места через entity-level admin mutation.
  *
- * @remarks Сообщает наружу dirty-state, чтобы widget-экран мог блокировать навигацию.
+ * @remarks Effect синхронизирует вычисленный RHF dirty-state с navigation blocker
+ * владеющего widget. Вычисление во время render не может безопасно вызвать внешний
+ * callback; зависимости effect ограничены callback и нормализованным boolean.
+ * Cleanup не нужен: form и widget размонтируются вместе, а reset и успешное
+ * сохранение публикуют `false`.
  */
 export function EditPlaceForm({
   onCancel,
@@ -34,10 +41,21 @@ export function EditPlaceForm({
   place,
 }: EditPlaceFormProps) {
   const { message } = AntdApp.useApp()
-  const [form] = Form.useForm<PlaceFormValues>()
   const initialValues = getPlaceFormInitialValues(place)
+  const form = useZodForm(editPlaceFormSchema, {
+    defaultValues: initialValues,
+  })
   const [errorMessages, setErrorMessages] = useState<string[]>([])
-  const [isDirty, setIsDirty] = useState(false)
+  const values = useWatch({
+    control: form.control,
+    compute: (currentValues) => currentValues,
+  })
+  const isDirty = hasPlaceFormChanges(values, initialValues)
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
+
   const updatePlaceMutation = useUpdatePlaceMutation({
     onError: (error) => {
       const apiError = normalizeApiError(error)
@@ -46,33 +64,23 @@ export function EditPlaceForm({
     },
     onSuccess: (updatedPlace) => {
       setErrorMessages([])
-      setIsDirty(false)
+      form.reset(initialValues)
       onDirtyChange?.(false)
       void message.success('Место обновлено')
       onUpdated(updatedPlace)
     },
   })
 
-  const updateDirtyState = (nextIsDirty: boolean) => {
-    setIsDirty(nextIsDirty)
-    onDirtyChange?.(nextIsDirty)
-  }
-
-  const handleValuesChange = () => {
-    updateDirtyState(hasPlaceFormChanges(form.getFieldsValue(), initialValues))
-  }
-
   const handleReset = () => {
-    form.setFieldsValue(initialValues)
+    form.reset(initialValues)
     setErrorMessages([])
-    updateDirtyState(false)
   }
 
   const handleFinish = (values: PlaceFormValues) => {
     const data = toUpdatePlaceRequest(values, initialValues)
 
     if (!Object.keys(data).length) {
-      updateDirtyState(false)
+      onDirtyChange?.(false)
       return
     }
 
@@ -84,50 +92,48 @@ export function EditPlaceForm({
   }
 
   return (
-    <Form<PlaceFormValues>
-      form={form}
-      initialValues={initialValues}
-      layout="vertical"
-      name="edit-place"
-      onFinish={handleFinish}
-      onValuesChange={handleValuesChange}
-      requiredMark={false}
-    >
-      {Boolean(errorMessages.length) && (
-        <Form.Item>
-          <PlaceFormErrorAlert
-            messages={errorMessages}
-            title="Не удалось обновить место"
-          />
-        </Form.Item>
-      )}
+    <FormProvider {...form}>
+      <form
+        name="edit-place"
+        noValidate
+        onSubmit={form.handleSubmit(handleFinish)}
+      >
+        {Boolean(errorMessages.length) && (
+          <Form.Item>
+            <PlaceFormErrorAlert
+              messages={errorMessages}
+              title="Не удалось обновить место"
+            />
+          </Form.Item>
+        )}
 
-      <PlaceFormFields
-        disabled={updatePlaceMutation.isPending}
-        showSlug
-        slugRequired
-      />
+        <PlaceFormFields
+          control={form.control}
+          disabled={updatePlaceMutation.isPending}
+          showSlug
+        />
 
-      <Flex gap={8} justify="end" wrap>
-        <Button disabled={updatePlaceMutation.isPending} onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button
-          disabled={!isDirty || updatePlaceMutation.isPending}
-          onClick={handleReset}
-        >
-          Вернуть исходные
-        </Button>
-        <Button
-          aria-label="Сохранить"
-          disabled={!isDirty}
-          htmlType="submit"
-          loading={updatePlaceMutation.isPending}
-          type="primary"
-        >
-          Сохранить
-        </Button>
-      </Flex>
-    </Form>
+        <Flex gap={8} justify="end" wrap>
+          <Button disabled={updatePlaceMutation.isPending} onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button
+            disabled={!isDirty || updatePlaceMutation.isPending}
+            onClick={handleReset}
+          >
+            Вернуть исходные
+          </Button>
+          <Button
+            aria-label="Сохранить"
+            disabled={!isDirty || updatePlaceMutation.isPending}
+            htmlType="submit"
+            loading={updatePlaceMutation.isPending}
+            type="primary"
+          >
+            Сохранить
+          </Button>
+        </Flex>
+      </form>
+    </FormProvider>
   )
 }

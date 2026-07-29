@@ -188,6 +188,41 @@ describe('EditPlaceForm', () => {
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
   })
 
+  it('requires a slug before submitting an edit', async () => {
+    const mutate = vi.fn()
+    mockedUseUpdatePlaceMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useUpdatePlaceMutation>)
+
+    renderEditPlaceForm()
+
+    fireEvent.change(screen.getByLabelText('Ярлык'), {
+      target: { value: '' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+
+    expect(await screen.findByText('Введите ярлык')).toBeInTheDocument()
+    expect(mutate).not.toHaveBeenCalled()
+  })
+
+  it('does not publish dirty state for normalized whitespace-only changes', async () => {
+    mockedUseUpdatePlaceMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useUpdatePlaceMutation>)
+    const { onDirtyChange } = renderEditPlaceForm()
+
+    fireEvent.change(screen.getByLabelText('Название'), {
+      target: { value: '  Скрытый SPA  ' },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled()
+    })
+    expect(onDirtyChange).not.toHaveBeenCalledWith(true)
+  })
+
   it('sends only changed normalized fields to update mutation', async () => {
     const mutate = vi.fn()
     mockedUseUpdatePlaceMutation.mockReturnValue({
@@ -274,7 +309,7 @@ describe('EditPlaceForm', () => {
           },
         }) as unknown as ReturnType<typeof useUpdatePlaceMutation>,
     )
-    const { onUpdated } = renderEditPlaceForm()
+    const { onDirtyChange, onUpdated } = renderEditPlaceForm()
 
     fireEvent.change(screen.getByLabelText('Описание'), {
       target: { value: 'Новое описание' },
@@ -286,6 +321,7 @@ describe('EditPlaceForm', () => {
         expect.objectContaining({ id: 'place-2', summary: 'Новое описание' }),
       )
     })
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false)
   })
 
   it('renders normalized API error messages', async () => {

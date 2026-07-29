@@ -7,10 +7,13 @@ import {
   toCreatePlaceRequest,
   type PlaceFormValues,
 } from '@/features/place/form/model/place-form'
+import { createPlaceFormSchema } from '@/features/place/form/model/place-form-schema'
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
+import { FormProvider } from 'react-hook-form'
 import { useState } from 'react'
 import { CreatePlacePartialSuccessAlert } from './create-place-partial-success-alert'
 
@@ -38,6 +41,15 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
   const [partialSuccess, setPartialSuccess] =
     useState<PartialSuccessState | null>(null)
   const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null)
+  const form = useZodForm(createPlaceFormSchema, {
+    defaultValues: {
+      categoryId: null,
+      slug: '',
+      summary: '',
+      tags: [],
+      title: '',
+    },
+  })
   const createPlaceMutation = useCreatePlaceMutation()
   const uploadCoverMutation = useUploadPlaceCoverPhotoMutation()
 
@@ -90,52 +102,57 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
   }
 
   return (
-    <Form<PlaceFormValues>
-      layout="vertical"
-      name="create-place"
-      onFinish={handleFinish}
-      requiredMark={false}
-    >
-      {Boolean(errorMessages.length) && (
-        <Form.Item>
-          <PlaceFormErrorAlert
-            messages={errorMessages}
-            title="Не удалось создать место"
-          />
-        </Form.Item>
-      )}
+    <FormProvider {...form}>
+      <form
+        name="create-place"
+        noValidate
+        onSubmit={form.handleSubmit(handleFinish)}
+      >
+        {Boolean(errorMessages.length) && (
+          <Form.Item>
+            <PlaceFormErrorAlert
+              messages={errorMessages}
+              title="Не удалось создать место"
+            />
+          </Form.Item>
+        )}
 
-      {partialSuccess && (
-        <Form.Item>
-          <CreatePlacePartialSuccessAlert
-            messages={partialSuccess.messages}
-            placeId={partialSuccess.placeId}
-          />
-        </Form.Item>
-      )}
+        {partialSuccess && (
+          <Form.Item>
+            <CreatePlacePartialSuccessAlert
+              messages={partialSuccess.messages}
+              placeId={partialSuccess.placeId}
+            />
+          </Form.Item>
+        )}
 
-      <PlaceFormFields disabled={isPending || isCreateLocked} showSlug />
+        <PlaceFormFields
+          control={form.control}
+          disabled={isPending || isCreateLocked}
+          showSlug
+        />
 
-      <PlaceCoverDraftPicker
-        disabled={isPending || isCreateLocked}
-        onChange={setSelectedCoverFile}
-        selectedFile={selectedCoverFile}
-      />
+        <PlaceCoverDraftPicker
+          disabled={isPending || isCreateLocked}
+          onChange={setSelectedCoverFile}
+          selectedFile={selectedCoverFile}
+        />
 
-      <Flex gap={8} justify="end" wrap>
-        <Button disabled={isPending} onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button
-          aria-label="Создать"
-          disabled={isCreateLocked}
-          htmlType="submit"
-          loading={isPending}
-          type="primary"
-        >
-          Создать
-        </Button>
-      </Flex>
-    </Form>
+        <Flex gap={8} justify="end" wrap>
+          <Button disabled={isPending} onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button
+            aria-label="Создать"
+            disabled={isCreateLocked}
+            htmlType="submit"
+            loading={isPending}
+            type="primary"
+          >
+            Создать
+          </Button>
+        </Flex>
+      </form>
+    </FormProvider>
   )
 }

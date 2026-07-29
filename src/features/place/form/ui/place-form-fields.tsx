@@ -1,27 +1,26 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
-import { Alert, Form, Input, Select } from 'antd'
-import {
-  getPlaceSlugValidationError,
-  type PlaceFormValues,
-} from '../model/place-form'
+import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
+import { Alert, Input, Select } from 'antd'
+import type { Control } from 'react-hook-form'
+import type { PlaceFormValues } from '../model/place-form'
 
 /**
  * Props общего набора полей формы места.
  */
 export type PlaceFormFieldsProps = {
+  control: Control<PlaceFormValues>
   disabled?: boolean
   showSlug?: boolean
-  slugRequired?: boolean
 }
 
 /**
  * Общие Ant Design поля для create/edit сценариев места.
  */
 export function PlaceFormFields({
+  control,
   disabled = false,
   showSlug = false,
-  slugRequired = false,
 }: PlaceFormFieldsProps) {
   const categoriesQuery = usePlaceCategoriesQuery()
   const categoryOptions = getPlaceCategoryOptions(
@@ -32,71 +31,86 @@ export function PlaceFormFields({
 
   return (
     <>
-      <Form.Item<PlaceFormValues>
-        label="Название"
-        name="title"
-        rules={[{ required: true, message: 'Введите название' }]}
-      >
-        <Input autoComplete="off" disabled={disabled} />
-      </Form.Item>
+      <RhfFormItem control={control} label="Название" name="title" required>
+        {(field, controlProps) => (
+          <Input
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            autoComplete="off"
+            disabled={disabled}
+            id={controlProps.id}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={(input) => field.ref(input?.input ?? null)}
+            status={controlProps.status}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
       {showSlug && (
-        <Form.Item<PlaceFormValues>
+        <RhfFormItem
+          control={control}
           extra="Часть публичного адреса места. При создании может быть заполнена автоматически."
           label="Ярлык"
           name="slug"
-          rules={[
-            ...(slugRequired
-              ? [
-                  {
-                    message: 'Введите ярлык',
-                    required: true,
-                    whitespace: true,
-                  },
-                ]
-              : []),
-            {
-              validator: async (_rule, value: unknown) => {
-                if (typeof value !== 'string') {
-                  return
-                }
-
-                const validationError = getPlaceSlugValidationError(value)
-
-                if (validationError) {
-                  throw new Error(validationError)
-                }
-              },
-            },
-          ]}
         >
-          <Input
-            aria-label="Ярлык"
-            disabled={disabled}
-            placeholder="Например: quiet-spa"
-          />
-        </Form.Item>
+          {(field, controlProps) => (
+            <Input
+              aria-describedby={controlProps['aria-describedby']}
+              aria-invalid={controlProps['aria-invalid']}
+              aria-label="Ярлык"
+              disabled={disabled}
+              id={controlProps.id}
+              onBlur={field.onBlur}
+              onChange={field.onChange}
+              placeholder="Например: quiet-spa"
+              ref={(input) => field.ref(input?.input ?? null)}
+              status={controlProps.status}
+              value={field.value}
+            />
+          )}
+        </RhfFormItem>
       )}
 
-      <Form.Item<PlaceFormValues> label="Описание" name="summary">
-        <Input.TextArea
-          autoSize={{ maxRows: 6, minRows: 3 }}
-          disabled={disabled}
-        />
-      </Form.Item>
+      <RhfFormItem control={control} label="Описание" name="summary">
+        {(field, controlProps) => (
+          <Input.TextArea
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            autoSize={{ maxRows: 6, minRows: 3 }}
+            disabled={disabled}
+            id={controlProps.id}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            status={controlProps.status}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<PlaceFormValues>
+      <RhfFormItem
+        control={control}
         label="Категория"
         name="categoryId"
-        rules={[{ required: true, message: 'Выберите категорию' }]}
+        required
       >
-        <Select
-          aria-label="Категория"
-          disabled={isCategorySelectDisabled}
-          loading={categoriesQuery.isFetching}
-          options={categoryOptions}
-        />
-      </Form.Item>
+        {(field, controlProps) => (
+          <Select
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            aria-label="Категория"
+            disabled={isCategorySelectDisabled}
+            id={controlProps.id}
+            loading={categoriesQuery.isFetching}
+            onBlur={field.onBlur}
+            onChange={(value) => field.onChange(value ?? null)}
+            options={categoryOptions}
+            status={controlProps.status}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
       {categoriesQuery.isError && (
         <Alert
@@ -108,15 +122,24 @@ export function PlaceFormFields({
         />
       )}
 
-      <Form.Item<PlaceFormValues> label="Теги" name="tags">
-        <Select
-          aria-label="Теги"
-          disabled={disabled}
-          mode="tags"
-          placeholder="Добавьте теги"
-          tokenSeparators={[',']}
-        />
-      </Form.Item>
+      <RhfFormItem control={control} label="Теги" name="tags">
+        {(field, controlProps) => (
+          <Select
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            aria-label="Теги"
+            disabled={disabled}
+            id={controlProps.id}
+            mode="tags"
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            placeholder="Добавьте теги"
+            status={controlProps.status}
+            tokenSeparators={[',']}
+            value={field.value ?? []}
+          />
+        )}
+      </RhfFormItem>
     </>
   )
 }

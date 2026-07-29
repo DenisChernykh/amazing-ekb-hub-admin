@@ -90,7 +90,7 @@ export function PlaceCoverDraftPicker({
   const fileName = selectedFile?.name ?? draftFileName
 
   return (
-    <Form.Item label="Cover-фото">
+    <Form.Item label="Cover-фото" layout="vertical">
       <Flex gap={12} vertical>
         {Boolean(errorMessages.length) && (
           <Alert
