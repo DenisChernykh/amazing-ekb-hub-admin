@@ -2,11 +2,17 @@ import {
   getActivePlaceImportConflictOperationId,
   useStartPlaceImportMutation,
 } from '@/entities/place-import/model/place-import-mutations'
+import {
+  placeImportStartSchema,
+  type PlaceImportStartValues,
+} from '@/features/place/import-yandex/model/place-import-start-schema'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import { getHttpUrlValidationError } from '@/shared/lib/url/safe-url'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
+import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { ImportOutlined } from '@ant-design/icons'
-import { Alert, Button, Form, Input, Space, Typography } from 'antd'
+import { Alert, Button, Input, Space, Typography } from 'antd'
 import { useState } from 'react'
+import { FormProvider } from 'react-hook-form'
 
 type PlaceImportStartFormProps = {
   onStarted: (operationId: string) => void
@@ -14,7 +20,11 @@ type PlaceImportStartFormProps = {
 
 /** Форма запуска импорта одной карточки Яндекс Карт. */
 export function PlaceImportStartForm({ onStarted }: PlaceImportStartFormProps) {
-  const [form] = Form.useForm<{ url: string }>()
+  const form = useZodForm(placeImportStartSchema, {
+    defaultValues: { url: '' },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const mutation = useStartPlaceImportMutation({
     onError: (error) => {
@@ -30,55 +40,59 @@ export function PlaceImportStartForm({ onStarted }: PlaceImportStartFormProps) {
     onSuccess: (operation) => onStarted(operation.id),
   })
 
-  const handleSubmit = ({ url }: { url: string }) => {
+  const handleSubmit = ({ url }: PlaceImportStartValues) => {
     setErrorMessage(null)
-    mutation.mutate({ url: url.trim() })
+    mutation.mutate({ url })
   }
 
   return (
-    <Form form={form} layout="vertical" onFinish={handleSubmit}>
-      <Typography.Paragraph type="secondary">
-        Вставьте ссылку на одну карточку организации. Backend проверит адрес,
-        подготовит read-only preview и создаст место только после подтверждения.
-      </Typography.Paragraph>
+    <FormProvider {...form}>
+      <form noValidate onSubmit={form.handleSubmit(handleSubmit)}>
+        <Typography.Paragraph type="secondary">
+          Вставьте ссылку на одну карточку организации. Backend проверит адрес,
+          подготовит read-only preview и создаст место только после
+          подтверждения.
+        </Typography.Paragraph>
 
-      {errorMessage && <Alert showIcon title={errorMessage} type="error" />}
+        {Boolean(errorMessage) && (
+          <Alert showIcon title={errorMessage} type="error" />
+        )}
 
-      <Form.Item
-        label="Ссылка Яндекс Карт"
-        name="url"
-        rules={[
-          {
-            required: true,
-            message: 'Вставьте ссылку на карточку организации',
-          },
-          {
-            validator: async (_rule, value: unknown) => {
-              if (typeof value !== 'string' || !value.trim()) return
-              const error = getHttpUrlValidationError(value)
-              if (error) throw new Error(error)
-            },
-          },
-        ]}
-      >
-        <Input
-          autoComplete="url"
-          maxLength={2048}
-          placeholder="https://yandex.ru/maps/org/..."
-          type="url"
-        />
-      </Form.Item>
-
-      <Space>
-        <Button
-          htmlType="submit"
-          icon={<ImportOutlined aria-hidden="true" />}
-          loading={mutation.isPending}
-          type="primary"
+        <RhfFormItem
+          control={form.control}
+          label="Ссылка Яндекс Карт"
+          name="url"
+          required
         >
-          Начать импорт
-        </Button>
-      </Space>
-    </Form>
+          {(field, controlProps) => (
+            <Input
+              aria-describedby={controlProps['aria-describedby']}
+              aria-invalid={controlProps['aria-invalid']}
+              autoComplete="url"
+              id={controlProps.id}
+              maxLength={2048}
+              onBlur={field.onBlur}
+              onChange={field.onChange}
+              placeholder="https://yandex.ru/maps/org/..."
+              ref={(input) => field.ref(input?.input ?? null)}
+              status={controlProps.status}
+              type="url"
+              value={field.value}
+            />
+          )}
+        </RhfFormItem>
+
+        <Space>
+          <Button
+            htmlType="submit"
+            icon={<ImportOutlined aria-hidden="true" />}
+            loading={mutation.isPending}
+            type="primary"
+          >
+            Начать импорт
+          </Button>
+        </Space>
+      </form>
+    </FormProvider>
   )
 }

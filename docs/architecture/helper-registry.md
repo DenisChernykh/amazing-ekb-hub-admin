@@ -229,6 +229,8 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useCreatePlaceImportViewerAccessMutation` | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Creates one-time CAPTCHA viewer access.                                                                     |
 | `useRevokePlaceImportViewerAccessMutation` | `src/entities/place-import/model/place-import-mutations.ts`          | exported   | Revokes the current CAPTCHA viewer capability/session.                                                      |
 | `PlaceImportStatusTag`                     | `src/entities/place-import/ui/place-import-meta.tsx`                 | exported   | Renders localized Ant Design metadata for an operation status.                                              |
+| `placeImportStartSchema`                   | `src/features/place/import-yandex/model/place-import-start-schema.ts`| exported   | Composes the generated Yandex import URL field with trimming, safe-protocol validation, and Russian copy.   |
+| `PlaceImportStartValues`                   | `src/features/place/import-yandex/model/place-import-start-schema.ts`| exported   | Defines input values accepted by the Yandex import start form before Zod parsing.                            |
 | `useCaptchaViewer`                         | `src/features/place/import-yandex/model/use-captcha-viewer.ts`       | exported   | Coordinates popup creation, capability navigation, TTL expiry, and explicit revoke.                         |
 | `PlaceImportStartForm`                     | `src/features/place/import-yandex/ui/place-import-start-form.tsx`    | exported   | Validates a safe HTTP URL and starts the import scenario.                                                   |
 | `PlaceImportCaptchaPanel`                  | `src/features/place/import-yandex/ui/place-import-captcha-panel.tsx` | exported   | Renders CAPTCHA popup actions and access countdown.                                                         |
@@ -238,9 +240,11 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Auth UI
 
-| Helper            | Location                                          | Visibility | Contract                                                                                                                                         |
-| ----------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `getRedirectPath` | `src/widgets/auth-login/ui/auth-login-screen.tsx` | private    | Converts React Router login state into a safe post-login redirect path. Promote to an auth routing helper if another login-like screen needs it. |
+| Helper            | Location                                               | Visibility | Contract                                                                                                                                         |
+| ----------------- | ------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `loginFormSchema` | `src/features/auth/login/model/login-form-schema.ts`   | exported   | Composes the generated login email contract with exact Russian required and email messages for the RHF login form.                               |
+| `LoginFormValues` | `src/features/auth/login/model/login-form-schema.ts`   | exported   | Defines input values accepted by the RHF login form before Zod parsing.                                                                           |
+| `getRedirectPath` | `src/widgets/auth-login/ui/auth-login-screen.tsx`      | private    | Converts React Router login state into a safe post-login redirect path. Promote to an auth routing helper if another login-like screen needs it. |
 
 ## Places List Widget
 
@@ -258,31 +262,33 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Category Form Feature
 
-| Helper                           | Location                                                         | Visibility | Contract                                                                                        |
-| -------------------------------- | ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| `CategoryFormValues`             | `src/features/category/form/model/category-form.ts`              | exported   | Defines create/edit category form values before conversion to generated API payloads.           |
-| `CategoryFormChangedField`       | `src/features/category/form/model/category-form.ts`              | exported   | Describes a normalized category field changed in the edit drawer.                               |
-| `getCategorySlugValidationError` | `src/features/category/form/model/category-form.ts`              | exported   | Returns the local validation message for optional category slug values.                         |
-| `getCategoryFormInitialValues`   | `src/features/category/form/model/category-form.ts`              | exported   | Maps admin category data to edit form initial values.                                           |
-| `toCreateCategoryRequest`        | `src/features/category/form/model/category-form.ts`              | exported   | Normalizes category form values into `POST /admin/categories` payload.                          |
-| `toUpdateCategoryRequest`        | `src/features/category/form/model/category-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/categories/{categoryId}` payload from changed fields. |
-| `hasCategoryFormChanges`         | `src/features/category/form/model/category-form.ts`              | exported   | Detects whether normalized category form values differ from loaded server values.               |
-| `getCategoryFormChangedFields`   | `src/features/category/form/model/category-form.ts`              | exported   | Returns normalized changed category fields for edit drawer chips.                               |
-| `CategoryFormFields`             | `src/features/category/form/ui/category-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit category drawers.                              |
-| `CategoryFormErrorAlert`         | `src/features/category/form/ui/category-form-error-alert.tsx`    | exported   | Renders normalized create/edit category API errors.                                             |
-| `CategoryFormChangedFields`      | `src/features/category/form/ui/category-form-changed-fields.tsx` | exported   | Renders changed field chips for category edit drawer.                                           |
-| `CreateCategoryDrawer`           | `src/features/category/create/ui/create-category-drawer.tsx`     | exported   | Creates categories through the entity mutation bridge with dirty-close protection.              |
-| `EditCategoryDrawer`             | `src/features/category/edit/ui/edit-category-drawer.tsx`         | exported   | Edits category fields through the entity mutation bridge with dirty diff chips.                 |
-| `EditCategoryDrawerActions`      | `src/features/category/edit/ui/edit-category-drawer-actions.tsx` | exported   | Renders edit category drawer actions.                                                           |
-| `DeleteCategoryButton`           | `src/features/category/delete/ui/delete-category-button.tsx`     | exported   | Deletes unused categories after confirmation through the entity mutation bridge.                |
-| `CategoriesScreen`               | `src/widgets/categories/ui/categories-screen.tsx`                | exported   | Loads admin categories and hosts the category table plus create/edit drawers.                   |
+| Helper                        | Location                                                         | Visibility | Contract                                                                                        |
+| ----------------------------- | ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `createCategoryFormSchema`    | `src/features/category/form/model/category-form-schema.ts`       | exported   | Composes generated category fields with create-specific Russian validation and optional slug.   |
+| `editCategoryFormSchema`      | `src/features/category/form/model/category-form-schema.ts`       | exported   | Composes generated category fields with edit-specific Russian validation and required slug.     |
+| `CategoryFormValues`          | `src/features/category/form/model/category-form-schema.ts`       | exported   | Defines create/edit category form values before conversion to generated API payloads.           |
+| `CategoryFormChangedField`    | `src/features/category/form/model/category-form.ts`              | exported   | Describes a normalized category field changed in the edit drawer.                               |
+| `getCategoryFormInitialValues`| `src/features/category/form/model/category-form.ts`              | exported   | Maps admin category data to edit form initial values.                                           |
+| `toCreateCategoryRequest`     | `src/features/category/form/model/category-form.ts`              | exported   | Normalizes category form values into `POST /admin/categories` payload.                          |
+| `toUpdateCategoryRequest`     | `src/features/category/form/model/category-form.ts`              | exported   | Builds a normalized partial `PATCH /admin/categories/{categoryId}` payload from changed fields. |
+| `hasCategoryFormChanges`      | `src/features/category/form/model/category-form.ts`              | exported   | Detects whether normalized category form values differ from loaded server values.               |
+| `getCategoryFormChangedFields`| `src/features/category/form/model/category-form.ts`              | exported   | Returns normalized changed category fields for edit drawer chips.                               |
+| `CategoryFormFields`          | `src/features/category/form/ui/category-form-fields.tsx`         | exported   | Renders shared Ant Design fields for create/edit category drawers.                              |
+| `CategoryFormErrorAlert`      | `src/features/category/form/ui/category-form-error-alert.tsx`    | exported   | Renders normalized create/edit category API errors.                                             |
+| `CategoryFormChangedFields`   | `src/features/category/form/ui/category-form-changed-fields.tsx` | exported   | Renders changed field chips for category edit drawer.                                           |
+| `CreateCategoryDrawer`        | `src/features/category/create/ui/create-category-drawer.tsx`     | exported   | Creates categories through the entity mutation bridge with dirty-close protection.              |
+| `EditCategoryDrawer`          | `src/features/category/edit/ui/edit-category-drawer.tsx`         | exported   | Edits category fields through the entity mutation bridge with dirty diff chips.                 |
+| `EditCategoryDrawerActions`   | `src/features/category/edit/ui/edit-category-drawer-actions.tsx` | exported   | Renders edit category drawer actions.                                                           |
+| `DeleteCategoryButton`        | `src/features/category/delete/ui/delete-category-button.tsx`     | exported   | Deletes unused categories after confirmation through the entity mutation bridge.                |
+| `CategoriesScreen`            | `src/widgets/categories/ui/categories-screen.tsx`                | exported   | Loads admin categories and hosts the category table plus create/edit drawers.                   |
 
 ## Place Form Feature
 
 | Helper                           | Location                                                              | Visibility | Contract                                                                                                                                               |
 | -------------------------------- | --------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `createPlaceFormSchema`          | `src/features/place/form/model/place-form-schema.ts`                  | exported   | Composes generated place fields with create-specific Russian validation and nullable category input.                                                    |
+| `editPlaceFormSchema`            | `src/features/place/form/model/place-form-schema.ts`                  | exported   | Composes generated place fields with edit-specific Russian validation and required slug.                                                               |
 | `PlaceFormValues`                | `src/features/place/form/model/place-form.ts`                         | exported   | Defines create/edit place form values, including optional `summary`/`tags`, before conversion to generated API payloads.                               |
-| `getPlaceSlugValidationError`    | `src/features/place/form/model/place-form.ts`                         | exported   | Returns the local validation message for optional place slug values.                                                                                   |
 | `getPlaceFormInitialValues`      | `src/features/place/form/model/place-form.ts`                         | exported   | Maps admin `PlaceDetail` to form initial values.                                                                                                       |
 | `toCreatePlaceRequest`           | `src/features/place/form/model/place-form.ts`                         | exported   | Normalizes form values into `POST /admin/places` payload, preserving empty optional `summary`/`tags` as `''` and `[]`.                                 |
 | `toUpdatePlaceRequest`           | `src/features/place/form/model/place-form.ts`                         | exported   | Builds a normalized partial `PATCH /admin/places/{placeId}` payload from changed fields only, including explicit clears for optional `summary`/`tags`. |
@@ -350,6 +356,9 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | Helper                         | Location                                                         | Visibility | Contract                                                                                                       |
 | ------------------------------ | ---------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
 | `MaterialFormValues`           | `src/features/material/form/model/material-form.ts`              | exported   | Defines create/edit material form values before conversion to generated API payloads.                          |
+| `createMaterialFormSchema`     | `src/features/material/form/model/material-form-schema.ts`       | exported   | Composes generated material fields with required URL and UI-native `Dayjs` validation for create.                |
+| `editMaterialWithUrlFormSchema` | `src/features/material/form/model/material-form-schema.ts`      | exported   | Validates edit values when the material read-model exposes its source URL.                                     |
+| `editMaterialWithoutUrlFormSchema` | `src/features/material/form/model/material-form-schema.ts`   | exported   | Validates edit values when the material read-model omits its source URL.                                       |
 | `MaterialFormChangedField`     | `src/features/material/form/model/material-form.ts`              | exported   | Describes a normalized changed material field shown as an edit drawer diff chip.                               |
 | `isMaterialDurationEnabled`    | `src/features/material/form/model/material-form.ts`              | exported   | Detects whether material duration is applicable for the selected material type.                                |
 | `getMaterialFormInitialValues` | `src/features/material/form/model/material-form.ts`              | exported   | Maps admin `Material` to form initial values.                                                                  |
