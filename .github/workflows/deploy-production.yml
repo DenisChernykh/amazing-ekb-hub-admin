@@ -74,10 +74,7 @@ jobs:
           set -euo pipefail
 
           test -n "${VITE_API_BASE_URL}"
-          if [[ "${VITE_API_BASE_URL}" != "/" && ! "${VITE_API_BASE_URL}" =~ ^https?://[^/?#@]+/?$ ]]; then
-            echo 'VITE_API_BASE_URL must be / or an absolute HTTP(S) origin without a path.' >&2
-            exit 1
-          fi
+          node scripts/validate-api-origin.mjs "${VITE_API_BASE_URL}"
 
       - name: Build runtime image
         run: |
