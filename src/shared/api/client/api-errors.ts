@@ -3,24 +3,34 @@ import type { ProblemResponseDto } from '@/shared/api/generated/model'
 import axios from 'axios'
 import { z } from 'zod'
 
-const problemDocumentSchema = z.object({
-  type: z.string(),
-  title: z.string(),
-  status: z.number().int().min(400).max(599),
-  detail: z.string(),
-  instance: z.string(),
-  code: AuthGetCsrfToken401Response.shape.code,
-  requestId: z.string(),
-  errors: z
-    .array(
-      z.object({
-        pointer: z.string(),
-        code: z.string(),
-        detail: z.string(),
-      }),
-    )
-    .optional(),
-})
+const problemDocumentSchema = z
+  .object({
+    type: z.string(),
+    title: z.string(),
+    status: z.number().int().min(400).max(599),
+    detail: z.string(),
+    instance: z.string(),
+    code: AuthGetCsrfToken401Response.shape.code,
+    requestId: z.string(),
+    errors: z
+      .array(
+        z.object({
+          pointer: z.string(),
+          code: z.string(),
+          detail: z.string(),
+        }),
+      )
+      .optional(),
+  })
+  .superRefine((problem, context) => {
+    if (problem.code === 'VALIDATION_FAILED' && problem.status !== 422) {
+      context.addIssue({
+        code: 'custom',
+        message: 'VALIDATION_FAILED requires status 422',
+        path: ['status'],
+      })
+    }
+  })
 
 /**
  * Структурированное тело ошибки API в формате Problem Details.
@@ -95,12 +105,24 @@ function parseRetryAfter(value: unknown, now: number): number | null {
 
   const retryAfter = value.trim()
   if (/^\d+$/u.test(retryAfter)) {
-    const seconds = Number(retryAfter)
-    return Number.isSafeInteger(seconds) ? seconds * 1_000 : null
+    const milliseconds = Number(retryAfter) * 1_000
+    return Number.isSafeInteger(milliseconds) ? milliseconds : null
+  }
+
+  if (
+    !/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/u.test(
+      retryAfter,
+    )
+  ) {
+    return null
   }
 
   const retryAt = Date.parse(retryAfter)
-  if (Number.isNaN(retryAt) || retryAt <= now) {
+  if (
+    Number.isNaN(retryAt) ||
+    new Date(retryAt).toUTCString() !== retryAfter ||
+    retryAt <= now
+  ) {
     return null
   }
 

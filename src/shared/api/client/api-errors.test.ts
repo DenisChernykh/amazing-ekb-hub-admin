@@ -100,6 +100,21 @@ describe('normalizeApiError', () => {
     )
   })
 
+  it('rejects VALIDATION_FAILED outside the required 422 status', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          data: {
+            ...problem,
+            code: 'VALIDATION_FAILED',
+            status: 400,
+          },
+          status: 400,
+        }),
+      ),
+    ).toBeInstanceOf(ApiProtocolError)
+  })
+
   it('preserves code, status, and requestId from a valid Problem Details body', () => {
     expect(normalizeApiError(createAxiosError())).toMatchObject({
       code: 'INTERNAL_ERROR',
@@ -114,6 +129,18 @@ describe('normalizeApiError', () => {
       normalizeApiError(createAxiosError({ retryAfter: '12' })),
     ).toMatchObject({
       retryAfterMs: 12_000,
+    })
+  })
+
+  it('rejects numeric Retry-After values that overflow safe milliseconds', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          retryAfter: '9007199254741',
+        }),
+      ),
+    ).toMatchObject({
+      retryAfterMs: null,
     })
   })
 
@@ -145,6 +172,21 @@ describe('normalizeApiError', () => {
       })
     },
   )
+
+  it.each([
+    '2030-01-01T00:00:05Z',
+    'January 1, 2030 00:00:05 GMT',
+    '2030/01/01 00:00:05 GMT',
+  ])('rejects a non-HTTP-date Retry-After value: %s', (retryAfter) => {
+    expect(
+      normalizeApiError(
+        createAxiosError({ retryAfter }),
+        Date.UTC(2030, 0, 1, 0, 0, 0),
+      ),
+    ).toMatchObject({
+      retryAfterMs: null,
+    })
+  })
 })
 
 describe('isProblemCode', () => {

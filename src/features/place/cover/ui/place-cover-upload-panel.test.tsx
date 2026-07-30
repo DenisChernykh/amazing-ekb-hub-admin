@@ -239,7 +239,7 @@ describe('PlaceCoverUploadPanel', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 400))
+            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 422))
           },
         }) as unknown as ReturnType<typeof useUploadPlaceCoverPhotoMutation>,
     )

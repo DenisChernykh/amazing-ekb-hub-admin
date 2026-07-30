@@ -374,7 +374,7 @@ describe('CreatePlaceForm', () => {
       isPending: false,
       mutateAsync: vi
         .fn()
-        .mockRejectedValue(createApiProblemError('VALIDATION_FAILED', 400)),
+        .mockRejectedValue(createApiProblemError('VALIDATION_FAILED', 422)),
     } as unknown as ReturnType<typeof useCreatePlaceMutation>)
     mockedUseUploadPlaceCoverPhotoMutation.mockReturnValue({
       isPending: false,
