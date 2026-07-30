@@ -8,6 +8,12 @@
 import '@/shared/config/zod-locale'
 
 export {
+  clearCsrfToken,
+  peekCsrfToken,
+  setCsrfToken,
+} from './client/csrf-token'
+
+export {
   authGetCsrfToken,
   authGetMe,
   authLogin,
