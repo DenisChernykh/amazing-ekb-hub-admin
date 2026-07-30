@@ -1,18 +1,18 @@
-import { ApiClientError } from '@/shared/api/client/api-error'
-import {
-  createPlaceMaterial,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminMaterialLibraryQueryKey,
-  getListAdminPlaceMaterialsQueryKey,
-  hidePlaceMaterialLink,
-  linkPlaceMaterial,
-  updateMaterial,
-  updateMaterialAdminStatus,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  AdminMaterialLibraryItem,
-  Material,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  MaterialResponseDto,
+} from '@/shared/api'
+import {
+  adminMaterialsUpdate,
+  adminMaterialsUpdateStatus,
+  adminPlaceMaterialsCreate,
+  adminPlaceMaterialsHide,
+  adminPlaceMaterialsLink,
+  getAdminMaterialsListQueryKey,
+  getAdminPlaceMaterialsListQueryKey,
+  getAdminPlacesGetQueryKey,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -25,27 +25,27 @@ import {
   useUpdateMaterialMutation,
 } from './material-mutations'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
-    `/admin/places/${placeId}`,
+vi.mock('@/shared/api', () => ({
+  getAdminPlacesGetQueryKey: vi.fn(({ placeId }) => [
+    `/v1/admin/places/${placeId}`,
   ]),
-  getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }) => [
-    `/admin/places/${placeId}/materials`,
+  getAdminPlaceMaterialsListQueryKey: vi.fn(({ placeId }) => [
+    `/v1/admin/places/${placeId}/materials`,
   ]),
-  createPlaceMaterial: vi.fn(),
-  hidePlaceMaterialLink: vi.fn(),
-  linkPlaceMaterial: vi.fn(),
-  getListAdminMaterialLibraryQueryKey: vi.fn(() => ['/admin/materials']),
-  updateMaterial: vi.fn(),
-  updateMaterialAdminStatus: vi.fn(),
+  adminPlaceMaterialsCreate: vi.fn(),
+  adminPlaceMaterialsHide: vi.fn(),
+  adminPlaceMaterialsLink: vi.fn(),
+  getAdminMaterialsListQueryKey: vi.fn(() => ['/v1/admin/materials']),
+  adminMaterialsUpdate: vi.fn(),
+  adminMaterialsUpdateStatus: vi.fn(),
   useCreatePlaceMaterial: vi.fn(),
 }))
 
-const mockedCreatePlaceMaterial = vi.mocked(createPlaceMaterial)
-const mockedHidePlaceMaterialLink = vi.mocked(hidePlaceMaterialLink)
-const mockedLinkPlaceMaterial = vi.mocked(linkPlaceMaterial)
-const mockedUpdateMaterial = vi.mocked(updateMaterial)
-const mockedUpdateMaterialAdminStatus = vi.mocked(updateMaterialAdminStatus)
+const mockedCreatePlaceMaterial = vi.mocked(adminPlaceMaterialsCreate)
+const mockedHidePlaceMaterialLink = vi.mocked(adminPlaceMaterialsHide)
+const mockedLinkPlaceMaterial = vi.mocked(adminPlaceMaterialsLink)
+const mockedUpdateMaterial = vi.mocked(adminMaterialsUpdate)
+const mockedUpdateMaterialAdminStatus = vi.mocked(adminMaterialsUpdateStatus)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -55,18 +55,19 @@ const createWrapper = (queryClient: QueryClient) => {
   }
 }
 
-const material: Material = {
+const material: MaterialResponseDto = {
   durationSec: null,
   id: 'material-1',
   placeId: 'place-1',
   platform: 'telegram',
   publishedAt: '2026-03-20T10:30:00+05:00',
+  redirectUrl: null,
   title: 'Обзор комплекса',
   type: 'post',
   url: 'https://t.me/amazing_ekb/321',
 }
 
-const libraryItem: AdminMaterialLibraryItem = {
+const libraryItem: AdminMaterialLibraryResponseDto = {
   adminStatus: 'pending',
   durationSec: null,
   excerpt: 'Пост из Telegram',
@@ -96,21 +97,21 @@ describe('material mutations', () => {
     mockedHidePlaceMaterialLink.mockReset()
     mockedLinkPlaceMaterial.mockReset()
     mockedUpdateMaterial.mockReset()
-    vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
-      ({ placeId }) => [`/admin/places/${placeId}`],
+    vi.mocked(getAdminPlacesGetQueryKey).mockImplementation(({ placeId }) => [
+      `/v1/admin/places/${placeId}`,
+    ])
+    vi.mocked(getAdminPlaceMaterialsListQueryKey).mockImplementation(
+      ({ placeId }) => [`/v1/admin/places/${placeId}/materials`],
     )
-    vi.mocked(getListAdminPlaceMaterialsQueryKey).mockImplementation(
-      ({ placeId }) => [`/admin/places/${placeId}/materials`],
-    )
-    vi.mocked(getListAdminMaterialLibraryQueryKey).mockImplementation(() => [
-      '/admin/materials',
+    vi.mocked(getAdminMaterialsListQueryKey).mockImplementation(() => [
+      '/v1/admin/materials',
     ])
   })
 
   it('invalidates materials list and admin detail after creating material', async () => {
     const queryClient = new QueryClient()
-    const materialsQueryKey = ['/admin/places/place-1/materials']
-    const detailQueryKey = ['/admin/places/place-1']
+    const materialsQueryKey = ['/v1/admin/places/place-1/materials']
+    const detailQueryKey = ['/v1/admin/places/place-1']
     const onSuccess = vi.fn()
     queryClient.setQueryData(materialsQueryKey, { items: [] })
     queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
@@ -192,8 +193,8 @@ describe('material mutations', () => {
 
   it('invalidates materials list and admin detail after updating material', async () => {
     const queryClient = new QueryClient()
-    const materialsQueryKey = ['/admin/places/place-1/materials']
-    const detailQueryKey = ['/admin/places/place-1']
+    const materialsQueryKey = ['/v1/admin/places/place-1/materials']
+    const detailQueryKey = ['/v1/admin/places/place-1']
     const onSuccess = vi.fn()
     queryClient.setQueryData(materialsQueryKey, { items: [material] })
     queryClient.setQueryData(detailQueryKey, { id: 'place-1' })
@@ -236,12 +237,12 @@ describe('material mutations', () => {
 
   it('updates material admin status and invalidates all material library queries', async () => {
     const queryClient = new QueryClient()
-    const allMaterialsQueryKey = ['/admin/materials']
+    const allMaterialsQueryKey = ['/v1/admin/materials']
     const filteredMaterialsQueryKey = [
-      '/admin/materials',
+      '/v1/admin/materials',
       { adminStatus: 'pending' },
     ]
-    const approvedItem: AdminMaterialLibraryItem = {
+    const approvedItem: AdminMaterialLibraryResponseDto = {
       ...libraryItem,
       adminStatus: 'approved',
     }
@@ -281,11 +282,11 @@ describe('material mutations', () => {
 
   it('links existing material to place and invalidates material dependencies', async () => {
     const queryClient = new QueryClient()
-    const materialsQueryKey = ['/admin/places/place-1/materials']
-    const detailQueryKey = ['/admin/places/place-1']
-    const allMaterialsQueryKey = ['/admin/materials']
+    const materialsQueryKey = ['/v1/admin/places/place-1/materials']
+    const detailQueryKey = ['/v1/admin/places/place-1']
+    const allMaterialsQueryKey = ['/v1/admin/materials']
     const filteredMaterialsQueryKey = [
-      '/admin/materials',
+      '/v1/admin/materials',
       { adminStatus: 'approved', linked: false, placeId: 'place-1' },
     ]
     const onSuccess = vi.fn()
@@ -360,11 +361,11 @@ describe('material mutations', () => {
 
   it('hides place-material link and invalidates material dependencies', async () => {
     const queryClient = new QueryClient()
-    const materialsQueryKey = ['/admin/places/place-1/materials']
-    const detailQueryKey = ['/admin/places/place-1']
-    const allMaterialsQueryKey = ['/admin/materials']
+    const materialsQueryKey = ['/v1/admin/places/place-1/materials']
+    const detailQueryKey = ['/v1/admin/places/place-1']
+    const allMaterialsQueryKey = ['/v1/admin/materials']
     const filteredMaterialsQueryKey = [
-      '/admin/materials',
+      '/v1/admin/materials',
       { adminStatus: 'approved', placeId: 'place-1' },
     ]
     const onSuccess = vi.fn()

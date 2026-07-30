@@ -1,6 +1,6 @@
 import { CreateContentSourceDrawer } from '@/features/content-source/create/ui/create-content-source-drawer'
 import { EditContentSourceDrawer } from '@/features/content-source/edit/ui/edit-content-source-drawer'
-import type { ContentSource } from '@/shared/api/generated/model'
+import type { ContentSourceResponseDto } from '@/shared/api'
 
 /**
  * Рендерит create/edit drawers, которыми управляет content sources screen.
@@ -11,7 +11,7 @@ export function ContentSourcesDrawers({
   onCloseCreate,
   onCloseEdit,
 }: {
-  editingSource: ContentSource | null
+  editingSource: ContentSourceResponseDto | null
   isCreateOpen: boolean
   onCloseCreate: () => void
   onCloseEdit: () => void

@@ -1,10 +1,12 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
+import type {
+  AdminPlaceMaterialsListParams,
+  MaterialListResponseDto,
+} from '@/shared/api'
 import {
-  getListAdminPlaceMaterialsQueryKey,
-  listAdminPlaceMaterials,
-} from '@/shared/api/generated/admin/admin'
-import type { MaterialListResponse } from '@/shared/api/generated/operation'
-import type { ListAdminPlaceMaterialsParams } from '@/shared/api/generated/operation/listAdminPlaceMaterialsParams'
+  adminPlaceMaterialsList,
+  getAdminPlaceMaterialsListQueryKey,
+} from '@/shared/api'
+import type { ApiClientError } from '@/shared/api/client/api-error'
 import { useQuery } from '@tanstack/react-query'
 
 /**
@@ -15,12 +17,12 @@ import { useQuery } from '@tanstack/react-query'
  */
 export function usePlaceMaterialsListQuery(
   placeId: string,
-  params?: ListAdminPlaceMaterialsParams,
+  params?: AdminPlaceMaterialsListParams,
 ) {
-  return useQuery<MaterialListResponse, ApiClientError>({
+  return useQuery<MaterialListResponseDto, ApiClientError>({
     enabled: Boolean(placeId),
     queryFn: ({ signal }) =>
-      listAdminPlaceMaterials({ placeId }, params, undefined, signal),
-    queryKey: getListAdminPlaceMaterialsQueryKey({ placeId }, params),
+      adminPlaceMaterialsList({ placeId }, params, undefined, signal),
+    queryKey: getAdminPlaceMaterialsListQueryKey({ placeId }, params),
   })
 }

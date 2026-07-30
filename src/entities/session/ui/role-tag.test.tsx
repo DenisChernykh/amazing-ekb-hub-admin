@@ -5,13 +5,13 @@ import { RoleTag } from './role-tag'
 
 describe('RoleTag', () => {
   it('renders localized admin role label', () => {
-    render(<RoleTag role="admin" />)
+    render(<RoleTag roleKey="admin" />)
 
     expect(screen.getByText('Администратор')).toBeInTheDocument()
   })
 
   it('renders localized user role label', () => {
-    render(<RoleTag role="user" />)
+    render(<RoleTag roleKey="user" />)
 
     expect(screen.getByText('Пользователь')).toBeInTheDocument()
   })

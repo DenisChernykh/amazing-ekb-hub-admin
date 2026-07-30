@@ -4,9 +4,8 @@ import { CreateMaterialDrawer } from '@/features/material/create/ui/create-mater
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
+import type { MaterialListResponseDto, MaterialResponseDto } from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PublicMaterial } from '@/shared/api/generated/model'
-import type { MaterialListResponse } from '@/shared/api/generated/operation'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -34,7 +33,7 @@ vi.mock('@/features/material/edit/ui/edit-material-drawer', () => ({
       open,
       placeId,
     }: {
-      material: PublicMaterial
+      material: MaterialResponseDto
       open: boolean
       placeId: string
     }) =>
@@ -65,8 +64,8 @@ vi.mock('@/features/place/pinned-material/ui/pinned-material-panel', () => ({
       pinnedMaterial,
       placeId,
     }: {
-      materials: PublicMaterial[]
-      pinnedMaterial: PublicMaterial | null
+      materials: MaterialResponseDto[]
+      pinnedMaterial: MaterialResponseDto | null
       placeId: string
     }) => (
       <div>
@@ -117,9 +116,10 @@ const materialsResponse = {
       title: 'Обзор комплекса',
       type: 'post',
       redirectUrl: '/v1/materials/material-1/go',
+      url: 'https://t.me/amazing_ekb/1',
     },
   ],
-} as unknown as MaterialListResponse
+} satisfies MaterialListResponseDto
 
 const pinnedMaterial = materialsResponse.items[0] ?? null
 

@@ -5,11 +5,11 @@ import {
   BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
   saveBulkModerationDraftSelection,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
-  PlaceListResponse,
-  PlaceSummary,
-} from '@/shared/api/generated/model'
+  AdminPlaceListResponseDto,
+  AdminPlaceSummaryResponseDto,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import { Provider } from 'react-redux'
@@ -31,14 +31,18 @@ const mockedUseUpdatePlaceStatusMutation = vi.mocked(
 )
 const mutateAsyncMock = vi.fn()
 
-const activePlace: PlaceSummary = {
+const activePlace: AdminPlaceSummaryResponseDto = {
   category: {
     coverImageUrl: null,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    status: 'active',
+    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_pools',
     slug: 'pools',
     title: 'Бассейны',
   },
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'aquacenter',
   status: 'active',
@@ -47,14 +51,18 @@ const activePlace: PlaceSummary = {
   title: 'Аквацентр',
 }
 
-const hiddenPlace: PlaceSummary = {
+const hiddenPlace: AdminPlaceSummaryResponseDto = {
   category: {
     coverImageUrl: null,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    status: 'active',
+    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
   },
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-2',
   slug: 'hidden-spa',
   status: 'hidden',
@@ -63,28 +71,28 @@ const hiddenPlace: PlaceSummary = {
   title: 'Скрытый SPA',
 }
 
-const places: PlaceListResponse = {
+const places: AdminPlaceListResponseDto = {
   items: [activePlace, hiddenPlace],
   page: 2,
   pageSize: 20,
   total: 21,
 }
 
-const pageOnePlaces: PlaceListResponse = {
+const pageOnePlaces: AdminPlaceListResponseDto = {
   items: [activePlace],
   page: 1,
   pageSize: 1,
   total: 2,
 }
 
-const pageTwoPlaces: PlaceListResponse = {
+const pageTwoPlaces: AdminPlaceListResponseDto = {
   items: [hiddenPlace],
   page: 2,
   pageSize: 1,
   total: 2,
 }
 
-const emptyPlaces: PlaceListResponse = {
+const emptyPlaces: AdminPlaceListResponseDto = {
   items: [],
   page: 1,
   pageSize: 10,

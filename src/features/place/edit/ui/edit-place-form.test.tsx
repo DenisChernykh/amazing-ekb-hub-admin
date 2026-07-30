@@ -1,7 +1,10 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { useUpdatePlaceMutation } from '@/entities/place/model/place-mutations'
+import type {
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail } from '@/shared/api/generated/model'
 import {
   fireEvent,
   render,
@@ -111,12 +114,15 @@ const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const place: PlaceDetail = {
+const place: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {

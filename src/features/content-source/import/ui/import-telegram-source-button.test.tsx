@@ -1,6 +1,9 @@
 import { useImportTelegramSourceMutation } from '@/entities/content-source/model/content-source-mutations'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -39,14 +42,14 @@ const mockedUseImportTelegramSourceMutation = vi.mocked(
 
 type ImportMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (importRun: ImportRun) => void
+  onSuccess?: (importRun: ImportRunResponseDto) => void
 }
 
 type ImportMutationVariables = {
   sourceId: string
 }
 
-const contentSource: ContentSource = {
+const contentSource: ContentSourceResponseDto = {
   channelId: null,
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',

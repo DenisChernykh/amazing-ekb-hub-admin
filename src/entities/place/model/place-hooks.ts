@@ -1,15 +1,15 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import {
-  getAdminPlaceDetail,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminPlacesQueryKey,
-  listAdminPlaces,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  AdminPlaceDetail,
-  ListAdminPlacesParams,
-} from '@/shared/api/generated/model'
-import type { AdminPlaceListResponse } from '@/shared/api/generated/operation'
+  AdminPlaceListResponseDto,
+  AdminPlacesListParams,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
+import {
+  adminPlacesGet,
+  adminPlacesList,
+  getAdminPlacesGetQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
+import type { ApiClientError } from '@/shared/api/client/api-error'
 import { useQuery } from '@tanstack/react-query'
 
 /**
@@ -18,10 +18,10 @@ import { useQuery } from '@tanstack/react-query'
  * @remarks Использует generated fetcher и query key, чтобы UI не импортировал
  * transport-слой напрямую и список мог показывать `hidden` places.
  */
-export function usePlacesListQuery(params: ListAdminPlacesParams) {
-  return useQuery<AdminPlaceListResponse, ApiClientError>({
-    queryFn: ({ signal }) => listAdminPlaces(params, undefined, signal),
-    queryKey: getListAdminPlacesQueryKey(params),
+export function usePlacesListQuery(params: AdminPlacesListParams) {
+  return useQuery<AdminPlaceListResponseDto, ApiClientError>({
+    queryFn: ({ signal }) => adminPlacesList(params, undefined, signal),
+    queryKey: getAdminPlacesListQueryKey(params),
   })
 }
 
@@ -31,10 +31,9 @@ export function usePlacesListQuery(params: ListAdminPlacesParams) {
  * @remarks Использует generated fetcher и query key внутри entity-level hook.
  */
 export function useAdminPlaceDetailQuery(placeId: string) {
-  return useQuery<AdminPlaceDetail, ApiClientError>({
+  return useQuery<PlaceDetailResponseDto, ApiClientError>({
     enabled: Boolean(placeId),
-    queryFn: ({ signal }) =>
-      getAdminPlaceDetail({ placeId }, undefined, signal),
-    queryKey: getGetAdminPlaceDetailQueryKey({ placeId }),
+    queryFn: ({ signal }) => adminPlacesGet({ placeId }, undefined, signal),
+    queryKey: getAdminPlacesGetQueryKey({ placeId }),
   })
 }

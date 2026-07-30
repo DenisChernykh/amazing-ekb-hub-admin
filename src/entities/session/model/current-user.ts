@@ -1,10 +1,12 @@
-import type { AuthMeResponse } from '@/shared/api/generated/model'
+import type { CurrentUserResponseDto } from '@/shared/api'
 import { createContext, useContext } from 'react'
 
 /**
  * Context текущего backend-пользователя внутри защищенной части приложения.
  */
-export const CurrentUserContext = createContext<AuthMeResponse | null>(null)
+export const CurrentUserContext = createContext<CurrentUserResponseDto | null>(
+  null,
+)
 
 /**
  * Возвращает текущего пользователя из защищенного session context.

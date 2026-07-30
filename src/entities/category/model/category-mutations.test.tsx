@@ -1,11 +1,11 @@
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import {
-  createPlaceCategory,
-  deletePlaceCategory,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminPlaceCategoriesQueryKey,
-  updatePlaceCategory,
-} from '@/shared/api/generated/admin/admin'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+  adminCategoriesCreate,
+  adminCategoriesDelete,
+  adminCategoriesUpdate,
+  getAdminCategoriesListQueryKey,
+  getAdminPlacesGetQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -16,22 +16,22 @@ import {
   useUpdateCategoryMutation,
 } from './category-mutations'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  createPlaceCategory: vi.fn(),
-  deletePlaceCategory: vi.fn(),
-  getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
-    `/admin/places/${placeId}`,
+vi.mock('@/shared/api', () => ({
+  adminCategoriesCreate: vi.fn(),
+  adminCategoriesDelete: vi.fn(),
+  getAdminPlacesGetQueryKey: vi.fn(({ placeId }) => [
+    `/v1/admin/places/${placeId}`,
   ]),
-  getListAdminPlaceCategoriesQueryKey: vi.fn(() => ['/admin/categories']),
-  getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
-  updatePlaceCategory: vi.fn(),
+  getAdminCategoriesListQueryKey: vi.fn(() => ['/v1/admin/categories']),
+  getAdminPlacesListQueryKey: vi.fn(() => ['/v1/admin/places']),
+  adminCategoriesUpdate: vi.fn(),
 }))
 
-const mockedCreatePlaceCategory = vi.mocked(createPlaceCategory)
-const mockedDeletePlaceCategory = vi.mocked(deletePlaceCategory)
-const mockedUpdatePlaceCategory = vi.mocked(updatePlaceCategory)
+const mockedCreatePlaceCategory = vi.mocked(adminCategoriesCreate)
+const mockedDeletePlaceCategory = vi.mocked(adminCategoriesDelete)
+const mockedUpdatePlaceCategory = vi.mocked(adminCategoriesUpdate)
 
-const category: AdminPlaceCategory = {
+const category: PlaceCategoryResponseDto = {
   createdAt: '2026-07-03T10:00:00.000Z',
   coverImageUrl: null,
   id: 'category_spa',
@@ -39,7 +39,7 @@ const category: AdminPlaceCategory = {
   status: 'active',
   title: 'SPA',
   updatedAt: '2026-07-03T10:00:00.000Z',
-}
+} satisfies PlaceCategoryResponseDto
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -66,7 +66,7 @@ describe('category mutations', () => {
     mockedCreatePlaceCategory.mockReset()
     mockedDeletePlaceCategory.mockReset()
     mockedUpdatePlaceCategory.mockReset()
-    vi.mocked(getListAdminPlaceCategoriesQueryKey).mockClear()
+    vi.mocked(getAdminCategoriesListQueryKey).mockClear()
   })
 
   it('creates category and invalidates category list', async () => {
@@ -88,7 +88,7 @@ describe('category mutations', () => {
       title: 'SPA',
     })
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['/admin/categories'],
+      queryKey: ['/v1/admin/categories'],
     })
   })
 
@@ -117,10 +117,10 @@ describe('category mutations', () => {
       },
     )
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['/admin/categories'],
+      queryKey: ['/v1/admin/categories'],
     })
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['/admin/places'],
+      queryKey: ['/v1/admin/places'],
     })
 
     const detailInvalidation = invalidateQueries.mock.calls.find(
@@ -129,12 +129,12 @@ describe('category mutations', () => {
 
     expect(
       detailInvalidation?.predicate?.({
-        queryKey: getGetAdminPlaceDetailQueryKey({ placeId: 'place-1' }),
+        queryKey: getAdminPlacesGetQueryKey({ placeId: 'place-1' }),
       } as never),
     ).toBe(true)
     expect(
       detailInvalidation?.predicate?.({
-        queryKey: ['/admin/places'],
+        queryKey: ['/v1/admin/places'],
       } as never),
     ).toBe(false)
   })
@@ -158,7 +158,7 @@ describe('category mutations', () => {
       categoryId: 'category_spa',
     })
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['/admin/categories'],
+      queryKey: ['/v1/admin/categories'],
     })
   })
 })

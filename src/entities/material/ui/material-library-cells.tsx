@@ -7,7 +7,7 @@ import {
   getMaterialPlatformMeta,
   getSafeMaterialHref,
 } from '@/entities/material/ui/material-meta'
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
+import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
 import { ExportOutlined, PictureOutlined } from '@ant-design/icons'
 import { Flex, Tag, Typography } from 'antd'
 
@@ -19,7 +19,7 @@ export function MaterialLibrarySourceCell({
   material,
 }: {
   className?: string
-  material: AdminMaterialLibraryItem
+  material: AdminMaterialLibraryResponseDto
 }) {
   const platformMeta = getMaterialPlatformMeta(material.platform)
   const sourceHref = getSafeMaterialHref(material.source?.url)
@@ -55,7 +55,7 @@ export function MaterialLibraryPreviewCell({
 }: {
   className?: string
   linkMode: 'action' | 'text'
-  material: AdminMaterialLibraryItem
+  material: AdminMaterialLibraryResponseDto
   textClassName?: string
 }) {
   const materialHref = getSafeMaterialHref(material.url)
@@ -103,7 +103,7 @@ export function MaterialLibraryPreviewCell({
 export function MaterialLibraryMediaCell({
   material,
 }: {
-  material: AdminMaterialLibraryItem
+  material: AdminMaterialLibraryResponseDto
 }) {
   const mediaPreviewHref = getSafeMaterialHref(material.mediaPreviewUrl)
 
@@ -131,7 +131,7 @@ export function MaterialLibraryMediaCell({
 export function MaterialLibraryAdminStatusTag({
   status,
 }: {
-  status: AdminMaterialLibraryItem['adminStatus']
+  status: AdminMaterialLibraryResponseDto['adminStatus']
 }) {
   const meta = getMaterialAdminStatusMeta(status)
 
@@ -144,7 +144,7 @@ export function MaterialLibraryAdminStatusTag({
 export function MaterialLibraryLinkedTag({
   linked,
 }: {
-  linked: AdminMaterialLibraryItem['linked']
+  linked: AdminMaterialLibraryResponseDto['linked']
 }) {
   const meta = getMaterialLinkedMeta(linked)
 

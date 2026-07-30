@@ -1,4 +1,4 @@
-import { AdminContentSourcesCreateBody } from '@/shared/api/generated-zod/admin-content-sources/admin-content-sources.zod'
+import { AdminContentSourcesCreateBody } from '@/shared/api'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { z } from 'zod'
 

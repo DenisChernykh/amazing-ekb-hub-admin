@@ -1,6 +1,9 @@
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceSummary } from '@/shared/api/generated/model'
 import {
   fireEvent,
   render,
@@ -43,14 +46,18 @@ const mockedUseUpdatePlaceStatusMutation = vi.mocked(
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const updatedPlace: PlaceSummary = {
+const updatedPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-2',
   slug: 'active-spa',
   status: 'active',
@@ -59,7 +66,9 @@ const updatedPlace: PlaceSummary = {
   title: 'Скрытый SPA',
 }
 
-const renderPlaceStatusPanel = (status: PlaceSummary['status'] = 'hidden') => {
+const renderPlaceStatusPanel = (
+  status: AdminPlaceSummaryResponseDto['status'] = 'hidden',
+) => {
   render(
     <AntdApp>
       <PlaceStatusPanel placeId="place-2" status={status} />

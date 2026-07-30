@@ -3,8 +3,11 @@ import {
   formatImportRunDateTime,
   getImportRunStatusMeta,
 } from '@/entities/import-run/ui/import-run-meta'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import type { ApiClientError } from '@/shared/api/client/api-error'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
 import {
   ScreenApiErrorState,
   ScreenEmptyState,
@@ -17,9 +20,9 @@ import styles from './content-sources-screen.module.css'
  * Props for the latest import runs table.
  */
 export type ImportRunsTableProps = {
-  contentSources: ContentSource[]
+  contentSources: ContentSourceResponseDto[]
   error: ApiClientError | null
-  importRuns: ImportRun[]
+  importRuns: ImportRunResponseDto[]
   isError: boolean
   isFetching: boolean
   isPending: boolean
@@ -45,14 +48,14 @@ export function ImportRunsTable({
     {
       dataIndex: 'sourceId',
       key: 'sourceId',
-      render: (sourceId: ImportRun['sourceId']) =>
+      render: (sourceId: ImportRunResponseDto['sourceId']) =>
         sourceById.get(sourceId)?.displayName ?? sourceId,
       title: 'Источник',
     },
     {
       dataIndex: 'status',
       key: 'status',
-      render: (status: ImportRun['status']) => {
+      render: (status: ImportRunResponseDto['status']) => {
         const meta = getImportRunStatusMeta(status)
 
         return <Tag color={meta.color}>{meta.label}</Tag>
@@ -61,27 +64,28 @@ export function ImportRunsTable({
     },
     {
       key: 'counts',
-      render: (_value: unknown, importRun: ImportRun) =>
+      render: (_value: unknown, importRun: ImportRunResponseDto) =>
         formatImportRunCounts(importRun),
       title: 'Счетчики',
     },
     {
       dataIndex: 'startedAt',
       key: 'startedAt',
-      render: (value: ImportRun['startedAt']) => formatImportRunDateTime(value),
+      render: (value: ImportRunResponseDto['startedAt']) =>
+        formatImportRunDateTime(value),
       title: 'Начат',
     },
     {
       dataIndex: 'finishedAt',
       key: 'finishedAt',
-      render: (value: ImportRun['finishedAt']) =>
+      render: (value: ImportRunResponseDto['finishedAt']) =>
         formatImportRunDateTime(value),
       title: 'Завершен',
     },
     {
       dataIndex: 'errorMessage',
       key: 'errorMessage',
-      render: (value: ImportRun['errorMessage']) =>
+      render: (value: ImportRunResponseDto['errorMessage']) =>
         value ? (
           <Typography.Text className={styles.errorText} type="danger">
             {value}

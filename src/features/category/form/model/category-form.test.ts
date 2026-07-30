@@ -1,8 +1,8 @@
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import {
   AdminCategoriesCreateBody,
   AdminCategoriesUpdateBody,
-} from '@/shared/api/generated-zod/admin-categories/admin-categories.zod'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+} from '@/shared/api'
 import { describe, expect, it } from 'vitest'
 import {
   getCategoryFormChangedFields,
@@ -16,7 +16,7 @@ import {
   editCategoryFormSchema,
 } from './category-form-schema'
 
-const category: AdminPlaceCategory = {
+const category: PlaceCategoryResponseDto = {
   createdAt: '2026-07-03T10:00:00.000Z',
   coverImageUrl: null,
   id: 'category_spa',
@@ -24,7 +24,7 @@ const category: AdminPlaceCategory = {
   status: 'active',
   title: 'SPA',
   updatedAt: '2026-07-03T10:00:00.000Z',
-}
+} satisfies PlaceCategoryResponseDto
 
 describe('category form helpers', () => {
   it('requires a create category title', () => {

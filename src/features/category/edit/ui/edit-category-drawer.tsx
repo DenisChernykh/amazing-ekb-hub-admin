@@ -9,8 +9,8 @@ import { editCategoryFormSchema } from '@/features/category/form/model/category-
 import { CategoryFormChangedFields } from '@/features/category/form/ui/category-form-changed-fields'
 import { CategoryFormErrorAlert } from '@/features/category/form/ui/category-form-error-alert'
 import { CategoryFormFields } from '@/features/category/form/ui/category-form-fields'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
@@ -21,9 +21,9 @@ import { EditCategoryDrawerActions } from './edit-category-drawer-actions'
  * Props drawer-а редактирования категории.
  */
 export type EditCategoryDrawerProps = {
-  category: AdminPlaceCategory
+  category: PlaceCategoryResponseDto
   onClose: () => void
-  onUpdated?: (category: AdminPlaceCategory) => void
+  onUpdated?: (category: PlaceCategoryResponseDto) => void
   open: boolean
 }
 

@@ -1,5 +1,5 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
-import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation'
+import type { AdminMaterialLibraryListResponseDto } from '@/shared/api'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -21,7 +21,7 @@ import { MaterialLibraryFilterBar } from './material-library-filter-bar'
 import styles from './material-library-inbox.module.css'
 import { MaterialLibraryTable } from './material-library-table'
 
-const emptyMaterialLibraryResponse: AdminMaterialLibraryListResponse = {
+const emptyMaterialLibraryResponse: AdminMaterialLibraryListResponseDto = {
   items: [],
   page: 1,
   pageSize: 20,

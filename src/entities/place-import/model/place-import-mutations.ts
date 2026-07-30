@@ -1,19 +1,19 @@
+import type {
+  PlaceImportOperationResponseDto,
+  PlaceImportViewerAccessResponseDto,
+  StartPlaceImportDto,
+} from '@/shared/api'
+import {
+  adminPlaceImportsCancel,
+  adminPlaceImportsConfirm,
+  adminPlaceImportsCreateViewerAccess,
+  adminPlaceImportsRevokeViewerAccess,
+  adminPlaceImportsStart,
+} from '@/shared/api'
 import {
   isApiClientError,
   type ApiClientError,
 } from '@/shared/api/client/api-error'
-import {
-  cancelPlaceImport,
-  confirmPlaceImport,
-  createPlaceImportViewerAccess,
-  revokePlaceImportViewerAccess,
-  startYandexMapsPlaceImport,
-} from '@/shared/api/generated/admin/admin'
-import type {
-  PlaceImportOperation,
-  PlaceImportViewerAccess,
-  StartPlaceImportRequest,
-} from '@/shared/api/generated/model'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   invalidatePlaceImportResultQueries,
@@ -42,15 +42,15 @@ export function getActivePlaceImportConflictOperationId(error: unknown) {
 
 /** Запускает новую durable operation импорта. */
 export function useStartPlaceImportMutation(
-  options?: PlaceImportMutationOptions<PlaceImportOperation>,
+  options?: PlaceImportMutationOptions<PlaceImportOperationResponseDto>,
 ) {
   const queryClient = useQueryClient()
   return useMutation<
-    PlaceImportOperation,
+    PlaceImportOperationResponseDto,
     ApiClientError,
-    StartPlaceImportRequest
+    StartPlaceImportDto
   >({
-    mutationFn: (request) => startYandexMapsPlaceImport(request),
+    mutationFn: (request) => adminPlaceImportsStart(request),
     onError: options?.onError,
     onSuccess: async (operation) => {
       syncPlaceImportOperationCache(queryClient, operation)
@@ -61,11 +61,11 @@ export function useStartPlaceImportMutation(
 
 /** Подтверждает immutable preview и синхронизирует caches результата. */
 export function useConfirmPlaceImportMutation(
-  options?: PlaceImportMutationOptions<PlaceImportOperation>,
+  options?: PlaceImportMutationOptions<PlaceImportOperationResponseDto>,
 ) {
   const queryClient = useQueryClient()
-  return useMutation<PlaceImportOperation, ApiClientError, string>({
-    mutationFn: (operationId) => confirmPlaceImport({ operationId }),
+  return useMutation<PlaceImportOperationResponseDto, ApiClientError, string>({
+    mutationFn: (operationId) => adminPlaceImportsConfirm({ operationId }),
     onError: options?.onError,
     onSuccess: async (operation) => {
       syncPlaceImportOperationCache(queryClient, operation)
@@ -77,11 +77,11 @@ export function useConfirmPlaceImportMutation(
 
 /** Отменяет operation и сохраняет terminal snapshot. */
 export function useCancelPlaceImportMutation(
-  options?: PlaceImportMutationOptions<PlaceImportOperation>,
+  options?: PlaceImportMutationOptions<PlaceImportOperationResponseDto>,
 ) {
   const queryClient = useQueryClient()
-  return useMutation<PlaceImportOperation, ApiClientError, string>({
-    mutationFn: (operationId) => cancelPlaceImport({ operationId }),
+  return useMutation<PlaceImportOperationResponseDto, ApiClientError, string>({
+    mutationFn: (operationId) => adminPlaceImportsCancel({ operationId }),
     onError: options?.onError,
     onSuccess: async (operation) => {
       syncPlaceImportOperationCache(queryClient, operation)
@@ -92,10 +92,15 @@ export function useCancelPlaceImportMutation(
 
 /** Выдаёт одноразовый viewer capability для CAPTCHA popup. */
 export function useCreatePlaceImportViewerAccessMutation(
-  options?: PlaceImportMutationOptions<PlaceImportViewerAccess>,
+  options?: PlaceImportMutationOptions<PlaceImportViewerAccessResponseDto>,
 ) {
-  return useMutation<PlaceImportViewerAccess, ApiClientError, string>({
-    mutationFn: (operationId) => createPlaceImportViewerAccess({ operationId }),
+  return useMutation<
+    PlaceImportViewerAccessResponseDto,
+    ApiClientError,
+    string
+  >({
+    mutationFn: (operationId) =>
+      adminPlaceImportsCreateViewerAccess({ operationId }),
     onError: options?.onError,
     onSuccess: options?.onSuccess,
   })
@@ -106,7 +111,8 @@ export function useRevokePlaceImportViewerAccessMutation(
   options?: PlaceImportMutationOptions<void>,
 ) {
   return useMutation<void, ApiClientError, string>({
-    mutationFn: (operationId) => revokePlaceImportViewerAccess({ operationId }),
+    mutationFn: (operationId) =>
+      adminPlaceImportsRevokeViewerAccess({ operationId }),
     onError: options?.onError,
     onSuccess: options?.onSuccess,
   })

@@ -9,8 +9,8 @@ import { editContentSourceFormSchema } from '@/features/content-source/form/mode
 import { ContentSourceFormChangedFields } from '@/features/content-source/form/ui/content-source-form-changed-fields'
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
+import type { ContentSourceResponseDto } from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { ContentSource } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
@@ -21,9 +21,9 @@ import { EditContentSourceDrawerActions } from './edit-content-source-drawer-act
  * Props drawer-а редактирования content source.
  */
 export type EditContentSourceDrawerProps = {
-  contentSource: ContentSource
+  contentSource: ContentSourceResponseDto
   onClose: () => void
-  onUpdated?: (contentSource: ContentSource) => void
+  onUpdated?: (contentSource: ContentSourceResponseDto) => void
   open: boolean
 }
 

@@ -1,8 +1,8 @@
-import {
-  AdminPlacesCreateBody,
-  AdminPlacesUpdateBody,
-} from '@/shared/api/generated-zod/admin-places/admin-places.zod'
-import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
+import type {
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
+import { AdminPlacesCreateBody, AdminPlacesUpdateBody } from '@/shared/api'
 import { describe, expect, it } from 'vitest'
 import {
   getPlaceFormInitialValues,
@@ -13,21 +13,27 @@ import {
 } from './place-form'
 import { createPlaceFormSchema, editPlaceFormSchema } from './place-form-schema'
 
-const spaCategory: PlaceCategory = {
+const spaCategory: PlaceCategoryResponseDto = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const cafeCategory: PlaceCategory = {
+const cafeCategory: PlaceCategoryResponseDto = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_cafe',
   slug: 'cafe',
   title: 'Кафе',
-}
+} satisfies PlaceCategoryResponseDto
 
-const place: PlaceDetail = {
+const place: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {

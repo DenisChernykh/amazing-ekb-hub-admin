@@ -1,4 +1,4 @@
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import { ScreenEmptyState } from '@/shared/ui/screen-state/screen-state'
 import { Table } from 'antd'
 import styles from './categories-screen.module.css'
@@ -8,9 +8,9 @@ import { getCategoriesTableColumns } from './categories-table-columns'
  * Props таблицы категорий.
  */
 export type CategoriesTableProps = {
-  categories: AdminPlaceCategory[]
+  categories: PlaceCategoryResponseDto[]
   isFetching: boolean
-  onEdit: (category: AdminPlaceCategory) => void
+  onEdit: (category: PlaceCategoryResponseDto) => void
 }
 
 /**

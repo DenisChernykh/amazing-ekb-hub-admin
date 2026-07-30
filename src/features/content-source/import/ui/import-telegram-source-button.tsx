@@ -3,11 +3,14 @@ import {
   formatImportRunCounts,
   getImportRunStatusMeta,
 } from '@/entities/import-run/ui/import-run-meta'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import {
   getApiErrorStatus,
   normalizeApiError,
 } from '@/shared/api/client/api-error'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
 import { DownloadOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex } from 'antd'
 import { useState } from 'react'
@@ -19,8 +22,8 @@ import { useState } from 'react'
  * блокирует повторный запуск после refresh, пока backend run остается активным.
  */
 export type ImportTelegramSourceButtonProps = {
-  activeImportRun?: ImportRun | null
-  contentSource: ContentSource
+  activeImportRun?: ImportRunResponseDto | null
+  contentSource: ContentSourceResponseDto
 }
 
 const IMPORT_ALREADY_ACTIVE_MESSAGE =

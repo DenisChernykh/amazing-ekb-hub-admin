@@ -3,8 +3,11 @@ import {
   useCreatePlaceMutation,
   useUploadPlaceCoverPhotoMutation,
 } from '@/entities/place/model/place-mutations'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceSummary } from '@/shared/api/generated/model'
 import {
   fireEvent,
   render,
@@ -150,14 +153,18 @@ const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const createdPlace: PlaceSummary = {
+const createdPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'quiet-spa',
   status: 'active',
@@ -166,7 +173,7 @@ const createdPlace: PlaceSummary = {
   title: 'Тихий SPA',
 }
 
-const uploadedPlace: PlaceSummary = {
+const uploadedPlace: AdminPlaceSummaryResponseDto = {
   ...createdPlace,
   coverImageUrl: '/places/place-1/photo',
 }

@@ -14,9 +14,10 @@ describe('AdminShell', () => {
       <MemoryRouter initialEntries={['/places']}>
         <CurrentUserContext.Provider
           value={{
-            email: 'admin@example.test',
-            id: 'admin-1',
-            role: 'admin',
+            normalizedEmail: 'admin@example.test',
+            permissions: ['admin.dashboard.read'],
+            roleKeys: ['admin'],
+            userId: 'admin-1',
           }}
         >
           <AdminShell />
@@ -44,8 +45,8 @@ describe('AdminShell', () => {
       'href',
       '/content-sources',
     )
-    expect(screen.queryByText('admin@example.test')).not.toBeInTheDocument()
-    expect(screen.getAllByText('Администратор')).toHaveLength(2)
+    expect(screen.getByText('admin@example.test')).toBeInTheDocument()
+    expect(screen.getByText('Администратор')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
   })
 })

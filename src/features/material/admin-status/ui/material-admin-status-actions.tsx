@@ -1,16 +1,19 @@
 import { useUpdateMaterialAdminStatusMutation } from '@/entities/material/model/material-mutations'
 import { getMaterialAdminStatusMeta } from '@/entities/material/ui/material-meta'
-import { normalizeApiError } from '@/shared/api/client/api-error'
 import type {
-  AdminMaterialLibraryItem,
-  MaterialAdminStatus,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  AdminMaterialLibraryResponseDtoAdminStatus,
+} from '@/shared/api'
+import { normalizeApiError } from '@/shared/api/client/api-error'
 import { CheckOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex, Space } from 'antd'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-type ReviewableMaterialAdminStatus = Exclude<MaterialAdminStatus, 'pending'>
+type ReviewableMaterialAdminStatus = Exclude<
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  'pending'
+>
 
 type MaterialAdminStatusAction = {
   icon: ReactNode
@@ -41,7 +44,7 @@ const statusActions: MaterialAdminStatusAction[] = [
 ]
 
 type MaterialAdminStatusActionsProps = {
-  material: AdminMaterialLibraryItem
+  material: AdminMaterialLibraryResponseDto
 }
 
 /**

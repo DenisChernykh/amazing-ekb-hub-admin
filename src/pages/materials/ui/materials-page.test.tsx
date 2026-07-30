@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { MaterialsPage } from './materials-page'
 
 vi.mock('@/widgets/material-library/ui/material-library-inbox', () => ({
-  MaterialLibraryInbox: () => <div>Material library inbox widget</div>,
+  MaterialLibraryInbox: () => (
+    <div>MaterialResponseDto library inbox widget</div>
+  ),
 }))
 
 describe('MaterialsPage', () => {
@@ -11,7 +13,7 @@ describe('MaterialsPage', () => {
     render(<MaterialsPage />)
 
     expect(
-      screen.getByText('Material library inbox widget'),
+      screen.getByText('MaterialResponseDto library inbox widget'),
     ).toBeInTheDocument()
   })
 })

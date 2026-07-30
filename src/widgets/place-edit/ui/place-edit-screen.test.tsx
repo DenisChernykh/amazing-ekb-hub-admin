@@ -1,6 +1,6 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
+import type { PlaceDetailResponseDto } from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail } from '@/shared/api/generated/model'
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import {
@@ -46,10 +46,13 @@ function NavigationProbe({ to }: { to: To }) {
 
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
-const place: PlaceDetail = {
+const place: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: {
     coverImageUrl: null,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    status: 'active',
+    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',

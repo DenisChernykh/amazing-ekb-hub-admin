@@ -1,7 +1,7 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
+import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
 import { Alert, App as AntdApp, Drawer, Empty, Flex, Typography } from 'antd'
 import { useState } from 'react'
 import { LinkExistingMaterialTable } from './link-existing-material-table'
@@ -51,7 +51,7 @@ export function LinkExistingMaterialDrawer({
     onClose()
   }
 
-  const handleLink = (material: AdminMaterialLibraryItem) => {
+  const handleLink = (material: AdminMaterialLibraryResponseDto) => {
     setErrorMessage(null)
     linkMaterialMutation.mutate(
       {

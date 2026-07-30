@@ -7,7 +7,10 @@ import {
   bulkModerationActions,
   selectBulkModerationSelectedCount,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-slice'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -15,14 +18,18 @@ import { BulkModerationDraftRestorePrompt } from './bulk-moderation-draft-restor
 
 const poolsCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
-}
+} satisfies PlaceCategoryResponseDto
 
-const activePlace: PlaceSummary = {
+const activePlace: AdminPlaceSummaryResponseDto = {
   category: poolsCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'aquacenter',
   status: 'active',

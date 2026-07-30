@@ -68,8 +68,10 @@ export function AdminShell() {
             </Typography.Title>
 
             <Space wrap>
-              <RoleTag role={user.role} />
-              <Typography.Text strong>Администратор</Typography.Text>
+              {user.roleKeys.map((roleKey) => (
+                <RoleTag key={roleKey} roleKey={roleKey} />
+              ))}
+              <Typography.Text strong>{user.normalizedEmail}</Typography.Text>
               <LogoutButton />
             </Space>
           </Flex>

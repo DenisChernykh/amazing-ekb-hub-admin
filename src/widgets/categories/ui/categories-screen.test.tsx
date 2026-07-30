@@ -2,9 +2,11 @@ import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hook
 import { CreateCategoryDrawer } from '@/features/category/create/ui/create-category-drawer'
 import { DeleteCategoryButton } from '@/features/category/delete/ui/delete-category-button'
 import { EditCategoryDrawer } from '@/features/category/edit/ui/edit-category-drawer'
+import type {
+  PlaceCategoryListResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
-import type { AdminPlaceCategoryListResponse } from '@/shared/api/generated/operation'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,7 +30,7 @@ vi.mock('@/features/category/edit/ui/edit-category-drawer', () => ({
 
 vi.mock('@/features/category/delete/ui/delete-category-button', () => ({
   DeleteCategoryButton: vi.fn(
-    ({ category }: { category: AdminPlaceCategory }) => (
+    ({ category }: { category: PlaceCategoryResponseDto }) => (
       <button>delete {category.id}</button>
     ),
   ),
@@ -39,7 +41,7 @@ const mockedCreateCategoryDrawer = vi.mocked(CreateCategoryDrawer)
 const mockedEditCategoryDrawer = vi.mocked(EditCategoryDrawer)
 const mockedDeleteCategoryButton = vi.mocked(DeleteCategoryButton)
 
-const spaCategory: AdminPlaceCategory = {
+const spaCategory: PlaceCategoryResponseDto = {
   createdAt: '2026-07-03T10:00:00.000Z',
   coverImageUrl: null,
   id: 'category_spa',
@@ -47,9 +49,9 @@ const spaCategory: AdminPlaceCategory = {
   status: 'active',
   title: 'SPA',
   updatedAt: '2026-07-03T10:00:00.000Z',
-}
+} satisfies PlaceCategoryResponseDto
 
-const poolsCategory: AdminPlaceCategory = {
+const poolsCategory: PlaceCategoryResponseDto = {
   createdAt: '2026-07-03T11:00:00.000Z',
   coverImageUrl: null,
   id: 'category_pools',
@@ -57,9 +59,9 @@ const poolsCategory: AdminPlaceCategory = {
   status: 'draft',
   title: 'Бассейны',
   updatedAt: '2026-07-03T11:00:00.000Z',
-}
+} satisfies PlaceCategoryResponseDto
 
-const categoriesResponse: AdminPlaceCategoryListResponse = {
+const categoriesResponse: PlaceCategoryListResponseDto = {
   items: [spaCategory, poolsCategory],
 }
 

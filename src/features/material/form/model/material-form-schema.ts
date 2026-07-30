@@ -1,5 +1,5 @@
 import { isSafeMaterialUrl } from '@/entities/material/model/material-url'
-import { AdminPlaceMaterialsCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
+import { AdminPlaceMaterialsCreateBody } from '@/shared/api'
 import dayjs, { type Dayjs } from 'dayjs'
 import { z } from 'zod'
 

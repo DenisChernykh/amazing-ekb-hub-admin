@@ -1,7 +1,7 @@
 import { formatCategoryDateTime } from '@/entities/category/ui/category-meta'
 import { CategoryStatusTag } from '@/entities/category/ui/category-status-tag'
 import { DeleteCategoryButton } from '@/features/category/delete/ui/delete-category-button'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import { EditOutlined } from '@ant-design/icons'
 import type { TableColumnsType } from 'antd'
 import { Button, Flex, Typography } from 'antd'
@@ -13,15 +13,15 @@ import styles from './categories-screen.module.css'
 export function getCategoriesTableColumns({
   onEdit,
 }: {
-  onEdit: (category: AdminPlaceCategory) => void
-}): TableColumnsType<AdminPlaceCategory> {
+  onEdit: (category: PlaceCategoryResponseDto) => void
+}): TableColumnsType<PlaceCategoryResponseDto> {
   return [
     {
       dataIndex: 'title',
       key: 'title',
       render: (
-        title: AdminPlaceCategory['title'],
-        category: AdminPlaceCategory,
+        title: PlaceCategoryResponseDto['title'],
+        category: PlaceCategoryResponseDto,
       ) => (
         <Flex className={styles.categoryCell} gap={4} vertical>
           <Typography.Text strong>{title}</Typography.Text>
@@ -33,7 +33,7 @@ export function getCategoriesTableColumns({
     {
       dataIndex: 'slug',
       key: 'slug',
-      render: (slug: AdminPlaceCategory['slug']) => (
+      render: (slug: PlaceCategoryResponseDto['slug']) => (
         <Typography.Text code>{slug}</Typography.Text>
       ),
       title: 'Ярлык',
@@ -41,21 +41,21 @@ export function getCategoriesTableColumns({
     {
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      render: (value: AdminPlaceCategory['updatedAt']) =>
+      render: (value: PlaceCategoryResponseDto['updatedAt']) =>
         formatCategoryDateTime(value),
       title: 'Обновлена',
     },
     {
       dataIndex: 'status',
       key: 'status',
-      render: (status: AdminPlaceCategory['status']) => (
+      render: (status: PlaceCategoryResponseDto['status']) => (
         <CategoryStatusTag status={status} />
       ),
       title: 'Статус',
     },
     {
       key: 'actions',
-      render: (_value: unknown, category: AdminPlaceCategory) => (
+      render: (_value: unknown, category: PlaceCategoryResponseDto) => (
         <Flex className={styles.actions} gap={8} vertical>
           <Button
             icon={<EditOutlined aria-hidden="true" />}

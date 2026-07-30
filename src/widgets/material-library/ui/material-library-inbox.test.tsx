@@ -1,8 +1,10 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { MaterialAdminStatusActions } from '@/features/material/admin-status/ui/material-admin-status-actions'
+import type {
+  AdminMaterialLibraryListResponseDto,
+  AdminMaterialLibraryResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
-import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -16,7 +18,7 @@ vi.mock(
   '@/features/material/admin-status/ui/material-admin-status-actions',
   () => ({
     MaterialAdminStatusActions: vi.fn(
-      ({ material }: { material: AdminMaterialLibraryItem }) => (
+      ({ material }: { material: AdminMaterialLibraryResponseDto }) => (
         <div>actions for {material.id}</div>
       ),
     ),
@@ -26,7 +28,7 @@ vi.mock(
 const mockedUseMaterialLibraryQuery = vi.mocked(useMaterialLibraryQuery)
 const mockedMaterialAdminStatusActions = vi.mocked(MaterialAdminStatusActions)
 
-const telegramMaterial: AdminMaterialLibraryItem = {
+const telegramMaterial: AdminMaterialLibraryResponseDto = {
   adminStatus: 'pending',
   durationSec: null,
   excerpt: 'Пост из Telegram-канала Amazing EKB',
@@ -50,7 +52,7 @@ const telegramMaterial: AdminMaterialLibraryItem = {
   url: 'https://t.me/amazing_ekb/321',
 }
 
-const dzenMaterial: AdminMaterialLibraryItem = {
+const dzenMaterial: AdminMaterialLibraryResponseDto = {
   ...telegramMaterial,
   adminStatus: 'approved',
   excerpt: null,
@@ -67,7 +69,7 @@ const dzenMaterial: AdminMaterialLibraryItem = {
   url: 'https://dzen.ru/video/watch/abcdef',
 }
 
-const unsafeMaterial: AdminMaterialLibraryItem = {
+const unsafeMaterial: AdminMaterialLibraryResponseDto = {
   ...telegramMaterial,
   adminStatus: 'pending',
   excerpt: 'Материал с unsafe ссылками',
@@ -95,7 +97,7 @@ const materialLibraryResponse = {
   page: 2,
   pageSize: 20,
   total: 43,
-} satisfies AdminMaterialLibraryListResponse
+} satisfies AdminMaterialLibraryListResponseDto
 
 const renderInbox = (route = '/materials') => {
   render(

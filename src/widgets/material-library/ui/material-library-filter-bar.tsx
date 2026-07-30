@@ -3,9 +3,9 @@ import {
   getMaterialPlatformOptions,
 } from '@/entities/material/ui/material-meta'
 import type {
-  MaterialAdminStatus,
-  Platform,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  AdminMaterialsListPlatform,
+} from '@/shared/api'
 import { Flex, Select } from 'antd'
 import type { MaterialLibraryFiltersState } from '../model/material-library-filters'
 import styles from './material-library-inbox.module.css'
@@ -35,7 +35,7 @@ export function MaterialLibraryFilterBar({
 }) {
   return (
     <Flex className={styles.filters} gap={12} wrap>
-      <Select<Platform | typeof allValue>
+      <Select<AdminMaterialsListPlatform | typeof allValue>
         className={styles.filter}
         onChange={(value) => {
           onChange({
@@ -49,7 +49,7 @@ export function MaterialLibraryFilterBar({
         ]}
         value={filters.platform ?? allValue}
       />
-      <Select<MaterialAdminStatus | typeof allValue>
+      <Select<AdminMaterialLibraryResponseDtoAdminStatus | typeof allValue>
         className={styles.filter}
         onChange={(value) => {
           onChange({

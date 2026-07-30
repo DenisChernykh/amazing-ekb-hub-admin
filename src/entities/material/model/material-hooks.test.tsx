@@ -1,29 +1,29 @@
+import type { MaterialListResponseDto } from '@/shared/api'
 import {
-  getListAdminPlaceMaterialsQueryKey,
-  listAdminPlaceMaterials,
-} from '@/shared/api/generated/admin/admin'
-import type { MaterialListResponse } from '@/shared/api/generated/operation'
+  adminPlaceMaterialsList,
+  getAdminPlaceMaterialsListQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlaceMaterialsListQuery } from './material-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getListAdminPlaceMaterialsQueryKey: vi.fn(({ placeId }, params) => [
-    `/admin/places/${placeId}/materials`,
+vi.mock('@/shared/api', () => ({
+  getAdminPlaceMaterialsListQueryKey: vi.fn(({ placeId }, params) => [
+    `/v1/admin/places/${placeId}/materials`,
     ...(params ? [params] : []),
   ]),
-  listAdminPlaceMaterials: vi.fn(),
+  adminPlaceMaterialsList: vi.fn(),
   useListAdminPlaceMaterials: vi.fn(() => ({
     data: undefined,
     isPending: true,
   })),
 }))
 
-const mockedListAdminPlaceMaterials = vi.mocked(listAdminPlaceMaterials)
+const mockedListAdminPlaceMaterials = vi.mocked(adminPlaceMaterialsList)
 
-const materialListResponse: MaterialListResponse = {
+const materialListResponse: MaterialListResponseDto = {
   items: [],
 }
 
@@ -47,7 +47,7 @@ const createQueryClient = () =>
 describe('material hooks', () => {
   beforeEach(() => {
     mockedListAdminPlaceMaterials.mockReset()
-    vi.mocked(getListAdminPlaceMaterialsQueryKey).mockClear()
+    vi.mocked(getAdminPlaceMaterialsListQueryKey).mockClear()
   })
 
   it('loads place materials through generated fetcher and query key', async () => {
@@ -62,7 +62,7 @@ describe('material hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getListAdminPlaceMaterialsQueryKey).toHaveBeenCalledWith(
+    expect(getAdminPlaceMaterialsListQueryKey).toHaveBeenCalledWith(
       { placeId: 'place-1' },
       params,
     )

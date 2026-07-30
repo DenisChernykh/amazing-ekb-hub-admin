@@ -1,22 +1,22 @@
+import type { PlaceCategoryListResponseDto } from '@/shared/api'
 import {
-  getListAdminPlaceCategoriesQueryKey,
-  listAdminPlaceCategories,
-} from '@/shared/api/generated/admin/admin'
-import type { AdminPlaceCategoryListResponse } from '@/shared/api/generated/operation'
+  adminCategoriesList,
+  getAdminCategoriesListQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlaceCategoriesQuery } from './category-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getListAdminPlaceCategoriesQueryKey: vi.fn(() => ['/admin/categories']),
-  listAdminPlaceCategories: vi.fn(),
+vi.mock('@/shared/api', () => ({
+  getAdminCategoriesListQueryKey: vi.fn(() => ['/v1/admin/categories']),
+  adminCategoriesList: vi.fn(),
 }))
 
-const mockedListAdminPlaceCategories = vi.mocked(listAdminPlaceCategories)
+const mockedListAdminPlaceCategories = vi.mocked(adminCategoriesList)
 
-const categoryListResponse: AdminPlaceCategoryListResponse = {
+const categoryListResponse: PlaceCategoryListResponseDto = {
   items: [],
 }
 
@@ -40,7 +40,7 @@ const createQueryClient = () =>
 describe('category hooks', () => {
   beforeEach(() => {
     mockedListAdminPlaceCategories.mockReset()
-    vi.mocked(getListAdminPlaceCategoriesQueryKey).mockClear()
+    vi.mocked(getAdminCategoriesListQueryKey).mockClear()
   })
 
   it('loads admin categories through generated fetcher and query key', async () => {
@@ -53,7 +53,7 @@ describe('category hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getListAdminPlaceCategoriesQueryKey).toHaveBeenCalledWith()
+    expect(getAdminCategoriesListQueryKey).toHaveBeenCalledWith()
     expect(mockedListAdminPlaceCategories).toHaveBeenCalledWith(
       undefined,
       expect.any(AbortSignal),

@@ -1,9 +1,9 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
+import type { PlaceCategoryListResponseDto } from '@/shared/api'
 import {
-  getListAdminPlaceCategoriesQueryKey,
-  listAdminPlaceCategories,
-} from '@/shared/api/generated/admin/admin'
-import type { AdminPlaceCategoryListResponse } from '@/shared/api/generated/operation'
+  adminCategoriesList,
+  getAdminCategoriesListQueryKey,
+} from '@/shared/api'
+import type { ApiClientError } from '@/shared/api/client/api-error'
 import { useQuery } from '@tanstack/react-query'
 
 /**
@@ -13,8 +13,8 @@ import { useQuery } from '@tanstack/react-query'
  * чтобы UI не импортировал transport-слой напрямую.
  */
 export function usePlaceCategoriesQuery() {
-  return useQuery<AdminPlaceCategoryListResponse, ApiClientError>({
-    queryFn: ({ signal }) => listAdminPlaceCategories(undefined, signal),
-    queryKey: getListAdminPlaceCategoriesQueryKey(),
+  return useQuery<PlaceCategoryListResponseDto, ApiClientError>({
+    queryFn: ({ signal }) => adminCategoriesList(undefined, signal),
+    queryKey: getAdminCategoriesListQueryKey(),
   })
 }

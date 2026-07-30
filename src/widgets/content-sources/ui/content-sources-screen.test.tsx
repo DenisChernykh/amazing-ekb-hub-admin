@@ -5,12 +5,13 @@ import { CreateContentSourceDrawer } from '@/features/content-source/create/ui/c
 import { EditContentSourceDrawer } from '@/features/content-source/edit/ui/edit-content-source-drawer'
 import { ImportTelegramSourceButton } from '@/features/content-source/import/ui/import-telegram-source-button'
 import { ContentSourceStatusActions } from '@/features/content-source/status/ui/content-source-status-actions'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
 import type {
-  ContentSourceListResponse,
-  ImportRunListResponse,
-} from '@/shared/api/generated/operation'
+  ContentSourceListResponseDto,
+  ContentSourceResponseDto,
+  ImportRunListResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -32,7 +33,7 @@ vi.mock(
   '@/features/content-source/status/ui/content-source-status-actions',
   () => ({
     ContentSourceStatusActions: vi.fn(
-      ({ contentSource }: { contentSource: ContentSource }) => (
+      ({ contentSource }: { contentSource: ContentSourceResponseDto }) => (
         <div>status actions for {contentSource.id}</div>
       ),
     ),
@@ -47,8 +48,8 @@ vi.mock(
         activeImportRun,
         contentSource,
       }: {
-        activeImportRun?: ImportRun | null
-        contentSource: ContentSource
+        activeImportRun?: ImportRunResponseDto | null
+        contentSource: ContentSourceResponseDto
       }) => (
         <div>
           import action for {contentSource.id} active{' '}
@@ -82,7 +83,7 @@ const mockedEditContentSourceDrawer = vi.mocked(EditContentSourceDrawer)
 const mockedContentSourceStatusActions = vi.mocked(ContentSourceStatusActions)
 const mockedImportTelegramSourceButton = vi.mocked(ImportTelegramSourceButton)
 
-const telegramSource: ContentSource = {
+const telegramSource: ContentSourceResponseDto = {
   channelId: '-100123',
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',
@@ -97,7 +98,7 @@ const telegramSource: ContentSource = {
   url: 'https://t.me/amazing_ekb',
 }
 
-const dzenSource: ContentSource = {
+const dzenSource: ContentSourceResponseDto = {
   ...telegramSource,
   channelId: null,
   displayName: 'Dzen Source',
@@ -111,7 +112,7 @@ const dzenSource: ContentSource = {
   url: 'javascript://example.com/%0Aalert(1)',
 }
 
-const completedRun: ImportRun = {
+const completedRun: ImportRunResponseDto = {
   createdAt: '2026-06-16T08:00:00.000Z',
   createdCount: 2,
   errorMessage: null,
@@ -126,7 +127,7 @@ const completedRun: ImportRun = {
   updatedCount: 0,
 }
 
-const failedRun: ImportRun = {
+const failedRun: ImportRunResponseDto = {
   ...completedRun,
   createdCount: 0,
   errorMessage: 'Telegram rate limit',
@@ -138,7 +139,7 @@ const failedRun: ImportRun = {
   status: 'failed',
 }
 
-const queuedRun: ImportRun = {
+const queuedRun: ImportRunResponseDto = {
   ...completedRun,
   createdCount: 0,
   errorMessage: null,
@@ -152,11 +153,11 @@ const queuedRun: ImportRun = {
   updatedCount: 0,
 }
 
-const sourcesResponse: ContentSourceListResponse = {
+const sourcesResponse: ContentSourceListResponseDto = {
   items: [telegramSource, dzenSource],
 }
 
-const runsResponse: ImportRunListResponse = {
+const runsResponse: ImportRunListResponseDto = {
   items: [completedRun, failedRun],
 }
 

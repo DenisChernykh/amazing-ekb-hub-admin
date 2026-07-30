@@ -4,8 +4,11 @@ import { CreateMaterialDrawer } from '@/features/material/create/ui/create-mater
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
+import type {
+  MaterialResponseDto,
+  PinnedMaterialResponseDto,
+} from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PublicMaterial } from '@/shared/api/generated/model'
 import { Alert, App as AntdApp, Button, Card, Space } from 'antd'
 import { useState } from 'react'
 import {
@@ -17,7 +20,7 @@ import {
  * Props панели материалов места на admin detail screen.
  */
 export type PlaceMaterialsPanelProps = {
-  pinnedMaterial: PublicMaterial | null
+  pinnedMaterial: PinnedMaterialResponseDto | null
   placeId: string
 }
 
@@ -34,9 +37,8 @@ export function PlaceMaterialsPanel({
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isLinkExistingOpen, setIsLinkExistingOpen] = useState(false)
-  const [editingMaterial, setEditingMaterial] = useState<PublicMaterial | null>(
-    null,
-  )
+  const [editingMaterial, setEditingMaterial] =
+    useState<MaterialResponseDto | null>(null)
   const [hideLinkError, setHideLinkError] =
     useState<PlaceMaterialHideLinkError | null>(null)
   const hideLinkMutation = useHidePlaceMaterialLinkMutation()
@@ -60,7 +62,7 @@ export function PlaceMaterialsPanel({
     </Space>
   )
 
-  const handleHideLink = (material: PublicMaterial) => {
+  const handleHideLink = (material: MaterialResponseDto) => {
     setHideLinkError(null)
     hideLinkMutation.mutate(
       {

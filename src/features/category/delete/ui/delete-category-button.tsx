@@ -1,6 +1,6 @@
 import { useDeleteCategoryMutation } from '@/entities/category/model/category-mutations'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { DeleteOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button } from 'antd'
 
@@ -8,7 +8,7 @@ import { App as AntdApp, Button } from 'antd'
  * Props кнопки удаления категории места.
  */
 export type DeleteCategoryButtonProps = {
-  category: AdminPlaceCategory
+  category: PlaceCategoryResponseDto
 }
 
 /**

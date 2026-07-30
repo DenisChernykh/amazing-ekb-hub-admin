@@ -1,14 +1,17 @@
-import { ApiClientError } from '@/shared/api/client/api-error'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import {
-  createContentSource,
-  getListAdminMaterialLibraryQueryKey,
-  getListContentSourcesQueryKey,
-  getListImportRunsQueryKey,
-  importTelegramChannel,
-  updateContentSource,
-  updateContentSourceStatus,
-} from '@/shared/api/generated/admin/admin'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
+  adminContentSourcesCreate,
+  adminContentSourcesUpdate,
+  adminContentSourcesUpdateStatus,
+  adminTelegramImportsEnqueue,
+  getAdminContentSourcesListQueryKey,
+  getAdminImportRunsListQueryKey,
+  getAdminMaterialsListQueryKey,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -20,20 +23,24 @@ import {
   useUpdateContentSourceStatusMutation,
 } from './content-source-mutations'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  createContentSource: vi.fn(),
-  getListAdminMaterialLibraryQueryKey: vi.fn(() => ['/admin/materials']),
-  getListContentSourcesQueryKey: vi.fn(() => ['/admin/content-sources']),
-  getListImportRunsQueryKey: vi.fn(() => ['/admin/import-runs']),
-  importTelegramChannel: vi.fn(),
-  updateContentSource: vi.fn(),
-  updateContentSourceStatus: vi.fn(),
+vi.mock('@/shared/api', () => ({
+  adminContentSourcesCreate: vi.fn(),
+  getAdminMaterialsListQueryKey: vi.fn(() => ['/v1/admin/materials']),
+  getAdminContentSourcesListQueryKey: vi.fn(() => [
+    '/v1/admin/content-sources',
+  ]),
+  getAdminImportRunsListQueryKey: vi.fn(() => ['/v1/admin/import-runs']),
+  adminTelegramImportsEnqueue: vi.fn(),
+  adminContentSourcesUpdate: vi.fn(),
+  adminContentSourcesUpdateStatus: vi.fn(),
 }))
 
-const mockedCreateContentSource = vi.mocked(createContentSource)
-const mockedImportTelegramChannel = vi.mocked(importTelegramChannel)
-const mockedUpdateContentSource = vi.mocked(updateContentSource)
-const mockedUpdateContentSourceStatus = vi.mocked(updateContentSourceStatus)
+const mockedCreateContentSource = vi.mocked(adminContentSourcesCreate)
+const mockedImportTelegramChannel = vi.mocked(adminTelegramImportsEnqueue)
+const mockedUpdateContentSource = vi.mocked(adminContentSourcesUpdate)
+const mockedUpdateContentSourceStatus = vi.mocked(
+  adminContentSourcesUpdateStatus,
+)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -43,7 +50,7 @@ const createWrapper = (queryClient: QueryClient) => {
   }
 }
 
-const contentSource: ContentSource = {
+const contentSource: ContentSourceResponseDto = {
   channelId: '-100123',
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',
@@ -58,7 +65,7 @@ const contentSource: ContentSource = {
   url: 'https://t.me/amazing_ekb',
 }
 
-const importRun: ImportRun = {
+const importRun: ImportRunResponseDto = {
   createdAt: '2026-06-16T08:00:00.000Z',
   createdCount: 2,
   errorMessage: null,
@@ -79,22 +86,22 @@ describe('content source mutations', () => {
     mockedImportTelegramChannel.mockReset()
     mockedUpdateContentSource.mockReset()
     mockedUpdateContentSourceStatus.mockReset()
-    vi.mocked(getListAdminMaterialLibraryQueryKey).mockImplementation(() => [
-      '/admin/materials',
+    vi.mocked(getAdminMaterialsListQueryKey).mockImplementation(() => [
+      '/v1/admin/materials',
     ])
-    vi.mocked(getListContentSourcesQueryKey).mockImplementation(() => [
-      '/admin/content-sources',
+    vi.mocked(getAdminContentSourcesListQueryKey).mockImplementation(() => [
+      '/v1/admin/content-sources',
     ])
-    vi.mocked(getListImportRunsQueryKey).mockImplementation(() => [
-      '/admin/import-runs',
+    vi.mocked(getAdminImportRunsListQueryKey).mockImplementation(() => [
+      '/v1/admin/import-runs',
     ])
   })
 
   it('creates content source and invalidates all source lists', async () => {
     const queryClient = new QueryClient()
-    const sourceQueryKey = ['/admin/content-sources']
+    const sourceQueryKey = ['/v1/admin/content-sources']
     const filteredSourceQueryKey = [
-      '/admin/content-sources',
+      '/v1/admin/content-sources',
       { platform: 'telegram' },
     ]
     const onSuccess = vi.fn()
@@ -160,8 +167,8 @@ describe('content source mutations', () => {
 
   it('updates content source and invalidates sources plus material library', async () => {
     const queryClient = new QueryClient()
-    const sourceQueryKey = ['/admin/content-sources']
-    const materialQueryKey = ['/admin/materials']
+    const sourceQueryKey = ['/v1/admin/content-sources']
+    const materialQueryKey = ['/v1/admin/materials']
     const onSuccess = vi.fn()
     queryClient.setQueryData(sourceQueryKey, { items: [contentSource] })
     queryClient.setQueryData(materialQueryKey, { items: [] })
@@ -196,7 +203,7 @@ describe('content source mutations', () => {
 
   it('updates content source status and invalidates source lists', async () => {
     const queryClient = new QueryClient()
-    const sourceQueryKey = ['/admin/content-sources']
+    const sourceQueryKey = ['/v1/admin/content-sources']
     const onSuccess = vi.fn()
     queryClient.setQueryData(sourceQueryKey, { items: [contentSource] })
     mockedUpdateContentSourceStatus.mockResolvedValue({
@@ -230,9 +237,9 @@ describe('content source mutations', () => {
 
   it('imports Telegram source and invalidates sources, import runs, and material library', async () => {
     const queryClient = new QueryClient()
-    const sourceQueryKey = ['/admin/content-sources']
-    const runQueryKey = ['/admin/import-runs']
-    const materialQueryKey = ['/admin/materials']
+    const sourceQueryKey = ['/v1/admin/content-sources']
+    const runQueryKey = ['/v1/admin/import-runs']
+    const materialQueryKey = ['/v1/admin/materials']
     const onSuccess = vi.fn()
     queryClient.setQueryData(sourceQueryKey, { items: [contentSource] })
     queryClient.setQueryData(runQueryKey, { items: [] })
@@ -269,7 +276,7 @@ describe('content source mutations', () => {
 
   it('invalidates import runs and passes 409 conflicts to callback', async () => {
     const queryClient = new QueryClient()
-    const runQueryKey = ['/admin/import-runs']
+    const runQueryKey = ['/v1/admin/import-runs']
     const onError = vi.fn()
     const apiError = new ApiClientError({
       kind: 'conflict',

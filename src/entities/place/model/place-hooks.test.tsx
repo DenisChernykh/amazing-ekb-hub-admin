@@ -1,24 +1,27 @@
+import type {
+  AdminPlaceListResponseDto,
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
 import {
-  getAdminPlaceDetail,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminPlacesQueryKey,
-  listAdminPlaces,
-} from '@/shared/api/generated/admin/admin'
-import type { PlaceDetail } from '@/shared/api/generated/model'
-import type { AdminPlaceListResponse } from '@/shared/api/generated/operation'
+  adminPlacesGet,
+  adminPlacesList,
+  getAdminPlacesGetQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAdminPlaceDetailQuery, usePlacesListQuery } from './place-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getAdminPlaceDetail: vi.fn(),
-  getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
-    `/admin/places/${placeId}`,
+vi.mock('@/shared/api', () => ({
+  adminPlacesGet: vi.fn(),
+  getAdminPlacesGetQueryKey: vi.fn(({ placeId }) => [
+    `/v1/admin/places/${placeId}`,
   ]),
-  getListAdminPlacesQueryKey: vi.fn((params) => [
-    '/admin/places',
+  getAdminPlacesListQueryKey: vi.fn((params) => [
+    '/v1/admin/places',
     ...(params ? [params] : []),
   ]),
   useGetAdminPlaceDetail: vi.fn(() => ({
@@ -29,13 +32,13 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
     data: undefined,
     isPending: true,
   })),
-  listAdminPlaces: vi.fn(),
+  adminPlacesList: vi.fn(),
 }))
 
-const mockedListAdminPlaces = vi.mocked(listAdminPlaces)
-const mockedGetAdminPlaceDetail = vi.mocked(getAdminPlaceDetail)
+const mockedListAdminPlaces = vi.mocked(adminPlacesList)
+const mockedGetAdminPlaceDetail = vi.mocked(adminPlacesGet)
 
-const placeListResponse: AdminPlaceListResponse = {
+const placeListResponse: AdminPlaceListResponseDto = {
   items: [],
   page: 1,
   pageSize: 10,
@@ -44,12 +47,15 @@ const placeListResponse: AdminPlaceListResponse = {
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const placeDetail: PlaceDetail = {
+const placeDetail: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {
@@ -88,8 +94,8 @@ describe('place hooks', () => {
   beforeEach(() => {
     mockedListAdminPlaces.mockReset()
     mockedGetAdminPlaceDetail.mockReset()
-    vi.mocked(getListAdminPlacesQueryKey).mockClear()
-    vi.mocked(getGetAdminPlaceDetailQueryKey).mockClear()
+    vi.mocked(getAdminPlacesListQueryKey).mockClear()
+    vi.mocked(getAdminPlacesGetQueryKey).mockClear()
   })
 
   it('loads admin places through generated fetcher and query key', async () => {
@@ -103,7 +109,7 @@ describe('place hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getListAdminPlacesQueryKey).toHaveBeenCalledWith(params)
+    expect(getAdminPlacesListQueryKey).toHaveBeenCalledWith(params)
     expect(mockedListAdminPlaces).toHaveBeenCalledWith(
       params,
       undefined,
@@ -122,7 +128,7 @@ describe('place hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getGetAdminPlaceDetailQueryKey).toHaveBeenCalledWith({
+    expect(getAdminPlacesGetQueryKey).toHaveBeenCalledWith({
       placeId: 'place-1',
     })
     expect(mockedGetAdminPlaceDetail).toHaveBeenCalledWith(

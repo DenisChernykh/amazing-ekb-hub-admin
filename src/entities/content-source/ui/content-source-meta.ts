@@ -1,7 +1,7 @@
 import type {
-  ContentSourcePlatform,
-  ContentSourceStatus,
-} from '@/shared/api/generated/model'
+  ContentSourceResponseDtoPlatform,
+  ContentSourceResponseDtoStatus,
+} from '@/shared/api'
 
 /**
  * UI-метаданные content source для тегов, фильтров и таблиц.
@@ -12,7 +12,7 @@ export type ContentSourceMeta = {
 }
 
 const contentSourcePlatformMeta: Record<
-  ContentSourcePlatform,
+  ContentSourceResponseDtoPlatform,
   ContentSourceMeta
 > = {
   dzen: {
@@ -41,17 +41,19 @@ const contentSourcePlatformMeta: Record<
   },
 }
 
-const contentSourceStatusMeta: Record<ContentSourceStatus, ContentSourceMeta> =
-  {
-    active: {
-      color: 'green',
-      label: 'Активен',
-    },
-    disabled: {
-      color: 'default',
-      label: 'Отключен',
-    },
-  }
+const contentSourceStatusMeta: Record<
+  ContentSourceResponseDtoStatus,
+  ContentSourceMeta
+> = {
+  active: {
+    color: 'green',
+    label: 'Активен',
+  },
+  disabled: {
+    color: 'default',
+    label: 'Отключен',
+  },
+}
 
 /**
  * Runtime-значения платформ content source в стабильном UI-порядке.
@@ -63,7 +65,7 @@ export const CONTENT_SOURCE_PLATFORM_VALUES = [
   'tiktok',
   'vk',
   'pinterest',
-] satisfies ContentSourcePlatform[]
+] satisfies ContentSourceResponseDtoPlatform[]
 
 /**
  * Runtime-значения статусов content source в стабильном UI-порядке.
@@ -71,19 +73,23 @@ export const CONTENT_SOURCE_PLATFORM_VALUES = [
 export const CONTENT_SOURCE_STATUS_VALUES = [
   'active',
   'disabled',
-] satisfies ContentSourceStatus[]
+] satisfies ContentSourceResponseDtoStatus[]
 
 /**
  * Возвращает локализованные UI-метаданные платформы content source.
  */
-export function getContentSourcePlatformMeta(platform: ContentSourcePlatform) {
+export function getContentSourcePlatformMeta(
+  platform: ContentSourceResponseDtoPlatform,
+) {
   return contentSourcePlatformMeta[platform]
 }
 
 /**
  * Возвращает локализованные UI-метаданные статуса content source.
  */
-export function getContentSourceStatusMeta(status: ContentSourceStatus) {
+export function getContentSourceStatusMeta(
+  status: ContentSourceResponseDtoStatus,
+) {
   return contentSourceStatusMeta[status]
 }
 

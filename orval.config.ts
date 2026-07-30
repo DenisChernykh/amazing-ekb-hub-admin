@@ -1,12 +1,11 @@
 import { defineConfig } from 'orval'
 
-const apiClientSnapshotPath = './openapi.yaml'
-const validationSnapshotPath = './openapi/openapi.json'
+const openApiSnapshotPath = './openapi/openapi.json'
 
 export default defineConfig({
   amazingEkbHub: {
     input: {
-      target: apiClientSnapshotPath,
+      target: openApiSnapshotPath,
     },
     output: {
       target: './src/shared/api/generated/index.ts',
@@ -28,8 +27,6 @@ export default defineConfig({
         query: {
           version: 5,
           signal: true,
-          useQuery: true,
-          useMutation: true,
         },
       },
     },
@@ -37,7 +34,7 @@ export default defineConfig({
 
   amazingEkbHubZod: {
     input: {
-      target: validationSnapshotPath,
+      target: openApiSnapshotPath,
     },
     output: {
       target: './src/shared/api/generated-zod/index.ts',

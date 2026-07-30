@@ -1,8 +1,8 @@
 import type {
-  CreatePlaceRequest,
-  PlaceDetail,
-  UpdatePlaceRequest,
-} from '@/shared/api/generated/model'
+  CreatePlaceDto,
+  PlaceDetailResponseDto,
+  UpdatePlaceDto,
+} from '@/shared/api'
 import { z } from 'zod'
 import { editPlaceFormSchema } from './place-form-schema'
 
@@ -60,7 +60,9 @@ const areTagsEqual = (left: string[], right: string[]) => {
 /**
  * Возвращает начальные значения формы из admin detail места.
  */
-export function getPlaceFormInitialValues(place: PlaceDetail): PlaceFormValues {
+export function getPlaceFormInitialValues(
+  place: PlaceDetailResponseDto,
+): PlaceFormValues {
   return {
     categoryId: place.category.id,
     slug: place.slug,
@@ -73,12 +75,10 @@ export function getPlaceFormInitialValues(place: PlaceDetail): PlaceFormValues {
 /**
  * Преобразует значения формы в payload создания места.
  */
-export function toCreatePlaceRequest(
-  values: PlaceFormValues,
-): CreatePlaceRequest {
+export function toCreatePlaceRequest(values: PlaceFormValues): CreatePlaceDto {
   const normalizedValues = normalizePlaceFormValues(values)
 
-  const request: CreatePlaceRequest = {
+  const request: CreatePlaceDto = {
     categoryId: getRequiredValue(normalizedValues.categoryId, 'categoryId'),
     summary: normalizedValues.summary,
     tags: normalizedValues.tags,
@@ -100,10 +100,10 @@ export function toCreatePlaceRequest(
 export function toUpdatePlaceRequest(
   values: PlaceFormValues,
   initialValues: PlaceFormValues,
-): UpdatePlaceRequest {
+): UpdatePlaceDto {
   const normalizedValues = normalizePlaceFormValues(values)
   const normalizedInitialValues = normalizePlaceFormValues(initialValues)
-  const request: UpdatePlaceRequest = {}
+  const request: UpdatePlaceDto = {}
 
   if (normalizedValues.title !== normalizedInitialValues.title) {
     request.title = normalizedValues.title

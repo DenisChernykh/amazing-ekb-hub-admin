@@ -9,6 +9,9 @@ import { resolvePairedBackendSource } from './openapi-source.mjs'
 
 const requiredOperations = [
   ['/v1/auth/login', 'post', 'authLogin'],
+  ['/v1/auth/csrf', 'get', 'authGetCsrfToken'],
+  ['/v1/auth/me', 'get', 'authGetMe'],
+  ['/v1/auth/logout', 'post', 'authLogout'],
   ['/v1/admin/categories', 'post', 'adminCategoriesCreate'],
   ['/v1/admin/categories/{categoryId}', 'patch', 'adminCategoriesUpdate'],
   ['/v1/admin/content-sources', 'post', 'adminContentSourcesCreate'],
@@ -22,6 +25,15 @@ const requiredOperations = [
   ['/v1/admin/places/{placeId}', 'patch', 'adminPlacesUpdate'],
   ['/v1/admin/places/{placeId}/materials', 'post', 'adminPlaceMaterialsCreate'],
   ['/v1/admin/place-imports/yandex-maps', 'post', 'adminPlaceImportsStart'],
+]
+
+const requiredProblemCodes = [
+  'AUTHENTICATION_REQUIRED',
+  'AUTHORIZATION_DENIED',
+  'NOT_FOUND',
+  'VALIDATION_FAILED',
+  'DEPENDENCY_UNAVAILABLE',
+  'INTERNAL_ERROR',
 ]
 
 const readWorktreeList = () => {
@@ -65,6 +77,17 @@ export function validateOpenApiDocument(value) {
     if (operation.operationId !== operationId) {
       throw new Error(
         `OpenAPI document has an unexpected operation ID for ${method.toUpperCase()} ${path}`,
+      )
+    }
+  }
+
+  const problemCodes =
+    value.components?.schemas?.ProblemResponseDto?.properties?.code?.enum
+
+  for (const problemCode of requiredProblemCodes) {
+    if (!Array.isArray(problemCodes) || !problemCodes.includes(problemCode)) {
+      throw new Error(
+        `OpenAPI document is missing ProblemResponseDto code ${problemCode}`,
       )
     }
   }

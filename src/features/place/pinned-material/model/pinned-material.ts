@@ -1,4 +1,4 @@
-import type { SetPinnedMaterialRequest } from '@/shared/api/generated/model'
+import type { SetPinnedMaterialDto } from '@/shared/api'
 
 /**
  * Строит payload назначения закрепленного материала.
@@ -8,7 +8,7 @@ import type { SetPinnedMaterialRequest } from '@/shared/api/generated/model'
  */
 export function toSetPinnedMaterialRequest(
   materialId: string | null,
-): SetPinnedMaterialRequest | null {
+): SetPinnedMaterialDto | null {
   if (!materialId) {
     return null
   }

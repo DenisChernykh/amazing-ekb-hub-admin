@@ -1,4 +1,4 @@
-import { AdminPlacesCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
+import { AdminPlacesCreateBody } from '@/shared/api'
 import { z } from 'zod'
 
 const PLACE_SLUG_GUIDANCE =

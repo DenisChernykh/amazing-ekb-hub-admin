@@ -7,8 +7,11 @@ import {
   useClearPinnedMaterialMutation,
   useSetPinnedMaterialMutation,
 } from '@/entities/place/model/place-mutations'
+import type {
+  MaterialResponseDto,
+  PinnedMaterialResponseDto,
+} from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PublicMaterial } from '@/shared/api/generated/model'
 import { App as AntdApp, Card, Flex, Select } from 'antd'
 import { useState } from 'react'
 import { toSetPinnedMaterialRequest } from '../model/pinned-material'
@@ -16,7 +19,7 @@ import { PinnedMaterialActions } from './pinned-material-actions'
 import { PinnedMaterialCurrent } from './pinned-material-current'
 import { PinnedMaterialErrorAlert } from './pinned-material-error-alert'
 
-const getMaterialOptionLabel = (material: PublicMaterial) => {
+const getMaterialOptionLabel = (material: MaterialResponseDto) => {
   const platform = getMaterialPlatformMeta(material.platform)
   const type = getMaterialTypeMeta(material.type)
 
@@ -27,8 +30,8 @@ const getMaterialOptionLabel = (material: PublicMaterial) => {
  * Props панели выбора закрепленного материала места.
  */
 export type PinnedMaterialPanelProps = {
-  materials: PublicMaterial[]
-  pinnedMaterial: PublicMaterial | null
+  materials: MaterialResponseDto[]
+  pinnedMaterial: PinnedMaterialResponseDto | null
   placeId: string
 }
 

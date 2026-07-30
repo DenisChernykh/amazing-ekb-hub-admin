@@ -1,4 +1,4 @@
-import { getGetCurrentUserQueryKey } from '@/shared/api/generated/auth/auth'
+import { getAuthGetMeQueryKey } from '@/shared/api'
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 import {
@@ -9,7 +9,7 @@ import {
 
 describe('session-api cache helpers', () => {
   it('keeps the public session query key aligned with generated API', () => {
-    expect(getCurrentSessionQueryKey()).toEqual(getGetCurrentUserQueryKey())
+    expect(getCurrentSessionQueryKey()).toEqual(getAuthGetMeQueryKey())
   })
 
   it('invalidates current session query through a passed query client', async () => {

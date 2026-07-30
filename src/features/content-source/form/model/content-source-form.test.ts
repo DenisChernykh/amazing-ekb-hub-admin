@@ -1,8 +1,8 @@
+import type { ContentSourceResponseDto } from '@/shared/api'
 import {
   AdminContentSourcesCreateBody,
   AdminContentSourcesUpdateBody,
-} from '@/shared/api/generated-zod/admin-content-sources/admin-content-sources.zod'
-import type { ContentSource } from '@/shared/api/generated/model'
+} from '@/shared/api'
 import { describe, expect, it } from 'vitest'
 import {
   getContentSourceFormChangedFields,
@@ -16,7 +16,7 @@ import {
   editContentSourceFormSchema,
 } from './content-source-form-schema'
 
-const contentSource: ContentSource = {
+const contentSource: ContentSourceResponseDto = {
   channelId: '-100123',
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',

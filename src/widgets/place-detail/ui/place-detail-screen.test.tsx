@@ -1,6 +1,6 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
+import type { PlaceDetailResponseDto } from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail } from '@/shared/api/generated/model'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -48,7 +48,7 @@ vi.mock('./place-materials-panel', () => ({
     pinnedMaterial,
     placeId,
   }: {
-    pinnedMaterial: PlaceDetail['pinnedMaterial']
+    pinnedMaterial: PlaceDetailResponseDto['pinnedMaterial']
     placeId: string
   }) => (
     <div>
@@ -59,10 +59,13 @@ vi.mock('./place-materials-panel', () => ({
 
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
-const hiddenPlace: PlaceDetail = {
+const hiddenPlace: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: {
     coverImageUrl: null,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    status: 'active',
+    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
@@ -141,7 +144,7 @@ describe('PlaceDetailScreen', () => {
   })
 
   it('remounts cover upload panel when place changes', () => {
-    const nextPlace: PlaceDetail = {
+    const nextPlace: PlaceDetailResponseDto = {
       ...hiddenPlace,
       coverImageUrl: '/places/place-3/photo',
       id: 'place-3',

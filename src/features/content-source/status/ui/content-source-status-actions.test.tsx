@@ -1,9 +1,9 @@
 import { useUpdateContentSourceStatusMutation } from '@/entities/content-source/model/content-source-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
-  ContentSource,
-  ContentSourceStatus,
-} from '@/shared/api/generated/model'
+  ContentSourceResponseDto,
+  ContentSourceResponseDtoStatus,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -40,15 +40,15 @@ const mockedUseUpdateContentSourceStatusMutation = vi.mocked(
 
 type StatusMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (contentSource: ContentSource) => void
+  onSuccess?: (contentSource: ContentSourceResponseDto) => void
 }
 
 type StatusMutationVariables = {
   sourceId: string
-  status: ContentSourceStatus
+  status: ContentSourceResponseDtoStatus
 }
 
-const contentSource: ContentSource = {
+const contentSource: ContentSourceResponseDto = {
   channelId: null,
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',

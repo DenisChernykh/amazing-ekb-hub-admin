@@ -1,10 +1,10 @@
 import type {
-  AdminMaterialLibraryItem,
-  MaterialAdminStatus,
-  MaterialType,
-  Platform,
-  PublicMaterial,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  MaterialResponseDto,
+  MaterialResponseDtoPlatform,
+  MaterialResponseDtoType,
+} from '@/shared/api'
 import { isSafeMaterialUrl } from '../model/material-url'
 
 /**
@@ -15,22 +15,23 @@ export type MaterialMeta = {
   label: string
 }
 
-const materialPlatformMeta: Record<Platform, MaterialMeta> = {
-  dzen: {
-    color: 'gold',
-    label: 'Дзен',
-  },
-  instagram: {
-    color: 'magenta',
-    label: 'Instagram',
-  },
-  telegram: {
-    color: 'blue',
-    label: 'Telegram',
-  },
-}
+const materialPlatformMeta: Record<MaterialResponseDtoPlatform, MaterialMeta> =
+  {
+    dzen: {
+      color: 'gold',
+      label: 'Дзен',
+    },
+    instagram: {
+      color: 'magenta',
+      label: 'Instagram',
+    },
+    telegram: {
+      color: 'blue',
+      label: 'Telegram',
+    },
+  }
 
-const materialTypeMeta: Record<MaterialType, MaterialMeta> = {
+const materialTypeMeta: Record<MaterialResponseDtoType, MaterialMeta> = {
   post: {
     color: 'default',
     label: 'Пост',
@@ -45,7 +46,10 @@ const materialTypeMeta: Record<MaterialType, MaterialMeta> = {
   },
 }
 
-const materialAdminStatusMeta: Record<MaterialAdminStatus, MaterialMeta> = {
+const materialAdminStatusMeta: Record<
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  MaterialMeta
+> = {
   approved: {
     color: 'green',
     label: 'Одобрено',
@@ -89,7 +93,7 @@ export const MATERIAL_PLATFORM_VALUES = [
   'telegram',
   'dzen',
   'instagram',
-] satisfies Platform[]
+] satisfies MaterialResponseDtoPlatform[]
 
 /**
  * Runtime-значения типов материалов в стабильном UI-порядке.
@@ -98,7 +102,7 @@ export const MATERIAL_TYPE_VALUES = [
   'post',
   'reel',
   'video',
-] satisfies MaterialType[]
+] satisfies MaterialResponseDtoType[]
 
 /**
  * Runtime-значения review-статусов материалов в стабильном UI-порядке.
@@ -108,26 +112,28 @@ export const MATERIAL_ADMIN_STATUS_VALUES = [
   'approved',
   'rejected',
   'archived',
-] satisfies MaterialAdminStatus[]
+] satisfies AdminMaterialLibraryResponseDtoAdminStatus[]
 
 /**
  * Возвращает локализованные UI-метаданные платформы материала.
  */
-export function getMaterialPlatformMeta(platform: Platform) {
+export function getMaterialPlatformMeta(platform: MaterialResponseDtoPlatform) {
   return materialPlatformMeta[platform]
 }
 
 /**
  * Возвращает локализованные UI-метаданные типа материала.
  */
-export function getMaterialTypeMeta(type: MaterialType) {
+export function getMaterialTypeMeta(type: MaterialResponseDtoType) {
   return materialTypeMeta[type]
 }
 
 /**
  * Возвращает локализованные UI-метаданные review-статуса материала.
  */
-export function getMaterialAdminStatusMeta(status: MaterialAdminStatus) {
+export function getMaterialAdminStatusMeta(
+  status: AdminMaterialLibraryResponseDtoAdminStatus,
+) {
   return materialAdminStatusMeta[status]
 }
 
@@ -219,7 +225,7 @@ export function formatMaterialPublishedDate(publishedAt: string) {
  * @returns `—`, если backend не вернул ни excerpt, ни title, ни text.
  */
 export function getMaterialLibraryPreviewText(
-  material: AdminMaterialLibraryItem,
+  material: AdminMaterialLibraryResponseDto,
 ) {
   return material.excerpt ?? material.title ?? material.text ?? '—'
 }
@@ -230,7 +236,7 @@ export function getMaterialLibraryPreviewText(
  * @returns Заголовок материала или fallback для импортированных материалов без title.
  */
 export function getPublicMaterialTitleText(
-  material: Pick<PublicMaterial, 'title'>,
+  material: Pick<MaterialResponseDto, 'title'>,
 ) {
   return material.title ?? 'Материал без названия'
 }
@@ -241,7 +247,7 @@ export function getPublicMaterialTitleText(
  * @returns `Ручной материал` для материалов без content source.
  */
 export function getMaterialLibrarySourceTitle(
-  material: AdminMaterialLibraryItem,
+  material: AdminMaterialLibraryResponseDto,
 ) {
   return material.source?.displayName ?? 'Ручной материал'
 }

@@ -1,9 +1,9 @@
 import { useUpdateMaterialAdminStatusMutation } from '@/entities/material/model/material-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
-  AdminMaterialLibraryItem,
-  MaterialAdminStatus,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  AdminMaterialLibraryResponseDtoAdminStatus,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -38,7 +38,7 @@ const mockedUseUpdateMaterialAdminStatusMutation = vi.mocked(
   useUpdateMaterialAdminStatusMutation,
 )
 
-const material: AdminMaterialLibraryItem = {
+const material: AdminMaterialLibraryResponseDto = {
   adminStatus: 'pending',
   durationSec: null,
   excerpt: 'Пост из Telegram',
@@ -72,11 +72,11 @@ const renderActions = (value = material) => {
 
 type StatusMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: AdminMaterialLibraryItem) => void
+  onSuccess?: (material: AdminMaterialLibraryResponseDto) => void
 }
 
 type StatusMutationVariables = {
-  adminStatus: MaterialAdminStatus
+  adminStatus: AdminMaterialLibraryResponseDtoAdminStatus
   materialId: string
 }
 

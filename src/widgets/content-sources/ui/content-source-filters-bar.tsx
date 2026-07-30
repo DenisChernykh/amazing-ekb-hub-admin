@@ -3,9 +3,9 @@ import {
   getContentSourceStatusOptions,
 } from '@/entities/content-source/ui/content-source-meta'
 import type {
-  ContentSourcePlatform,
-  ContentSourceStatus,
-} from '@/shared/api/generated/model'
+  ContentSourceResponseDtoPlatform,
+  ContentSourceResponseDtoStatus,
+} from '@/shared/api'
 import { Flex, Select } from 'antd'
 import type { ContentSourceFiltersState } from '../model/content-source-filters'
 import styles from './content-sources-screen.module.css'
@@ -29,7 +29,7 @@ export function ContentSourceFiltersBar({
 }: ContentSourceFiltersBarProps) {
   return (
     <Flex className={styles.filters} gap={12} wrap>
-      <Select<ContentSourcePlatform | typeof allValue>
+      <Select<ContentSourceResponseDtoPlatform | typeof allValue>
         className={styles.filter}
         onChange={(value) => {
           onChange({
@@ -43,7 +43,7 @@ export function ContentSourceFiltersBar({
         ]}
         value={filters.platform ?? allValue}
       />
-      <Select<ContentSourceStatus | typeof allValue>
+      <Select<ContentSourceResponseDtoStatus | typeof allValue>
         className={styles.filter}
         onChange={(value) => {
           onChange({

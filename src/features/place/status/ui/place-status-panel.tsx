@@ -1,8 +1,8 @@
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
 import { getPlaceStatusFromValue } from '@/entities/place/model/place-status'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
+import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PlaceStatus } from '@/shared/api/generated/model'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   Alert,
@@ -18,13 +18,13 @@ import {
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-const statusHint: Record<PlaceStatus, string> = {
+const statusHint: Record<AdminPlaceSummaryResponseDtoStatus, string> = {
   active: 'Место видно в публичном каталоге.',
   hidden: 'Место скрыто из публичного каталога, но доступно в админке.',
 }
 
 const statusAction: Record<
-  PlaceStatus,
+  AdminPlaceSummaryResponseDtoStatus,
   { icon: ReactNode; label: string; successMessage: string }
 > = {
   active: {
@@ -62,7 +62,7 @@ const statusOptions = [
 
 type PlaceStatusPanelProps = {
   placeId: string
-  status: PlaceStatus
+  status: AdminPlaceSummaryResponseDtoStatus
 }
 
 /**
@@ -72,7 +72,8 @@ type PlaceStatusPanelProps = {
  */
 export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
   const { message } = AntdApp.useApp()
-  const [selectedStatus, setSelectedStatus] = useState<PlaceStatus>(status)
+  const [selectedStatus, setSelectedStatus] =
+    useState<AdminPlaceSummaryResponseDtoStatus>(status)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false)
   const selectedAction = statusAction[selectedStatus]

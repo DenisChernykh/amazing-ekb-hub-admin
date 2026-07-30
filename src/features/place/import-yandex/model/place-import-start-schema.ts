@@ -1,4 +1,4 @@
-import { AdminPlaceImportsStartBody } from '@/shared/api/generated-zod/admin-place-imports/admin-place-imports.zod'
+import { AdminPlaceImportsStartBody } from '@/shared/api'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { z } from 'zod'
 

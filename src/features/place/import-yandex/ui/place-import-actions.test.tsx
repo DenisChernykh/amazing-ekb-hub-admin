@@ -2,7 +2,7 @@ import {
   useCancelPlaceImportMutation,
   useConfirmPlaceImportMutation,
 } from '@/entities/place-import/model/place-import-mutations'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -22,7 +22,7 @@ vi.mock('antd', async () => {
   return { ...actual, App }
 })
 
-const preview: PlaceImportOperation = {
+const preview: PlaceImportOperationResponseDto = {
   attempt: 1,
   captchaExpiresAt: null,
   category: null,

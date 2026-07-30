@@ -1,5 +1,5 @@
 import { useUpdateContentSourceMutation } from '@/entities/content-source/model/content-source-mutations'
-import type { ContentSource } from '@/shared/api/generated/model'
+import type { ContentSourceResponseDto } from '@/shared/api'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -85,7 +85,7 @@ const mockedUseUpdateContentSourceMutation = vi.mocked(
   useUpdateContentSourceMutation,
 )
 
-const contentSource: ContentSource = {
+const contentSource: ContentSourceResponseDto = {
   channelId: '-100123',
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',

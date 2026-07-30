@@ -1,6 +1,6 @@
 import { CreateCategoryDrawer } from '@/features/category/create/ui/create-category-drawer'
 import { EditCategoryDrawer } from '@/features/category/edit/ui/edit-category-drawer'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 
 /**
  * Рендерит create/edit drawers, которыми управляет categories screen.
@@ -11,7 +11,7 @@ export function CategoriesDrawers({
   onCloseCreate,
   onCloseEdit,
 }: {
-  editingCategory: AdminPlaceCategory | null
+  editingCategory: PlaceCategoryResponseDto | null
   isCreateOpen: boolean
   onCloseCreate: () => void
   onCloseEdit: () => void

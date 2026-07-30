@@ -6,8 +6,8 @@ import {
 import { createMaterialFormSchema } from '@/features/material/form/model/material-form-schema'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
+import type { MaterialResponseDto } from '@/shared/api'
 import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -27,7 +27,7 @@ const createMaterialFormDefaultValues: MaterialFormValues = {
  */
 export type CreateMaterialDrawerProps = {
   onClose: () => void
-  onCreated?: (material: Material) => void
+  onCreated?: (material: MaterialResponseDto) => void
   open: boolean
   placeId: string
 }

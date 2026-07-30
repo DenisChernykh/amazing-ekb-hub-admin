@@ -53,9 +53,8 @@ OPENAPI_SPEC_SOURCE=/absolute/path/to/backend-worktree/docs/api/openapi.json \
 
 Сам artifact собирается в backend командой `pnpm run openapi:generate`; admin
 только валидирует, сохраняет локальный snapshot в `openapi/openapi.json` и
-запускает Orval для generated Zod. Существующий runtime API client продолжает
-генерироваться из `openapi.yaml`; его миграция на новый backend-контракт не
-входит в RHF/Zod-рефакторинг.
+запускает Orval для согласованных TypeScript-клиента и generated Zod-схем.
+Рукописный код импортирует курируемый контракт только через `@/shared/api`.
 
 ## Documentation
 

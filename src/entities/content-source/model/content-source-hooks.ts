@@ -1,10 +1,12 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
+import type {
+  AdminContentSourcesListParams,
+  ContentSourceListResponseDto,
+} from '@/shared/api'
 import {
-  getListContentSourcesQueryKey,
-  listContentSources,
-} from '@/shared/api/generated/admin/admin'
-import type { ContentSourceListResponse } from '@/shared/api/generated/operation/contentSourceListResponse'
-import type { ListContentSourcesParams } from '@/shared/api/generated/operation/listContentSourcesParams'
+  adminContentSourcesList,
+  getAdminContentSourcesListQueryKey,
+} from '@/shared/api'
+import type { ApiClientError } from '@/shared/api/client/api-error'
 import { useQuery } from '@tanstack/react-query'
 
 type ContentSourcesQueryOptions = {
@@ -18,12 +20,12 @@ type ContentSourcesQueryOptions = {
  * только `enabled` для условочной lookup-загрузки.
  */
 export function useContentSourcesQuery(
-  params?: ListContentSourcesParams,
+  params?: AdminContentSourcesListParams,
   options?: ContentSourcesQueryOptions,
 ) {
-  return useQuery<ContentSourceListResponse, ApiClientError>({
+  return useQuery<ContentSourceListResponseDto, ApiClientError>({
     enabled: options?.enabled,
-    queryFn: ({ signal }) => listContentSources(params, undefined, signal),
-    queryKey: getListContentSourcesQueryKey(params),
+    queryFn: ({ signal }) => adminContentSourcesList(params, undefined, signal),
+    queryKey: getAdminContentSourcesListQueryKey(params),
   })
 }

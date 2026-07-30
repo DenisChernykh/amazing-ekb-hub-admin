@@ -2,8 +2,12 @@ import {
   useClearPinnedMaterialMutation,
   useSetPinnedMaterialMutation,
 } from '@/entities/place/model/place-mutations'
+import type {
+  MaterialResponseDto,
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail, PublicMaterial } from '@/shared/api/generated/model'
 import {
   fireEvent,
   render,
@@ -79,12 +83,15 @@ const mockedUseClearPinnedMaterialMutation = vi.mocked(
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const materials: PublicMaterial[] = [
+const materials: MaterialResponseDto[] = [
   {
     durationSec: null,
     id: 'material-1',
@@ -94,6 +101,7 @@ const materials: PublicMaterial[] = [
     title: 'Обзор комплекса',
     type: 'post',
     redirectUrl: '/v1/materials/material-1/go',
+    url: 'https://t.me/amazing_ekb/1',
   },
   {
     durationSec: 90,
@@ -104,16 +112,17 @@ const materials: PublicMaterial[] = [
     title: 'С чего начать',
     type: 'video',
     redirectUrl: '/v1/materials/material-2/go',
+    url: 'https://dzen.ru/video/watch/2',
   },
 ]
 
-const untitledMaterial: PublicMaterial = {
+const untitledMaterial: MaterialResponseDto = {
   ...materials[0],
   id: 'material-untitled',
   title: null,
 }
 
-const updatedPlace: PlaceDetail = {
+const updatedPlace: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {
@@ -139,7 +148,7 @@ const renderPinnedMaterialPanel = ({
 }: {
   isClearPending?: boolean
   isPending?: boolean
-  pinnedMaterial?: PublicMaterial | null
+  pinnedMaterial?: MaterialResponseDto | null
   placeId?: string
 } = {}) => {
   const clearMutate = vi.fn()

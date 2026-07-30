@@ -1,7 +1,7 @@
 import {
   AdminCategoriesCreateBody,
   AdminCategoriesUpdateBody,
-} from '@/shared/api/generated-zod/admin-categories/admin-categories.zod'
+} from '@/shared/api'
 import { z } from 'zod'
 
 const categorySlugGuidance =

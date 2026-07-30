@@ -4,8 +4,12 @@ import {
   BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
   saveBulkModerationDraftSelection,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
+import type {
+  AdminPlaceSummaryResponseDto,
+  CurrentUserResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { AuthMeResponse, PlaceSummary } from '@/shared/api/generated/model'
 import { render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -17,22 +21,27 @@ vi.mock('@/entities/session/model/session-hooks', () => ({
 
 const mockedUseCurrentSessionQuery = vi.mocked(useCurrentSessionQuery)
 
-const admin: AuthMeResponse = {
-  email: 'admin@example.test',
-  id: 'admin-1',
-  role: 'admin',
+const admin: CurrentUserResponseDto = {
+  normalizedEmail: 'admin@example.test',
+  permissions: ['admin.dashboard.read'],
+  roleKeys: ['admin'],
+  userId: 'admin-1',
 }
 
 const poolsCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
-}
+} satisfies PlaceCategoryResponseDto
 
-const activePlace: PlaceSummary = {
+const activePlace: AdminPlaceSummaryResponseDto = {
   category: poolsCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'aquacenter',
   status: 'active',
@@ -44,7 +53,7 @@ const activePlace: PlaceSummary = {
 function PrivateRouteProbe() {
   const user = useCurrentUser()
 
-  return <div>Private route for {user.email}</div>
+  return <div>Private route for {user.normalizedEmail}</div>
 }
 
 const renderProtectedRoute = () => {

@@ -1,11 +1,11 @@
-import { ApiClientError } from '@/shared/api/client/api-error'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import {
-  getGetPlaceImportOperationQueryKey,
-  getListAdminPlaceCategoriesQueryKey,
-  getListAdminPlacesQueryKey,
-  readPlaceImportEvents,
-} from '@/shared/api/generated/admin/admin'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+  adminPlaceImportsGetEvents,
+  getAdminCategoriesListQueryKey,
+  getAdminPlaceImportsGetQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -15,13 +15,14 @@ import {
   usePlaceImportEvents,
 } from './place-import-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getGetPlaceImportOperationQueryKey: vi.fn(({ operationId }) => [
-    `/admin/place-imports/${operationId}`,
+vi.mock('@/shared/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/api')>()),
+  getAdminPlaceImportsGetQueryKey: vi.fn(({ operationId }) => [
+    `/v1/admin/place-imports/${operationId}`,
   ]),
-  getListAdminPlaceCategoriesQueryKey: vi.fn(() => ['/admin/categories']),
-  getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
-  readPlaceImportEvents: vi.fn(),
+  getAdminCategoriesListQueryKey: vi.fn(() => ['/v1/admin/categories']),
+  getAdminPlacesListQueryKey: vi.fn(() => ['/v1/admin/places']),
+  adminPlaceImportsGetEvents: vi.fn(),
 }))
 
 class EventSourceMock {
@@ -54,8 +55,8 @@ class EventSourceMock {
 }
 
 const operation = (
-  overrides: Partial<PlaceImportOperation> = {},
-): PlaceImportOperation => ({
+  overrides: Partial<PlaceImportOperationResponseDto> = {},
+): PlaceImportOperationResponseDto => ({
   attempt: 0,
   captchaExpiresAt: null,
   category: null,
@@ -86,7 +87,7 @@ const createWrapper = (queryClient: QueryClient) =>
 describe('usePlaceImportEvents', () => {
   beforeEach(() => {
     EventSourceMock.instances = []
-    vi.mocked(readPlaceImportEvents).mockReset()
+    vi.mocked(adminPlaceImportsGetEvents).mockReset()
     vi.stubEnv('VITE_API_BASE_URL', '/v1')
     vi.stubGlobal('EventSource', EventSourceMock)
     vi.useFakeTimers()
@@ -102,11 +103,11 @@ describe('usePlaceImportEvents', () => {
     const queryClient = new QueryClient()
     const queued = operation({ version: 4 })
     queryClient.setQueryData(
-      getGetPlaceImportOperationQueryKey({ operationId: queued.id }),
+      getAdminPlaceImportsGetQueryKey({ operationId: queued.id }),
       queued,
     )
-    queryClient.setQueryData(getListAdminPlacesQueryKey(), { items: [] })
-    queryClient.setQueryData(getListAdminPlaceCategoriesQueryKey(), {
+    queryClient.setQueryData(getAdminPlacesListQueryKey(), { items: [] })
+    queryClient.setQueryData(getAdminCategoriesListQueryKey(), {
       items: [],
     })
 
@@ -136,12 +137,12 @@ describe('usePlaceImportEvents', () => {
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
     expect(
       queryClient.getQueryData(
-        getGetPlaceImportOperationQueryKey({ operationId: completed.id }),
+        getAdminPlaceImportsGetQueryKey({ operationId: completed.id }),
       ),
     ).toEqual(completed)
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListAdminPlaceCategoriesQueryKey(),
+        queryKey: getAdminCategoriesListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
   })
@@ -150,10 +151,10 @@ describe('usePlaceImportEvents', () => {
     const queryClient = new QueryClient()
     const queued = operation({ version: 2 })
     queryClient.setQueryData(
-      getGetPlaceImportOperationQueryKey({ operationId: queued.id }),
+      getAdminPlaceImportsGetQueryKey({ operationId: queued.id }),
       queued,
     )
-    vi.mocked(readPlaceImportEvents)
+    vi.mocked(adminPlaceImportsGetEvents)
       .mockResolvedValueOnce({
         events: [],
         operation: operation({ version: 3 }),
@@ -176,7 +177,7 @@ describe('usePlaceImportEvents', () => {
       await Promise.resolve()
     })
     expect(result.current.isPollingFallback).toBe(true)
-    expect(readPlaceImportEvents).toHaveBeenCalledWith(
+    expect(adminPlaceImportsGetEvents).toHaveBeenCalledWith(
       { operationId: 'operation-1' },
       { afterVersion: 2 },
       undefined,
@@ -186,7 +187,7 @@ describe('usePlaceImportEvents', () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(PLACE_IMPORT_POLL_INTERVAL_MS)
     })
-    expect(readPlaceImportEvents).toHaveBeenLastCalledWith(
+    expect(adminPlaceImportsGetEvents).toHaveBeenLastCalledWith(
       { operationId: 'operation-1' },
       { afterVersion: 3 },
       undefined,
@@ -196,17 +197,17 @@ describe('usePlaceImportEvents', () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(PLACE_IMPORT_POLL_INTERVAL_MS * 2)
     })
-    expect(readPlaceImportEvents).toHaveBeenCalledTimes(2)
+    expect(adminPlaceImportsGetEvents).toHaveBeenCalledTimes(2)
   })
 
   it('aborts an in-flight polling request when the operation becomes terminal', async () => {
     const queryClient = new QueryClient()
     const queued = operation({ version: 2 })
     queryClient.setQueryData(
-      getGetPlaceImportOperationQueryKey({ operationId: queued.id }),
+      getAdminPlaceImportsGetQueryKey({ operationId: queued.id }),
       queued,
     )
-    vi.mocked(readPlaceImportEvents).mockReturnValue(new Promise(() => {}))
+    vi.mocked(adminPlaceImportsGetEvents).mockReturnValue(new Promise(() => {}))
     const { rerender } = renderHook(
       ({ currentOperation }) => usePlaceImportEvents(currentOperation),
       {
@@ -219,7 +220,8 @@ describe('usePlaceImportEvents', () => {
       EventSourceMock.instances[0]?.emit('error')
       await Promise.resolve()
     })
-    const pollingSignal = vi.mocked(readPlaceImportEvents).mock.calls[0]?.[3]
+    const pollingSignal = vi.mocked(adminPlaceImportsGetEvents).mock
+      .calls[0]?.[3]
     expect(pollingSignal?.aborted).toBe(false)
 
     rerender({ currentOperation: operation({ status: 'failed', version: 3 }) })
@@ -237,17 +239,17 @@ describe('usePlaceImportEvents', () => {
 
     expect(EventSourceMock.instances).toHaveLength(0)
     expect(result.current.isPollingFallback).toBe(false)
-    expect(readPlaceImportEvents).not.toHaveBeenCalled()
+    expect(adminPlaceImportsGetEvents).not.toHaveBeenCalled()
   })
 
   it('exposes polling errors and clears them after a successful retry', async () => {
     const queryClient = new QueryClient()
     const queued = operation({ version: 2 })
     queryClient.setQueryData(
-      getGetPlaceImportOperationQueryKey({ operationId: queued.id }),
+      getAdminPlaceImportsGetQueryKey({ operationId: queued.id }),
       queued,
     )
-    vi.mocked(readPlaceImportEvents)
+    vi.mocked(adminPlaceImportsGetEvents)
       .mockRejectedValueOnce(
         new ApiClientError({
           kind: 'network',
@@ -279,10 +281,10 @@ describe('usePlaceImportEvents', () => {
     const queryClient = new QueryClient()
     const queued = operation({ version: 2 })
     queryClient.setQueryData(
-      getGetPlaceImportOperationQueryKey({ operationId: queued.id }),
+      getAdminPlaceImportsGetQueryKey({ operationId: queued.id }),
       queued,
     )
-    vi.mocked(readPlaceImportEvents).mockRejectedValueOnce(
+    vi.mocked(adminPlaceImportsGetEvents).mockRejectedValueOnce(
       new ApiClientError({
         kind: 'network',
         message: 'Connection lost',

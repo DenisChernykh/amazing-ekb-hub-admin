@@ -1,5 +1,5 @@
 import { useUpdateCategoryMutation } from '@/entities/category/model/category-mutations'
-import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -54,7 +54,7 @@ vi.mock('antd', async () => {
 
 const mockedUseUpdateCategoryMutation = vi.mocked(useUpdateCategoryMutation)
 
-const category: AdminPlaceCategory = {
+const category: PlaceCategoryResponseDto = {
   coverImageUrl: null,
   createdAt: '2026-07-03T10:00:00.000Z',
   id: 'category_spa',
@@ -62,7 +62,7 @@ const category: AdminPlaceCategory = {
   status: 'active',
   title: 'SPA',
   updatedAt: '2026-07-03T10:00:00.000Z',
-}
+} satisfies PlaceCategoryResponseDto
 
 const renderEditDrawer = () => {
   const onClose = vi.fn()

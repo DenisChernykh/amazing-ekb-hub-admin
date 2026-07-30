@@ -10,9 +10,10 @@ describe('AdminDashboard', () => {
       <MemoryRouter>
         <CurrentUserContext.Provider
           value={{
-            email: 'admin@example.test',
-            id: 'admin-1',
-            role: 'admin',
+            normalizedEmail: 'admin@example.test',
+            permissions: ['admin.dashboard.read'],
+            roleKeys: ['admin'],
+            userId: 'admin-1',
           }}
         >
           <AdminDashboard />

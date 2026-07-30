@@ -5,7 +5,7 @@ import {
   getMaterialTypeMeta,
   getPublicMaterialTitleText,
 } from '@/entities/material/ui/material-meta'
-import type { PublicMaterial } from '@/shared/api/generated/model'
+import type { MaterialResponseDto } from '@/shared/api'
 import type { TableColumnsType } from 'antd'
 import { Alert, Button, Empty, Space, Table, Tag } from 'antd'
 
@@ -25,9 +25,9 @@ const getPlaceMaterialColumns = ({
 }: {
   hideLinkError: PlaceMaterialHideLinkError | null
   isHideLinkPending: boolean
-  onEdit: (material: PublicMaterial) => void
-  onHideLink: (material: PublicMaterial) => void
-}): TableColumnsType<PublicMaterial> => [
+  onEdit: (material: MaterialResponseDto) => void
+  onHideLink: (material: MaterialResponseDto) => void
+}): TableColumnsType<MaterialResponseDto> => [
   {
     dataIndex: 'title',
     key: 'title',
@@ -37,7 +37,7 @@ const getPlaceMaterialColumns = ({
   {
     dataIndex: 'platform',
     key: 'platform',
-    render: (platform: PublicMaterial['platform']) => {
+    render: (platform: MaterialResponseDto['platform']) => {
       const meta = getMaterialPlatformMeta(platform)
 
       return <Tag color={meta.color}>{meta.label}</Tag>
@@ -47,7 +47,7 @@ const getPlaceMaterialColumns = ({
   {
     dataIndex: 'type',
     key: 'type',
-    render: (type: PublicMaterial['type']) => {
+    render: (type: MaterialResponseDto['type']) => {
       const meta = getMaterialTypeMeta(type)
 
       return <Tag color={meta.color}>{meta.label}</Tag>
@@ -63,7 +63,7 @@ const getPlaceMaterialColumns = ({
   {
     dataIndex: 'durationSec',
     key: 'durationSec',
-    render: (durationSec: PublicMaterial['durationSec']) =>
+    render: (durationSec: MaterialResponseDto['durationSec']) =>
       formatMaterialDuration(durationSec),
     title: 'Длительность',
   },
@@ -114,9 +114,9 @@ export function PlaceMaterialsTable({
   hideLinkError: PlaceMaterialHideLinkError | null
   isHideLinkPending: boolean
   isLoading: boolean
-  materials: PublicMaterial[]
-  onEdit: (material: PublicMaterial) => void
-  onHideLink: (material: PublicMaterial) => void
+  materials: MaterialResponseDto[]
+  onEdit: (material: MaterialResponseDto) => void
+  onHideLink: (material: MaterialResponseDto) => void
 }) {
   return (
     <Table

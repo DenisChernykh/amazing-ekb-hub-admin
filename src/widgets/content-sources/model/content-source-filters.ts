@@ -3,10 +3,10 @@ import {
   CONTENT_SOURCE_STATUS_VALUES,
 } from '@/entities/content-source/ui/content-source-meta'
 import type {
-  ContentSourcePlatform,
-  ContentSourceStatus,
-} from '@/shared/api/generated/model'
-import type { ListContentSourcesParams } from '@/shared/api/generated/operation/listContentSourcesParams'
+  AdminContentSourcesListParams,
+  ContentSourceResponseDtoPlatform,
+  ContentSourceResponseDtoStatus,
+} from '@/shared/api'
 import { isOneOf } from '@/shared/lib/type/is-one-of'
 
 /**
@@ -15,19 +15,19 @@ import { isOneOf } from '@/shared/lib/type/is-one-of'
  * @remarks `null` означает отсутствие соответствующего query param и backend-режим без фильтра.
  */
 export type ContentSourceFiltersState = {
-  platform: ContentSourcePlatform | null
-  status: ContentSourceStatus | null
+  platform: ContentSourceResponseDtoPlatform | null
+  status: ContentSourceResponseDtoStatus | null
 }
 
 const getContentSourcePlatformFromValue = (
   value: string | number | null,
-): ContentSourcePlatform | null => {
+): ContentSourceResponseDtoPlatform | null => {
   return isOneOf(CONTENT_SOURCE_PLATFORM_VALUES, value) ? value : null
 }
 
 const getContentSourceStatusFromValue = (
   value: string | number | null,
-): ContentSourceStatus | null => {
+): ContentSourceResponseDtoStatus | null => {
   return isOneOf(CONTENT_SOURCE_STATUS_VALUES, value) ? value : null
 }
 
@@ -46,7 +46,7 @@ export const getContentSourceFiltersFromSearch = (
  */
 export const getContentSourceQueryParams = (
   filters: ContentSourceFiltersState,
-): ListContentSourcesParams => ({
+): AdminContentSourcesListParams => ({
   ...(filters.platform ? { platform: filters.platform } : {}),
   ...(filters.status ? { status: filters.status } : {}),
 })

@@ -1,21 +1,21 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import {
-  createPlaceMaterial,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminMaterialLibraryQueryKey,
-  getListAdminPlaceMaterialsQueryKey,
-  hidePlaceMaterialLink,
-  linkPlaceMaterial,
-  updateMaterial,
-  updateMaterialAdminStatus,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  AdminMaterialLibraryItem,
-  CreateMaterialRequest,
-  Material,
-  MaterialAdminStatus,
-  UpdateMaterialRequest,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  CreateMaterialDto,
+  MaterialResponseDto,
+  UpdateMaterialDto,
+} from '@/shared/api'
+import {
+  adminMaterialsUpdate,
+  adminMaterialsUpdateStatus,
+  adminPlaceMaterialsCreate,
+  adminPlaceMaterialsHide,
+  adminPlaceMaterialsLink,
+  getAdminMaterialsListQueryKey,
+  getAdminPlaceMaterialsListQueryKey,
+  getAdminPlacesGetQueryKey,
+} from '@/shared/api'
+import type { ApiClientError } from '@/shared/api/client/api-error'
 import type { QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -24,7 +24,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
  */
 export type CreatePlaceMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: Material) => Promise<void> | void
+  onSuccess?: (material: MaterialResponseDto) => Promise<void> | void
 }
 
 /**
@@ -32,7 +32,7 @@ export type CreatePlaceMaterialMutationOptions = {
  */
 export type UpdateMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: Material) => Promise<void> | void
+  onSuccess?: (material: MaterialResponseDto) => Promise<void> | void
 }
 
 /**
@@ -40,7 +40,9 @@ export type UpdateMaterialMutationOptions = {
  */
 export type UpdateMaterialAdminStatusMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: AdminMaterialLibraryItem) => Promise<void> | void
+  onSuccess?: (
+    material: AdminMaterialLibraryResponseDto,
+  ) => Promise<void> | void
 }
 
 /**
@@ -48,7 +50,7 @@ export type UpdateMaterialAdminStatusMutationOptions = {
  */
 export type LinkPlaceMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: Material) => Promise<void> | void
+  onSuccess?: (material: MaterialResponseDto) => Promise<void> | void
 }
 
 /**
@@ -63,7 +65,7 @@ export type HidePlaceMaterialLinkMutationOptions = {
  * Переменные создания материала места через entity bridge.
  */
 export type CreatePlaceMaterialMutationVariables = {
-  data: CreateMaterialRequest
+  data: CreateMaterialDto
   pathParams: {
     placeId: string
   }
@@ -76,7 +78,7 @@ export type CreatePlaceMaterialMutationVariables = {
  * но нужен entity bridge для инвалидации списка материалов и admin detail места.
  */
 export type UpdateMaterialMutationVariables = {
-  data: UpdateMaterialRequest
+  data: UpdateMaterialDto
   materialId: string
   placeId: string
 }
@@ -85,7 +87,7 @@ export type UpdateMaterialMutationVariables = {
  * Переменные смены review-статуса материала через entity bridge.
  */
 export type UpdateMaterialAdminStatusMutationVariables = {
-  adminStatus: MaterialAdminStatus
+  adminStatus: AdminMaterialLibraryResponseDtoAdminStatus
   materialId: string
 }
 
@@ -110,7 +112,7 @@ export type HidePlaceMaterialLinkMutationVariables = {
  */
 export const invalidateMaterialLibraryQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListAdminMaterialLibraryQueryKey(),
+    queryKey: getAdminMaterialsListQueryKey(),
   })
 }
 
@@ -122,7 +124,7 @@ export const invalidatePlaceMaterialsListQuery = (
   placeId: string,
 ) => {
   return queryClient.invalidateQueries({
-    queryKey: getListAdminPlaceMaterialsQueryKey({ placeId }),
+    queryKey: getAdminPlaceMaterialsListQueryKey({ placeId }),
   })
 }
 
@@ -131,7 +133,7 @@ const invalidateAdminPlaceDetailQuery = (
   placeId: string,
 ) => {
   return queryClient.invalidateQueries({
-    queryKey: getGetAdminPlaceDetailQueryKey({ placeId }),
+    queryKey: getAdminPlacesGetQueryKey({ placeId }),
   })
 }
 
@@ -167,11 +169,12 @@ export function useCreatePlaceMaterialMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    Material,
+    MaterialResponseDto,
     ApiClientError,
     CreatePlaceMaterialMutationVariables
   >({
-    mutationFn: ({ data, pathParams }) => createPlaceMaterial(pathParams, data),
+    mutationFn: ({ data, pathParams }) =>
+      adminPlaceMaterialsCreate(pathParams, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -196,19 +199,21 @@ export function useUpdateMaterialMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useMutation<Material, ApiClientError, UpdateMaterialMutationVariables>(
-    {
-      mutationFn: ({ data, materialId }) =>
-        updateMaterial({ materialId }, data),
-      onError: (error) => {
-        options?.onError?.(error)
-      },
-      onSuccess: async (material, variables) => {
-        await invalidateMaterialDependencies(queryClient, variables.placeId)
-        await options?.onSuccess?.(material)
-      },
+  return useMutation<
+    MaterialResponseDto,
+    ApiClientError,
+    UpdateMaterialMutationVariables
+  >({
+    mutationFn: ({ data, materialId }) =>
+      adminMaterialsUpdate({ materialId }, data),
+    onError: (error) => {
+      options?.onError?.(error)
     },
-  )
+    onSuccess: async (material, variables) => {
+      await invalidateMaterialDependencies(queryClient, variables.placeId)
+      await options?.onSuccess?.(material)
+    },
+  })
 }
 
 /**
@@ -222,12 +227,12 @@ export function useUpdateMaterialAdminStatusMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    AdminMaterialLibraryItem,
+    AdminMaterialLibraryResponseDto,
     ApiClientError,
     UpdateMaterialAdminStatusMutationVariables
   >({
     mutationFn: ({ adminStatus, materialId }) =>
-      updateMaterialAdminStatus({ materialId }, { adminStatus }),
+      adminMaterialsUpdateStatus({ materialId }, { adminStatus }),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -250,12 +255,12 @@ export function useLinkPlaceMaterialMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    Material,
+    MaterialResponseDto,
     ApiClientError,
     LinkPlaceMaterialMutationVariables
   >({
     mutationFn: ({ materialId, placeId }) =>
-      linkPlaceMaterial({ materialId, placeId }),
+      adminPlaceMaterialsLink({ materialId, placeId }),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -283,7 +288,7 @@ export function useHidePlaceMaterialLinkMutation(
     HidePlaceMaterialLinkMutationVariables
   >({
     mutationFn: ({ materialId, placeId }) =>
-      hidePlaceMaterialLink({ materialId, placeId }),
+      adminPlaceMaterialsHide({ materialId, placeId }),
     onError: (error) => {
       options?.onError?.(error)
     },

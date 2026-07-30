@@ -1,6 +1,6 @@
 import { useUpdateMaterialMutation } from '@/entities/material/model/material-mutations'
 import type { EditableMaterial } from '@/features/material/form/model/material-form'
-import type { Material } from '@/shared/api/generated/model'
+import type { MaterialResponseDto } from '@/shared/api'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -121,12 +121,13 @@ vi.mock('antd', async () => {
 
 const mockedUseUpdateMaterialMutation = vi.mocked(useUpdateMaterialMutation)
 
-const material: Material = {
+const material: MaterialResponseDto = {
   durationSec: 125,
   id: 'material-1',
   placeId: 'place-1',
   platform: 'telegram',
   publishedAt: '2026-03-20T10:30:00+05:00',
+  redirectUrl: null,
   title: 'Обзор комплекса',
   type: 'post',
   url: 'https://example.com/material/321',
@@ -270,6 +271,7 @@ describe('EditMaterialDrawer', () => {
       placeId: material.placeId,
       platform: material.platform,
       publishedAt: material.publishedAt,
+      redirectUrl: null,
       title: material.title,
       type: material.type,
     }

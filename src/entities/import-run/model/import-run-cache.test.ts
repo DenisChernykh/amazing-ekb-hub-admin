@@ -1,10 +1,12 @@
+import type {
+  ImportRunListResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import {
-  getListAdminMaterialLibraryQueryKey,
-  getListContentSourcesQueryKey,
-  getListImportRunsQueryKey,
-} from '@/shared/api/generated/admin/admin'
-import type { ImportRun } from '@/shared/api/generated/model'
-import type { ImportRunListResponse } from '@/shared/api/generated/operation'
+  getAdminContentSourcesListQueryKey,
+  getAdminImportRunsListQueryKey,
+  getAdminMaterialsListQueryKey,
+} from '@/shared/api'
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 import {
@@ -17,7 +19,9 @@ import {
   upsertImportRunInList,
 } from './import-run-cache'
 
-const makeRun = (overrides: Partial<ImportRun>): ImportRun => ({
+const makeRun = (
+  overrides: Partial<ImportRunResponseDto>,
+): ImportRunResponseDto => ({
   createdAt: '2026-06-24T08:00:00.000Z',
   createdCount: 0,
   errorMessage: null,
@@ -68,7 +72,7 @@ describe('import run cache helpers', () => {
   it('upserts import runs without duplicating existing rows', () => {
     const queuedRun = makeRun({ id: 'run-queued', status: 'queued' })
     const runningRun = makeRun({ id: 'run-running', status: 'running' })
-    const response: ImportRunListResponse = {
+    const response: ImportRunListResponseDto = {
       items: [queuedRun],
     }
 
@@ -100,53 +104,59 @@ describe('import run cache helpers', () => {
       status: 'queued',
     })
 
-    queryClient.setQueryData(getListImportRunsQueryKey(), {
+    queryClient.setQueryData(getAdminImportRunsListQueryKey(), {
       items: [queuedRun],
     })
     queryClient.setQueryData(
-      getListImportRunsQueryKey({ sourceId: 'source-1' }),
+      getAdminImportRunsListQueryKey({ sourceId: 'source-1' }),
       {
         items: [queuedRun],
       },
     )
     queryClient.setQueryData(
-      getListImportRunsQueryKey({ sourceId: 'source-2' }),
+      getAdminImportRunsListQueryKey({ sourceId: 'source-2' }),
       {
         items: [otherRun],
       },
     )
-    queryClient.setQueryData(getListImportRunsQueryKey({ status: 'queued' }), {
-      items: [queuedRun, otherRun],
-    })
-    queryClient.setQueryData(getListImportRunsQueryKey({ status: 'running' }), {
-      items: [],
-    })
+    queryClient.setQueryData(
+      getAdminImportRunsListQueryKey({ status: 'queued' }),
+      {
+        items: [queuedRun, otherRun],
+      },
+    )
+    queryClient.setQueryData(
+      getAdminImportRunsListQueryKey({ status: 'running' }),
+      {
+        items: [],
+      },
+    )
 
     syncImportRunQueryCache(queryClient, runningRun)
 
     expect(
-      queryClient.getQueryData<ImportRunListResponse>(
-        getListImportRunsQueryKey(),
+      queryClient.getQueryData<ImportRunListResponseDto>(
+        getAdminImportRunsListQueryKey(),
       )?.items,
     ).toEqual([runningRun])
     expect(
-      queryClient.getQueryData<ImportRunListResponse>(
-        getListImportRunsQueryKey({ sourceId: 'source-1' }),
+      queryClient.getQueryData<ImportRunListResponseDto>(
+        getAdminImportRunsListQueryKey({ sourceId: 'source-1' }),
       )?.items,
     ).toEqual([runningRun])
     expect(
-      queryClient.getQueryData<ImportRunListResponse>(
-        getListImportRunsQueryKey({ sourceId: 'source-2' }),
+      queryClient.getQueryData<ImportRunListResponseDto>(
+        getAdminImportRunsListQueryKey({ sourceId: 'source-2' }),
       )?.items,
     ).toEqual([otherRun])
     expect(
-      queryClient.getQueryData<ImportRunListResponse>(
-        getListImportRunsQueryKey({ status: 'queued' }),
+      queryClient.getQueryData<ImportRunListResponseDto>(
+        getAdminImportRunsListQueryKey({ status: 'queued' }),
       )?.items,
     ).toEqual([otherRun])
     expect(
-      queryClient.getQueryData<ImportRunListResponse>(
-        getListImportRunsQueryKey({ status: 'running' }),
+      queryClient.getQueryData<ImportRunListResponseDto>(
+        getAdminImportRunsListQueryKey({ status: 'running' }),
       )?.items,
     ).toEqual([runningRun])
 
@@ -154,7 +164,7 @@ describe('import run cache helpers', () => {
 
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListImportRunsQueryKey(),
+        queryKey: getAdminImportRunsListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
   })
@@ -164,7 +174,7 @@ describe('import run cache helpers', () => {
     const queuedRun = makeRun({ id: 'run-queued', status: 'queued' })
 
     queryClient.setQueryData(
-      getListImportRunsQueryKey({ sourceId: 'source-1' }),
+      getAdminImportRunsListQueryKey({ sourceId: 'source-1' }),
       {
         items: [queuedRun],
       },
@@ -179,9 +189,11 @@ describe('import run cache helpers', () => {
   it('invalidates import completion dependency caches', async () => {
     const queryClient = new QueryClient()
 
-    queryClient.setQueryData(getListImportRunsQueryKey(), { items: [] })
-    queryClient.setQueryData(getListContentSourcesQueryKey(), { items: [] })
-    queryClient.setQueryData(getListAdminMaterialLibraryQueryKey(), {
+    queryClient.setQueryData(getAdminImportRunsListQueryKey(), { items: [] })
+    queryClient.setQueryData(getAdminContentSourcesListQueryKey(), {
+      items: [],
+    })
+    queryClient.setQueryData(getAdminMaterialsListQueryKey(), {
       items: [],
     })
 
@@ -189,17 +201,17 @@ describe('import run cache helpers', () => {
 
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListImportRunsQueryKey(),
+        queryKey: getAdminImportRunsListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListContentSourcesQueryKey(),
+        queryKey: getAdminContentSourcesListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListAdminMaterialLibraryQueryKey(),
+        queryKey: getAdminMaterialsListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
   })

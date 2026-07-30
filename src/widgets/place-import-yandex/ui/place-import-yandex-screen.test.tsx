@@ -3,8 +3,8 @@ import {
   usePlaceImportEvents,
   usePlaceImportOperationQuery,
 } from '@/entities/place-import/model/place-import-hooks'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,8 +28,8 @@ vi.mock('@/features/place/import-yandex/ui/place-import-start-form', () => ({
 }))
 
 const completedOperation = (
-  outcome: PlaceImportOperation['outcome'],
-): PlaceImportOperation => ({
+  outcome: PlaceImportOperationResponseDto['outcome'],
+): PlaceImportOperationResponseDto => ({
   attempt: 1,
   captchaExpiresAt: null,
   category: null,
@@ -49,7 +49,9 @@ const completedOperation = (
   version: 4,
 })
 
-const queuedOperation = (id = 'operation-active'): PlaceImportOperation => ({
+const queuedOperation = (
+  id = 'operation-active',
+): PlaceImportOperationResponseDto => ({
   ...completedOperation(null),
   id,
   outcome: null,
@@ -99,7 +101,9 @@ function RecoveredOperationRoute() {
   )
 }
 
-const renderCompleted = (outcome: PlaceImportOperation['outcome']) => {
+const renderCompleted = (
+  outcome: PlaceImportOperationResponseDto['outcome'],
+) => {
   vi.mocked(usePlaceImportOperationQuery).mockReturnValue({
     data: completedOperation(outcome),
     isError: false,

@@ -1,11 +1,14 @@
+import type {
+  AdminImportRunsListParams,
+  ImportRunListResponseDto,
+  ImportRunResponseDto,
+  ImportRunResponseDtoStatus,
+} from '@/shared/api'
 import {
-  getListAdminMaterialLibraryQueryKey,
-  getListContentSourcesQueryKey,
-  getListImportRunsQueryKey,
-} from '@/shared/api/generated/admin/admin'
-import type { ImportRun, ImportRunStatus } from '@/shared/api/generated/model'
-import type { ImportRunListResponse } from '@/shared/api/generated/operation'
-import type { ListImportRunsParams } from '@/shared/api/generated/operation/listImportRunsParams'
+  getAdminContentSourcesListQueryKey,
+  getAdminImportRunsListQueryKey,
+  getAdminMaterialsListQueryKey,
+} from '@/shared/api'
 import { isOneOf } from '@/shared/lib/type/is-one-of'
 import { isRecord } from '@/shared/lib/type/is-record'
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
@@ -15,21 +18,25 @@ const importRunStatusValues = [
   'running',
   'completed',
   'failed',
-] satisfies ImportRunStatus[]
+] satisfies ImportRunResponseDtoStatus[]
 
-const activeImportRunStatuses = new Set<ImportRunStatus>(['queued', 'running'])
+const activeImportRunStatuses = new Set<ImportRunResponseDtoStatus>([
+  'queued',
+  'running',
+])
 
-const terminalImportRunStatuses = new Set<ImportRunStatus>([
+const terminalImportRunStatuses = new Set<ImportRunResponseDtoStatus>([
   'completed',
   'failed',
 ])
 
-const isImportRunStatus = (value: unknown): value is ImportRunStatus =>
-  isOneOf(importRunStatusValues, value)
+const isImportRunStatus = (
+  value: unknown,
+): value is ImportRunResponseDtoStatus => isOneOf(importRunStatusValues, value)
 
 const getImportRunQueryParams = (
   queryKey: QueryKey,
-): ListImportRunsParams | undefined => {
+): AdminImportRunsListParams | undefined => {
   const [, params] = queryKey
 
   if (!isRecord(params)) {
@@ -45,8 +52,8 @@ const getImportRunQueryParams = (
 }
 
 const matchesImportRunParams = (
-  importRun: ImportRun,
-  params: ListImportRunsParams | undefined,
+  importRun: ImportRunResponseDto,
+  params: AdminImportRunsListParams | undefined,
 ) => {
   if (params?.sourceId && params.sourceId !== importRun.sourceId) {
     return false
@@ -60,7 +67,7 @@ const matchesImportRunParams = (
 }
 
 const removeImportRunFromList = (
-  response: ImportRunListResponse | undefined,
+  response: ImportRunListResponseDto | undefined,
   importRunId: string,
 ) => {
   if (!response) {
@@ -73,9 +80,9 @@ const removeImportRunFromList = (
 }
 
 const syncImportRunInList = (
-  response: ImportRunListResponse | undefined,
-  importRun: ImportRun,
-  params: ListImportRunsParams | undefined,
+  response: ImportRunListResponseDto | undefined,
+  importRun: ImportRunResponseDto,
+  params: AdminImportRunsListParams | undefined,
 ) => {
   if (!matchesImportRunParams(importRun, params)) {
     return removeImportRunFromList(response, importRun.id)
@@ -87,13 +94,13 @@ const syncImportRunInList = (
 /**
  * Проверяет, является ли статус import run активным для блокировки повторного запуска.
  */
-export const isActiveImportRunStatus = (status: ImportRunStatus) =>
+export const isActiveImportRunStatus = (status: ImportRunResponseDtoStatus) =>
   activeImportRunStatuses.has(status)
 
 /**
  * Проверяет, является ли статус import run терминальным для закрытия realtime-подписки.
  */
-export const isTerminalImportRunStatus = (status: ImportRunStatus) =>
+export const isTerminalImportRunStatus = (status: ImportRunResponseDtoStatus) =>
   terminalImportRunStatuses.has(status)
 
 /**
@@ -102,7 +109,7 @@ export const isTerminalImportRunStatus = (status: ImportRunStatus) =>
  * @returns `null`, если для source нет `queued` или `running` run.
  */
 export const getActiveImportRunForSource = (
-  importRuns: ImportRun[],
+  importRuns: ImportRunResponseDto[],
   sourceId: string,
 ) =>
   importRuns.find(
@@ -115,9 +122,9 @@ export const getActiveImportRunForSource = (
  * Добавляет новый import run в начало списка или заменяет существующий run с тем же id.
  */
 export const upsertImportRunInList = (
-  response: ImportRunListResponse | undefined,
-  importRun: ImportRun,
-): ImportRunListResponse => {
+  response: ImportRunListResponseDto | undefined,
+  importRun: ImportRunResponseDto,
+): ImportRunListResponseDto => {
   if (!response) {
     return {
       items: [importRun],
@@ -149,9 +156,9 @@ export const upsertImportRunInList = (
  */
 export const syncImportRunQueryCache = (
   queryClient: QueryClient,
-  importRun: ImportRun,
+  importRun: ImportRunResponseDto,
 ) => {
-  const rootQueryKey = getListImportRunsQueryKey()
+  const rootQueryKey = getAdminImportRunsListQueryKey()
   const seenQueryKeys = new Set<string>()
   const syncQueryKey = (queryKey: QueryKey) => {
     const cacheKey = JSON.stringify(queryKey)
@@ -162,7 +169,7 @@ export const syncImportRunQueryCache = (
 
     seenQueryKeys.add(cacheKey)
 
-    queryClient.setQueryData<ImportRunListResponse | undefined>(
+    queryClient.setQueryData<ImportRunListResponseDto | undefined>(
       queryKey,
       (response) =>
         syncImportRunInList(
@@ -188,7 +195,7 @@ export const syncImportRunQueryCache = (
  */
 export const invalidateImportRunQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListImportRunsQueryKey(),
+    queryKey: getAdminImportRunsListQueryKey(),
   })
 }
 
@@ -204,10 +211,10 @@ export const invalidateImportRunDependencyQueries = (
   return Promise.all([
     invalidateImportRunQueries(queryClient),
     queryClient.invalidateQueries({
-      queryKey: getListContentSourcesQueryKey(),
+      queryKey: getAdminContentSourcesListQueryKey(),
     }),
     queryClient.invalidateQueries({
-      queryKey: getListAdminMaterialLibraryQueryKey(),
+      queryKey: getAdminMaterialsListQueryKey(),
     }),
   ])
 }
@@ -219,11 +226,11 @@ export const getImportRunFromQueryCache = (
   queryClient: QueryClient,
   runId: string,
 ) => {
-  const rootQueryKey = getListImportRunsQueryKey()
+  const rootQueryKey = getAdminImportRunsListQueryKey()
 
   return (
     queryClient
-      .getQueriesData<ImportRunListResponse | undefined>({
+      .getQueriesData<ImportRunListResponseDto | undefined>({
         queryKey: rootQueryKey,
       })
       .flatMap(([, response]) => response?.items ?? [])

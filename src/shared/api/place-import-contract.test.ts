@@ -1,7 +1,7 @@
 import {
   AdminPlaceImportsGet200Response,
   AdminPlaceImportsStartBody,
-} from '@/shared/api/generated-zod/admin-place-imports/admin-place-imports.zod'
+} from '@/shared/api'
 import { describe, expect, it } from 'vitest'
 
 describe('generated place import contract', () => {

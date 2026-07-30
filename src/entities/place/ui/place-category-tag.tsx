@@ -1,9 +1,9 @@
-import type { PlaceCategory } from '@/shared/api/generated/model'
+import type { PlaceCategoryResponseDto } from '@/shared/api'
 import { Tag } from 'antd'
 import { getPlaceCategoryMeta } from './place-meta'
 
 type PlaceCategoryTagProps = {
-  category: PlaceCategory
+  category: PlaceCategoryResponseDto
 }
 
 /**

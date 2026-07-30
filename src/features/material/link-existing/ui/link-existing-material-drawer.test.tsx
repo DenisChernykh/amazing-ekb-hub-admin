@@ -1,10 +1,10 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
-  AdminMaterialLibraryItem,
-  Material,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  MaterialResponseDto,
+} from '@/shared/api'
+import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -44,7 +44,7 @@ const mockedUseLinkPlaceMaterialMutation = vi.mocked(
   useLinkPlaceMaterialMutation,
 )
 
-const libraryMaterial: AdminMaterialLibraryItem = {
+const libraryMaterial: AdminMaterialLibraryResponseDto = {
   adminStatus: 'approved',
   durationSec: null,
   excerpt: 'Пост из Telegram-канала Amazing EKB',
@@ -68,18 +68,19 @@ const libraryMaterial: AdminMaterialLibraryItem = {
   url: 'https://t.me/amazing_ekb/321',
 }
 
-const linkedMaterial: Material = {
+const linkedMaterial: MaterialResponseDto = {
   durationSec: null,
   id: 'material-1',
   placeId: 'place-1',
   platform: 'telegram',
   publishedAt: '2026-03-20T10:30:00+05:00',
+  redirectUrl: null,
   title: 'Пост из Telegram-канала Amazing EKB',
   type: 'post',
   url: 'https://t.me/amazing_ekb/321',
 }
 
-const unsafeMaterial: AdminMaterialLibraryItem = {
+const unsafeMaterial: AdminMaterialLibraryResponseDto = {
   ...libraryMaterial,
   excerpt: 'Материал с unsafe ссылками',
   id: 'unsafe-material',
@@ -93,7 +94,7 @@ const unsafeMaterial: AdminMaterialLibraryItem = {
   url: 'javascript://example.com/%0Aalert(1)',
 }
 
-const hiddenPlaceLinkMaterial: AdminMaterialLibraryItem = {
+const hiddenPlaceLinkMaterial: AdminMaterialLibraryResponseDto = {
   ...libraryMaterial,
   excerpt: 'Скрытая связь для текущего места',
   id: 'hidden-material',
@@ -102,7 +103,7 @@ const hiddenPlaceLinkMaterial: AdminMaterialLibraryItem = {
   url: 'https://t.me/amazing_ekb/322',
 }
 
-const activePlaceLinkMaterial: AdminMaterialLibraryItem = {
+const activePlaceLinkMaterial: AdminMaterialLibraryResponseDto = {
   ...libraryMaterial,
   excerpt: 'Активная связь для текущего места',
   id: 'active-material',
@@ -129,7 +130,7 @@ const renderDrawer = (props: { onClose?: () => void; open?: boolean } = {}) => {
 
 type LinkMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: Material) => void
+  onSuccess?: (material: MaterialResponseDto) => void
 }
 
 type LinkMutationVariables = {

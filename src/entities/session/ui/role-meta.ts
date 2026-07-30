@@ -1,4 +1,3 @@
-import type { Role } from '@/shared/api/generated/model'
 import type { TagProps } from 'antd'
 
 /**
@@ -9,7 +8,7 @@ export type RoleMeta = {
   label: string
 }
 
-const roleMeta = {
+const roleMeta: Record<string, RoleMeta> = {
   admin: {
     color: 'green',
     label: 'Администратор',
@@ -18,9 +17,14 @@ const roleMeta = {
     color: 'blue',
     label: 'Пользователь',
   },
-} satisfies Record<Role, RoleMeta>
+}
 
 /**
- * Возвращает локализованные UI-метаданные для backend-роли.
+ * Возвращает локализованные UI-метаданные для backend role key.
+ *
+ * @remarks Неизвестный ключ остается видимым, чтобы новый backend role key не
+ * терялся в интерфейсе до добавления локализованной подписи.
  */
-export const getRoleMeta = (role: Role) => roleMeta[role]
+export const getRoleMeta = (roleKey: string): RoleMeta => {
+  return roleMeta[roleKey] ?? { color: 'default', label: roleKey }
+}

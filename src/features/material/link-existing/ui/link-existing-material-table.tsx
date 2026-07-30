@@ -6,7 +6,7 @@ import {
   MaterialLibrarySourceCell,
 } from '@/entities/material/ui/material-library-cells'
 import { formatMaterialPublishedDate } from '@/entities/material/ui/material-meta'
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
+import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
 import type { TableColumnsType } from 'antd'
 import { Button, Table } from 'antd'
 
@@ -21,16 +21,16 @@ export function LinkExistingMaterialTable({
 }: {
   isFetching: boolean
   isLinkPending: boolean
-  materials: AdminMaterialLibraryItem[]
-  onLink: (material: AdminMaterialLibraryItem) => void
+  materials: AdminMaterialLibraryResponseDto[]
+  onLink: (material: AdminMaterialLibraryResponseDto) => void
 }) {
-  const columns: TableColumnsType<AdminMaterialLibraryItem> = [
+  const columns: TableColumnsType<AdminMaterialLibraryResponseDto> = [
     {
       dataIndex: 'source',
       key: 'source',
       render: (
-        _value: AdminMaterialLibraryItem['source'],
-        material: AdminMaterialLibraryItem,
+        _value: AdminMaterialLibraryResponseDto['source'],
+        material: AdminMaterialLibraryResponseDto,
       ) => <MaterialLibrarySourceCell material={material} />,
       title: 'Источник',
     },
@@ -42,7 +42,7 @@ export function LinkExistingMaterialTable({
     },
     {
       key: 'preview',
-      render: (_value: unknown, material: AdminMaterialLibraryItem) => (
+      render: (_value: unknown, material: AdminMaterialLibraryResponseDto) => (
         <MaterialLibraryPreviewCell linkMode="text" material={material} />
       ),
       title: 'Текст',
@@ -51,15 +51,15 @@ export function LinkExistingMaterialTable({
       dataIndex: 'mediaKind',
       key: 'mediaKind',
       render: (
-        _mediaKind: AdminMaterialLibraryItem['mediaKind'],
-        material: AdminMaterialLibraryItem,
+        _mediaKind: AdminMaterialLibraryResponseDto['mediaKind'],
+        material: AdminMaterialLibraryResponseDto,
       ) => <MaterialLibraryMediaCell material={material} />,
       title: 'Медиа',
     },
     {
       dataIndex: 'adminStatus',
       key: 'adminStatus',
-      render: (status: AdminMaterialLibraryItem['adminStatus']) => (
+      render: (status: AdminMaterialLibraryResponseDto['adminStatus']) => (
         <MaterialLibraryAdminStatusTag status={status} />
       ),
       title: 'Статус',
@@ -67,14 +67,14 @@ export function LinkExistingMaterialTable({
     {
       dataIndex: 'linked',
       key: 'linked',
-      render: (linked: AdminMaterialLibraryItem['linked']) => (
+      render: (linked: AdminMaterialLibraryResponseDto['linked']) => (
         <MaterialLibraryLinkedTag linked={linked} />
       ),
       title: 'Связь',
     },
     {
       key: 'actions',
-      render: (_value: unknown, material: AdminMaterialLibraryItem) => (
+      render: (_value: unknown, material: AdminMaterialLibraryResponseDto) => (
         <Button
           aria-label="Связать"
           disabled={isLinkPending}

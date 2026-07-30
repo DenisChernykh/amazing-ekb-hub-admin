@@ -3,27 +3,37 @@ import {
   saveBulkModerationDraftSelection,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { bulkModerationActions } from '@/features/place/bulk-moderation/model/bulk-moderation-slice'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAppStore } from './store'
 
 const poolsCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
-}
+} satisfies PlaceCategoryResponseDto
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const activePlace: PlaceSummary = {
+const activePlace: AdminPlaceSummaryResponseDto = {
   category: poolsCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'aquacenter',
   status: 'active',
@@ -32,9 +42,10 @@ const activePlace: PlaceSummary = {
   title: 'Аквацентр',
 }
 
-const hiddenPlace: PlaceSummary = {
+const hiddenPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-2',
   slug: 'hidden-spa',
   status: 'hidden',

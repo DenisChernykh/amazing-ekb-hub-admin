@@ -1,29 +1,29 @@
+import type { ImportRunListResponseDto } from '@/shared/api'
 import {
-  getListImportRunsQueryKey,
-  listImportRuns,
-} from '@/shared/api/generated/admin/admin'
-import type { ImportRunListResponse } from '@/shared/api/generated/operation'
+  adminImportRunsList,
+  getAdminImportRunsListQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useImportRunsQuery } from './import-run-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getListImportRunsQueryKey: vi.fn((params) => [
-    '/admin/import-runs',
+vi.mock('@/shared/api', () => ({
+  getAdminImportRunsListQueryKey: vi.fn((params) => [
+    '/v1/admin/import-runs',
     ...(params ? [params] : []),
   ]),
-  listImportRuns: vi.fn(),
+  adminImportRunsList: vi.fn(),
   useListImportRuns: vi.fn(() => ({
     data: undefined,
     isPending: true,
   })),
 }))
 
-const mockedListImportRuns = vi.mocked(listImportRuns)
+const mockedListImportRuns = vi.mocked(adminImportRunsList)
 
-const importRunListResponse: ImportRunListResponse = {
+const importRunListResponse: ImportRunListResponseDto = {
   items: [],
 }
 
@@ -47,7 +47,7 @@ const createQueryClient = () =>
 describe('import run hooks', () => {
   beforeEach(() => {
     mockedListImportRuns.mockReset()
-    vi.mocked(getListImportRunsQueryKey).mockClear()
+    vi.mocked(getAdminImportRunsListQueryKey).mockClear()
   })
 
   it('loads import runs through generated fetcher and query key', async () => {
@@ -64,7 +64,7 @@ describe('import run hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getListImportRunsQueryKey).toHaveBeenCalledWith(params)
+    expect(getAdminImportRunsListQueryKey).toHaveBeenCalledWith(params)
     expect(mockedListImportRuns).toHaveBeenCalledWith(
       params,
       undefined,

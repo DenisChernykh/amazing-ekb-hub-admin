@@ -1,10 +1,10 @@
+import type { CurrentUserResponseDto, LoginResponseDto } from '@/shared/api'
 import {
-  getCurrentUser,
-  getGetCurrentUserQueryKey,
-  login,
-  logout,
-} from '@/shared/api/generated/auth/auth'
-import type { AuthMeResponse } from '@/shared/api/generated/model'
+  authGetMe,
+  authLogin,
+  authLogout,
+  getAuthGetMeQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -15,24 +15,30 @@ import {
   useLogoutSession,
 } from './session-hooks'
 
-vi.mock('@/shared/api/generated/auth/auth', () => ({
-  getCurrentUser: vi.fn(),
-  getGetCurrentUserQueryKey: vi.fn(() => ['/auth/me']),
-  login: vi.fn(),
-  logout: vi.fn(),
-  useGetCurrentUser: vi.fn(),
-  useLogin: vi.fn(),
-  useLogout: vi.fn(),
+vi.mock('@/shared/api', () => ({
+  authGetMe: vi.fn(),
+  getAuthGetMeQueryKey: vi.fn(() => ['/v1/auth/me']),
+  authLogin: vi.fn(),
+  authLogout: vi.fn(),
 }))
 
-const mockedGetCurrentUser = vi.mocked(getCurrentUser)
-const mockedLogin = vi.mocked(login)
-const mockedLogout = vi.mocked(logout)
+const mockedGetCurrentUser = vi.mocked(authGetMe)
+const mockedLogin = vi.mocked(authLogin)
+const mockedLogout = vi.mocked(authLogout)
 
-const admin: AuthMeResponse = {
-  email: 'admin@example.test',
-  id: 'admin-1',
-  role: 'admin',
+const admin: CurrentUserResponseDto = {
+  normalizedEmail: 'admin@example.test',
+  permissions: ['admin.dashboard.read'],
+  roleKeys: ['admin'],
+  userId: 'admin-1',
+}
+
+const loginResponse: LoginResponseDto = {
+  csrfToken: 'a'.repeat(43),
+  session: {
+    absoluteExpiresAt: '2026-01-02T00:00:00.000Z',
+    publicId: 'a'.repeat(22),
+  },
 }
 
 const createWrapper = (queryClient: QueryClient) => {
@@ -57,7 +63,7 @@ describe('session hooks', () => {
     mockedGetCurrentUser.mockReset()
     mockedLogin.mockReset()
     mockedLogout.mockReset()
-    vi.mocked(getGetCurrentUserQueryKey).mockReturnValue(['/auth/me'])
+    vi.mocked(getAuthGetMeQueryKey).mockReturnValue(['/v1/auth/me'])
   })
 
   it('loads current session through generated fetcher with retry disabled', async () => {
@@ -70,14 +76,14 @@ describe('session hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getGetCurrentUserQueryKey).toHaveBeenCalled()
+    expect(getAuthGetMeQueryKey).toHaveBeenCalled()
     expect(mockedGetCurrentUser).toHaveBeenCalledWith(
       undefined,
       expect.any(AbortSignal),
     )
     expect(result.current.data).toBe(admin)
     expect(
-      queryClient.getQueryCache().find({ queryKey: ['/auth/me'] })?.options
+      queryClient.getQueryCache().find({ queryKey: ['/v1/auth/me'] })?.options
         .retry,
     ).toBe(false)
   })
@@ -85,13 +91,13 @@ describe('session hooks', () => {
   it('logs in through generated fetcher and invalidates current session', async () => {
     const queryClient = new QueryClient()
     const onSuccess = vi.fn()
-    const queryKey = ['/auth/me']
+    const queryKey = ['/v1/auth/me']
     const credentials = {
       email: 'admin@example.test',
       password: 'unit-test-password',
     }
     queryClient.setQueryData(queryKey, admin)
-    mockedLogin.mockResolvedValue(admin)
+    mockedLogin.mockResolvedValue(loginResponse)
 
     const { result } = renderHook(() => useLoginSession({ onSuccess }), {
       wrapper: createWrapper(queryClient),
@@ -103,13 +109,13 @@ describe('session hooks', () => {
     expect(
       queryClient.getQueryCache().find({ queryKey })?.state.isInvalidated,
     ).toBe(true)
-    expect(onSuccess).toHaveBeenCalledWith(admin)
+    expect(onSuccess).toHaveBeenCalledWith(loginResponse)
   })
 
   it('logs out through generated fetcher and removes current session', async () => {
     const queryClient = new QueryClient()
     const onSuccess = vi.fn()
-    const queryKey = ['/auth/me']
+    const queryKey = ['/v1/auth/me']
     queryClient.setQueryData(queryKey, admin)
     mockedLogout.mockResolvedValue(undefined)
 

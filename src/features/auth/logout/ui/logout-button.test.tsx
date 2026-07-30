@@ -3,7 +3,10 @@ import {
   BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
   saveBulkModerationDraftSelection,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -19,14 +22,18 @@ const mockedUseLogoutSession = vi.mocked(useLogoutSession)
 
 const poolsCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_pools',
   slug: 'pools',
   title: 'Бассейны',
-}
+} satisfies PlaceCategoryResponseDto
 
-const activePlace: PlaceSummary = {
+const activePlace: AdminPlaceSummaryResponseDto = {
   category: poolsCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'aquacenter',
   status: 'active',

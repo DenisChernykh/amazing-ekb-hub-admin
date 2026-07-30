@@ -1,10 +1,10 @@
-import { getGetCurrentUserQueryKey } from '@/shared/api/generated/auth/auth'
+import { getAuthGetMeQueryKey } from '@/shared/api'
 import type { QueryClient } from '@tanstack/react-query'
 
 /**
  * Возвращает React Query key текущей backend-сессии.
  */
-export const getCurrentSessionQueryKey = getGetCurrentUserQueryKey
+export const getCurrentSessionQueryKey = getAuthGetMeQueryKey
 
 /**
  * Инвалидирует кеш текущей сессии после успешного login или refresh.
