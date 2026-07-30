@@ -23,7 +23,7 @@ export function subscribeToPlaceImportEvents(
   const search = new URLSearchParams({ afterVersion: String(afterVersion) })
   const eventSource = new EventSource(
     buildApiUrl(
-      `/admin/place-imports/${encodeURIComponent(operationId)}/events/stream?${search.toString()}`,
+      `/v1/admin/place-imports/${encodeURIComponent(operationId)}/events/stream?${search.toString()}`,
     ),
     { withCredentials: true },
   )

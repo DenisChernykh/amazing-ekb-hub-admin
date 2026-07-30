@@ -16,7 +16,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS builder
-ARG VITE_API_BASE_URL=/v1
+ARG VITE_API_BASE_URL=/
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 COPY . .
 RUN pnpm run build

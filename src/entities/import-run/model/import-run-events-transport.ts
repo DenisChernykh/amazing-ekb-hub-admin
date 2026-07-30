@@ -32,7 +32,7 @@ export const subscribeToImportRunEvents = (
 ): ImportRunEventsSubscription => {
   let isClosed = false
   const eventSource = new EventSource(
-    buildApiUrl(`/admin/import-runs/${encodeURIComponent(runId)}/events`),
+    buildApiUrl(`/v1/admin/import-runs/${encodeURIComponent(runId)}/events`),
     {
       withCredentials: true,
     },
