@@ -1,4 +1,3 @@
-import { CurrentUserContext } from '@/entities/session/model/current-user'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
@@ -8,16 +7,7 @@ describe('AdminDashboard', () => {
   it('renders a product welcome screen without technical session details', () => {
     render(
       <MemoryRouter>
-        <CurrentUserContext.Provider
-          value={{
-            normalizedEmail: 'admin@example.test',
-            permissions: ['admin.dashboard.read'],
-            roleKeys: ['admin'],
-            userId: 'admin-1',
-          }}
-        >
-          <AdminDashboard />
-        </CurrentUserContext.Provider>
+        <AdminDashboard />
       </MemoryRouter>,
     )
 

@@ -1,5 +1,4 @@
-import { useCurrentUser } from '@/entities/session/model/current-user'
-import { RoleTag } from '@/entities/session/ui/role-tag'
+import { RoleTag, useCurrentSession } from '@/entities/session'
 import { LogoutButton } from '@/features/auth/logout/ui/logout-button'
 import { Flex, Layout, Menu, Space, Typography, theme } from 'antd'
 import type { CSSProperties } from 'react'
@@ -19,13 +18,13 @@ type AdminShellVariables = CSSProperties & {
 }
 
 /**
- * Общий protected shell админки с sidebar, header, нейтральным session summary и content outlet.
+ * Общий protected shell админки с навигацией, role tags и content outlet.
  *
- * @remarks Требует `RequireAuth`, который предоставляет текущего пользователя через session context.
+ * @remarks Читает suspense session query внутри защищённой ветки router.
  */
 export function AdminShell() {
   const location = useLocation()
-  const user = useCurrentUser()
+  const { data: user } = useCurrentSession()
   const { token } = theme.useToken()
   const style: AdminShellVariables = {
     '--admin-shell-bg': token.colorBgLayout,
@@ -64,14 +63,13 @@ export function AdminShell() {
         <Header className={styles.header}>
           <Flex align="center" gap={16} justify="space-between" wrap>
             <Typography.Title className={styles.brandTitle} level={3}>
-              Админка
+              Администратор
             </Typography.Title>
 
             <Space wrap>
               {user.roleKeys.map((roleKey) => (
                 <RoleTag key={roleKey} roleKey={roleKey} />
               ))}
-              <Typography.Text strong>{user.normalizedEmail}</Typography.Text>
               <LogoutButton />
             </Space>
           </Flex>

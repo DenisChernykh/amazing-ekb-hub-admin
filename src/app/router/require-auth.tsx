@@ -1,7 +1,7 @@
-import { CurrentUserContext } from '@/entities/session/model/current-user'
-import { useCurrentSessionQuery } from '@/entities/session/model/session-hooks'
+import { currentSessionQueryOptions } from '@/entities/session'
 import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { isProblemCode } from '@/shared/api/client/api-errors'
+import { useQuery } from '@tanstack/react-query'
 import { Button, Flex, Layout, Result, Spin, Typography, theme } from 'antd'
 import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
@@ -41,13 +41,18 @@ function AuthStateScreen({ children }: AuthStateScreenProps) {
 }
 
 /**
- * Защищает приватные маршруты, загружает текущую сессию и прокидывает пользователя через context.
+ * Защищает приватные маршруты предварительной проверкой текущей сессии.
  *
- * @remarks При auth/permission отказе очищает browser draft выбора bulk moderation, чтобы приватное UI-state не переживало logout/session loss.
+ * @remarks Использует canonical session query options без suspense, чтобы
+ * сохранить текущие loading/error экраны до отдельной Data Router migration.
+ * При auth/permission отказе очищает feature-owned bulk moderation draft.
  */
 export function RequireAuth() {
   const location = useLocation()
-  const currentUserQuery = useCurrentSessionQuery()
+  const currentUserQuery = useQuery({
+    ...currentSessionQueryOptions(),
+    retry: false,
+  })
   const isAuthenticationRequired =
     currentUserQuery.isError &&
     isProblemCode(currentUserQuery.error, 'AUTHENTICATION_REQUIRED')
@@ -89,12 +94,11 @@ export function RequireAuth() {
       )
     }
 
-    return <Navigate replace state={{ from: location }} to="/login" />
+    const returnTo = `${location.pathname}${location.search}${location.hash}`
+    const loginSearch = new URLSearchParams({ returnTo }).toString()
+
+    return <Navigate replace to={`/login?${loginSearch}`} />
   }
 
-  return (
-    <CurrentUserContext.Provider value={currentUserQuery.data}>
-      <Outlet />
-    </CurrentUserContext.Provider>
-  )
+  return <Outlet />
 }

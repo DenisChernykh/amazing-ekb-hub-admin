@@ -16,6 +16,16 @@ describe('RoleTag', () => {
     expect(screen.getByText('Пользователь')).toBeInTheDocument()
   })
 
+  it('renders an unknown backend role key with neutral metadata', () => {
+    render(<RoleTag roleKey="content_editor" />)
+
+    expect(screen.getByText('content_editor')).toBeInTheDocument()
+    expect(getRoleMeta('content_editor')).toEqual({
+      color: 'default',
+      label: 'content_editor',
+    })
+  })
+
   it('exposes role metadata for non-tag role displays', () => {
     expect(getRoleMeta('admin')).toMatchObject({
       color: 'green',

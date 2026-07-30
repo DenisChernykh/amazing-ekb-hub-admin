@@ -1,32 +1,30 @@
-import { useCurrentUser } from '@/entities/session/model/current-user'
-import { useCurrentSessionQuery } from '@/entities/session/model/session-hooks'
+import { currentSessionQueryOptions } from '@/entities/session'
 import {
   BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
   saveBulkModerationDraftSelection,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import type {
   AdminPlaceSummaryResponseDto,
-  CurrentUserResponseDto,
   PlaceCategoryResponseDto,
 } from '@/shared/api'
 import { createApiProblemError } from '@/test/api-problem'
+import { useQuery } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
-import { createMemoryRouter, RouterProvider } from 'react-router'
+import { createMemoryRouter, RouterProvider, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { RequireAuth } from './require-auth'
 
-vi.mock('@/entities/session/model/session-hooks', () => ({
-  useCurrentSessionQuery: vi.fn(),
+vi.mock('@/entities/session', () => ({
+  currentSessionQueryOptions: vi.fn(() => ({
+    queryKey: ['/v1/auth/me'],
+  })),
 }))
 
-const mockedUseCurrentSessionQuery = vi.mocked(useCurrentSessionQuery)
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: vi.fn(),
+}))
 
-const admin: CurrentUserResponseDto = {
-  normalizedEmail: 'admin@example.test',
-  permissions: ['admin.dashboard.read'],
-  roleKeys: ['admin'],
-  userId: 'admin-1',
-}
+const mockedUseQuery = vi.mocked(useQuery)
 
 const poolsCategory = {
   coverImageUrl: null,
@@ -51,9 +49,13 @@ const activePlace: AdminPlaceSummaryResponseDto = {
 }
 
 function PrivateRouteProbe() {
-  const user = useCurrentUser()
+  return <div>Private route</div>
+}
 
-  return <div>Private route for {user.normalizedEmail}</div>
+function LoginRouteProbe() {
+  const location = useLocation()
+
+  return <div>Login route {location.search}</div>
 }
 
 const renderProtectedRoute = () => {
@@ -70,7 +72,7 @@ const renderProtectedRoute = () => {
       },
       {
         path: '/login',
-        element: <div>Login route</div>,
+        element: <LoginRouteProbe />,
       },
     ],
     {
@@ -84,7 +86,8 @@ const renderProtectedRoute = () => {
 describe('RequireAuth', () => {
   beforeEach(() => {
     window.sessionStorage.clear()
-    mockedUseCurrentSessionQuery.mockReset()
+    mockedUseQuery.mockReset()
+    vi.mocked(currentSessionQueryOptions).mockClear()
   })
 
   afterEach(() => {
@@ -92,12 +95,12 @@ describe('RequireAuth', () => {
   })
 
   it('shows a session loading state while current user is pending', () => {
-    mockedUseCurrentSessionQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       error: null,
       isError: false,
       isPending: true,
-    } as ReturnType<typeof useCurrentSessionQuery>)
+    } as ReturnType<typeof useQuery>)
 
     renderProtectedRoute()
 
@@ -105,25 +108,27 @@ describe('RequireAuth', () => {
   })
 
   it('redirects anonymous users to login route', async () => {
-    mockedUseCurrentSessionQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       error: createApiProblemError('AUTHENTICATION_REQUIRED', 401),
       isError: true,
       isPending: false,
-    } as ReturnType<typeof useCurrentSessionQuery>)
+    } as ReturnType<typeof useQuery>)
 
     renderProtectedRoute()
 
-    expect(await screen.findByText('Login route')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Login route ?returnTo=%2F'),
+    ).toBeInTheDocument()
   })
 
   it('clears bulk moderation draft when the current session is lost', async () => {
-    mockedUseCurrentSessionQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       error: createApiProblemError('AUTHENTICATION_REQUIRED', 401),
       isError: true,
       isPending: false,
-    } as ReturnType<typeof useCurrentSessionQuery>)
+    } as ReturnType<typeof useQuery>)
     saveBulkModerationDraftSelection([activePlace])
 
     renderProtectedRoute()
@@ -138,17 +143,19 @@ describe('RequireAuth', () => {
   })
 
   it('keeps bulk moderation draft for transient current-session errors', async () => {
-    mockedUseCurrentSessionQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isPending: false,
-    } as ReturnType<typeof useCurrentSessionQuery>)
+    } as ReturnType<typeof useQuery>)
     saveBulkModerationDraftSelection([activePlace])
 
     renderProtectedRoute()
 
-    expect(await screen.findByText('Login route')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Login route ?returnTo=%2F'),
+    ).toBeInTheDocument()
     expect(
       window.sessionStorage.getItem(
         BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
@@ -157,30 +164,33 @@ describe('RequireAuth', () => {
   })
 
   it('shows forbidden state for permission errors', () => {
-    mockedUseCurrentSessionQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       error: createApiProblemError('AUTHORIZATION_DENIED', 403),
       isError: true,
       isPending: false,
-    } as ReturnType<typeof useCurrentSessionQuery>)
+    } as ReturnType<typeof useQuery>)
 
     renderProtectedRoute()
 
     expect(screen.getByText('Доступ запрещен')).toBeInTheDocument()
   })
 
-  it('renders private route with current user context', () => {
-    mockedUseCurrentSessionQuery.mockReturnValue({
-      data: admin,
+  it('renders the protected outlet after a successful session query', () => {
+    mockedUseQuery.mockReturnValue({
+      data: {
+        normalizedEmail: 'admin@example.test',
+        permissions: ['admin.dashboard.read'],
+        roleKeys: ['admin'],
+        userId: 'admin-1',
+      },
       error: null,
       isError: false,
       isPending: false,
-    } as ReturnType<typeof useCurrentSessionQuery>)
+    } as ReturnType<typeof useQuery>)
 
     renderProtectedRoute()
 
-    expect(
-      screen.getByText('Private route for admin@example.test'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Private route')).toBeInTheDocument()
   })
 })

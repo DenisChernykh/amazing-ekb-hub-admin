@@ -79,6 +79,12 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `getHttpUrlValidationError` | `src/shared/lib/url/safe-url.ts` | exported   | Returns the shared local validation message for unsafe `http/https` URLs. |
 | `normalizeHttpUrl`          | `src/shared/lib/url/safe-url.ts` | exported   | Trims safe `http/https` URLs and throws before unsafe API payloads.       |
 
+## Shared Route Helpers
+
+| Helper             | Location                         | Visibility | Contract                                                                                                         |
+| ------------------ | -------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| `sanitizeReturnTo` | `src/shared/routes/return-to.ts` | exported   | Accepts a safe same-app post-login path and falls back to `/` for external, protocol-relative, or login targets. |
+
 ## Shared UI
 
 | Helper                    | Location                                                     | Visibility | Contract                                                                              |
@@ -103,15 +109,14 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Session Entity
 
-| Helper                      | Location                                      | Visibility | Contract                                                            |
-| --------------------------- | --------------------------------------------- | ---------- | ------------------------------------------------------------------- |
-| `getCurrentSessionQueryKey` | `src/entities/session/api/session-api.ts`     | exported   | Returns the React Query key for the current backend session.        |
-| `invalidateCurrentSession`  | `src/entities/session/api/session-api.ts`     | exported   | Invalidates the current session query after login or refresh.       |
-| `removeCurrentSession`      | `src/entities/session/api/session-api.ts`     | exported   | Removes the current session query after logout.                     |
-| `useCurrentSessionQuery`    | `src/entities/session/model/session-hooks.ts` | exported   | Loads the current backend session with auth-guard retry disabled.   |
-| `useLoginSession`           | `src/entities/session/model/session-hooks.ts` | exported   | Logs in through auth API and invalidates the current session query. |
-| `useLogoutSession`          | `src/entities/session/model/session-hooks.ts` | exported   | Logs out through auth API and removes the current session query.    |
-| `getRoleMeta`               | `src/entities/session/ui/role-meta.ts`        | exported   | Maps backend `Role` to localized Ant Design tag metadata.           |
+| Helper                       | Location                                      | Visibility | Contract                                                                                       |
+| ---------------------------- | --------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `currentSessionQueryKey`     | `src/entities/session/api/session.ts`         | exported   | Reuses the generated `authGetMe` React Query key.                                              |
+| `currentSessionQueryOptions` | `src/entities/session/api/session.ts`         | exported   | Reuses the generated `authGetMe` query options.                                                |
+| `useCurrentSession`          | `src/entities/session/api/session.ts`         | exported   | Reads the protected current-session DTO through a suspense query and forwards its AbortSignal. |
+| `refreshCurrentSession`      | `src/entities/session/model/session-cache.ts` | exported   | Invalidates and immediately fetches the current backend session.                               |
+| `clearCurrentSession`        | `src/entities/session/model/session-cache.ts` | exported   | Removes only the current-session query and in-memory CSRF token.                               |
+| `getRoleMeta`                | `src/entities/session/ui/role-meta.ts`        | exported   | Maps any backend role key to localized or neutral Ant Design tag metadata.                     |
 
 ## Category Entity
 
@@ -259,11 +264,14 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Auth UI
 
-| Helper            | Location                                             | Visibility | Contract                                                                                                                                         |
-| ----------------- | ---------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `loginFormSchema` | `src/features/auth/login/model/login-form-schema.ts` | exported   | Composes the generated login email contract with exact Russian required and email messages for the RHF login form.                               |
-| `LoginFormValues` | `src/features/auth/login/model/login-form-schema.ts` | exported   | Defines input values accepted by the RHF login form before Zod parsing.                                                                          |
-| `getRedirectPath` | `src/widgets/auth-login/ui/auth-login-screen.tsx`    | private    | Converts React Router login state into a safe post-login redirect path. Promote to an auth routing helper if another login-like screen needs it. |
+| Helper                     | Location                                             | Visibility | Contract                                                                                                                  |
+| -------------------------- | ---------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `loginFormSchema`          | `src/features/auth/login/model/login-form-schema.ts` | exported   | Composes the generated login email contract with exact Russian required and email messages for the RHF login form.        |
+| `LoginFormValues`          | `src/features/auth/login/model/login-form-schema.ts` | exported   | Defines input values accepted by the RHF login form before Zod parsing.                                                   |
+| `mapLoginValidationErrors` | `src/features/auth/login/model/login-errors.ts`      | exported   | Maps only `/email` and `/password` validation pointers and ignores all other backend field details.                       |
+| `getLoginFormError`        | `src/features/auth/login/model/login-errors.ts`      | exported   | Converts auth, rate-limit, dependency, network, protocol, and unknown failures to safe login copy.                        |
+| `useLogin`                 | `src/features/auth/login/model/use-login.ts`         | exported   | Logs in, stores response CSRF, clears the feature-owned bulk draft, and replaces the route with sanitized `returnTo`.     |
+| `useLogout`                | `src/features/auth/logout/model/use-logout.ts`       | exported   | Clears session/CSRF/draft and redirects only after success or `AUTHENTICATION_REQUIRED`; preserves state on other errors. |
 
 ## Places List Widget
 
