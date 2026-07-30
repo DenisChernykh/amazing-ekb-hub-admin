@@ -13,6 +13,9 @@ type AuthLoginScreenVariables = CSSProperties & {
 
 /**
  * Экран входа, который передаёт query-string `returnTo` в login feature.
+ *
+ * @remarks Требует Router context для чтения текущего location и
+ * `QueryClientProvider` для login mutation во вложенной форме.
  */
 export function AuthLoginScreen() {
   const location = useLocation()

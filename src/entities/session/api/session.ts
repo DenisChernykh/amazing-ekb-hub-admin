@@ -24,8 +24,10 @@ export const currentSessionQueryOptions = getAuthGetMeQueryOptions
 /**
  * Возвращает текущую backend-сессию из React Query.
  *
- * @remarks Использует suspense query и предназначен для UI внутри уже
- * защищённого маршрута.
+ * @remarks Требует `QueryClientProvider`, использует suspense query и
+ * предназначен для UI внутри уже защищённого маршрута.
+ *
+ * @returns Suspense query с DTO текущей backend-сессии.
  */
 export function useCurrentSession() {
   return useSuspenseQuery({

@@ -31,8 +31,8 @@ const credentials = {
   password: 'unit-test-password',
 }
 
-function LoginProbe() {
-  const login = useLogin('/places?status=hidden')
+function LoginProbe({ returnTo }: { returnTo: string }) {
+  const login = useLogin(returnTo)
 
   return (
     <button onClick={() => login.mutate(credentials)} type="button">
@@ -41,7 +41,7 @@ function LoginProbe() {
   )
 }
 
-function renderLoginProbe() {
+function renderLoginProbe(returnTo = '/places?status=hidden') {
   const queryClient = new QueryClient({
     defaultOptions: {
       mutations: { retry: false },
@@ -50,7 +50,8 @@ function renderLoginProbe() {
   })
   const router = createMemoryRouter(
     [
-      { path: '/login', element: <LoginProbe /> },
+      { path: '/', element: <p>Safe route</p> },
+      { path: '/login', element: <LoginProbe returnTo={returnTo} /> },
       { path: '/places', element: <p>Places route</p> },
     ],
     { initialEntries: ['/login'] },
@@ -109,5 +110,21 @@ describe('useLogin', () => {
     expect(router.state.location.pathname).toBe('/places')
     expect(router.state.location.search).toBe('?status=hidden')
     expect(currentSessionRequests).toBe(0)
+  })
+
+  it('falls back to root when returnTo is an encoded login-route equivalent', async () => {
+    server.use(
+      http.post('http://api.test/v1/auth/login', () =>
+        HttpResponse.json(loginResponse),
+      ),
+    )
+    const router = renderLoginProbe('/%6Cogin/?from=login#form')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Login probe' }))
+
+    expect(await screen.findByText('Safe route')).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/')
+    expect(router.state.location.search).toBe('')
+    expect(router.state.location.hash).toBe('')
   })
 })

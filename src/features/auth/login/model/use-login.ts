@@ -8,8 +8,11 @@ import { sanitizeReturnTo } from '@/shared/routes'
 /**
  * Выполняет вход и заменяет маршрут безопасным `returnTo`.
  *
- * @remarks После успешного login сохраняет выданный CSRF-токен, очищает
- * feature-owned bulk moderation draft и не выполняет дополнительный `/auth/me`.
+ * @remarks Требует Router context и `QueryClientProvider`. После успешного
+ * login сохраняет выданный CSRF-токен, очищает feature-owned bulk moderation
+ * draft и не выполняет дополнительный `/auth/me`.
+ *
+ * @returns React Query mutation для выполнения login-запроса.
  */
 export function useLogin(returnTo: string | null) {
   const navigate = useNavigate()

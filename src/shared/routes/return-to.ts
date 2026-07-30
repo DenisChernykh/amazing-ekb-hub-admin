@@ -1,8 +1,13 @@
+import { matchRoutes } from 'react-router'
+
+const loginRoutes = [{ path: '/login' }]
+
 /**
  * Возвращает безопасный внутренний маршрут после входа.
  *
  * @remarks Принимает только абсолютный путь текущего приложения, отклоняет
- * protocol-relative URL и повторный переход на `/login`.
+ * protocol-relative URL и любой маршрут, который React Router сопоставляет с
+ * `/login`.
  *
  * @returns Нормализованный внутренний маршрут или `/`.
  */
@@ -18,5 +23,5 @@ export function sanitizeReturnTo(value: string | null | undefined) {
   const target = new URL(value, 'http://local.invalid')
   const normalized = `${target.pathname}${target.search}${target.hash}`
 
-  return target.pathname === '/login' ? '/' : normalized
+  return matchRoutes(loginRoutes, normalized) === null ? normalized : '/'
 }

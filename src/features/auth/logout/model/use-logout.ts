@@ -8,9 +8,12 @@ import { authLogout, isProblemCode } from '@/shared/api'
 /**
  * Выполняет logout и синхронизирует локальное состояние с backend-результатом.
  *
- * @remarks Успех и `AUTHENTICATION_REQUIRED` очищают session/CSRF cache,
- * feature-owned bulk draft и заменяют маршрут на `/login`. Остальные ошибки
- * сохраняют все локальные данные и текущий маршрут для повторной попытки.
+ * @remarks Требует Router context и `QueryClientProvider`. Успех и
+ * `AUTHENTICATION_REQUIRED` очищают session/CSRF cache, feature-owned bulk draft
+ * и заменяют маршрут на `/login`. Остальные ошибки сохраняют все локальные
+ * данные и текущий маршрут для повторной попытки.
+ *
+ * @returns React Query mutation для выполнения logout-запроса.
  */
 export function useLogout() {
   const queryClient = useQueryClient()
