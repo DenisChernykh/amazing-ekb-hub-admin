@@ -19,21 +19,25 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Shared API Client
 
-| Helper                | Location                                 | Visibility         | Contract                                                                                                                    |
-| --------------------- | ---------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `normalizeApiError`   | `src/shared/api/client/api-error.ts`     | exported           | Converts Axios, network, and unknown errors to `ApiClientError`.                                                            |
-| `isApiClientError`    | `src/shared/api/client/api-error.ts`     | exported           | Narrows unknown errors to `ApiClientError`.                                                                                 |
-| `getApiErrorStatus`   | `src/shared/api/client/api-error.ts`     | exported           | Reads HTTP status from a normalized API error.                                                                              |
-| `getApiBaseUrl`       | `src/shared/api/client/api-base-url.ts`  | exported           | Returns the shared API root/origin for Axios and browser APIs such as `EventSource`.                                        |
-| `joinApiUrl`          | `src/shared/api/client/api-base-url.ts`  | exported           | Joins the validated API root/origin with a caller-owned versioned endpoint path.                                            |
-| `buildApiUrl`         | `src/shared/api/client/api-base-url.ts`  | exported           | Builds backend API URLs from the shared origin and a caller-owned versioned endpoint path.                                  |
-| `parsePublicEnv`      | `src/shared/config/env.ts`               | exported           | Validates that the public API setting is same-origin `/` or an absolute HTTP(S) origin without path/query/hash/credentials. |
-| `peekCsrfToken`       | `src/shared/api/client/csrf-token.ts`    | exported           | Reads the current in-memory CSRF token without issuing a request.                                                           |
-| `setCsrfToken`        | `src/shared/api/client/csrf-token.ts`    | exported           | Replaces the in-memory CSRF token and invalidates older in-flight fetch generations.                                        |
-| `clearCsrfToken`      | `src/shared/api/client/csrf-token.ts`    | exported           | Clears the in-memory CSRF token and prevents late pre-logout fetches from restoring it.                                     |
-| `getOrFetchCsrfToken` | `src/shared/api/client/csrf-token.ts`    | transport-internal | Returns the cached CSRF token or shares one generation-safe fetch across concurrent callers.                                |
-| `API_AXIOS_INSTANCE`  | `src/shared/api/client/axios-client.ts`  | exported           | Sends credentialed API requests and adds generation-safe CSRF headers to non-login unsafe methods.                          |
-| `apiMutator`          | `src/shared/api/client/orval-mutator.ts` | exported           | Merges Orval request options, accepts operational JSON `503` responses, and normalizes other failures.                      |
+| Helper                                | Location                                 | Visibility         | Contract                                                                                                                    |
+| ------------------------------------- | ---------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `normalizeApiError`                   | `src/shared/api/client/api-error.ts`     | exported           | Converts Axios, network, and unknown errors to `ApiClientError`.                                                            |
+| `isApiClientError`                    | `src/shared/api/client/api-error.ts`     | exported           | Narrows unknown errors to `ApiClientError`.                                                                                 |
+| `getApiErrorStatus`                   | `src/shared/api/client/api-error.ts`     | exported           | Reads HTTP status from a normalized API error.                                                                              |
+| `getApiBaseUrl`                       | `src/shared/api/client/api-base-url.ts`  | exported           | Returns the shared API root/origin for Axios and browser APIs such as `EventSource`.                                        |
+| `joinApiUrl`                          | `src/shared/api/client/api-base-url.ts`  | exported           | Joins the validated API root/origin with a caller-owned versioned endpoint path.                                            |
+| `buildApiUrl`                         | `src/shared/api/client/api-base-url.ts`  | exported           | Builds backend API URLs from the shared origin and a caller-owned versioned endpoint path.                                  |
+| `parsePublicEnv`                      | `src/shared/config/env.ts`               | exported           | Validates that the public API setting is same-origin `/` or an absolute HTTP(S) origin without path/query/hash/credentials. |
+| `peekCsrfToken`                       | `src/shared/api/client/csrf-token.ts`    | exported           | Reads the current in-memory CSRF token without issuing a request.                                                           |
+| `setCsrfToken`                        | `src/shared/api/client/csrf-token.ts`    | exported           | Replaces the in-memory CSRF token and invalidates older in-flight fetch generations.                                        |
+| `clearCsrfToken`                      | `src/shared/api/client/csrf-token.ts`    | exported           | Clears the in-memory CSRF token and prevents late pre-logout fetches from restoring it.                                     |
+| `getOrFetchCsrfToken`                 | `src/shared/api/client/csrf-token.ts`    | transport-internal | Returns the cached CSRF token or shares one generation-safe fetch across concurrent callers.                                |
+| `isLoginRequest`                      | `src/shared/api/client/axios-client.ts`  | private            | Exempts only the exact versioned login path from CSRF fetching.                                                             |
+| `fetchCsrfToken`                      | `src/shared/api/client/axios-client.ts`  | private            | Fetches the session-bound CSRF token with credentials and validates its response shape.                                     |
+| `API_AXIOS_INSTANCE`                  | `src/shared/api/client/axios-client.ts`  | exported           | Sends credentialed API requests, preserves multipart bodies, and adds generation-safe CSRF headers to unsafe methods.       |
+| `acceptsOperationalHealthUnavailable` | `src/shared/api/client/orval-mutator.ts` | private            | Allows JSON `503` data only for exact operational health GET paths.                                                         |
+| `getResponseMediaType`                | `src/shared/api/client/orval-mutator.ts` | private            | Normalizes an Axios response Content-Type to its lowercase media type.                                                      |
+| `apiMutator`                          | `src/shared/api/client/orval-mutator.ts` | exported           | Merges Orval request options, accepts operational JSON `503` responses, and normalizes other failures.                      |
 
 ## Shared Number Helpers
 

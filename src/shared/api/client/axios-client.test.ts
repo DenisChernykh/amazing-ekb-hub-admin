@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 
+import { adminPlacesUploadPhoto } from '@/shared/api'
 import { server } from '@/test/msw/server'
 
 import { API_AXIOS_INSTANCE } from './axios-client'
@@ -94,11 +95,13 @@ describe('credentialed Axios transport', () => {
   it('fetches CSRF before sending an empty JSON logout request', async () => {
     const callOrder: string[] = []
     let body = ''
+    let csrfCredentials: RequestCredentials | undefined
     let csrfHeader: string | null = null
 
     server.use(
-      http.get('http://api.test/v1/auth/csrf', () => {
+      http.get('http://api.test/v1/auth/csrf', ({ request }) => {
         callOrder.push('csrf')
+        csrfCredentials = request.credentials
         return HttpResponse.json({ csrfToken: 'logout-token' })
       }),
       http.post('http://api.test/v1/auth/logout', async ({ request }) => {
@@ -113,7 +116,43 @@ describe('credentialed Axios transport', () => {
 
     expect(callOrder).toEqual(['csrf', 'logout'])
     expect(body).toBe('{}')
+    expect(csrfCredentials).toBe('include')
     expect(csrfHeader).toBe('logout-token')
+  })
+
+  it('preserves generated multipart uploads and attaches CSRF', async () => {
+    let contentType: string | null = null
+    let csrfHeader: string | null = null
+    let receivedBody = ''
+
+    server.use(
+      http.get('http://api.test/v1/auth/csrf', () =>
+        HttpResponse.json({ csrfToken: 'upload-token' }),
+      ),
+      http.post(
+        'http://api.test/v1/admin/places/place-1/photo',
+        async ({ request }) => {
+          contentType = request.headers.get('Content-Type')
+          csrfHeader = request.headers.get('X-CSRF-Token')
+          receivedBody = await request.text()
+
+          return HttpResponse.json({ id: 'place-1' })
+        },
+      ),
+    )
+
+    const photo = new File(['image-bytes'], 'cover.png', {
+      type: 'image/png',
+    })
+
+    await adminPlacesUploadPhoto({ placeId: 'place-1' }, { photo })
+
+    expect(contentType).toMatch(/^multipart\/form-data; boundary=/)
+    expect(csrfHeader).toBe('upload-token')
+    expect(receivedBody).toContain(
+      'Content-Disposition: form-data; name="photo"; filename="',
+    )
+    expect(receivedBody).toContain('Content-Type: image/png')
   })
 
   it('shares one CSRF fetch between parallel unsafe requests', async () => {

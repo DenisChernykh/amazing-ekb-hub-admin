@@ -8,7 +8,11 @@ type PendingCsrfToken = {
 
 let pendingCsrfToken: PendingCsrfToken | null = null
 
-/** Возвращает сохранённый CSRF-токен без сетевого запроса. */
+/**
+ * Возвращает сохранённый CSRF-токен без сетевого запроса.
+ *
+ * @returns Текущий токен или `null`, если токен ещё не получен либо очищен.
+ */
 export function peekCsrfToken() {
   return csrfToken
 }
