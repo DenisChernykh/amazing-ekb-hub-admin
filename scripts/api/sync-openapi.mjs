@@ -36,6 +36,16 @@ const requiredProblemCodes = [
   'INTERNAL_ERROR',
 ]
 
+const placeSummarySchemaNames = [
+  'AdminPlaceSummaryResponseDto',
+  'PlaceDetailResponseDto',
+  'PlaceSummaryResponseDto',
+  'PublicPlaceSummaryResponseDto',
+]
+
+const placeSummaryCategoryRef =
+  '#/components/schemas/PlaceSummaryCategoryResponseDto'
+
 const readWorktreeList = () => {
   try {
     return execFileSync('git', ['worktree', 'list', '--porcelain'], {
@@ -90,6 +100,34 @@ export function validateOpenApiDocument(value) {
         `OpenAPI document is missing ProblemResponseDto code ${problemCode}`,
       )
     }
+  }
+
+  const schemas = value.components?.schemas
+
+  for (const schemaName of placeSummarySchemaNames) {
+    const categoryRef = schemas?.[schemaName]?.properties?.category?.$ref
+
+    if (categoryRef !== placeSummaryCategoryRef) {
+      throw new Error(
+        `OpenAPI document has an unexpected ${schemaName}.category ref`,
+      )
+    }
+  }
+
+  if (schemas?.ImportRunEventResponseDto !== undefined) {
+    throw new Error(
+      'OpenAPI document still contains obsolete ImportRunEventResponseDto',
+    )
+  }
+
+  const importRunEventStreamSchema =
+    value.paths['/v1/admin/import-runs/{runId}/events']?.get?.responses?.[200]
+      ?.content?.['text/event-stream']?.schema
+
+  if (importRunEventStreamSchema?.type !== 'string') {
+    throw new Error(
+      'OpenAPI document has an unexpected GET /v1/admin/import-runs/{runId}/events text/event-stream schema',
+    )
   }
 
   return value

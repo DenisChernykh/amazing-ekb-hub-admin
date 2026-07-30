@@ -5,12 +5,12 @@
  * Amazing EKB backend contract.
  * OpenAPI spec version: 1.0.0
  */
-import type { PlaceCategoryResponseDto } from './placeCategoryResponseDto'
 import type { PlaceCountersResponseDto } from './placeCountersResponseDto'
+import type { PlaceSummaryCategoryResponseDto } from './placeSummaryCategoryResponseDto'
 import type { PublicPlaceSummaryResponseDtoStatus } from './publicPlaceSummaryResponseDtoStatus'
 
 export type PublicPlaceSummaryResponseDto = {
-  category: PlaceCategoryResponseDto
+  category: PlaceSummaryCategoryResponseDto
   counters: PlaceCountersResponseDto
   /** @nullable */
   coverImageUrl: string | null

@@ -6,12 +6,12 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { PinnedMaterialResponseDto } from './pinnedMaterialResponseDto'
-import type { PlaceCategoryResponseDto } from './placeCategoryResponseDto'
 import type { PlaceCountersResponseDto } from './placeCountersResponseDto'
 import type { PlaceDetailResponseDtoStatus } from './placeDetailResponseDtoStatus'
+import type { PlaceSummaryCategoryResponseDto } from './placeSummaryCategoryResponseDto'
 
 export type PlaceDetailResponseDto = {
-  category: PlaceCategoryResponseDto
+  category: PlaceSummaryCategoryResponseDto
   counters: PlaceCountersResponseDto
   /** @nullable */
   coverImageUrl: string | null

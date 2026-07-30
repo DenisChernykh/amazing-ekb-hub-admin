@@ -48,12 +48,9 @@ export const PlacesList200Response = zod.strictObject({
     zod.strictObject({
       category: zod.strictObject({
         coverImageUrl: zod.string().nullable(),
-        createdAt: zod.iso.datetime({ offset: true }),
         id: zod.string(),
         slug: zod.string(),
-        status: zod.enum(['draft', 'active']),
         title: zod.string(),
-        updatedAt: zod.iso.datetime({ offset: true }),
       }),
       counters: zod.strictObject({
         dzen: zod.number().min(placesList200ResponseItemsItemCountersDzenMin),
@@ -221,12 +218,9 @@ export const placesGet200ResponsePinnedMaterialOneDurationSecMin = 0
 export const PlacesGet200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   counters: zod.strictObject({
     dzen: zod.number().min(placesGet200ResponseCountersDzenMin),

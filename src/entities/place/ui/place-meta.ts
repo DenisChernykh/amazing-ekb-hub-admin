@@ -1,6 +1,7 @@
 import type {
   AdminPlaceSummaryResponseDtoStatus,
   PlaceCategoryResponseDto,
+  PlaceSummaryCategoryResponseDto,
 } from '@/shared/api'
 import type { TagProps } from 'antd'
 
@@ -24,9 +25,11 @@ const statusMeta = {
 } satisfies Record<AdminPlaceSummaryResponseDtoStatus, PlaceMeta>
 
 /**
- * Возвращает UI-метаданные для серверной категории места.
+ * Возвращает UI-метаданные для полной или summary-категории места.
  */
-export const getPlaceCategoryMeta = (category: PlaceCategoryResponseDto) =>
+export const getPlaceCategoryMeta = (
+  category: PlaceCategoryResponseDto | PlaceSummaryCategoryResponseDto,
+) =>
   ({
     color: 'default',
     label: category.title,

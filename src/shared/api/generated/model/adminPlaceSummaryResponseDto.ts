@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { AdminPlaceSummaryResponseDtoStatus } from './adminPlaceSummaryResponseDtoStatus'
-import type { PlaceCategoryResponseDto } from './placeCategoryResponseDto'
+import type { PlaceSummaryCategoryResponseDto } from './placeSummaryCategoryResponseDto'
 
 export type AdminPlaceSummaryResponseDto = {
-  category: PlaceCategoryResponseDto
+  category: PlaceSummaryCategoryResponseDto
   /** @nullable */
   coverImageUrl: string | null
   id: string

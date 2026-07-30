@@ -145,7 +145,7 @@
       "AdminPlaceSummaryResponseDto": {
         "properties": {
           "category": {
-            "$ref": "#/components/schemas/PlaceCategoryResponseDto"
+            "$ref": "#/components/schemas/PlaceSummaryCategoryResponseDto"
           },
           "coverImageUrl": {
             "nullable": true,
@@ -598,15 +598,6 @@
         ],
         "type": "object"
       },
-      "ImportRunEventResponseDto": {
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/ImportRunResponseDto"
-          }
-        },
-        "required": ["data"],
-        "type": "object"
-      },
       "ImportRunListResponseDto": {
         "properties": {
           "items": {
@@ -969,7 +960,7 @@
       "PlaceDetailResponseDto": {
         "properties": {
           "category": {
-            "$ref": "#/components/schemas/PlaceCategoryResponseDto"
+            "$ref": "#/components/schemas/PlaceSummaryCategoryResponseDto"
           },
           "counters": {
             "$ref": "#/components/schemas/PlaceCountersResponseDto"
@@ -1289,10 +1280,29 @@
         "required": ["viewerUrl", "expiresAt"],
         "type": "object"
       },
+      "PlaceSummaryCategoryResponseDto": {
+        "properties": {
+          "coverImageUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "slug", "title", "coverImageUrl"],
+        "type": "object"
+      },
       "PlaceSummaryResponseDto": {
         "properties": {
           "category": {
-            "$ref": "#/components/schemas/PlaceCategoryResponseDto"
+            "$ref": "#/components/schemas/PlaceSummaryCategoryResponseDto"
           },
           "coverImageUrl": {
             "nullable": true,
@@ -1538,7 +1548,7 @@
       "PublicPlaceSummaryResponseDto": {
         "properties": {
           "category": {
-            "$ref": "#/components/schemas/PlaceCategoryResponseDto"
+            "$ref": "#/components/schemas/PlaceSummaryCategoryResponseDto"
           },
           "counters": {
             "$ref": "#/components/schemas/PlaceCountersResponseDto"
@@ -4268,7 +4278,9 @@
             "content": {
               "text/event-stream": {
                 "schema": {
-                  "$ref": "#/components/schemas/ImportRunEventResponseDto"
+                  "description": "Server-sent event stream. Each data field contains a JSON-serialized import-run payload.",
+                  "example": "event: import-run.updated\ndata: {\"id\":\"run-123\",\"sourceId\":\"source-123\",\"status\":\"running\",\"startedAt\":\"2026-07-30T18:00:00.000Z\",\"finishedAt\":null,\"foundCount\":3,\"createdCount\":1,\"updatedCount\":1,\"skippedDuplicateCount\":1,\"errorMessage\":null,\"createdAt\":\"2026-07-30T17:59:00.000Z\",\"updatedAt\":\"2026-07-30T18:00:00.000Z\"}\n\n",
+                  "type": "string"
                 }
               }
             },

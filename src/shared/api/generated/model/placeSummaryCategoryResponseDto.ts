@@ -5,8 +5,11 @@
  * Amazing EKB backend contract.
  * OpenAPI spec version: 1.0.0
  */
-import type { ImportRunResponseDto } from './importRunResponseDto'
 
-export type ImportRunEventResponseDto = {
-  data: ImportRunResponseDto
+export type PlaceSummaryCategoryResponseDto = {
+  /** @nullable */
+  coverImageUrl: string | null
+  id: string
+  slug: string
+  title: string
 }

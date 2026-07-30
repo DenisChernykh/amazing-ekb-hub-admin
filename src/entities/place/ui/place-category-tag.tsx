@@ -1,13 +1,13 @@
-import type { PlaceCategoryResponseDto } from '@/shared/api'
+import type { PlaceSummaryCategoryResponseDto } from '@/shared/api'
 import { Tag } from 'antd'
 import { getPlaceCategoryMeta } from './place-meta'
 
 type PlaceCategoryTagProps = {
-  category: PlaceCategoryResponseDto
+  category: PlaceSummaryCategoryResponseDto
 }
 
 /**
- * Отображает backend-категорию места как локализованный Ant Design tag.
+ * Отображает summary-категорию места как локализованный Ant Design tag.
  */
 export function PlaceCategoryTag({ category }: PlaceCategoryTagProps) {
   const meta = getPlaceCategoryMeta(category)

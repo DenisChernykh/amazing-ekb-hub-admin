@@ -21,7 +21,6 @@ import { useQuery } from '@tanstack/react-query'
 import type {
   AdminImportRunsListParams,
   AdminImportRunsStreamEventsPathParameters,
-  ImportRunEventResponseDto,
   ImportRunListResponseDto,
   ProblemResponseDto,
   ValidationProblemResponseDto,
@@ -223,7 +222,7 @@ export const adminImportRunsStreamEvents = (
   options?: SecondParameter<typeof apiMutator>,
   signal?: AbortSignal,
 ) => {
-  return apiMutator<ImportRunEventResponseDto>(
+  return apiMutator<string>(
     {
       url: `/v1/admin/import-runs/${encodeURIComponent(String(runId))}/events`,
       method: 'GET',

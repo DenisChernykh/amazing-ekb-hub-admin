@@ -63,9 +63,6 @@ const hiddenPlace: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: {
     coverImageUrl: null,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    status: 'active',
-    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',

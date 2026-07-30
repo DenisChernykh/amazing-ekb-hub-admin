@@ -32,12 +32,9 @@ export const AdminPlacesList200Response = zod.strictObject({
     zod.strictObject({
       category: zod.strictObject({
         coverImageUrl: zod.string().nullable(),
-        createdAt: zod.iso.datetime({ offset: true }),
         id: zod.string(),
         slug: zod.string(),
-        status: zod.enum(['draft', 'active']),
         title: zod.string(),
-        updatedAt: zod.iso.datetime({ offset: true }),
       }),
       coverImageUrl: zod.string().nullable(),
       id: zod.string(),
@@ -312,12 +309,9 @@ export const AdminPlacesCreateBody = zod.strictObject({
 export const AdminPlacesCreate201Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   coverImageUrl: zod.string().nullable(),
   id: zod.string(),
@@ -755,12 +749,9 @@ export const adminPlacesGet200ResponsePinnedMaterialOneDurationSecMin = 0
 export const AdminPlacesGet200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   counters: zod.strictObject({
     dzen: zod.number().min(adminPlacesGet200ResponseCountersDzenMin),
@@ -1038,12 +1029,9 @@ export const AdminPlacesUpdateBody = zod.strictObject({
 export const AdminPlacesUpdate200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   coverImageUrl: zod.string().nullable(),
   id: zod.string(),
@@ -3062,12 +3050,9 @@ export const AdminPlacesUploadPhotoBody = zod.strictObject({
 export const AdminPlacesUploadPhoto200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   coverImageUrl: zod.string().nullable(),
   id: zod.string(),
@@ -3488,12 +3473,9 @@ export const adminPlacesClearPinnedMaterial200ResponsePinnedMaterialOneDurationS
 export const AdminPlacesClearPinnedMaterial200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   counters: zod.strictObject({
     dzen: zod
@@ -3779,12 +3761,9 @@ export const adminPlacesSetPinnedMaterial200ResponsePinnedMaterialOneDurationSec
 export const AdminPlacesSetPinnedMaterial200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   counters: zod.strictObject({
     dzen: zod
@@ -4189,12 +4168,9 @@ export const AdminPlacesUpdateStatusBody = zod.strictObject({
 export const AdminPlacesUpdateStatus200Response = zod.strictObject({
   category: zod.strictObject({
     coverImageUrl: zod.string().nullable(),
-    createdAt: zod.iso.datetime({ offset: true }),
     id: zod.string(),
     slug: zod.string(),
-    status: zod.enum(['draft', 'active']),
     title: zod.string(),
-    updatedAt: zod.iso.datetime({ offset: true }),
   }),
   coverImageUrl: zod.string().nullable(),
   id: zod.string(),

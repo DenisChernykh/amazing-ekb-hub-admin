@@ -143,6 +143,7 @@ export type {
   PlaceImportOperationResponseDto,
   PlaceImportOperationResponseDtoStatus,
   PlaceImportViewerAccessResponseDto,
+  PlaceSummaryCategoryResponseDto,
   PlaceSummaryResponseDto,
   SetPinnedMaterialDto,
   StartPlaceImportDto,

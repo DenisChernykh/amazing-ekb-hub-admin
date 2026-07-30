@@ -34,9 +34,6 @@ const mutateAsyncMock = vi.fn()
 const activePlace: AdminPlaceSummaryResponseDto = {
   category: {
     coverImageUrl: null,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    status: 'active',
-    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_pools',
     slug: 'pools',
     title: 'Бассейны',
@@ -54,9 +51,6 @@ const activePlace: AdminPlaceSummaryResponseDto = {
 const hiddenPlace: AdminPlaceSummaryResponseDto = {
   category: {
     coverImageUrl: null,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    status: 'active',
-    updatedAt: '2026-01-01T00:00:00.000Z',
     id: 'category_spa',
     slug: 'spa',
     title: 'SPA',
