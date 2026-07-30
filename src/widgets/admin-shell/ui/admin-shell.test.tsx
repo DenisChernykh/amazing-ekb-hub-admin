@@ -37,7 +37,9 @@ function renderAdminShell() {
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={['/places']}>
-        <AdminShell />
+        <AdminShell>
+          <p>Protected child content</p>
+        </AdminShell>
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -72,6 +74,7 @@ describe('AdminShell', () => {
     )
     expect(screen.getByText('content_editor')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
+    expect(screen.getByText('Protected child content')).toBeInTheDocument()
   })
 
   it('does not expose session identity or permission diagnostics', () => {

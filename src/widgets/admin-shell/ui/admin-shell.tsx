@@ -1,8 +1,8 @@
 import { RoleTag, useCurrentSession } from '@/entities/session'
 import { LogoutButton } from '@/features/auth/logout/ui/logout-button'
 import { Flex, Layout, Menu, Space, Typography, theme } from 'antd'
-import type { CSSProperties } from 'react'
-import { Link, Outlet, useLocation } from 'react-router'
+import type { CSSProperties, ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
 import {
   adminNavigationItems,
   getSelectedNavigationKey,
@@ -17,12 +17,16 @@ type AdminShellVariables = CSSProperties & {
   '--admin-shell-surface': string
 }
 
+type AdminShellProps = {
+  children: ReactNode
+}
+
 /**
- * Общий protected shell админки с навигацией, role tags и content outlet.
+ * Общий protected shell админки с навигацией, role tags и переданным контентом.
  *
  * @remarks Читает suspense session query внутри защищённой ветки router.
  */
-export function AdminShell() {
+export function AdminShell({ children }: AdminShellProps) {
   const location = useLocation()
   const { data: user } = useCurrentSession()
   const { token } = theme.useToken()
@@ -75,9 +79,7 @@ export function AdminShell() {
           </Flex>
         </Header>
 
-        <Content className={styles.content}>
-          <Outlet />
-        </Content>
+        <Content className={styles.content}>{children}</Content>
       </Layout>
     </Layout>
   )

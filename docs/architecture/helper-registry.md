@@ -107,6 +107,19 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useAppDispatch`   | `src/app/store-hooks.ts`  | exported   | Typed Redux dispatch hook for app-level state changes.                        |
 | `useAppSelector`   | `src/app/store-hooks.ts`  | exported   | Typed Redux selector hook for reading app-level state.                        |
 
+## App Router
+
+| Helper                              | Location                                     | Visibility | Contract                                                                                                                        |
+| ----------------------------------- | -------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `createRequireSessionLoader`        | `src/app/router/loaders.ts`                  | exported   | Requires a fresh session, redirects only `AUTHENTICATION_REQUIRED`, and preserves abort/non-auth errors for the route boundary. |
+| `createRedirectAuthenticatedLoader` | `src/app/router/loaders.ts`                  | exported   | Keeps anonymous users on login and redirects authenticated users only to a sanitized app-local `returnTo`.                      |
+| `getRouteErrorPresentation`         | `src/app/router/route-error-presentation.ts` | exported   | Maps route failures to safe API copy with page-specific authorization text, retry metadata, and optional request diagnostics.   |
+| `RouteError`                        | `src/app/router/route-error.tsx`             | exported   | Renders the Ant Design Data Router error element and exposes retry only for failures classified as retryable.                   |
+| `ProtectedLayout`                   | `src/app/router/protected-layout.tsx`        | exported   | Composes the protected route outlet inside the presentation-only admin shell after the parent loader succeeds.                  |
+| `protectedRouteChildren`            | `src/app/router/index.tsx`                   | exported   | Defines the relative dashboard/admin child route set nested below the protected root route.                                     |
+| `createAppRoutes`                   | `src/app/router/index.tsx`                   | exported   | Creates runtime/test Data Router routes whose loaders perform fresh abort-safe session checks and auth-loss cleanup.            |
+| `router`                            | `src/app/router/index.tsx`                   | exported   | Runtime browser Data Router built from the shared route factory and application Query Client.                                   |
+
 ## Session Entity
 
 | Helper                       | Location                                      | Visibility | Contract                                                                                       |
