@@ -159,6 +159,58 @@ describe('normalizeApiError', () => {
     })
   })
 
+  it('accepts a future obsolete RFC850 Retry-After date', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          retryAfter: 'Tuesday, 01-Jan-30 00:00:05 GMT',
+        }),
+        Date.UTC(2030, 0, 1, 0, 0, 0),
+      ),
+    ).toMatchObject({
+      retryAfterMs: 5_000,
+    })
+  })
+
+  it('accepts a future obsolete asctime Retry-After date', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          retryAfter: 'Tue Jan  1 00:00:05 2030',
+        }),
+        Date.UTC(2030, 0, 1, 0, 0, 0),
+      ),
+    ).toMatchObject({
+      retryAfterMs: 5_000,
+    })
+  })
+
+  it('keeps an RFC850 date exactly 50 years in the future', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          retryAfter: 'Monday, 01-Jan-80 00:00:00 GMT',
+        }),
+        Date.UTC(2030, 0, 1, 0, 0, 0),
+      ),
+    ).toMatchObject({
+      retryAfterMs: 1_577_836_800_000,
+    })
+  })
+
+  it('moves an RFC850 date more than 50 years ahead to the past century', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          retryAfter: 'Monday, 01-Jan-80 00:00:01 GMT',
+        }),
+        Date.UTC(2030, 0, 1, 0, 0, 0),
+      ),
+    ).toMatchObject({
+      retryAfterMs: null,
+    })
+  })
+
   it.each(['0.5', '-1', 'not-a-date', 'Mon, 31 Dec 2029 23:59:59 GMT'])(
     'maps past or invalid Retry-After to null: %s',
     (retryAfter) => {
@@ -178,6 +230,21 @@ describe('normalizeApiError', () => {
     'January 1, 2030 00:00:05 GMT',
     '2030/01/01 00:00:05 GMT',
   ])('rejects a non-HTTP-date Retry-After value: %s', (retryAfter) => {
+    expect(
+      normalizeApiError(
+        createAxiosError({ retryAfter }),
+        Date.UTC(2030, 0, 1, 0, 0, 0),
+      ),
+    ).toMatchObject({
+      retryAfterMs: null,
+    })
+  })
+
+  it.each([
+    'Sun, 31 Feb 2030 00:00:05 GMT',
+    'Sunday, 31-Feb-30 00:00:05 GMT',
+    'Sun Feb 31 00:00:05 2030',
+  ])('rejects a normalized calendar overflow: %s', (retryAfter) => {
     expect(
       normalizeApiError(
         createAxiosError({ retryAfter }),

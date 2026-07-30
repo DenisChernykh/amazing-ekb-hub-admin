@@ -98,6 +98,176 @@ export type ApiClientError<
   TProblem extends ProblemDocumentLike = ProblemDocumentLike,
 > = ApiProblemError<TProblem> | ApiNetworkError | ApiProtocolError
 
+const httpMonths: readonly string[] = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+const httpShortWeekdays: readonly string[] = [
+  'Sun',
+  'Mon',
+  'Tue',
+  'Wed',
+  'Thu',
+  'Fri',
+  'Sat',
+]
+const httpLongWeekdays: readonly string[] = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]
+
+/**
+ * Строго разбирает три формы HTTP-date из RFC 9110 без неявных форматов
+ * `Date.parse`.
+ *
+ * @remarks Для устаревшего RFC850-формата применяет правило двухзначного года:
+ * дата более чем на 50 лет в будущем относится к предыдущему столетию.
+ */
+function parseHttpDate(value: string, now: number): number | null {
+  const imfFixdate =
+    /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), (\d{2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{2}):(\d{2}):(\d{2}) GMT$/u.exec(
+      value,
+    )
+  const rfc850Date =
+    /^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday), (\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2}):(\d{2}) GMT$/u.exec(
+      value,
+    )
+  const asctimeDate =
+    /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}| \d) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/u.exec(
+      value,
+    )
+
+  let dateParts: {
+    weekdayIndex: number
+    year: number
+    monthIndex: number
+    day: number
+    hour: number
+    minute: number
+    second: number
+    isRfc850: boolean
+  }
+
+  if (imfFixdate !== null) {
+    dateParts = {
+      weekdayIndex: httpShortWeekdays.indexOf(imfFixdate[1] ?? ''),
+      day: Number(imfFixdate[2]),
+      monthIndex: httpMonths.indexOf(imfFixdate[3] ?? ''),
+      year: Number(imfFixdate[4]),
+      hour: Number(imfFixdate[5]),
+      minute: Number(imfFixdate[6]),
+      second: Number(imfFixdate[7]),
+      isRfc850: false,
+    }
+  } else if (rfc850Date !== null) {
+    const currentYear = new Date(now).getUTCFullYear()
+    dateParts = {
+      weekdayIndex: httpLongWeekdays.indexOf(rfc850Date[1] ?? ''),
+      day: Number(rfc850Date[2]),
+      monthIndex: httpMonths.indexOf(rfc850Date[3] ?? ''),
+      year: currentYear - (currentYear % 100) + Number(rfc850Date[4]),
+      hour: Number(rfc850Date[5]),
+      minute: Number(rfc850Date[6]),
+      second: Number(rfc850Date[7]),
+      isRfc850: true,
+    }
+  } else if (asctimeDate !== null) {
+    dateParts = {
+      weekdayIndex: httpShortWeekdays.indexOf(asctimeDate[1] ?? ''),
+      monthIndex: httpMonths.indexOf(asctimeDate[2] ?? ''),
+      day: Number(asctimeDate[3]),
+      hour: Number(asctimeDate[4]),
+      minute: Number(asctimeDate[5]),
+      second: Number(asctimeDate[6]),
+      year: Number(asctimeDate[7]),
+      isRfc850: false,
+    }
+  } else {
+    return null
+  }
+
+  const { weekdayIndex, monthIndex, day, hour, minute, second, isRfc850 } =
+    dateParts
+  let { year } = dateParts
+
+  if (
+    weekdayIndex < 0 ||
+    monthIndex < 0 ||
+    !Number.isInteger(year) ||
+    !Number.isInteger(day) ||
+    day < 1 ||
+    day > 31 ||
+    !Number.isInteger(hour) ||
+    hour < 0 ||
+    hour > 23 ||
+    !Number.isInteger(minute) ||
+    minute < 0 ||
+    minute > 59 ||
+    !Number.isInteger(second) ||
+    second < 0 ||
+    second > 60
+  ) {
+    return null
+  }
+
+  const normalizedSecond = Math.min(second, 59)
+  let timestamp = Date.UTC(
+    year,
+    monthIndex,
+    day,
+    hour,
+    minute,
+    normalizedSecond,
+  )
+
+  const leapSecondMs = second === 60 ? 1_000 : 0
+  if (isRfc850) {
+    const fiftyYearBoundary = new Date(now)
+    fiftyYearBoundary.setUTCFullYear(fiftyYearBoundary.getUTCFullYear() + 50)
+    if (timestamp + leapSecondMs > fiftyYearBoundary.getTime()) {
+      year -= 100
+      timestamp = Date.UTC(
+        year,
+        monthIndex,
+        day,
+        hour,
+        minute,
+        normalizedSecond,
+      )
+    }
+  }
+
+  const parsedDate = new Date(timestamp)
+  if (
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== monthIndex ||
+    parsedDate.getUTCDate() !== day ||
+    parsedDate.getUTCHours() !== hour ||
+    parsedDate.getUTCMinutes() !== minute ||
+    parsedDate.getUTCSeconds() !== normalizedSecond ||
+    parsedDate.getUTCDay() !== weekdayIndex
+  ) {
+    return null
+  }
+
+  return timestamp + leapSecondMs
+}
+
 function parseRetryAfter(value: unknown, now: number): number | null {
   if (typeof value !== 'string') {
     return null
@@ -109,20 +279,8 @@ function parseRetryAfter(value: unknown, now: number): number | null {
     return Number.isSafeInteger(milliseconds) ? milliseconds : null
   }
 
-  if (
-    !/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/u.test(
-      retryAfter,
-    )
-  ) {
-    return null
-  }
-
-  const retryAt = Date.parse(retryAfter)
-  if (
-    Number.isNaN(retryAt) ||
-    new Date(retryAt).toUTCString() !== retryAfter ||
-    retryAt <= now
-  ) {
+  const retryAt = parseHttpDate(retryAfter, now)
+  if (retryAt === null || retryAt <= now) {
     return null
   }
 
