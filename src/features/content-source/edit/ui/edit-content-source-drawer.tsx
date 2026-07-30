@@ -2,18 +2,19 @@ import { useUpdateContentSourceMutation } from '@/entities/content-source/model/
 import {
   getContentSourceFormChangedFields,
   getContentSourceFormInitialValues,
-  hasContentSourceFormChanges,
   toUpdateContentSourceRequest,
-  type ContentSourceFormChangedField,
   type ContentSourceFormValues,
 } from '@/features/content-source/form/model/content-source-form'
+import { editContentSourceFormSchema } from '@/features/content-source/form/model/content-source-form-schema'
 import { ContentSourceFormChangedFields } from '@/features/content-source/form/ui/content-source-form-changed-fields'
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { ContentSource } from '@/shared/api/generated/model'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
+import { FormProvider, useWatch } from 'react-hook-form'
 import { EditContentSourceDrawerActions } from './edit-content-source-drawer-actions'
 
 /**
@@ -38,13 +39,19 @@ export function EditContentSourceDrawer({
   open,
 }: EditContentSourceDrawerProps) {
   const { message, modal } = AntdApp.useApp()
-  const [form] = Form.useForm<ContentSourceFormValues>()
   const initialValues = getContentSourceFormInitialValues(contentSource)
+  const form = useZodForm(editContentSourceFormSchema, {
+    defaultValues: initialValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
+  const values = useWatch({
+    compute: (currentValues) => currentValues,
+    control: form.control,
+  })
+  const changedFields = getContentSourceFormChangedFields(values, initialValues)
+  const isDirty = changedFields.length > 0
   const [errorMessages, setErrorMessages] = useState<string[]>([])
-  const [isDirty, setIsDirty] = useState(false)
-  const [changedFields, setChangedFields] = useState<
-    ContentSourceFormChangedField[]
-  >([])
   const updateSourceMutation = useUpdateContentSourceMutation({
     onError: (error) => {
       const apiError = normalizeApiError(error)
@@ -53,25 +60,16 @@ export function EditContentSourceDrawer({
     },
     onSuccess: (updatedSource) => {
       setErrorMessages([])
-      setIsDirty(false)
-      setChangedFields([])
+      form.reset(initialValues)
       void message.success('Источник обновлен')
       onUpdated?.(updatedSource)
       onClose()
     },
   })
 
-  const updateDirtyState = () => {
-    const values = form.getFieldsValue()
-    setIsDirty(hasContentSourceFormChanges(values, initialValues))
-    setChangedFields(getContentSourceFormChangedFields(values, initialValues))
-  }
-
   const closeClean = () => {
     setErrorMessages([])
-    setIsDirty(false)
-    setChangedFields([])
-    form.resetFields()
+    form.reset(initialValues)
     onClose()
   }
 
@@ -94,12 +92,10 @@ export function EditContentSourceDrawer({
     })
   }
 
-  const handleFinish = (values: ContentSourceFormValues) => {
-    const data = toUpdateContentSourceRequest(values, initialValues)
+  const handleSubmit = (formValues: ContentSourceFormValues) => {
+    const data = toUpdateContentSourceRequest(formValues, initialValues)
 
     if (!Object.keys(data).length) {
-      setIsDirty(false)
-      setChangedFields([])
       return
     }
 
@@ -118,41 +114,40 @@ export function EditContentSourceDrawer({
       title="Редактирование источника"
       width={520}
     >
-      <Form<ContentSourceFormValues>
-        form={form}
-        initialValues={initialValues}
-        layout="vertical"
-        name="edit-content-source"
-        onFinish={handleFinish}
-        onValuesChange={updateDirtyState}
-        requiredMark={false}
-      >
-        {Boolean(errorMessages.length) && (
-          <Form.Item>
-            <ContentSourceFormErrorAlert
-              messages={errorMessages}
-              title="Не удалось обновить источник"
-            />
-          </Form.Item>
-        )}
+      <FormProvider {...form}>
+        <form
+          name="edit-content-source"
+          noValidate
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          {Boolean(errorMessages.length) && (
+            <Form.Item layout="vertical">
+              <ContentSourceFormErrorAlert
+                messages={errorMessages}
+                title="Не удалось обновить источник"
+              />
+            </Form.Item>
+          )}
 
-        {Boolean(changedFields.length) && (
-          <Form.Item>
-            <ContentSourceFormChangedFields fields={changedFields} />
-          </Form.Item>
-        )}
+          {Boolean(changedFields.length) && (
+            <Form.Item layout="vertical">
+              <ContentSourceFormChangedFields fields={changedFields} />
+            </Form.Item>
+          )}
 
-        <ContentSourceFormFields
-          disabled={updateSourceMutation.isPending}
-          platformDisabled
-        />
+          <ContentSourceFormFields
+            control={form.control}
+            disabled={updateSourceMutation.isPending}
+            platformDisabled
+          />
 
-        <EditContentSourceDrawerActions
-          isDirty={isDirty}
-          isPending={updateSourceMutation.isPending}
-          onCancel={requestClose}
-        />
-      </Form>
+          <EditContentSourceDrawerActions
+            isDirty={isDirty}
+            isPending={updateSourceMutation.isPending}
+            onCancel={requestClose}
+          />
+        </form>
+      </FormProvider>
     </Drawer>
   )
 }

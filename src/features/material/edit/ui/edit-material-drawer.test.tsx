@@ -214,6 +214,29 @@ describe('EditMaterialDrawer', () => {
     expect(screen.queryByLabelText('Длительность, сек')).not.toBeInTheDocument()
   })
 
+  it('clears duration in the partial update after changing video to post', async () => {
+    const mutate = vi.fn()
+    mockedUseUpdateMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useUpdateMaterialMutation>)
+
+    renderEditDrawer({ ...material, type: 'video' })
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Тип' }), {
+      target: { value: 'post' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith({
+        data: { durationSec: null, type: 'post' },
+        materialId: 'material-1',
+        placeId: 'place-1',
+      })
+    })
+  })
+
   it('shows changed field chips and sends partial update payload', async () => {
     const mutate = vi.fn()
     mockedUseUpdateMaterialMutation.mockReturnValue({

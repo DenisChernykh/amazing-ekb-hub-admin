@@ -1,13 +1,15 @@
 import { useLoginSession } from '@/entities/session/model/session-hooks'
+import {
+  loginFormSchema,
+  type LoginFormValues,
+} from '@/features/auth/login/model/login-form-schema'
 import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { normalizeApiError } from '@/shared/api/client/api-error'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
+import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { LockOutlined, MailOutlined } from '@ant-design/icons'
-import { App as AntdApp, Button, Form, Input } from 'antd'
-
-type LoginFormValues = {
-  email: string
-  password: string
-}
+import { App as AntdApp, Button, Input } from 'antd'
+import { FormProvider } from 'react-hook-form'
 
 type LoginFormProps = {
   onLoggedIn: () => void
@@ -20,6 +22,11 @@ type LoginFormProps = {
  */
 export function LoginForm({ onLoggedIn }: LoginFormProps) {
   const { message } = AntdApp.useApp()
+  const form = useZodForm(loginFormSchema, {
+    defaultValues: { email: '', password: '' },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
   const loginMutation = useLoginSession({
     onError: (error) => {
       void message.error(normalizeApiError(error).message)
@@ -30,51 +37,65 @@ export function LoginForm({ onLoggedIn }: LoginFormProps) {
     },
   })
 
-  const handleFinish = (values: LoginFormValues) => {
+  const handleSubmit = (values: LoginFormValues) => {
     loginMutation.mutate({
       data: values,
     })
   }
 
   return (
-    <Form<LoginFormValues>
-      layout="vertical"
-      name="admin-login"
-      onFinish={handleFinish}
-      requiredMark={false}
-    >
-      <Form.Item
-        label="Email"
-        name="email"
-        rules={[
-          { required: true, message: 'Введите email' },
-          { type: 'email', message: 'Введите корректный email' },
-        ]}
+    <FormProvider {...form}>
+      <form
+        name="admin-login"
+        noValidate
+        onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <Input autoComplete="email" prefix={<MailOutlined />} size="large" />
-      </Form.Item>
+        <RhfFormItem control={form.control} label="Email" name="email">
+          {(field, controlProps) => (
+            <Input
+              aria-describedby={controlProps['aria-describedby']}
+              aria-invalid={controlProps['aria-invalid']}
+              autoComplete="email"
+              id={controlProps.id}
+              onBlur={field.onBlur}
+              onChange={field.onChange}
+              prefix={<MailOutlined />}
+              ref={(input) => field.ref(input?.input ?? null)}
+              size="large"
+              status={controlProps.status}
+              value={field.value}
+            />
+          )}
+        </RhfFormItem>
 
-      <Form.Item
-        label="Пароль"
-        name="password"
-        rules={[{ required: true, message: 'Введите пароль' }]}
-      >
-        <Input.Password
-          autoComplete="current-password"
-          prefix={<LockOutlined />}
+        <RhfFormItem control={form.control} label="Пароль" name="password">
+          {(field, controlProps) => (
+            <Input.Password
+              aria-describedby={controlProps['aria-describedby']}
+              aria-invalid={controlProps['aria-invalid']}
+              autoComplete="current-password"
+              id={controlProps.id}
+              onBlur={field.onBlur}
+              onChange={field.onChange}
+              prefix={<LockOutlined />}
+              ref={(input) => field.ref(input?.input ?? null)}
+              size="large"
+              status={controlProps.status}
+              value={field.value}
+            />
+          )}
+        </RhfFormItem>
+
+        <Button
+          block
+          htmlType="submit"
+          loading={loginMutation.isPending}
           size="large"
-        />
-      </Form.Item>
-
-      <Button
-        block
-        htmlType="submit"
-        loading={loginMutation.isPending}
-        size="large"
-        type="primary"
-      >
-        Войти
-      </Button>
-    </Form>
+          type="primary"
+        >
+          Войти
+        </Button>
+      </form>
+    </FormProvider>
   )
 }

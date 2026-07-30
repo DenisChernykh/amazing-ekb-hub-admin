@@ -1,4 +1,4 @@
-import { ListImportRuns200Response } from '@/shared/api/generated-zod/admin/admin.zod'
+import { AdminImportRunsList200Response } from '@/shared/api/generated-zod/admin-import-runs/admin-import-runs.zod'
 import type { ImportRun } from '@/shared/api/generated/model'
 
 /**
@@ -9,7 +9,7 @@ import type { ImportRun } from '@/shared/api/generated/model'
  */
 export const parseImportRunEventData = (data: string): ImportRun => {
   const parsed: unknown = JSON.parse(data)
-  const response = ListImportRuns200Response.parse({
+  const response = AdminImportRunsList200Response.parse({
     items: [parsed],
   })
   const importRun = response.items[0]

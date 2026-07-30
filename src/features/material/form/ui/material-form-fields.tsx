@@ -1,9 +1,10 @@
-import { getMaterialUrlValidationError } from '@/entities/material/model/material-url'
 import {
   getMaterialPlatformOptions,
   getMaterialTypeOptions,
 } from '@/entities/material/ui/material-meta'
-import { DatePicker, Form, Input, InputNumber, Select } from 'antd'
+import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
+import { DatePicker, Input, InputNumber, Select } from 'antd'
+import { useWatch, type Control } from 'react-hook-form'
 import {
   isMaterialDurationEnabled,
   type MaterialFormValues,
@@ -13,6 +14,7 @@ import {
  * Props набора полей формы материала.
  */
 export type MaterialFormFieldsProps = {
+  control: Control<MaterialFormValues>
   disabled?: boolean
   showUrlField?: boolean
 }
@@ -21,103 +23,132 @@ export type MaterialFormFieldsProps = {
  * Общие Ant Design поля создания и редактирования материала.
  */
 export function MaterialFormFields({
+  control,
   disabled,
   showUrlField = true,
 }: MaterialFormFieldsProps) {
+  const materialType = useWatch({
+    control,
+    name: 'type',
+  })
+
   return (
     <>
-      <Form.Item<MaterialFormValues>
-        label="Платформа"
-        name="platform"
-        rules={[{ message: 'Выберите платформу', required: true }]}
-      >
-        <Select
-          aria-label="Платформа"
-          disabled={disabled}
-          options={getMaterialPlatformOptions()}
-        />
-      </Form.Item>
+      <RhfFormItem control={control} label="Платформа" name="platform">
+        {(field, controlProps) => (
+          <Select
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            aria-label="Платформа"
+            disabled={disabled}
+            id={controlProps.id}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            options={getMaterialPlatformOptions()}
+            ref={field.ref}
+            status={controlProps.status}
+            value={field.value ?? undefined}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<MaterialFormValues>
-        label="Тип"
-        name="type"
-        rules={[{ message: 'Выберите тип материала', required: true }]}
-      >
-        <Select
-          aria-label="Тип"
-          disabled={disabled}
-          options={getMaterialTypeOptions()}
-        />
-      </Form.Item>
+      <RhfFormItem control={control} label="Тип" name="type">
+        {(field, controlProps) => (
+          <Select
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            aria-label="Тип"
+            disabled={disabled}
+            id={controlProps.id}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            options={getMaterialTypeOptions()}
+            ref={field.ref}
+            status={controlProps.status}
+            value={field.value ?? undefined}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<MaterialFormValues>
-        label="Заголовок"
-        name="title"
-        rules={[{ message: 'Введите заголовок', required: true }]}
-      >
-        <Input aria-label="Заголовок" disabled={disabled} />
-      </Form.Item>
+      <RhfFormItem control={control} label="Заголовок" name="title">
+        {(field, controlProps) => (
+          <Input
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            aria-label="Заголовок"
+            disabled={disabled}
+            id={controlProps.id}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
+            ref={(input) => field.ref(input?.input ?? null)}
+            status={controlProps.status}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<MaterialFormValues>
-        label="Дата публикации"
-        name="publishedAt"
-        rules={[{ message: 'Выберите дату публикации', required: true }]}
-      >
-        <DatePicker
-          aria-label="Дата публикации"
-          disabled={disabled}
-          format="DD.MM.YYYY"
-          style={{ width: '100%' }}
-        />
-      </Form.Item>
+      <RhfFormItem control={control} label="Дата публикации" name="publishedAt">
+        {(field, controlProps) => (
+          <DatePicker
+            aria-describedby={controlProps['aria-describedby']}
+            aria-invalid={controlProps['aria-invalid']}
+            aria-label="Дата публикации"
+            disabled={disabled}
+            format="DD.MM.YYYY"
+            id={controlProps.id}
+            onBlur={field.onBlur}
+            onChange={(value) => field.onChange(value)}
+            ref={field.ref}
+            status={controlProps.status}
+            style={{ width: '100%' }}
+            value={field.value}
+          />
+        )}
+      </RhfFormItem>
 
-      <Form.Item<MaterialFormValues>
-        noStyle
-        shouldUpdate={(previousValues, currentValues) =>
-          previousValues.type !== currentValues.type
-        }
-      >
-        {({ getFieldValue }) =>
-          isMaterialDurationEnabled(getFieldValue('type')) && (
-            <Form.Item<MaterialFormValues>
-              label="Длительность, сек"
-              name="durationSec"
-            >
-              <InputNumber
-                aria-label="Длительность, сек"
-                disabled={disabled}
-                min={0}
-                precision={0}
-                style={{ width: '100%' }}
-              />
-            </Form.Item>
-          )
-        }
-      </Form.Item>
+      {isMaterialDurationEnabled(materialType) && (
+        <RhfFormItem
+          control={control}
+          label="Длительность, сек"
+          name="durationSec"
+        >
+          {(field, controlProps) => (
+            <InputNumber
+              aria-describedby={controlProps['aria-describedby']}
+              aria-invalid={controlProps['aria-invalid']}
+              aria-label="Длительность, сек"
+              disabled={disabled}
+              id={controlProps.id}
+              min={0}
+              onBlur={field.onBlur}
+              onChange={(value) => field.onChange(value)}
+              precision={0}
+              ref={field.ref}
+              status={controlProps.status}
+              style={{ width: '100%' }}
+              value={field.value}
+            />
+          )}
+        </RhfFormItem>
+      )}
 
       {showUrlField && (
-        <Form.Item<MaterialFormValues>
-          label="Ссылка"
-          name="url"
-          rules={[
-            { message: 'Введите ссылку', required: true, whitespace: true },
-            {
-              validator: async (_rule, value: unknown) => {
-                if (typeof value !== 'string') {
-                  return
-                }
-
-                const validationError = getMaterialUrlValidationError(value)
-
-                if (validationError) {
-                  throw new Error(validationError)
-                }
-              },
-            },
-          ]}
-        >
-          <Input aria-label="Ссылка" disabled={disabled} />
-        </Form.Item>
+        <RhfFormItem control={control} label="Ссылка" name="url">
+          {(field, controlProps) => (
+            <Input
+              aria-describedby={controlProps['aria-describedby']}
+              aria-invalid={controlProps['aria-invalid']}
+              aria-label="Ссылка"
+              disabled={disabled}
+              id={controlProps.id}
+              onBlur={field.onBlur}
+              onChange={field.onChange}
+              ref={(input) => field.ref(input?.input ?? null)}
+              status={controlProps.status}
+              value={field.value}
+            />
+          )}
+        </RhfFormItem>
       )}
     </>
   )

@@ -7,21 +7,9 @@ import type {
   UpdateMaterialRequest,
 } from '@/shared/api/generated/model'
 import dayjs, { type Dayjs } from 'dayjs'
+import type { MaterialFormValues } from './material-form-schema'
 
-/**
- * Значения общей формы создания и редактирования материала.
- *
- * @remarks Поля допускают `undefined`, пока Ant Design Form еще не прошла
- * required-валидацию. Payload builders ожидают валидные значения формы.
- */
-export type MaterialFormValues = {
-  durationSec?: number | null
-  platform?: Platform
-  publishedAt?: Dayjs | null
-  title?: string
-  type?: MaterialType
-  url?: string
-}
+export type { MaterialFormValues } from './material-form-schema'
 
 type NormalizedMaterialFormValues = {
   durationSec: number | null

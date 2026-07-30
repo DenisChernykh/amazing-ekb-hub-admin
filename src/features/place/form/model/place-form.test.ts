@@ -1,13 +1,17 @@
+import {
+  AdminPlacesCreateBody,
+  AdminPlacesUpdateBody,
+} from '@/shared/api/generated-zod/admin-places/admin-places.zod'
 import type { PlaceCategory, PlaceDetail } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getPlaceFormInitialValues,
-  getPlaceSlugValidationError,
   hasPlaceFormChanges,
   toCreatePlaceRequest,
   toUpdatePlaceRequest,
   type PlaceFormValues,
 } from './place-form'
+import { createPlaceFormSchema, editPlaceFormSchema } from './place-form-schema'
 
 const spaCategory: PlaceCategory = {
   coverImageUrl: null,
@@ -42,6 +46,48 @@ const place: PlaceDetail = {
 }
 
 describe('place form helpers', () => {
+  it('rejects empty required create fields', () => {
+    expect(
+      createPlaceFormSchema
+        .safeParse({
+          categoryId: null,
+          slug: '',
+          summary: '',
+          tags: [],
+          title: '',
+        })
+        .error?.issues.map((issue) => issue.message),
+    ).toEqual(
+      expect.arrayContaining(['Введите название', 'Выберите категорию']),
+    )
+  })
+
+  it('requires a slug when editing a place', () => {
+    expect(
+      editPlaceFormSchema.safeParse({
+        categoryId: 'category_spa',
+        slug: '',
+        summary: '',
+        tags: [],
+        title: 'SPA',
+      }).error?.issues[0]?.message,
+    ).toBe('Введите ярлык')
+  })
+
+  it('uses exact generated-backed slug guidance', () => {
+    expect(
+      createPlaceFormSchema.safeParse({
+        categoryId: 'category_spa',
+        slug: 'Тихий SPA',
+        summary: '',
+        tags: [],
+        title: 'SPA',
+      }).error?.issues[0]?.message,
+    ).toBe(
+      'Используйте маленькие латинские буквы, цифры и дефисы, например quiet-spa',
+    )
+  })
+
   it('maps place detail to form initial values', () => {
     expect(getPlaceFormInitialValues(place)).toEqual({
       categoryId: 'category_spa',
@@ -61,27 +107,35 @@ describe('place form helpers', () => {
       title: '  Тихий SPA  ',
     }
 
-    expect(toCreatePlaceRequest(values)).toEqual({
+    const request = toCreatePlaceRequest(values)
+
+    expect(request).toEqual({
       categoryId: 'category_spa',
       slug: 'new-quiet-spa',
       summary: 'Новый SPA в центре',
       tags: ['spa', 'relax'],
       title: 'Тихий SPA',
     })
+    expect(AdminPlacesCreateBody.parse(request)).toEqual(request)
   })
 
   it('keeps empty optional summary and tags in create payload', () => {
     const values: PlaceFormValues = {
       categoryId: 'category_spa',
+      slug: '',
+      summary: '',
       title: '  Тихий SPA  ',
     }
 
-    expect(toCreatePlaceRequest(values)).toEqual({
+    const request = toCreatePlaceRequest(values)
+
+    expect(request).toEqual({
       categoryId: 'category_spa',
       summary: '',
       tags: [],
       title: 'Тихий SPA',
     })
+    expect(AdminPlacesCreateBody.parse(request)).toEqual(request)
   })
 
   it('builds partial update payload only from changed normalized fields', () => {
@@ -95,12 +149,15 @@ describe('place form helpers', () => {
       title: '  Тихий SPA  ',
     }
 
-    expect(toUpdatePlaceRequest(values, initialValues)).toEqual({
+    const request = toUpdatePlaceRequest(values, initialValues)
+
+    expect(request).toEqual({
       categoryId: 'category_cafe',
       slug: 'quiet-spa-premium',
       summary: 'SPA с обновленным описанием',
       tags: ['spa', 'city'],
     })
+    expect(AdminPlacesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('treats whitespace-only differences as unchanged', () => {
@@ -113,7 +170,10 @@ describe('place form helpers', () => {
     }
 
     expect(hasPlaceFormChanges(values, initialValues)).toBe(false)
-    expect(toUpdatePlaceRequest(values, initialValues)).toEqual({})
+    const request = toUpdatePlaceRequest(values, initialValues)
+
+    expect(request).toEqual({})
+    expect(AdminPlacesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('builds update payload for cleared optional summary and tags', () => {
@@ -125,17 +185,12 @@ describe('place form helpers', () => {
     }
 
     expect(hasPlaceFormChanges(values, initialValues)).toBe(true)
-    expect(toUpdatePlaceRequest(values, initialValues)).toEqual({
+    const request = toUpdatePlaceRequest(values, initialValues)
+
+    expect(request).toEqual({
       summary: '',
       tags: [],
     })
-  })
-
-  it('returns user-facing slug validation errors', () => {
-    expect(getPlaceSlugValidationError('')).toBeNull()
-    expect(getPlaceSlugValidationError('Тихий SPA')).toBe(
-      'Используйте маленькие латинские буквы, цифры и дефисы, например quiet-spa',
-    )
-    expect(getPlaceSlugValidationError('quiet-spa')).toBeNull()
+    expect(AdminPlacesUpdateBody.parse(request)).toEqual(request)
   })
 })

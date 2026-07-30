@@ -1,13 +1,20 @@
+import {
+  AdminCategoriesCreateBody,
+  AdminCategoriesUpdateBody,
+} from '@/shared/api/generated-zod/admin-categories/admin-categories.zod'
 import type { AdminPlaceCategory } from '@/shared/api/generated/model'
 import { describe, expect, it } from 'vitest'
 import {
   getCategoryFormChangedFields,
   getCategoryFormInitialValues,
-  getCategorySlugValidationError,
   hasCategoryFormChanges,
   toCreateCategoryRequest,
   toUpdateCategoryRequest,
 } from './category-form'
+import {
+  createCategoryFormSchema,
+  editCategoryFormSchema,
+} from './category-form-schema'
 
 const category: AdminPlaceCategory = {
   createdAt: '2026-07-03T10:00:00.000Z',
@@ -20,25 +27,54 @@ const category: AdminPlaceCategory = {
 }
 
 describe('category form helpers', () => {
-  it('builds normalized create payload with optional slug', () => {
+  it('requires a create category title', () => {
     expect(
-      toCreateCategoryRequest({
-        slug: ' spa ',
-        title: ' SPA ',
-      }),
-    ).toEqual({
+      createCategoryFormSchema.safeParse({ slug: '', title: '' }).error
+        ?.issues[0]?.message,
+    ).toBe('Введите название')
+  })
+
+  it('requires an edit category slug', () => {
+    expect(
+      editCategoryFormSchema.safeParse({ slug: '', title: 'SPA' }).error
+        ?.issues[0]?.message,
+    ).toBe('Введите ярлык')
+  })
+
+  it('rejects an edit category slug outside the API contract', () => {
+    expect(
+      editCategoryFormSchema.safeParse({
+        slug: 'Семейное кафе',
+        title: 'SPA',
+      }).error?.issues[0]?.message,
+    ).toBe(
+      'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe',
+    )
+  })
+
+  it('builds normalized create payload with optional slug', () => {
+    const request = toCreateCategoryRequest({
+      slug: ' spa ',
+      title: ' SPA ',
+    })
+
+    expect(request).toEqual({
       slug: 'spa',
       title: 'SPA',
     })
+    expect(AdminCategoriesCreateBody.parse(request)).toEqual(request)
 
-    expect(
-      toCreateCategoryRequest({
-        slug: '',
-        title: 'Бассейны',
-      }),
-    ).toEqual({
+    const requestWithoutSlug = toCreateCategoryRequest({
+      slug: '',
       title: 'Бассейны',
     })
+
+    expect(requestWithoutSlug).toEqual({
+      title: 'Бассейны',
+    })
+    expect(AdminCategoriesCreateBody.parse(requestWithoutSlug)).toEqual(
+      requestWithoutSlug,
+    )
   })
 
   it('maps category to initial form values', () => {
@@ -50,18 +86,18 @@ describe('category form helpers', () => {
 
   it('builds update payload with changed fields only', () => {
     const initialValues = getCategoryFormInitialValues(category)
+    const request = toUpdateCategoryRequest(
+      {
+        ...initialValues,
+        title: ' New SPA ',
+      },
+      initialValues,
+    )
 
-    expect(
-      toUpdateCategoryRequest(
-        {
-          ...initialValues,
-          title: ' New SPA ',
-        },
-        initialValues,
-      ),
-    ).toEqual({
+    expect(request).toEqual({
       title: 'New SPA',
     })
+    expect(AdminCategoriesUpdateBody.parse(request)).toEqual(request)
   })
 
   it('detects changed fields after normalization', () => {
@@ -85,13 +121,5 @@ describe('category form helpers', () => {
         initialValues,
       ),
     ).toEqual([{ key: 'slug', label: 'Ярлык' }])
-  })
-
-  it('returns user-facing slug validation errors', () => {
-    expect(getCategorySlugValidationError('')).toBeNull()
-    expect(getCategorySlugValidationError('Семейное кафе')).toBe(
-      'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe',
-    )
-    expect(getCategorySlugValidationError('family-cafe')).toBeNull()
   })
 })

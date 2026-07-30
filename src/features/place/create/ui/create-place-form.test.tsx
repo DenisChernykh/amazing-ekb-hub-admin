@@ -213,6 +213,28 @@ describe('CreatePlaceForm', () => {
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined)
   })
 
+  it('shows exact required errors and does not call mutations after an empty submit', async () => {
+    const createMutateAsync = vi.fn().mockResolvedValue(createdPlace)
+    const uploadMutateAsync = vi.fn().mockResolvedValue(uploadedPlace)
+    mockedUseCreatePlaceMutation.mockReturnValue({
+      isPending: false,
+      mutateAsync: createMutateAsync,
+    } as unknown as ReturnType<typeof useCreatePlaceMutation>)
+    mockedUseUploadPlaceCoverPhotoMutation.mockReturnValue({
+      isPending: false,
+      mutateAsync: uploadMutateAsync,
+    } as unknown as ReturnType<typeof useUploadPlaceCoverPhotoMutation>)
+
+    renderCreatePlaceForm()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
+
+    expect(await screen.findByText('Введите название')).toBeInTheDocument()
+    expect(await screen.findByText('Выберите категорию')).toBeInTheDocument()
+    expect(createMutateAsync).not.toHaveBeenCalled()
+    expect(uploadMutateAsync).not.toHaveBeenCalled()
+  })
+
   it('submits create place payload without a cover photo and reports created id', async () => {
     const createMutateAsync = vi.fn().mockResolvedValue(createdPlace)
     const uploadMutateAsync = vi.fn().mockResolvedValue(uploadedPlace)

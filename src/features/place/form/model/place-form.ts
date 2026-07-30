@@ -3,7 +3,8 @@ import type {
   PlaceDetail,
   UpdatePlaceRequest,
 } from '@/shared/api/generated/model'
-import { isValidSlug } from '@/shared/lib/slug/slug'
+import { z } from 'zod'
+import { editPlaceFormSchema } from './place-form-schema'
 
 /**
  * Значения общей формы создания и редактирования места.
@@ -12,16 +13,10 @@ import { isValidSlug } from '@/shared/lib/slug/slug'
  * и пустой массив перед отправкой, чтобы create/edit одинаково поддерживали
  * незаполненные и явно очищенные поля.
  */
-export type PlaceFormValues = {
-  categoryId: string
-  slug?: string
-  summary?: string
-  tags?: string[]
-  title: string
-}
+export type PlaceFormValues = z.input<typeof editPlaceFormSchema>
 
 type NormalizedPlaceFormValues = {
-  categoryId: string
+  categoryId: string | null
   slug: string | null
   summary: string
   tags: string[]
@@ -35,6 +30,14 @@ const trimOptionalValue = (value: string | undefined) => {
   const trimmedValue = (value ?? '').trim()
 
   return trimmedValue ? trimmedValue : null
+}
+
+const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
+  if (value === null) {
+    throw new Error(`Place form field "${fieldName}" is required`)
+  }
+
+  return value
 }
 
 const normalizePlaceFormValues = (
@@ -76,7 +79,7 @@ export function toCreatePlaceRequest(
   const normalizedValues = normalizePlaceFormValues(values)
 
   const request: CreatePlaceRequest = {
-    categoryId: normalizedValues.categoryId,
+    categoryId: getRequiredValue(normalizedValues.categoryId, 'categoryId'),
     summary: normalizedValues.summary,
     tags: normalizedValues.tags,
     title: normalizedValues.title,
@@ -115,7 +118,10 @@ export function toUpdatePlaceRequest(
   }
 
   if (normalizedValues.categoryId !== normalizedInitialValues.categoryId) {
-    request.categoryId = normalizedValues.categoryId
+    request.categoryId = getRequiredValue(
+      normalizedValues.categoryId,
+      'categoryId',
+    )
   }
 
   if (normalizedValues.slug !== normalizedInitialValues.slug) {
@@ -146,23 +152,4 @@ export function hasPlaceFormChanges(
     normalizedValues.categoryId !== normalizedInitialValues.categoryId ||
     normalizedValues.slug !== normalizedInitialValues.slug
   )
-}
-
-/**
- * Возвращает ошибку локальной проверки публичного slug места.
- *
- * @returns `null`, если slug пустой или соответствует backend-формату.
- */
-export function getPlaceSlugValidationError(value: string | undefined) {
-  const normalizedValue = (value ?? '').trim()
-
-  if (!normalizedValue) {
-    return null
-  }
-
-  if (!isValidSlug(normalizedValue)) {
-    return 'Используйте маленькие латинские буквы, цифры и дефисы, например quiet-spa'
-  }
-
-  return null
 }

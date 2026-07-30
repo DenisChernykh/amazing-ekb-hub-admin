@@ -2,18 +2,19 @@ import { useUpdateCategoryMutation } from '@/entities/category/model/category-mu
 import {
   getCategoryFormChangedFields,
   getCategoryFormInitialValues,
-  hasCategoryFormChanges,
   toUpdateCategoryRequest,
-  type CategoryFormChangedField,
   type CategoryFormValues,
 } from '@/features/category/form/model/category-form'
+import { editCategoryFormSchema } from '@/features/category/form/model/category-form-schema'
 import { CategoryFormChangedFields } from '@/features/category/form/ui/category-form-changed-fields'
 import { CategoryFormErrorAlert } from '@/features/category/form/ui/category-form-error-alert'
 import { CategoryFormFields } from '@/features/category/form/ui/category-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { AdminPlaceCategory } from '@/shared/api/generated/model'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
+import { FormProvider, useWatch } from 'react-hook-form'
 import { EditCategoryDrawerActions } from './edit-category-drawer-actions'
 
 /**
@@ -38,13 +39,19 @@ export function EditCategoryDrawer({
   open,
 }: EditCategoryDrawerProps) {
   const { message, modal } = AntdApp.useApp()
-  const [form] = Form.useForm<CategoryFormValues>()
   const initialValues = getCategoryFormInitialValues(category)
+  const form = useZodForm(editCategoryFormSchema, {
+    defaultValues: initialValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
+  const values = useWatch({
+    compute: (currentValues) => currentValues,
+    control: form.control,
+  })
+  const changedFields = getCategoryFormChangedFields(values, initialValues)
+  const isDirty = changedFields.length > 0
   const [errorMessages, setErrorMessages] = useState<string[]>([])
-  const [isDirty, setIsDirty] = useState(false)
-  const [changedFields, setChangedFields] = useState<
-    CategoryFormChangedField[]
-  >([])
   const updateCategoryMutation = useUpdateCategoryMutation({
     onError: (error) => {
       const apiError = normalizeApiError(error)
@@ -53,25 +60,16 @@ export function EditCategoryDrawer({
     },
     onSuccess: (updatedCategory) => {
       setErrorMessages([])
-      setIsDirty(false)
-      setChangedFields([])
+      form.reset(initialValues)
       void message.success('Категория обновлена')
       onUpdated?.(updatedCategory)
       onClose()
     },
   })
 
-  const updateDirtyState = () => {
-    const values = form.getFieldsValue()
-    setIsDirty(hasCategoryFormChanges(values, initialValues))
-    setChangedFields(getCategoryFormChangedFields(values, initialValues))
-  }
-
   const closeClean = () => {
     setErrorMessages([])
-    setIsDirty(false)
-    setChangedFields([])
-    form.resetFields()
+    form.reset(initialValues)
     onClose()
   }
 
@@ -94,12 +92,10 @@ export function EditCategoryDrawer({
     })
   }
 
-  const handleFinish = (values: CategoryFormValues) => {
-    const data = toUpdateCategoryRequest(values, initialValues)
+  const handleSubmit = (formValues: CategoryFormValues) => {
+    const data = toUpdateCategoryRequest(formValues, initialValues)
 
     if (!Object.keys(data).length) {
-      setIsDirty(false)
-      setChangedFields([])
       return
     }
 
@@ -118,42 +114,40 @@ export function EditCategoryDrawer({
       title="Редактирование категории"
       width={520}
     >
-      <Form<CategoryFormValues>
-        form={form}
-        initialValues={initialValues}
-        layout="vertical"
-        name="edit-category"
-        onFinish={handleFinish}
-        onValuesChange={updateDirtyState}
-        requiredMark={false}
-      >
-        {Boolean(errorMessages.length) && (
-          <Form.Item>
-            <CategoryFormErrorAlert
-              messages={errorMessages}
-              title="Не удалось обновить категорию"
-            />
-          </Form.Item>
-        )}
+      <FormProvider {...form}>
+        <form
+          name="edit-category"
+          noValidate
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          {Boolean(errorMessages.length) && (
+            <Form.Item layout="vertical">
+              <CategoryFormErrorAlert
+                messages={errorMessages}
+                title="Не удалось обновить категорию"
+              />
+            </Form.Item>
+          )}
 
-        {Boolean(changedFields.length) && (
-          <Form.Item>
-            <CategoryFormChangedFields fields={changedFields} />
-          </Form.Item>
-        )}
+          {Boolean(changedFields.length) && (
+            <Form.Item layout="vertical">
+              <CategoryFormChangedFields fields={changedFields} />
+            </Form.Item>
+          )}
 
-        <CategoryFormFields
-          disabled={updateCategoryMutation.isPending}
-          showSlug
-          slugRequired
-        />
+          <CategoryFormFields
+            control={form.control}
+            disabled={updateCategoryMutation.isPending}
+            showSlug
+          />
 
-        <EditCategoryDrawerActions
-          isDirty={isDirty}
-          isPending={updateCategoryMutation.isPending}
-          onCancel={requestClose}
-        />
-      </Form>
+          <EditCategoryDrawerActions
+            isDirty={isDirty}
+            isPending={updateCategoryMutation.isPending}
+            onCancel={requestClose}
+          />
+        </form>
+      </FormProvider>
     </Drawer>
   )
 }

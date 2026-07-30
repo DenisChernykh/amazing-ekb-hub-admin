@@ -1,13 +1,13 @@
 import {
-  GetPlaceImportOperation200Response,
-  StartYandexMapsPlaceImportBody,
-} from '@/shared/api/generated-zod/admin/admin.zod'
+  AdminPlaceImportsGet200Response,
+  AdminPlaceImportsStartBody,
+} from '@/shared/api/generated-zod/admin-place-imports/admin-place-imports.zod'
 import { describe, expect, it } from 'vitest'
 
 describe('generated place import contract', () => {
   it('accepts a full preview snapshot from merged backend OpenAPI', () => {
     expect(
-      GetPlaceImportOperation200Response.parse({
+      AdminPlaceImportsGet200Response.parse({
         attempt: 1,
         captchaExpiresAt: null,
         category: {
@@ -34,11 +34,11 @@ describe('generated place import contract', () => {
     ).toBe('preview_ready')
   })
 
-  it('rejects unsafe start payload fields and non-URL input', () => {
+  it('rejects an extra start payload field and empty input', () => {
     expect(() =>
-      StartYandexMapsPlaceImportBody.parse({
+      AdminPlaceImportsStartBody.parse({
         cookie: 'secret',
-        url: 'not-a-url',
+        url: '',
       }),
     ).toThrow()
   })

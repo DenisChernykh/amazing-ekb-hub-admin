@@ -3,12 +3,24 @@ import {
   toCreateMaterialRequest,
   type MaterialFormValues,
 } from '@/features/material/form/model/material-form'
+import { createMaterialFormSchema } from '@/features/material/form/model/material-form-schema'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
 import { normalizeApiError } from '@/shared/api/client/api-error'
 import type { Material } from '@/shared/api/generated/model'
+import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
+import { FormProvider } from 'react-hook-form'
+
+const createMaterialFormDefaultValues: MaterialFormValues = {
+  durationSec: null,
+  platform: null,
+  publishedAt: null,
+  title: '',
+  type: null,
+  url: '',
+}
 
 /**
  * Props drawer-а создания материала.
@@ -33,9 +45,13 @@ export function CreateMaterialDrawer({
   placeId,
 }: CreateMaterialDrawerProps) {
   const { message, modal } = AntdApp.useApp()
-  const [form] = Form.useForm<MaterialFormValues>()
+  const form = useZodForm(createMaterialFormSchema, {
+    defaultValues: createMaterialFormDefaultValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  })
   const [errorMessages, setErrorMessages] = useState<string[]>([])
-  const [isDirty, setIsDirty] = useState(false)
+  const { isDirty } = form.formState
   const createMaterialMutation = useCreatePlaceMaterialMutation({
     onError: (error) => {
       const apiError = normalizeApiError(error)
@@ -44,8 +60,7 @@ export function CreateMaterialDrawer({
     },
     onSuccess: (material) => {
       setErrorMessages([])
-      setIsDirty(false)
-      form.resetFields()
+      form.reset()
       void message.success('Материал добавлен')
       onCreated?.(material)
       onClose()
@@ -54,8 +69,7 @@ export function CreateMaterialDrawer({
 
   const closeClean = () => {
     setErrorMessages([])
-    setIsDirty(false)
-    form.resetFields()
+    form.reset()
     onClose()
   }
 
@@ -78,7 +92,7 @@ export function CreateMaterialDrawer({
     })
   }
 
-  const handleFinish = (values: MaterialFormValues) => {
+  const handleSubmit = (values: MaterialFormValues) => {
     setErrorMessages([])
     createMaterialMutation.mutate({
       data: toCreateMaterialRequest(values),
@@ -94,43 +108,43 @@ export function CreateMaterialDrawer({
       title="Новый материал"
       width={520}
     >
-      <Form<MaterialFormValues>
-        form={form}
-        layout="vertical"
-        name="create-material"
-        onFinish={handleFinish}
-        onValuesChange={() => {
-          setIsDirty(true)
-        }}
-        requiredMark={false}
-      >
-        {Boolean(errorMessages.length) && (
-          <Form.Item>
-            <MaterialFormErrorAlert
-              messages={errorMessages}
-              title="Не удалось добавить материал"
-            />
-          </Form.Item>
-        )}
+      <FormProvider {...form}>
+        <form
+          name="create-material"
+          noValidate
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          {Boolean(errorMessages.length) && (
+            <Form.Item layout="vertical">
+              <MaterialFormErrorAlert
+                messages={errorMessages}
+                title="Не удалось добавить материал"
+              />
+            </Form.Item>
+          )}
 
-        <MaterialFormFields disabled={createMaterialMutation.isPending} />
-
-        <Flex gap={8} justify="end" wrap>
-          <Button
+          <MaterialFormFields
+            control={form.control}
             disabled={createMaterialMutation.isPending}
-            onClick={requestClose}
-          >
-            Отмена
-          </Button>
-          <Button
-            htmlType="submit"
-            loading={createMaterialMutation.isPending}
-            type="primary"
-          >
-            Добавить
-          </Button>
-        </Flex>
-      </Form>
+          />
+
+          <Flex gap={8} justify="end" wrap>
+            <Button
+              disabled={createMaterialMutation.isPending}
+              onClick={requestClose}
+            >
+              Отмена
+            </Button>
+            <Button
+              htmlType="submit"
+              loading={createMaterialMutation.isPending}
+              type="primary"
+            >
+              Добавить
+            </Button>
+          </Flex>
+        </form>
+      </FormProvider>
     </Drawer>
   )
 }

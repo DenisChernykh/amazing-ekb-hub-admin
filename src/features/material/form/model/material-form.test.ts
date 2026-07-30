@@ -1,3 +1,5 @@
+import { AdminMaterialsUpdateBody } from '@/shared/api/generated-zod/admin-materials/admin-materials.zod'
+import { AdminPlaceMaterialsCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
 import type { Material } from '@/shared/api/generated/model'
 import dayjs from 'dayjs'
 import { describe, expect, it } from 'vitest'
@@ -10,6 +12,11 @@ import {
   toUpdateMaterialRequest,
   type MaterialFormValues,
 } from './material-form'
+import {
+  createMaterialFormSchema,
+  editMaterialWithoutUrlFormSchema,
+  editMaterialWithUrlFormSchema,
+} from './material-form-schema'
 
 const material: Material = {
   durationSec: 125,
@@ -23,6 +30,98 @@ const material: Material = {
 }
 
 describe('material form helpers', () => {
+  it('validates the required create material fields with exact messages', () => {
+    const result = createMaterialFormSchema.safeParse({
+      durationSec: null,
+      platform: null,
+      publishedAt: null,
+      title: ' ',
+      type: null,
+      url: '',
+    })
+
+    expect(result.success).toBe(false)
+
+    if (!result.success) {
+      expect(result.error.issues.map((issue) => issue.message)).toEqual(
+        expect.arrayContaining([
+          'Выберите платформу',
+          'Выберите тип материала',
+          'Введите заголовок',
+          'Выберите дату публикации',
+          'Введите ссылку',
+        ]),
+      )
+    }
+  })
+
+  it('requires a safe URL for create and edit forms with source URLs', () => {
+    const values = {
+      durationSec: null,
+      platform: 'telegram' as const,
+      publishedAt: dayjs('2026-03-20'),
+      title: 'Пост',
+      type: 'post' as const,
+      url: 'javascript://example.com/%0Aalert(1)',
+    }
+
+    for (const schema of [
+      createMaterialFormSchema,
+      editMaterialWithUrlFormSchema,
+    ]) {
+      expect(schema.safeParse(values).error?.issues[0]?.message).toBe(
+        'Введите ссылку с протоколом http или https',
+      )
+      expect(schema.safeParse({ ...values, url: ' ' }).success).toBe(false)
+    }
+  })
+
+  it('allows non-url edit forms to retain an empty URL field', () => {
+    expect(
+      editMaterialWithoutUrlFormSchema.safeParse({
+        durationSec: null,
+        platform: 'telegram',
+        publishedAt: dayjs('2026-03-20'),
+        title: 'Пост',
+        type: 'post',
+        url: '',
+      }).success,
+    ).toBe(true)
+  })
+
+  it('keeps duration optional for non-video values and accepts nullable video duration', () => {
+    expect(
+      createMaterialFormSchema.safeParse({
+        durationSec: 125,
+        platform: 'telegram',
+        publishedAt: dayjs('2026-03-20'),
+        title: 'Пост',
+        type: 'post',
+        url: 'https://example.com/material/1',
+      }).success,
+    ).toBe(true)
+    expect(
+      createMaterialFormSchema.safeParse({
+        durationSec: null,
+        platform: 'telegram',
+        publishedAt: dayjs('2026-03-20'),
+        title: 'Видео',
+        type: 'video',
+        url: 'https://example.com/material/2',
+      }).success,
+    ).toBe(true)
+    expect(
+      createMaterialFormSchema.safeParse({
+        durationSec: 125,
+        platform: 'telegram',
+        publishedAt: dayjs('2026-03-20'),
+        title: 'Видео',
+        type: 'video',
+        url: 'https://example.com/material/3',
+      }).success,
+    ).toBe(true)
+  })
+
   it('enables duration only for video material types', () => {
     expect(isMaterialDurationEnabled('post')).toBe(false)
     expect(isMaterialDurationEnabled('reel')).toBe(true)
@@ -65,7 +164,7 @@ describe('material form helpers', () => {
 
   it('normalizes create payload and stores selected calendar date', () => {
     const values: MaterialFormValues = {
-      durationSec: undefined,
+      durationSec: null,
       platform: 'telegram',
       publishedAt: dayjs('2026-03-20T00:30:00'),
       title: '  Новый обзор  ',
@@ -83,6 +182,7 @@ describe('material form helpers', () => {
       url: 'https://t.me/amazing_ekb/322',
     })
     expect(request.publishedAt).toBe('2026-03-20')
+    expect(AdminPlaceMaterialsCreateBody.parse(request)).toEqual(request)
   })
 
   it('omits duration and stores post calendar date', () => {
@@ -105,6 +205,7 @@ describe('material form helpers', () => {
     })
     expect(request).not.toHaveProperty('durationSec')
     expect(request.publishedAt).toBe('2026-03-20')
+    expect(AdminPlaceMaterialsCreateBody.parse(request)).toEqual(request)
   })
 
   it('rejects unsafe material URLs before building create payload', () => {
@@ -132,11 +233,14 @@ describe('material form helpers', () => {
       url: ' https://t.me/amazing_ekb/999 ',
     }
 
-    expect(toUpdateMaterialRequest(values, initialValues)).toEqual({
+    const request = toUpdateMaterialRequest(values, initialValues)
+
+    expect(request).toEqual({
       durationSec: null,
       title: 'Обновленный обзор',
       url: 'https://t.me/amazing_ekb/999',
     })
+    expect(AdminMaterialsUpdateBody.parse(request)).toEqual(request)
   })
 
   it('clears duration when changing a video material to post', () => {

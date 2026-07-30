@@ -3,17 +3,9 @@ import type {
   CreatePlaceCategoryRequest,
   UpdatePlaceCategoryRequest,
 } from '@/shared/api/generated/model'
-import { isValidSlug } from '@/shared/lib/slug/slug'
+import type { CategoryFormValues } from './category-form-schema'
 
-/**
- * Значения общей формы создания и редактирования категории места.
- *
- * @remarks Поля допускают `undefined`, пока Ant Design Form еще не прошла required-валидацию.
- */
-export type CategoryFormValues = {
-  slug?: string
-  title?: string
-}
+export type { CategoryFormValues } from './category-form-schema'
 
 type NormalizedCategoryFormValues = {
   slug: string | null
@@ -38,8 +30,8 @@ const categoryFormFieldKeys: Array<keyof NormalizedCategoryFormValues> = [
   'slug',
 ]
 
-const trimOptionalValue = (value: string | undefined) => {
-  const trimmedValue = (value ?? '').trim()
+const trimOptionalValue = (value: string) => {
+  const trimmedValue = value.trim()
 
   return trimmedValue ? trimmedValue : null
 }
@@ -48,7 +40,7 @@ const normalizeCategoryFormValues = (
   values: CategoryFormValues,
 ): NormalizedCategoryFormValues => ({
   slug: trimOptionalValue(values.slug),
-  title: (values.title ?? '').trim(),
+  title: values.title.trim(),
 })
 
 const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
@@ -57,25 +49,6 @@ const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
   }
 
   return value
-}
-
-/**
- * Возвращает ошибку локальной проверки ярлыка категории.
- *
- * @returns `null`, если ярлык пустой или заполнен в backend-формате.
- */
-export function getCategorySlugValidationError(value: string | undefined) {
-  const normalizedValue = (value ?? '').trim()
-
-  if (!normalizedValue) {
-    return null
-  }
-
-  if (!isValidSlug(normalizedValue)) {
-    return 'Используйте маленькие латинские буквы, цифры и дефисы, например family-cafe'
-  }
-
-  return null
 }
 
 /**

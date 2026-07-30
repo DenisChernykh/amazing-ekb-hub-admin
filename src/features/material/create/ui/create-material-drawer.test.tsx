@@ -1,10 +1,13 @@
 import { useCreatePlaceMaterialMutation } from '@/entities/material/model/material-mutations'
 import { ApiClientError } from '@/shared/api/client/api-error'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CreateMaterialDrawer } from './create-material-drawer'
+
+const modalConfirm = vi.fn()
 
 vi.mock('@/entities/material/model/material-mutations', () => ({
   useCreatePlaceMaterialMutation: vi.fn(),
@@ -21,7 +24,7 @@ vi.mock('antd', async () => {
       success: vi.fn(),
     },
     modal: {
-      confirm: vi.fn(),
+      confirm: modalConfirm,
     },
   })
 
@@ -140,7 +143,31 @@ const renderCreateDrawer = () => {
 
 describe('CreateMaterialDrawer', () => {
   beforeEach(() => {
+    modalConfirm.mockReset()
     mockedUseCreatePlaceMaterialMutation.mockReset()
+  })
+
+  it('shows every exact required message after submitting an empty form', async () => {
+    mockedUseCreatePlaceMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useCreatePlaceMaterialMutation>)
+
+    renderCreateDrawer()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }))
+
+    await waitFor(() => {
+      for (const message of [
+        'Выберите платформу',
+        'Выберите тип материала',
+        'Введите заголовок',
+        'Выберите дату публикации',
+        'Введите ссылку',
+      ]) {
+        expect(screen.getByText(message)).toBeInTheDocument()
+      }
+    })
   })
 
   it('submits normalized create material payload', async () => {
@@ -296,5 +323,27 @@ describe('CreateMaterialDrawer', () => {
 
     expect(await screen.findByText(/http или https/)).toBeInTheDocument()
     expect(mutate).not.toHaveBeenCalled()
+  })
+
+  it('asks confirmation before closing a dirty create drawer', async () => {
+    mockedUseCreatePlaceMaterialMutation.mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as unknown as ReturnType<typeof useCreatePlaceMaterialMutation>)
+
+    renderCreateDrawer()
+    const user = userEvent.setup()
+
+    await user.type(screen.getByLabelText('Заголовок'), 'Черновик')
+    await user.click(screen.getByRole('button', { name: 'Закрыть drawer' }))
+
+    await waitFor(() => {
+      expect(modalConfirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          okText: 'Закрыть',
+          title: 'Закрыть без сохранения?',
+        }),
+      )
+    })
   })
 })
