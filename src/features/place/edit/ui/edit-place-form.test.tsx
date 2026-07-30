@@ -4,7 +4,7 @@ import type {
   PlaceCategoryResponseDto,
   PlaceDetailResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -336,17 +336,7 @@ describe('EditPlaceForm', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'title must be a string',
-                messages: [
-                  'title must be a string',
-                  'categoryId must be valid',
-                ],
-                status: 400,
-              }),
-            )
+            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 400))
           },
         }) as unknown as ReturnType<typeof useUpdatePlaceMutation>,
     )
@@ -361,11 +351,9 @@ describe('EditPlaceForm', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('title must be a string'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
-    expect(
-      within(alert).getByText('categoryId must be valid'),
-    ).toBeInTheDocument()
+    expect(within(alert).queryByText('Raw backend detail')).toBeNull()
   })
 
   it('shows pending state on save action', () => {

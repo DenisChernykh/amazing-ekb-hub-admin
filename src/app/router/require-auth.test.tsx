@@ -9,7 +9,7 @@ import type {
   CurrentUserResponseDto,
   PlaceCategoryResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -107,11 +107,7 @@ describe('RequireAuth', () => {
   it('redirects anonymous users to login route', async () => {
     mockedUseCurrentSessionQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'auth',
-        message: 'Authentication required',
-        status: 401,
-      }),
+      error: createApiProblemError('AUTHENTICATION_REQUIRED', 401),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useCurrentSessionQuery>)
@@ -124,11 +120,7 @@ describe('RequireAuth', () => {
   it('clears bulk moderation draft when the current session is lost', async () => {
     mockedUseCurrentSessionQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'auth',
-        message: 'Authentication required',
-        status: 401,
-      }),
+      error: createApiProblemError('AUTHENTICATION_REQUIRED', 401),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useCurrentSessionQuery>)
@@ -148,11 +140,7 @@ describe('RequireAuth', () => {
   it('keeps bulk moderation draft for transient current-session errors', async () => {
     mockedUseCurrentSessionQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Internal server error',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useCurrentSessionQuery>)
@@ -171,11 +159,7 @@ describe('RequireAuth', () => {
   it('shows forbidden state for permission errors', () => {
     mockedUseCurrentSessionQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'permission',
-        message: 'Forbidden',
-        status: 403,
-      }),
+      error: createApiProblemError('AUTHORIZATION_DENIED', 403),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useCurrentSessionQuery>)

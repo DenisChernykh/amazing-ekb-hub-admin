@@ -18,7 +18,7 @@ import {
   getAdminPlacesGetQueryKey,
   getAdminPlacesListQueryKey,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
 import type { QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 

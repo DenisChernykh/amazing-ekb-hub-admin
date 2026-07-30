@@ -7,7 +7,8 @@ import { createContentSourceFormSchema } from '@/features/content-source/form/mo
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
 import type { ContentSourceResponseDto } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -51,9 +52,12 @@ export function CreateContentSourceDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const createSourceMutation = useCreateContentSourceMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const presentation = getApiErrorPresentation(error)
+      const errorMessage = isProblemCode(error, 'CONTENT_SOURCE_ALREADY_EXISTS')
+        ? 'Такой источник уже существует.'
+        : presentation.message
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (contentSource) => {
       setErrorMessages([])

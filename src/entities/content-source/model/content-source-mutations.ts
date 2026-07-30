@@ -18,8 +18,10 @@ import {
   adminTelegramImportsEnqueue,
   getAdminContentSourcesListQueryKey,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import { getApiErrorStatus } from '@/shared/api/client/api-error'
+import {
+  isProblemCode,
+  type ApiClientError,
+} from '@/shared/api/client/api-errors'
 import type { QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -193,7 +195,7 @@ export function useImportTelegramSourceMutation(
   >({
     mutationFn: ({ sourceId }) => adminTelegramImportsEnqueue({ sourceId }),
     onError: async (error) => {
-      if (getApiErrorStatus(error) === 409) {
+      if (isProblemCode(error, 'ACTIVE_IMPORT_EXISTS')) {
         await invalidateImportRunQueries(queryClient)
       }
 

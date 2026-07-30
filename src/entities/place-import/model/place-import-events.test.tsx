@@ -5,7 +5,7 @@ import {
   getAdminPlaceImportsGetQueryKey,
   getAdminPlacesListQueryKey,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { ApiNetworkError } from '@/shared/api/client/api-errors'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -115,8 +115,8 @@ describe('usePlaceImportEvents', () => {
       wrapper: createWrapper(queryClient),
     })
 
-    expect(EventSourceMock.instances[0]?.url).toBe(
-      '/v1/admin/place-imports/operation-1/events/stream?afterVersion=4',
+    expect(EventSourceMock.instances[0]?.url).toMatch(
+      /\/v1\/admin\/place-imports\/operation-1\/events\/stream\?afterVersion=4$/u,
     )
     expect(EventSourceMock.instances[0]?.withCredentials).toBe(true)
 
@@ -250,12 +250,7 @@ describe('usePlaceImportEvents', () => {
       queued,
     )
     vi.mocked(adminPlaceImportsGetEvents)
-      .mockRejectedValueOnce(
-        new ApiClientError({
-          kind: 'network',
-          message: 'Connection lost',
-        }),
-      )
+      .mockRejectedValueOnce(new ApiNetworkError())
       .mockResolvedValueOnce({
         events: [],
         operation: operation({ version: 3 }),
@@ -269,7 +264,9 @@ describe('usePlaceImportEvents', () => {
       await Promise.resolve()
       await Promise.resolve()
     })
-    expect(result.current.pollingErrorMessage).toBe('Connection lost')
+    expect(result.current.pollingErrorMessage).toBe(
+      'Не удалось подключиться к серверу.',
+    )
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(PLACE_IMPORT_POLL_INTERVAL_MS)
@@ -285,10 +282,7 @@ describe('usePlaceImportEvents', () => {
       queued,
     )
     vi.mocked(adminPlaceImportsGetEvents).mockRejectedValueOnce(
-      new ApiClientError({
-        kind: 'network',
-        message: 'Connection lost',
-      }),
+      new ApiNetworkError(),
     )
     const { rerender, result } = renderHook(
       ({ currentOperation }) => usePlaceImportEvents(currentOperation),
@@ -303,7 +297,9 @@ describe('usePlaceImportEvents', () => {
       await Promise.resolve()
       await Promise.resolve()
     })
-    expect(result.current.pollingErrorMessage).toBe('Connection lost')
+    expect(result.current.pollingErrorMessage).toBe(
+      'Не удалось подключиться к серверу.',
+    )
 
     rerender({
       currentOperation: operation({ status: 'cancelled', version: 3 }),

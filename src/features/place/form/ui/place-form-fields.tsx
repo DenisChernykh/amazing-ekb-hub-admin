@@ -1,5 +1,6 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { Alert, Input, Select } from 'antd'
 import type { Control } from 'react-hook-form'
@@ -111,9 +112,7 @@ export function PlaceFormFields({
       {categoriesQuery.isError && (
         <Alert
           showIcon
-          message={
-            categoriesQuery.error?.message || 'Не удалось загрузить категории'
-          }
+          message={getApiErrorPresentation(categoriesQuery.error).message}
           type="error"
         />
       )}

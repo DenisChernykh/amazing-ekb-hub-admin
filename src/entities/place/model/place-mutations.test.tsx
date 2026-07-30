@@ -14,7 +14,7 @@ import {
   getAdminPlacesGetQueryKey,
   getAdminPlacesListQueryKey,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -163,11 +163,7 @@ describe('place mutations', () => {
 
   it('passes create place errors to callback', async () => {
     const queryClient = new QueryClient()
-    const apiError = new ApiClientError({
-      kind: 'server',
-      message: 'Create unavailable',
-      status: 500,
-    })
+    const apiError = createApiProblemError('INTERNAL_ERROR', 500)
     const onError = vi.fn()
     mockedCreatePlace.mockRejectedValue(apiError)
 

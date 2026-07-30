@@ -1,6 +1,7 @@
 import { useDeleteCategoryMutation } from '@/entities/category/model/category-mutations'
 import type { PlaceCategoryResponseDto } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { DeleteOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button } from 'antd'
 
@@ -20,8 +21,13 @@ export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
   const { message, modal } = AntdApp.useApp()
   const deleteCategoryMutation = useDeleteCategoryMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      void message.error(apiError.message)
+      const presentation = getApiErrorPresentation(error)
+      const errorMessage = isProblemCode(error, 'CATEGORY_IN_USE')
+        ? 'Категория используется местами и не может быть удалена.'
+        : isProblemCode(error, 'CATEGORY_NOT_FOUND')
+          ? 'Категория не найдена.'
+          : presentation.message
+      void message.error(errorMessage)
     },
     onSuccess: () => {
       void message.success('Категория удалена')

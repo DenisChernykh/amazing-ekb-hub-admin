@@ -12,7 +12,7 @@ import {
   getAdminPlaceMaterialsListQueryKey,
   getAdminPlacesGetQueryKey,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -161,11 +161,7 @@ describe('material mutations', () => {
 
   it('passes create material errors to callback', async () => {
     const queryClient = new QueryClient()
-    const apiError = new ApiClientError({
-      kind: 'server',
-      message: 'Create material unavailable',
-      status: 500,
-    })
+    const apiError = createApiProblemError('INTERNAL_ERROR', 500)
     const onError = vi.fn()
     mockedCreatePlaceMaterial.mockRejectedValue(apiError)
 
@@ -335,11 +331,7 @@ describe('material mutations', () => {
 
   it('passes normalized link errors to callback', async () => {
     const queryClient = new QueryClient()
-    const apiError = new ApiClientError({
-      kind: 'server',
-      message: 'Link unavailable',
-      status: 500,
-    })
+    const apiError = createApiProblemError('INTERNAL_ERROR', 500)
     const onError = vi.fn()
     mockedLinkPlaceMaterial.mockRejectedValue(apiError)
 
@@ -414,11 +406,7 @@ describe('material mutations', () => {
 
   it('passes normalized hide errors to callback', async () => {
     const queryClient = new QueryClient()
-    const apiError = new ApiClientError({
-      kind: 'server',
-      message: 'Hide unavailable',
-      status: 500,
-    })
+    const apiError = createApiProblemError('INTERNAL_ERROR', 500)
     const onError = vi.fn()
     mockedHidePlaceMaterialLink.mockRejectedValue(apiError)
 

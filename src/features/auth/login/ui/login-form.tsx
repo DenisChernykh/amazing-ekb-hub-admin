@@ -4,7 +4,7 @@ import {
   type LoginFormValues,
 } from '@/features/auth/login/model/login-form-schema'
 import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { LockOutlined, MailOutlined } from '@ant-design/icons'
@@ -29,7 +29,7 @@ export function LoginForm({ onLoggedIn }: LoginFormProps) {
   })
   const loginMutation = useLoginSession({
     onError: (error) => {
-      void message.error(normalizeApiError(error).message)
+      void message.error(getApiErrorPresentation(error).message)
     },
     onSuccess: () => {
       clearBulkModerationDraftSelection()

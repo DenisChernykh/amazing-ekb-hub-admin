@@ -1,6 +1,6 @@
 import { useLogoutSession } from '@/entities/session/model/session-hooks'
 import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { LogoutOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button } from 'antd'
 import { useNavigate } from 'react-router'
@@ -15,7 +15,7 @@ export function LogoutButton() {
   const { message } = AntdApp.useApp()
   const logoutMutation = useLogoutSession({
     onError: (error) => {
-      void message.error(normalizeApiError(error).message)
+      void message.error(getApiErrorPresentation(error).message)
     },
     onSuccess: () => {
       clearBulkModerationDraftSelection()

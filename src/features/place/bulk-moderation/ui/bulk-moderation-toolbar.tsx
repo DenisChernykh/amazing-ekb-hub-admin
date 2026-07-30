@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/store-hooks'
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
 import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button, Flex, Typography } from 'antd'
 import {
@@ -50,7 +50,7 @@ export function BulkModerationToolbar() {
         failedCount += 1
         dispatch(
           bulkModerationActions.markItemFailed({
-            errorMessage: normalizeApiError(error).message,
+            errorMessage: getApiErrorPresentation(error).message,
             placeId: task.id,
           }),
         )

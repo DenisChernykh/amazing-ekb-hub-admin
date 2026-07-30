@@ -7,7 +7,7 @@ import type {
   PlaceCategoryResponseDto,
   PlaceDetailResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -413,12 +413,7 @@ describe('PinnedMaterialPanel', () => {
           isPending: false,
           mutate: () => {
             options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'Pinned material must belong to the same place',
-                messages: ['Pinned material must belong to the same place'],
-                status: 400,
-              }),
+              createApiProblemError('PINNED_MATERIAL_NOT_LINKED', 400),
             )
           },
         }) as unknown as ReturnType<typeof useSetPinnedMaterialMutation>,
@@ -442,10 +437,10 @@ describe('PinnedMaterialPanel', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('Pinned material must belong to the same place'),
+      within(alert).getByText('Материал не связан с этим местом.'),
     ).toBeInTheDocument()
     expect(messageError).toHaveBeenCalledWith(
-      'Pinned material must belong to the same place',
+      'Материал не связан с этим местом.',
     )
   })
 
@@ -459,14 +454,7 @@ describe('PinnedMaterialPanel', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'server',
-                message: 'Place is not available',
-                messages: ['Place is not available'],
-                status: 500,
-              }),
-            )
+            options?.onError?.(createApiProblemError('INTERNAL_ERROR', 500))
           },
         }) as unknown as ReturnType<typeof useClearPinnedMaterialMutation>,
     )
@@ -486,11 +474,11 @@ describe('PinnedMaterialPanel', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('Place is not available'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
     expect(
       within(alert).getByText('Не удалось снять закрепление'),
     ).toBeInTheDocument()
-    expect(messageError).toHaveBeenCalledWith('Place is not available')
+    expect(messageError).toHaveBeenCalledWith('Не удалось выполнить запрос.')
   })
 })

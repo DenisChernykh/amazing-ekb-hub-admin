@@ -5,10 +5,8 @@ import {
   adminPlaceImportsGetEvents,
   getAdminPlaceImportsGetQueryKey,
 } from '@/shared/api'
-import {
-  normalizeApiError,
-  type ApiClientError,
-} from '@/shared/api/client/api-error'
+import { type ApiClientError } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import {
@@ -166,7 +164,7 @@ export function usePlaceImportEvents(
       } catch (error) {
         if (!isDisposed) {
           setPollingError({
-            message: normalizeApiError(error).message,
+            message: getApiErrorPresentation(error).message,
             operationId,
           })
         }

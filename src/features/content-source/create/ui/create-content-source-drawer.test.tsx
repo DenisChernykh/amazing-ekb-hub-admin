@@ -1,5 +1,5 @@
 import { useCreateContentSourceMutation } from '@/entities/content-source/model/content-source-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -194,12 +194,7 @@ describe('CreateContentSourceDrawer', () => {
           isPending: false,
           mutate: () => {
             options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'displayName must be unique',
-                messages: ['displayName must be unique'],
-                status: 400,
-              }),
+              createApiProblemError('CONTENT_SOURCE_ALREADY_EXISTS', 409),
             )
           },
         }) as unknown as ReturnType<typeof useCreateContentSourceMutation>,
@@ -219,8 +214,10 @@ describe('CreateContentSourceDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Создать' }))
 
     expect(
-      await screen.findByText('displayName must be unique'),
+      await screen.findByText('Такой источник уже существует.'),
     ).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
+    expect(screen.queryByText('Raw backend detail')).not.toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Новый источник' })).toBeVisible()
   })
 

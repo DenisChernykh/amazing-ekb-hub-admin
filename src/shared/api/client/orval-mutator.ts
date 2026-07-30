@@ -1,15 +1,18 @@
 import { AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
-import type { ApiClientError } from './api-error'
-import { normalizeApiError } from './api-error'
+import {
+  type ApiClientError,
+  type ProblemDocumentLike,
+  normalizeApiError,
+} from './api-errors'
 import { API_AXIOS_INSTANCE } from './axios-client'
 
 /**
  * Единый error type, который Orval подставляет в generated React Query hooks.
  */
-export type ErrorType<ErrorData> = ErrorData extends unknown
-  ? ApiClientError
-  : never
+export type ErrorType<ErrorData> = ApiClientError<
+  ErrorData & ProblemDocumentLike
+>
 
 /**
  * Тип request body, который Orval передает в custom mutator без дополнительной трансформации.
@@ -42,7 +45,7 @@ function getResponseMediaType(response: AxiosResponse<unknown>) {
  *
  * @remarks Объединяет config и options без потери headers. Для readiness/startup
  * endpoints принимает JSON-ответ `503` как operational status, а все остальные
- * ошибки переводит через текущий `normalizeApiError` до typed-error cutover.
+ * ошибки переводит через `normalizeApiError` в единый client contract.
  *
  * @returns Данные успешного API-ответа с типом, заданным сгенерированным клиентом.
  */

@@ -4,7 +4,7 @@ import {
   usePlaceImportOperationQuery,
 } from '@/entities/place-import/model/place-import-hooks'
 import type { PlaceImportOperationResponseDto } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -176,11 +176,7 @@ describe('PlaceImportYandexScreen', () => {
 
   it('renders the start form when active lookup returns 404', () => {
     mockActiveQuery({
-      error: new ApiClientError({
-        kind: 'not-found',
-        message: 'No active import',
-        status: 404,
-      }),
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
       isError: true,
     })
 
@@ -193,18 +189,15 @@ describe('PlaceImportYandexScreen', () => {
 
   it('renders the API error state when active lookup fails with a non-404 error', () => {
     mockActiveQuery({
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Service unavailable',
-        status: 503,
-      }),
+      error: createApiProblemError('DEPENDENCY_UNAVAILABLE', 503),
       isError: true,
     })
 
     renderBaseRoute()
 
     expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
-    expect(screen.getByText('Service unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Сервис временно недоступен.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).toBeNull()
   })
 
   it('keeps an explicit operation route on snapshot plus realtime flow', () => {

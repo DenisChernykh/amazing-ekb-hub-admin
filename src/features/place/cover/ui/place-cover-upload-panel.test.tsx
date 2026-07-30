@@ -3,7 +3,7 @@ import type {
   AdminPlaceSummaryResponseDto,
   PlaceCategoryResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -239,14 +239,7 @@ describe('PlaceCoverUploadPanel', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'photo must be an image',
-                messages: ['photo must be an image'],
-                status: 400,
-              }),
-            )
+            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 400))
           },
         }) as unknown as ReturnType<typeof useUploadPlaceCoverPhotoMutation>,
     )
@@ -261,9 +254,10 @@ describe('PlaceCoverUploadPanel', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('photo must be an image'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
-    expect(messageError).toHaveBeenCalledWith('photo must be an image')
+    expect(messageError).toHaveBeenCalledWith('Не удалось выполнить запрос.')
+    expect(within(alert).queryByText('Raw backend detail')).toBeNull()
     expect(screen.getByRole('button', { name: 'Загрузить' })).not.toBeDisabled()
   })
 })

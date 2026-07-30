@@ -1,12 +1,10 @@
-import {
-  getActivePlaceImportConflictOperationId,
-  useStartPlaceImportMutation,
-} from '@/entities/place-import/model/place-import-mutations'
+import { useStartPlaceImportMutation } from '@/entities/place-import/model/place-import-mutations'
 import {
   placeImportStartSchema,
   type PlaceImportStartValues,
 } from '@/features/place/import-yandex/model/place-import-start-schema'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { ImportOutlined } from '@ant-design/icons'
@@ -15,11 +13,15 @@ import { useState } from 'react'
 import { FormProvider } from 'react-hook-form'
 
 type PlaceImportStartFormProps = {
+  onAlreadyActive?: () => void
   onStarted: (operationId: string) => void
 }
 
 /** Форма запуска импорта одной карточки Яндекс Карт. */
-export function PlaceImportStartForm({ onStarted }: PlaceImportStartFormProps) {
+export function PlaceImportStartForm({
+  onAlreadyActive,
+  onStarted,
+}: PlaceImportStartFormProps) {
   const form = useZodForm(placeImportStartSchema, {
     defaultValues: { url: '' },
     mode: 'onChange',
@@ -28,14 +30,18 @@ export function PlaceImportStartForm({ onStarted }: PlaceImportStartFormProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const mutation = useStartPlaceImportMutation({
     onError: (error) => {
-      const activeOperationId = getActivePlaceImportConflictOperationId(error)
-
-      if (activeOperationId) {
-        onStarted(activeOperationId)
+      if (isProblemCode(error, 'PLACE_IMPORT_ALREADY_ACTIVE')) {
+        onAlreadyActive?.()
         return
       }
 
-      setErrorMessage(normalizeApiError(error).message)
+      setErrorMessage(
+        isProblemCode(error, 'PLACE_IMPORT_INPUT_INVALID')
+          ? 'Проверьте ссылку для импорта.'
+          : isProblemCode(error, 'PLACE_IMPORTS_UNAVAILABLE')
+            ? 'Сервис импорта временно недоступен.'
+            : getApiErrorPresentation(error).message,
+      )
     },
     onSuccess: (operation) => onStarted(operation.id),
   })

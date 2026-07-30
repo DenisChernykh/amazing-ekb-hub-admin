@@ -7,10 +7,8 @@ import type {
   ContentSourceResponseDto,
   ImportRunResponseDto,
 } from '@/shared/api'
-import {
-  getApiErrorStatus,
-  normalizeApiError,
-} from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { DownloadOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex } from 'antd'
 import { useState } from 'react'
@@ -62,17 +60,26 @@ export function ImportTelegramSourceButton({
       { sourceId: contentSource.id },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
-
-          if (getApiErrorStatus(apiError) === 409) {
+          if (isProblemCode(error, 'ACTIVE_IMPORT_EXISTS')) {
             setInfoMessage(IMPORT_ALREADY_ACTIVE_MESSAGE)
             void message.info(IMPORT_ALREADY_ACTIVE_MESSAGE)
 
             return
           }
 
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          const presentation = getApiErrorPresentation(error)
+          const errorMessage = isProblemCode(
+            error,
+            'TELEGRAM_IMPORT_SOURCE_INVALID',
+          )
+            ? 'Источник не подходит для импорта Telegram.'
+            : isProblemCode(error, 'TELEGRAM_IMPORT_UNAVAILABLE')
+              ? 'Импорт Telegram временно недоступен.'
+              : isProblemCode(error, 'CONTENT_SOURCE_NOT_FOUND')
+                ? 'Источник не найден.'
+                : presentation.message
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)

@@ -3,7 +3,8 @@ import type {
   ContentSourceResponseDto,
   ContentSourceResponseDtoStatus,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -106,11 +107,7 @@ describe('ContentSourceStatusActions', () => {
         callbacks?: StatusMutationCallbacks,
       ) => {
         callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Status unavailable',
-            status: 500,
-          }),
+          createApiProblemError('CONTENT_SOURCE_NOT_FOUND', 404),
         )
       },
     } as unknown as ReturnType<typeof useUpdateContentSourceStatusMutation>)
@@ -120,9 +117,10 @@ describe('ContentSourceStatusActions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Отключить' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Status unavailable',
+      'Источник не найден.',
     )
-    expect(messageError).toHaveBeenCalledWith('Status unavailable')
+    expect(messageError).toHaveBeenCalledWith('Источник не найден.')
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
   })
 
   it('renders enable action for disabled source and disables while pending', () => {

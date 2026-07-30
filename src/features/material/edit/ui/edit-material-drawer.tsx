@@ -15,7 +15,8 @@ import { MaterialFormChangedFields } from '@/features/material/form/ui/material-
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
 import type { MaterialResponseDto } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
@@ -64,9 +65,12 @@ export function EditMaterialDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const updateMaterialMutation = useUpdateMaterialMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const presentation = getApiErrorPresentation(error)
+      const errorMessage = isProblemCode(error, 'MATERIAL_NOT_FOUND')
+        ? 'Материал не найден.'
+        : presentation.message
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (updatedMaterial) => {
       setErrorMessages([])

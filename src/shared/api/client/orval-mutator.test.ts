@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { server } from '@/test/msw/server'
 
-import { ApiClientError } from './api-error'
+import { ApiProblemError } from './api-errors'
 import { setCsrfToken } from './csrf-token'
 import { apiMutator } from './orval-mutator'
 
@@ -68,15 +68,24 @@ describe('Orval API mutator', () => {
 
   it('normalizes a non-operational 503 response', async () => {
     server.use(
-      http.get('http://api.test/v1/admin/places', () =>
-        HttpResponse.json(
-          {
-            error: 'Service unavailable',
-            message: 'Database unavailable',
-            statusCode: 503,
-          },
-          { status: 503 },
-        ),
+      http.get(
+        'http://api.test/v1/admin/places',
+        () =>
+          new HttpResponse(
+            JSON.stringify({
+              type: 'https://api.example.test/problems/dependency-unavailable',
+              title: 'Raw backend title',
+              status: 503,
+              detail: 'Raw backend detail',
+              instance: 'urn:request:request-503',
+              code: 'DEPENDENCY_UNAVAILABLE',
+              requestId: 'request-503',
+            }),
+            {
+              headers: { 'content-type': 'application/problem+json' },
+              status: 503,
+            },
+          ),
       ),
     )
 
@@ -85,9 +94,10 @@ describe('Orval API mutator', () => {
       url: '/v1/admin/places',
     })
 
-    await expect(failure).rejects.toBeInstanceOf(ApiClientError)
+    await expect(failure).rejects.toBeInstanceOf(ApiProblemError)
     await expect(failure).rejects.toMatchObject({
-      kind: 'server',
+      code: 'DEPENDENCY_UNAVAILABLE',
+      requestId: 'request-503',
       status: 503,
     })
   })

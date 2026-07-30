@@ -13,7 +13,7 @@ import {
   authLogout,
   getAuthGetMeQueryKey,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 type LoginSessionOptions = {

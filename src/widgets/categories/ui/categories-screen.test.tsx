@@ -6,7 +6,7 @@ import type {
   PlaceCategoryListResponseDto,
   PlaceCategoryResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -130,11 +130,7 @@ describe('CategoriesScreen', () => {
 
     mockedUsePlaceCategoriesQuery.mockReturnValueOnce({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'permission',
-        message: 'Forbidden',
-        status: 403,
-      }),
+      error: createApiProblemError('AUTHORIZATION_DENIED', 403),
       isError: true,
       isFetching: false,
       isPending: false,

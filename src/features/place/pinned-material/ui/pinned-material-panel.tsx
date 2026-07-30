@@ -11,7 +11,8 @@ import type {
   MaterialResponseDto,
   PinnedMaterialResponseDto,
 } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { App as AntdApp, Card, Flex, Select } from 'antd'
 import { useState } from 'react'
 import { toSetPinnedMaterialRequest } from '../model/pinned-material'
@@ -58,10 +59,16 @@ export function PinnedMaterialPanel({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const setPinnedMaterialMutation = useSetPinnedMaterialMutation({
     onError: (error) => {
-      const normalizedError = normalizeApiError(error)
+      const errorMessage = isProblemCode(error, 'PINNED_MATERIAL_NOT_FOUND')
+        ? 'Закрепленный материал не найден.'
+        : isProblemCode(error, 'PINNED_MATERIAL_NOT_LINKED')
+          ? 'Материал не связан с этим местом.'
+          : isProblemCode(error, 'PLACE_NOT_FOUND')
+            ? 'Место не найдено.'
+            : getApiErrorPresentation(error).message
       setErrorTitle('Не удалось закрепить материал')
-      setErrorMessages(normalizedError.messages)
-      void message.error(normalizedError.message)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (place) => {
       const nextPinnedMaterialId =
@@ -75,10 +82,14 @@ export function PinnedMaterialPanel({
   })
   const clearPinnedMaterialMutation = useClearPinnedMaterialMutation({
     onError: (error) => {
-      const normalizedError = normalizeApiError(error)
+      const errorMessage = isProblemCode(error, 'PINNED_MATERIAL_NOT_FOUND')
+        ? 'Закрепленный материал не найден.'
+        : isProblemCode(error, 'PLACE_NOT_FOUND')
+          ? 'Место не найдено.'
+          : getApiErrorPresentation(error).message
       setErrorTitle('Не удалось снять закрепление')
-      setErrorMessages(normalizedError.messages)
-      void message.error(normalizedError.message)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: () => {
       setSelectedMaterialId(null)

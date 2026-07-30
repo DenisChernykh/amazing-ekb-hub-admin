@@ -8,6 +8,23 @@
 import '@/shared/config/zod-locale'
 
 export {
+  ApiNetworkError,
+  ApiProblemError,
+  ApiProtocolError,
+  isProblemCode,
+  normalizeApiError,
+} from './client/api-errors'
+export type {
+  ApiClientError,
+  ProblemCode,
+  ProblemDocumentLike,
+} from './client/api-errors'
+export {
+  getApiErrorPresentation,
+  type ApiErrorPresentation,
+} from './presentation/api-error-presentation'
+
+export {
   clearCsrfToken,
   peekCsrfToken,
   setCsrfToken,

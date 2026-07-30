@@ -1,7 +1,7 @@
 import { CurrentUserContext } from '@/entities/session/model/current-user'
 import { useCurrentSessionQuery } from '@/entities/session/model/session-hooks'
 import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
-import { getApiErrorStatus } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
 import { Button, Flex, Layout, Result, Spin, Typography, theme } from 'antd'
 import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
@@ -48,11 +48,13 @@ function AuthStateScreen({ children }: AuthStateScreenProps) {
 export function RequireAuth() {
   const location = useLocation()
   const currentUserQuery = useCurrentSessionQuery()
-  const currentUserErrorStatus = currentUserQuery.isError
-    ? getApiErrorStatus(currentUserQuery.error)
-    : undefined
-  const shouldClearDraft =
-    currentUserErrorStatus === 401 || currentUserErrorStatus === 403
+  const isAuthenticationRequired =
+    currentUserQuery.isError &&
+    isProblemCode(currentUserQuery.error, 'AUTHENTICATION_REQUIRED')
+  const isAuthorizationDenied =
+    currentUserQuery.isError &&
+    isProblemCode(currentUserQuery.error, 'AUTHORIZATION_DENIED')
+  const shouldClearDraft = isAuthenticationRequired || isAuthorizationDenied
 
   useEffect(() => {
     if (shouldClearDraft) {
@@ -70,7 +72,7 @@ export function RequireAuth() {
   }
 
   if (currentUserQuery.isError) {
-    if (currentUserErrorStatus === 403) {
+    if (isAuthorizationDenied) {
       return (
         <AuthStateScreen>
           <Result

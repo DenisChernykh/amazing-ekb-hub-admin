@@ -11,7 +11,7 @@ import {
   getAdminImportRunsListQueryKey,
   getAdminMaterialsListQueryKey,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -138,11 +138,7 @@ describe('content source mutations', () => {
 
   it('updates content source and passes errors to callback', async () => {
     const queryClient = new QueryClient()
-    const apiError = new ApiClientError({
-      kind: 'server',
-      message: 'Source unavailable',
-      status: 500,
-    })
+    const apiError = createApiProblemError('INTERNAL_ERROR', 500)
     const onError = vi.fn()
     mockedUpdateContentSource.mockRejectedValue(apiError)
 
@@ -278,11 +274,7 @@ describe('content source mutations', () => {
     const queryClient = new QueryClient()
     const runQueryKey = ['/v1/admin/import-runs']
     const onError = vi.fn()
-    const apiError = new ApiClientError({
-      kind: 'conflict',
-      message: 'Import already running',
-      status: 409,
-    })
+    const apiError = createApiProblemError('ACTIVE_IMPORT_EXISTS', 409)
 
     queryClient.setQueryData(runQueryKey, { items: [] })
     mockedImportTelegramChannel.mockRejectedValue(apiError)

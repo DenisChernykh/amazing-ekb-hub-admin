@@ -3,7 +3,7 @@ import type {
   AdminPlaceSummaryResponseDto,
   PlaceCategoryResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -172,13 +172,7 @@ describe('PlaceStatusPanel', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'server',
-                message: 'Status unavailable',
-                status: 500,
-              }),
-            )
+            options?.onError?.(createApiProblemError('INTERNAL_ERROR', 500))
           },
         }) as unknown as ReturnType<typeof useUpdatePlaceStatusMutation>,
     )
@@ -194,9 +188,9 @@ describe('PlaceStatusPanel', () => {
     )
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Status unavailable',
+      'Не удалось выполнить запрос.',
     )
-    expect(messageError).toHaveBeenCalledWith('Status unavailable')
+    expect(messageError).toHaveBeenCalledWith('Не удалось выполнить запрос.')
     expect(
       within(screen.getByRole('dialog')).getByRole('button', {
         name: 'Опубликовать',

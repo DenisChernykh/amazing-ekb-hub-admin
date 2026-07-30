@@ -6,7 +6,7 @@ import {
   adminContentSourcesList,
   getAdminContentSourcesListQueryKey,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { useQuery } from '@tanstack/react-query'
 
 type ContentSourcesQueryOptions = {

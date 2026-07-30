@@ -3,7 +3,8 @@ import {
   useConfirmPlaceImportMutation,
 } from '@/entities/place-import/model/place-import-mutations'
 import type { PlaceImportOperationResponseDto } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { Alert, App as AntdApp, Button, Flex, Modal } from 'antd'
 import { useState } from 'react'
 
@@ -19,9 +20,16 @@ export function PlaceImportActions({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const handleError = (error: unknown) => {
-    const normalized = normalizeApiError(error)
-    setErrorMessage(normalized.message)
-    void message.error(normalized.message)
+    const nextErrorMessage = isProblemCode(
+      error,
+      'PLACE_IMPORT_PREVIEW_EXPIRED',
+    )
+      ? 'Срок действия preview истёк. Запустите импорт заново.'
+      : isProblemCode(error, 'PLACE_IMPORT_PREVIEW_NOT_READY')
+        ? 'Preview ещё не готов. Дождитесь завершения обработки.'
+        : getApiErrorPresentation(error).message
+    setErrorMessage(nextErrorMessage)
+    void message.error(nextErrorMessage)
   }
   const confirmMutation = useConfirmPlaceImportMutation({
     onError: handleError,

@@ -3,7 +3,8 @@ import type {
   AdminMaterialLibraryResponseDto,
   AdminMaterialLibraryResponseDtoAdminStatus,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -134,13 +135,7 @@ describe('MaterialAdminStatusActions', () => {
         _variables: StatusMutationVariables,
         callbacks?: StatusMutationCallbacks,
       ) => {
-        callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Status unavailable',
-            status: 500,
-          }),
-        )
+        callbacks?.onError?.(createApiProblemError('MATERIAL_NOT_FOUND', 404))
       },
     } as unknown as ReturnType<typeof useUpdateMaterialAdminStatusMutation>)
 
@@ -149,9 +144,10 @@ describe('MaterialAdminStatusActions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Отклонить' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Status unavailable',
+      'Материал не найден.',
     )
-    expect(messageError).toHaveBeenCalledWith('Status unavailable')
+    expect(messageError).toHaveBeenCalledWith('Материал не найден.')
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Отклонить' })).not.toBeDisabled()
   })
 

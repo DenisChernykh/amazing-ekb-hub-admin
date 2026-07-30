@@ -1,7 +1,8 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
 import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { Alert, App as AntdApp, Drawer, Empty, Flex, Typography } from 'antd'
 import { useState } from 'react'
 import { LinkExistingMaterialTable } from './link-existing-material-table'
@@ -60,9 +61,16 @@ export function LinkExistingMaterialDrawer({
       },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          const presentation = getApiErrorPresentation(error)
+          const errorMessage = isProblemCode(error, 'MATERIAL_PLACE_NOT_FOUND')
+            ? 'Материал места не найден.'
+            : isProblemCode(error, 'MATERIAL_NOT_FOUND')
+              ? 'Материал не найден.'
+              : isProblemCode(error, 'PLACE_NOT_FOUND')
+                ? 'Место не найдено.'
+                : presentation.message
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)
@@ -96,7 +104,7 @@ export function LinkExistingMaterialDrawer({
         ) : materialsQuery.isError ? (
           <Alert
             showIcon
-            title={normalizeApiError(materialsQuery.error).message}
+            title={getApiErrorPresentation(materialsQuery.error).message}
             type="error"
           />
         ) : linkableMaterials.length === 0 ? (

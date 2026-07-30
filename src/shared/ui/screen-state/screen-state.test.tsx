@@ -1,4 +1,4 @@
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router'
@@ -25,13 +25,9 @@ describe('ScreenApiErrorState', () => {
   it('maps permission errors to a forbidden state', () => {
     renderWithRouter(
       <ScreenApiErrorState
-        error={
-          new ApiClientError({
-            kind: 'permission',
-            message: 'Forbidden',
-            status: 403,
-          })
-        }
+        error={createApiProblemError('AUTHORIZATION_DENIED', 403, {
+          requestId: 'request-forbidden',
+        })}
         forbiddenAction={{ label: 'На главную', to: '/' }}
       />,
     )
@@ -46,13 +42,9 @@ describe('ScreenApiErrorState', () => {
   it('maps not-found errors to a not-found state', () => {
     renderWithRouter(
       <ScreenApiErrorState
-        error={
-          new ApiClientError({
-            kind: 'not-found',
-            message: 'Place not found',
-            status: 404,
-          })
-        }
+        error={createApiProblemError('PLACE_NOT_FOUND', 404, {
+          requestId: 'request-not-found',
+        })}
         notFoundAction={{ label: 'К списку мест', to: '/places' }}
       />,
     )
@@ -69,23 +61,36 @@ describe('ScreenApiErrorState', () => {
 
     renderWithRouter(
       <ScreenApiErrorState
-        error={
-          new ApiClientError({
-            kind: 'server',
-            message: 'Backend unavailable',
-            status: 500,
-          })
-        }
+        error={createApiProblemError('INTERNAL_ERROR', 500, {
+          requestId: 'request-screen-error',
+        })}
         retryAction={{ label: 'Повторить', onClick: retry }}
       />,
     )
 
     expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
-    expect(screen.getByText('Backend unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Не удалось выполнить запрос.')).toBeInTheDocument()
+    expect(screen.getByText('ID запроса: request-screen-error')).toBeVisible()
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
+    expect(screen.queryByText('Raw backend detail')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Raw backend field detail'),
+    ).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
 
     expect(retry).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not treat authentication errors as authorization failures', () => {
+    renderWithRouter(
+      <ScreenApiErrorState
+        error={createApiProblemError('AUTHENTICATION_REQUIRED', 401)}
+      />,
+    )
+
+    expect(screen.queryByText('Доступ запрещен')).not.toBeInTheDocument()
+    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
   })
 })
 

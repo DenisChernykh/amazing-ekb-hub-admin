@@ -9,7 +9,7 @@ import type {
   AdminPlaceListResponseDto,
   AdminPlaceSummaryResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import { Provider } from 'react-redux'
@@ -212,11 +212,7 @@ describe('PlacesList', () => {
   it('renders forbidden state for permission errors', () => {
     mockedUsePlacesListQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'permission',
-        message: 'Forbidden',
-        status: 403,
-      }),
+      error: createApiProblemError('AUTHORIZATION_DENIED', 403),
       isError: true,
       isPending: false,
     } as ReturnType<typeof usePlacesListQuery>)
@@ -229,11 +225,7 @@ describe('PlacesList', () => {
   it('renders generic screen error for server failures', () => {
     mockedUsePlacesListQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Places unavailable',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isPending: false,
     } as ReturnType<typeof usePlacesListQuery>)
@@ -241,7 +233,8 @@ describe('PlacesList', () => {
     renderPlacesList()
 
     expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
-    expect(screen.getByText('Places unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Не удалось выполнить запрос.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).toBeNull()
   })
 
   it('renders create action for an empty unfiltered list', () => {
@@ -409,13 +402,7 @@ describe('PlacesList', () => {
     } as ReturnType<typeof usePlacesListQuery>)
     mutateAsyncMock.mockImplementation(({ pathParams }) => {
       if (pathParams.placeId === 'place-2') {
-        return Promise.reject(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Ошибка place-2',
-            status: 500,
-          }),
-        )
+        return Promise.reject(createApiProblemError('INTERNAL_ERROR', 500))
       }
 
       return Promise.resolve({ ...activePlace, status: 'hidden' })
@@ -428,7 +415,9 @@ describe('PlacesList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Скрыть' }))
 
     await waitFor(() => {
-      expect(screen.getByText('Ошибка place-2')).toBeInTheDocument()
+      expect(
+        screen.getByText('Не удалось выполнить запрос.'),
+      ).toBeInTheDocument()
     })
 
     mutateAsyncMock.mockResolvedValue({ ...hiddenPlace, status: 'hidden' })

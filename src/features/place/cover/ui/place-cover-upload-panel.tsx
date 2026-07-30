@@ -1,5 +1,6 @@
 import { useUploadPlaceCoverPhotoMutation } from '@/entities/place/model/place-mutations'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import type { UploadProps } from 'antd'
 import { Alert, App as AntdApp, Card, Flex, Typography, Upload } from 'antd'
 import { useEffect, useRef, useState } from 'react'
@@ -50,9 +51,11 @@ export function PlaceCoverUploadPanel({
 
   const uploadMutation = useUploadPlaceCoverPhotoMutation({
     onError: (error) => {
-      const normalizedError = normalizeApiError(error)
-      setErrorMessages(normalizedError.messages)
-      message.error(normalizedError.message)
+      const errorMessage = isProblemCode(error, 'PLACE_NOT_FOUND')
+        ? 'Место не найдено.'
+        : getApiErrorPresentation(error).message
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: () => {
       setSelectedFile(null)

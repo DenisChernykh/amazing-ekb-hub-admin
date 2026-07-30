@@ -4,7 +4,8 @@ import type {
   AdminMaterialLibraryResponseDto,
   AdminMaterialLibraryResponseDtoAdminStatus,
 } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { CheckOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex, Space } from 'antd'
 import type { ReactNode } from 'react'
@@ -68,9 +69,12 @@ export function MaterialAdminStatusActions({
       },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          const presentation = getApiErrorPresentation(error)
+          const errorMessage = isProblemCode(error, 'MATERIAL_NOT_FOUND')
+            ? 'Материал не найден.'
+            : presentation.message
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)

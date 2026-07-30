@@ -9,7 +9,7 @@ import { PlaceImportActions } from '@/features/place/import-yandex/ui/place-impo
 import { PlaceImportCaptchaPanel } from '@/features/place/import-yandex/ui/place-import-captcha-panel'
 import { PlaceImportPreview } from '@/features/place/import-yandex/ui/place-import-preview'
 import { PlaceImportStartForm } from '@/features/place/import-yandex/ui/place-import-start-form'
-import { getApiErrorStatus } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -52,7 +52,8 @@ function PlaceImportYandexStartScreen() {
   }
 
   const hasNoActiveImport =
-    activeQuery.isError && getApiErrorStatus(activeQuery.error) === 404
+    activeQuery.isError &&
+    isProblemCode(activeQuery.error, 'PLACE_IMPORT_NOT_FOUND')
 
   if (activeQuery.isError && !hasNoActiveImport) {
     return (
@@ -69,6 +70,9 @@ function PlaceImportYandexStartScreen() {
       <Typography.Title level={2}>Импорт из Яндекс Карт</Typography.Title>
       <Card>
         <PlaceImportStartForm
+          onAlreadyActive={() => {
+            void activeQuery.refetch()
+          }}
           onStarted={(startedOperationId) =>
             navigate(`/places/import/yandex/${startedOperationId}`)
           }

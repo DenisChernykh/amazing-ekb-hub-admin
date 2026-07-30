@@ -2,7 +2,8 @@ import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutat
 import { getPlaceStatusFromValue } from '@/entities/place/model/place-status'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
 import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   Alert,
@@ -80,9 +81,11 @@ export function PlaceStatusPanel({ placeId, status }: PlaceStatusPanelProps) {
   const isChanged = selectedStatus !== status
   const updateStatusMutation = useUpdatePlaceStatusMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessage(apiError.message)
-      void message.error(apiError.message)
+      const nextErrorMessage = isProblemCode(error, 'PLACE_NOT_FOUND')
+        ? 'Место не найдено.'
+        : getApiErrorPresentation(error).message
+      setErrorMessage(nextErrorMessage)
+      void message.error(nextErrorMessage)
     },
     onSuccess: (place) => {
       setIsPublishConfirmOpen(false)

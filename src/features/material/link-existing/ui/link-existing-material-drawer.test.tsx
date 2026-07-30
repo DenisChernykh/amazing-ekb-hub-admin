@@ -4,7 +4,8 @@ import type {
   AdminMaterialLibraryResponseDto,
   MaterialResponseDto,
 } from '@/shared/api'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -245,11 +246,7 @@ describe('LinkExistingMaterialDrawer', () => {
         callbacks?: LinkMutationCallbacks,
       ) => {
         callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Link unavailable',
-            status: 500,
-          }),
+          createApiProblemError('MATERIAL_PLACE_NOT_FOUND', 404),
         )
       },
     } as unknown as ReturnType<typeof useLinkPlaceMaterialMutation>)
@@ -259,9 +256,9 @@ describe('LinkExistingMaterialDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Связать' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Link unavailable',
+      'Материал места не найден.',
     )
-    expect(messageError).toHaveBeenCalledWith('Link unavailable')
+    expect(messageError).toHaveBeenCalledWith('Материал места не найден.')
     expect(onClose).not.toHaveBeenCalled()
   })
 
@@ -335,11 +332,7 @@ describe('LinkExistingMaterialDrawer', () => {
 
     mockedUseMaterialLibraryQuery.mockReturnValueOnce({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Library unavailable',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isFetching: false,
       isPending: false,
@@ -350,7 +343,8 @@ describe('LinkExistingMaterialDrawer', () => {
       </AntdApp>,
     )
 
-    expect(screen.getByText('Library unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Не удалось выполнить запрос.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
 
     mockedUseMaterialLibraryQuery.mockReturnValueOnce({
       data: { items: [] },

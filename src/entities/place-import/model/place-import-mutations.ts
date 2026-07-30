@@ -10,10 +10,7 @@ import {
   adminPlaceImportsRevokeViewerAccess,
   adminPlaceImportsStart,
 } from '@/shared/api'
-import {
-  isApiClientError,
-  type ApiClientError,
-} from '@/shared/api/client/api-error'
+import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   invalidatePlaceImportResultQueries,
@@ -24,20 +21,6 @@ import {
 export type PlaceImportMutationOptions<TData> = {
   onError?: (error: ApiClientError) => void
   onSuccess?: (data: TData) => Promise<void> | void
-}
-
-/** Возвращает operation id из structured 409 active-import conflict. */
-export function getActivePlaceImportConflictOperationId(error: unknown) {
-  if (
-    !isApiClientError(error) ||
-    error.status !== 409 ||
-    error.body?.code !== 'active_place_import_exists' ||
-    typeof error.body.operationId !== 'string'
-  ) {
-    return null
-  }
-
-  return error.body.operationId
 }
 
 /** Запускает новую durable operation импорта. */

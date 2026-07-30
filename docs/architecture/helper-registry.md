@@ -19,25 +19,25 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Shared API Client
 
-| Helper                                | Location                                 | Visibility         | Contract                                                                                                                    |
-| ------------------------------------- | ---------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `normalizeApiError`                   | `src/shared/api/client/api-error.ts`     | exported           | Converts Axios, network, and unknown errors to `ApiClientError`.                                                            |
-| `isApiClientError`                    | `src/shared/api/client/api-error.ts`     | exported           | Narrows unknown errors to `ApiClientError`.                                                                                 |
-| `getApiErrorStatus`                   | `src/shared/api/client/api-error.ts`     | exported           | Reads HTTP status from a normalized API error.                                                                              |
-| `getApiBaseUrl`                       | `src/shared/api/client/api-base-url.ts`  | exported           | Returns the shared API root/origin for Axios and browser APIs such as `EventSource`.                                        |
-| `joinApiUrl`                          | `src/shared/api/client/api-base-url.ts`  | exported           | Joins the validated API root/origin with a caller-owned versioned endpoint path.                                            |
-| `buildApiUrl`                         | `src/shared/api/client/api-base-url.ts`  | exported           | Builds backend API URLs from the shared origin and a caller-owned versioned endpoint path.                                  |
-| `parsePublicEnv`                      | `src/shared/config/env.ts`               | exported           | Validates that the public API setting is same-origin `/` or an absolute HTTP(S) origin without path/query/hash/credentials. |
-| `peekCsrfToken`                       | `src/shared/api/client/csrf-token.ts`    | exported           | Reads the current in-memory CSRF token without issuing a request.                                                           |
-| `setCsrfToken`                        | `src/shared/api/client/csrf-token.ts`    | exported           | Replaces the in-memory CSRF token and invalidates older in-flight fetch generations.                                        |
-| `clearCsrfToken`                      | `src/shared/api/client/csrf-token.ts`    | exported           | Clears the in-memory CSRF token and prevents late pre-logout fetches from restoring it.                                     |
-| `getOrFetchCsrfToken`                 | `src/shared/api/client/csrf-token.ts`    | transport-internal | Returns the cached CSRF token or shares one generation-safe fetch across concurrent callers.                                |
-| `isLoginRequest`                      | `src/shared/api/client/axios-client.ts`  | private            | Exempts only the exact versioned login path from CSRF fetching.                                                             |
-| `fetchCsrfToken`                      | `src/shared/api/client/axios-client.ts`  | private            | Fetches the session-bound CSRF token with credentials and validates its response shape.                                     |
-| `API_AXIOS_INSTANCE`                  | `src/shared/api/client/axios-client.ts`  | exported           | Sends credentialed API requests, preserves multipart bodies, and adds generation-safe CSRF headers to unsafe methods.       |
-| `acceptsOperationalHealthUnavailable` | `src/shared/api/client/orval-mutator.ts` | private            | Allows JSON `503` data only for exact operational health GET paths.                                                         |
-| `getResponseMediaType`                | `src/shared/api/client/orval-mutator.ts` | private            | Normalizes an Axios response Content-Type to its lowercase media type.                                                      |
-| `apiMutator`                          | `src/shared/api/client/orval-mutator.ts` | exported           | Merges Orval request options, accepts operational JSON `503` responses, and normalizes other failures.                      |
+| Helper                                | Location                                                | Visibility         | Contract                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `normalizeApiError`                   | `src/shared/api/client/api-errors.ts`                   | exported           | Accepts only validated Problem Details HTTP errors and maps network or invalid responses to the strict client error union.  |
+| `isProblemCode`                       | `src/shared/api/client/api-errors.ts`                   | exported           | Narrows a normalized Problem Details error by its stable backend code.                                                      |
+| `getApiErrorPresentation`             | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Maps unknown errors to safe local UI copy, retry metadata, and an optional server-side request identifier.                  |
+| `getApiBaseUrl`                       | `src/shared/api/client/api-base-url.ts`                 | exported           | Returns the shared API root/origin for Axios and browser APIs such as `EventSource`.                                        |
+| `joinApiUrl`                          | `src/shared/api/client/api-base-url.ts`                 | exported           | Joins the validated API root/origin with a caller-owned versioned endpoint path.                                            |
+| `buildApiUrl`                         | `src/shared/api/client/api-base-url.ts`                 | exported           | Builds backend API URLs from the shared origin and a caller-owned versioned endpoint path.                                  |
+| `parsePublicEnv`                      | `src/shared/config/env.ts`                              | exported           | Validates that the public API setting is same-origin `/` or an absolute HTTP(S) origin without path/query/hash/credentials. |
+| `peekCsrfToken`                       | `src/shared/api/client/csrf-token.ts`                   | exported           | Reads the current in-memory CSRF token without issuing a request.                                                           |
+| `setCsrfToken`                        | `src/shared/api/client/csrf-token.ts`                   | exported           | Replaces the in-memory CSRF token and invalidates older in-flight fetch generations.                                        |
+| `clearCsrfToken`                      | `src/shared/api/client/csrf-token.ts`                   | exported           | Clears the in-memory CSRF token and prevents late pre-logout fetches from restoring it.                                     |
+| `getOrFetchCsrfToken`                 | `src/shared/api/client/csrf-token.ts`                   | transport-internal | Returns the cached CSRF token or shares one generation-safe fetch across concurrent callers.                                |
+| `isLoginRequest`                      | `src/shared/api/client/axios-client.ts`                 | private            | Exempts only the exact versioned login path from CSRF fetching.                                                             |
+| `fetchCsrfToken`                      | `src/shared/api/client/axios-client.ts`                 | private            | Fetches the session-bound CSRF token with credentials and validates its response shape.                                     |
+| `API_AXIOS_INSTANCE`                  | `src/shared/api/client/axios-client.ts`                 | exported           | Sends credentialed API requests, preserves multipart bodies, and adds generation-safe CSRF headers to unsafe methods.       |
+| `acceptsOperationalHealthUnavailable` | `src/shared/api/client/orval-mutator.ts`                | private            | Allows JSON `503` data only for exact operational health GET paths.                                                         |
+| `getResponseMediaType`                | `src/shared/api/client/orval-mutator.ts`                | private            | Normalizes an Axios response Content-Type to its lowercase media type.                                                      |
+| `apiMutator`                          | `src/shared/api/client/orval-mutator.ts`                | exported           | Merges Orval request options, accepts operational JSON `503` responses, and normalizes other failures.                      |
 
 ## Shared Number Helpers
 
@@ -92,12 +92,13 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## App State
 
-| Helper           | Location                 | Visibility | Contract                                                           |
-| ---------------- | ------------------------ | ---------- | ------------------------------------------------------------------ |
-| `createAppStore` | `src/app/store.ts`       | exported   | Creates an isolated Redux store instance for app runtime or tests. |
-| `store`          | `src/app/store.ts`       | exported   | Runtime Redux store used by `AppProviders`.                        |
-| `useAppDispatch` | `src/app/store-hooks.ts` | exported   | Typed Redux dispatch hook for app-level state changes.             |
-| `useAppSelector` | `src/app/store-hooks.ts` | exported   | Typed Redux selector hook for reading app-level state.             |
+| Helper             | Location                  | Visibility | Contract                                                                      |
+| ------------------ | ------------------------- | ---------- | ----------------------------------------------------------------------------- |
+| `shouldRetryQuery` | `src/app/query-client.ts` | exported   | Retries network and server-side Problem Details query failures at most twice. |
+| `createAppStore`   | `src/app/store.ts`        | exported   | Creates an isolated Redux store instance for app runtime or tests.            |
+| `store`            | `src/app/store.ts`        | exported   | Runtime Redux store used by `AppProviders`.                                   |
+| `useAppDispatch`   | `src/app/store-hooks.ts`  | exported   | Typed Redux dispatch hook for app-level state changes.                        |
+| `useAppSelector`   | `src/app/store-hooks.ts`  | exported   | Typed Redux selector hook for reading app-level state.                        |
 
 ## Session Entity
 
@@ -240,7 +241,6 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useActivePlaceImportQuery`                | `src/entities/place-import/model/place-import-hooks.ts`               | exported   | Runs the one-shot active-operation recovery lookup for the Yandex place-import start route.                 |
 | `usePlaceImportOperationQuery`             | `src/entities/place-import/model/place-import-hooks.ts`               | exported   | Loads the durable operation snapshot used to resume an import route after reload.                           |
 | `usePlaceImportEvents`                     | `src/entities/place-import/model/place-import-hooks.ts`               | exported   | Syncs an active operation over SSE and falls back to non-overlapping journal polling until terminal status. |
-| `getActivePlaceImportConflictOperationId`  | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Extracts the recoverable operation id from structured active-import 409 conflict errors.                    |
 | `useStartPlaceImportMutation`              | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Starts one Yandex Maps place import and seeds the operation cache.                                          |
 | `useConfirmPlaceImportMutation`            | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Confirms immutable preview and invalidates the admin places list.                                           |
 | `useCancelPlaceImportMutation`             | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Durably cancels an operation and syncs its terminal snapshot.                                               |
@@ -457,13 +457,3 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `ImportRunEventsSubscriptions`      | `src/widgets/content-sources/ui/import-run-events-subscriptions.tsx` | exported   | Mounts active import-run SSE subscriptions without visible UI.                                                               |
 | `ImportRunsTable`                   | `src/widgets/content-sources/ui/import-runs-table.tsx`               | exported   | Renders read-only latest import run diagnostics and source display names.                                                    |
 | `ContentSourcesScreen`              | `src/widgets/content-sources/ui/content-sources-screen.tsx`          | exported   | Renders content source management, URL-driven filters, source actions, latest import runs, and active-run SSE subscriptions. |
-
-## API Error Internals
-
-| Helper            | Location                             | Visibility | Contract                                                                        |
-| ----------------- | ------------------------------------ | ---------- | ------------------------------------------------------------------------------- |
-| `isRecord`        | `src/shared/api/client/api-error.ts` | private    | Narrows unknown values to object records before reading NestJS error fields.    |
-| `toNestErrorBody` | `src/shared/api/client/api-error.ts` | private    | Treats object-like response data as a possible NestJS error body.               |
-| `getMessages`     | `src/shared/api/client/api-error.ts` | private    | Converts NestJS `message: string \| string[]` into a non-empty UI message list. |
-| `getErrorTitle`   | `src/shared/api/client/api-error.ts` | private    | Reads the NestJS `error` title when present.                                    |
-| `classifyStatus`  | `src/shared/api/client/api-error.ts` | private    | Maps HTTP statuses to `ApiErrorKind`.                                           |

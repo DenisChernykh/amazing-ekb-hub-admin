@@ -12,7 +12,8 @@ import type {
   PlaceDetailResponseDto,
   PlaceSummaryResponseDto,
 } from '@/shared/api'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { isProblemCode } from '@/shared/api/client/api-errors'
+import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useEffect, useState } from 'react'
@@ -63,9 +64,13 @@ export function EditPlaceForm({
 
   const updatePlaceMutation = useUpdatePlaceMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const errorMessage = isProblemCode(error, 'PLACE_SLUG_CONFLICT')
+        ? 'Место с таким ярлыком уже существует.'
+        : isProblemCode(error, 'PLACE_NOT_FOUND')
+          ? 'Место не найдено.'
+          : getApiErrorPresentation(error).message
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (updatedPlace) => {
       setErrorMessages([])
