@@ -106,12 +106,13 @@ Backend уже закрывает обязательные admin-функции 
 - generated API + Orval;
 - TanStack entity hooks keep the FSD UI boundary while using generated Orval fetchers/query keys directly; done in merged admin PR [#59](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/59), closing admin issue [#46](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/46);
 - Unsafe hand-written production type assertions are removed from the material-library/content-source admin slice via shared runtime guards, typed key iteration, and a static regression test; done in merged admin PR [#60](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/60), closing admin issue [#42](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/42);
-- foundation alignment в branch `refactor/react-starter-foundation`, не в
-  merged `main`: cookie-only Axios transport с `withCredentials`, CSRF для
-  unsafe requests, runtime-validated `application/problem+json`, Data Router
-  loaders, global Query/Mutation auth-loss cleanup и MSW HTTP boundary;
+- foundation alignment завершён в admin `stage` через merged admin PR
+  [#85](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/85):
+  cookie-only Axios transport с `withCredentials`, CSRF для unsafe requests,
+  runtime-validated `application/problem+json`, Data Router loaders, global
+  Query/Mutation auth-loss cleanup и MSW HTTP boundary;
 - login page через AntD Form, protected route через `GET /v1/auth/me` и logout
-  button входят в этот branch foundation;
+  button входят в merged foundation PR [#85](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/85);
 - продуктовый dashboard welcome screen без технических session-полей в admin `main` через merged admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35), deployed in [admin deploy #26433216231](https://github.com/DenisChernykh/amazing-ekb-hub-admin/actions/runs/26433216231), закрывший [admin issue #30](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/30);
 - admin shell с sidebar/header/navigation; header больше не показывает реальный email аккаунта в admin `main` через merged admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35);
 - read-only route `/places` со списком мест через `GET /admin/places`, включая `hidden`;
@@ -142,7 +143,7 @@ Backend уже закрывает обязательные admin-функции 
 - field-level mapping для validation errors, если backend позже отдаст структурированные поля;
 - smoke/runtime сценарий с реальным backend после login/logout.
 
-Foundation branch использует backend contract из [backend issue #157](https://github.com/DenisChernykh/amazing-ekb-hub-backend/issues/157), исправленный в [backend PR #160](https://github.com/DenisChernykh/amazing-ekb-hub-backend/pull/160). Это source/contract evidence, а не runtime evidence: полный login → protected route → unsafe mutation → logout smoke с реальным backend остаётся явной невыполненной проверкой до отдельного запуска.
+Merged foundation PR [#85](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/85) использует backend contract из [backend issue #157](https://github.com/DenisChernykh/amazing-ekb-hub-backend/issues/157), исправленный в [backend PR #160](https://github.com/DenisChernykh/amazing-ekb-hub-backend/pull/160). Это source/contract evidence, а не runtime evidence: полный login → protected route → unsafe mutation → logout smoke с реальным backend остаётся явной невыполненной проверкой до отдельного запуска.
 
 ## Feature Gap Matrix
 
