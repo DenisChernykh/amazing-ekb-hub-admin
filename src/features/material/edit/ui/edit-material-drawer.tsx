@@ -14,8 +14,8 @@ import {
 import { MaterialFormChangedFields } from '@/features/material/form/ui/material-form-changed-fields'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
+import { getEditMaterialError } from '@/features/material/model/material-errors'
+import type { MaterialResponseDto } from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
@@ -28,7 +28,7 @@ import { EditMaterialDrawerActions } from './edit-material-drawer-actions'
 export type EditMaterialDrawerProps = {
   material: EditableMaterial
   onClose: () => void
-  onUpdated?: (material: Material) => void
+  onUpdated?: (material: MaterialResponseDto) => void
   open: boolean
   placeId: string
 }
@@ -64,9 +64,9 @@ export function EditMaterialDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const updateMaterialMutation = useUpdateMaterialMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const errorMessage = getEditMaterialError(error)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (updatedMaterial) => {
       setErrorMessages([])

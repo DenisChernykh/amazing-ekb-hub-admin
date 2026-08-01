@@ -1,6 +1,8 @@
-import { AdminMaterialsUpdateBody } from '@/shared/api/generated-zod/admin-materials/admin-materials.zod'
-import { AdminPlaceMaterialsCreateBody } from '@/shared/api/generated-zod/admin-places/admin-places.zod'
-import type { Material } from '@/shared/api/generated/model'
+import type { MaterialResponseDto } from '@/shared/api'
+import {
+  AdminMaterialsUpdateBody,
+  AdminPlaceMaterialsCreateBody,
+} from '@/shared/api'
 import dayjs from 'dayjs'
 import { describe, expect, it } from 'vitest'
 import {
@@ -18,12 +20,13 @@ import {
   editMaterialWithUrlFormSchema,
 } from './material-form-schema'
 
-const material: Material = {
+const material: MaterialResponseDto = {
   durationSec: 125,
   id: 'material-1',
   placeId: 'place-1',
   platform: 'telegram',
   publishedAt: '2026-03-20T10:30:00+05:00',
+  redirectUrl: null,
   title: 'Обзор комплекса',
   type: 'post',
   url: 'https://t.me/amazing_ekb/321',

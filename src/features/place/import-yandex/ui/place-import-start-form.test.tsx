@@ -1,6 +1,6 @@
 import { useStartPlaceImportMutation } from '@/entities/place-import/model/place-import-mutations'
 import { placeImportStartSchema } from '@/features/place/import-yandex/model/place-import-start-schema'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PlaceImportStartForm } from './place-import-start-form'
@@ -76,6 +76,7 @@ describe('PlaceImportStartForm', () => {
   })
 
   it('redirects to the existing active operation on structured 409 conflict', async () => {
+    const onAlreadyActive = vi.fn()
     const onStarted = vi.fn()
     vi.mocked(useStartPlaceImportMutation).mockImplementation(
       (options) =>
@@ -83,30 +84,26 @@ describe('PlaceImportStartForm', () => {
           isPending: false,
           mutate: () =>
             options?.onError?.(
-              new ApiClientError({
-                body: {
-                  code: 'active_place_import_exists',
-                  message: 'An active place import already exists',
-                  operationId: 'operation-existing',
-                  statusCode: 409,
-                },
-                kind: 'conflict',
-                message: 'An active place import already exists',
-                status: 409,
-              }),
+              createApiProblemError('PLACE_IMPORT_ALREADY_ACTIVE', 409),
             ),
         }) as unknown as ReturnType<typeof useStartPlaceImportMutation>,
     )
 
-    render(<PlaceImportStartForm onStarted={onStarted} />)
+    render(
+      <PlaceImportStartForm
+        onAlreadyActive={onAlreadyActive}
+        onStarted={onStarted}
+      />,
+    )
     fireEvent.change(screen.getByLabelText('Ссылка Яндекс Карт'), {
       target: { value: 'https://yandex.ru/maps/org/spa/1' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Начать импорт' }))
 
     await waitFor(() => {
-      expect(onStarted).toHaveBeenCalledWith('operation-existing')
+      expect(onAlreadyActive).toHaveBeenCalled()
     })
+    expect(onStarted).not.toHaveBeenCalled()
     expect(
       screen.queryByText('An active place import already exists'),
     ).not.toBeInTheDocument()

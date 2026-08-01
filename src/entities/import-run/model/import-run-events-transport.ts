@@ -1,4 +1,4 @@
-import { buildApiUrl } from '@/shared/api/client/api-base-url'
+import { buildApiUrl } from '@/shared/api'
 
 /**
  * Имя успешного SSE-события обновления import run.
@@ -32,7 +32,7 @@ export const subscribeToImportRunEvents = (
 ): ImportRunEventsSubscription => {
   let isClosed = false
   const eventSource = new EventSource(
-    buildApiUrl(`/admin/import-runs/${encodeURIComponent(runId)}/events`),
+    buildApiUrl(`/v1/admin/import-runs/${encodeURIComponent(runId)}/events`),
     {
       withCredentials: true,
     },

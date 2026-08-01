@@ -2,8 +2,8 @@ import {
   useCancelPlaceImportMutation,
   useConfirmPlaceImportMutation,
 } from '@/entities/place-import/model/place-import-mutations'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import { getPlaceImportActionError } from '@/features/place/model/place-errors'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { Alert, App as AntdApp, Button, Flex, Modal } from 'antd'
 import { useState } from 'react'
 
@@ -13,15 +13,15 @@ export function PlaceImportActions({
   operation,
 }: {
   isConfirmDisabled?: boolean
-  operation: PlaceImportOperation
+  operation: PlaceImportOperationResponseDto
 }) {
   const { message } = AntdApp.useApp()
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const handleError = (error: unknown) => {
-    const normalized = normalizeApiError(error)
-    setErrorMessage(normalized.message)
-    void message.error(normalized.message)
+    const nextErrorMessage = getPlaceImportActionError(error)
+    setErrorMessage(nextErrorMessage)
+    void message.error(nextErrorMessage)
   }
   const confirmMutation = useConfirmPlaceImportMutation({
     onError: handleError,

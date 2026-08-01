@@ -3,8 +3,11 @@ import {
   useCreatePlaceMutation,
   useUploadPlaceCoverPhotoMutation,
 } from '@/entities/place/model/place-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -150,14 +153,18 @@ const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const createdPlace: PlaceSummary = {
+const createdPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
   coverImageUrl: null,
+  mapsUrl: null,
   id: 'place-1',
   slug: 'quiet-spa',
   status: 'active',
@@ -166,7 +173,7 @@ const createdPlace: PlaceSummary = {
   title: 'Тихий SPA',
 }
 
-const uploadedPlace: PlaceSummary = {
+const uploadedPlace: AdminPlaceSummaryResponseDto = {
   ...createdPlace,
   coverImageUrl: '/places/place-1/photo',
 }
@@ -365,14 +372,9 @@ describe('CreatePlaceForm', () => {
     const uploadMutateAsync = vi.fn().mockResolvedValue(uploadedPlace)
     mockedUseCreatePlaceMutation.mockReturnValue({
       isPending: false,
-      mutateAsync: vi.fn().mockRejectedValue(
-        new ApiClientError({
-          kind: 'validation',
-          message: 'title must be a string',
-          messages: ['title must be a string', 'categoryId must be valid'],
-          status: 400,
-        }),
-      ),
+      mutateAsync: vi
+        .fn()
+        .mockRejectedValue(createApiProblemError('VALIDATION_FAILED', 422)),
     } as unknown as ReturnType<typeof useCreatePlaceMutation>)
     mockedUseUploadPlaceCoverPhotoMutation.mockReturnValue({
       isPending: false,
@@ -387,11 +389,9 @@ describe('CreatePlaceForm', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('title must be a string'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
-    expect(
-      within(alert).getByText('categoryId must be valid'),
-    ).toBeInTheDocument()
+    expect(within(alert).queryByText('Raw backend detail')).toBeNull()
     expect(uploadMutateAsync).not.toHaveBeenCalled()
   })
 
@@ -404,14 +404,9 @@ describe('CreatePlaceForm', () => {
     } as unknown as ReturnType<typeof useCreatePlaceMutation>)
     mockedUseUploadPlaceCoverPhotoMutation.mockReturnValue({
       isPending: false,
-      mutateAsync: vi.fn().mockRejectedValue(
-        new ApiClientError({
-          kind: 'server',
-          message: 'upload failed',
-          messages: ['upload failed'],
-          status: 500,
-        }),
-      ),
+      mutateAsync: vi
+        .fn()
+        .mockRejectedValue(createApiProblemError('INTERNAL_ERROR', 500)),
     } as unknown as ReturnType<typeof useUploadPlaceCoverPhotoMutation>)
 
     const { onCreated } = renderCreatePlaceForm()
@@ -427,7 +422,9 @@ describe('CreatePlaceForm', () => {
     expect(
       within(alert).getByText('Место создано, но cover-фото не загрузилось'),
     ).toBeInTheDocument()
-    expect(within(alert).getByText('upload failed')).toBeInTheDocument()
+    expect(
+      within(alert).getByText('Не удалось выполнить запрос.'),
+    ).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Открыть созданное место' }),
     ).toHaveAttribute('href', '/places/place-1')
@@ -443,14 +440,9 @@ describe('CreatePlaceForm', () => {
     } as unknown as ReturnType<typeof useCreatePlaceMutation>)
     mockedUseUploadPlaceCoverPhotoMutation.mockReturnValue({
       isPending: false,
-      mutateAsync: vi.fn().mockRejectedValue(
-        new ApiClientError({
-          kind: 'server',
-          message: 'upload failed',
-          messages: ['upload failed'],
-          status: 500,
-        }),
-      ),
+      mutateAsync: vi
+        .fn()
+        .mockRejectedValue(createApiProblemError('INTERNAL_ERROR', 500)),
     } as unknown as ReturnType<typeof useUploadPlaceCoverPhotoMutation>)
 
     renderCreatePlaceForm()

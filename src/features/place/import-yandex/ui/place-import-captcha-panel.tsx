@@ -1,4 +1,4 @@
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { Alert, Button, Flex, Statistic, Typography } from 'antd'
 import { useCaptchaViewer } from '../model/use-captcha-viewer'
 
@@ -6,7 +6,7 @@ import { useCaptchaViewer } from '../model/use-captcha-viewer'
 export function PlaceImportCaptchaPanel({
   operation,
 }: {
-  operation: PlaceImportOperation
+  operation: PlaceImportOperationResponseDto
 }) {
   const viewer = useCaptchaViewer(operation.id)
   const expiresAt = viewer.expiresAt ?? operation.captchaExpiresAt

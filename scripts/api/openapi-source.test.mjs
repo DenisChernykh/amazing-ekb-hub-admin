@@ -8,9 +8,72 @@ import { syncOpenApi, validateOpenApiDocument } from './sync-openapi.mjs'
 
 const validOpenApiDocument = {
   openapi: '3.0.3',
+  components: {
+    schemas: {
+      ProblemResponseDto: {
+        properties: {
+          code: {
+            enum: [
+              'AUTHENTICATION_REQUIRED',
+              'AUTHORIZATION_DENIED',
+              'NOT_FOUND',
+              'VALIDATION_FAILED',
+              'DEPENDENCY_UNAVAILABLE',
+              'INTERNAL_ERROR',
+            ],
+          },
+        },
+      },
+      PlaceSummaryCategoryResponseDto: {
+        properties: {
+          coverImageUrl: { nullable: true, type: 'string' },
+          id: { type: 'string' },
+          slug: { type: 'string' },
+          title: { type: 'string' },
+        },
+      },
+      AdminPlaceSummaryResponseDto: {
+        properties: {
+          category: {
+            $ref: '#/components/schemas/PlaceSummaryCategoryResponseDto',
+          },
+        },
+      },
+      PlaceDetailResponseDto: {
+        properties: {
+          category: {
+            $ref: '#/components/schemas/PlaceSummaryCategoryResponseDto',
+          },
+        },
+      },
+      PlaceSummaryResponseDto: {
+        properties: {
+          category: {
+            $ref: '#/components/schemas/PlaceSummaryCategoryResponseDto',
+          },
+        },
+      },
+      PublicPlaceSummaryResponseDto: {
+        properties: {
+          category: {
+            $ref: '#/components/schemas/PlaceSummaryCategoryResponseDto',
+          },
+        },
+      },
+    },
+  },
   paths: {
     '/v1/auth/login': {
       post: { operationId: 'authLogin', tags: ['auth'] },
+    },
+    '/v1/auth/csrf': {
+      get: { operationId: 'authGetCsrfToken', tags: ['auth'] },
+    },
+    '/v1/auth/me': {
+      get: { operationId: 'authGetMe', tags: ['auth'] },
+    },
+    '/v1/auth/logout': {
+      post: { operationId: 'authLogout', tags: ['auth'] },
     },
     '/v1/admin/categories': {
       post: { operationId: 'adminCategoriesCreate' },
@@ -26,6 +89,20 @@ const validOpenApiDocument = {
     },
     '/v1/admin/materials/{materialId}': {
       patch: { operationId: 'adminMaterialsUpdate' },
+    },
+    '/v1/admin/import-runs/{runId}/events': {
+      get: {
+        operationId: 'adminImportRunsStreamEvents',
+        responses: {
+          200: {
+            content: {
+              'text/event-stream': {
+                schema: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
     },
     '/v1/admin/places': {
       post: { operationId: 'adminPlacesCreate' },
@@ -84,6 +161,71 @@ describe('OpenAPI document validation', () => {
         paths: {},
       }),
     ).toThrow('POST /v1/auth/login')
+  })
+
+  it.each([
+    ['post', '/v1/auth/login'],
+    ['get', '/v1/auth/csrf'],
+    ['get', '/v1/auth/me'],
+    ['post', '/v1/auth/logout'],
+  ])('rejects a contract without %s %s', (method, path) => {
+    const document = structuredClone(validOpenApiDocument)
+    delete document.paths[path][method]
+
+    expect(() => validateOpenApiDocument(document)).toThrow(
+      `${method.toUpperCase()} ${path}`,
+    )
+  })
+
+  it('rejects a foundation contract without VALIDATION_FAILED problem code', () => {
+    const document = structuredClone(validOpenApiDocument)
+    document.components.schemas.ProblemResponseDto.properties.code.enum =
+      document.components.schemas.ProblemResponseDto.properties.code.enum.filter(
+        (code) => code !== 'VALIDATION_FAILED',
+      )
+
+    expect(() => validateOpenApiDocument(document)).toThrow('VALIDATION_FAILED')
+  })
+
+  it.each([
+    'AdminPlaceSummaryResponseDto',
+    'PlaceDetailResponseDto',
+    'PlaceSummaryResponseDto',
+    'PublicPlaceSummaryResponseDto',
+  ])('rejects the stale full category ref in %s', (schemaName) => {
+    const document = structuredClone(validOpenApiDocument)
+    document.components.schemas[schemaName].properties.category.$ref =
+      '#/components/schemas/PlaceCategoryResponseDto'
+
+    expect(() => validateOpenApiDocument(document)).toThrow(
+      `${schemaName}.category`,
+    )
+  })
+
+  it('rejects the obsolete import-run SSE wrapper schema', () => {
+    const document = structuredClone(validOpenApiDocument)
+    document.components.schemas.ImportRunEventResponseDto = {
+      properties: {
+        data: { $ref: '#/components/schemas/ImportRunResponseDto' },
+      },
+    }
+
+    expect(() => validateOpenApiDocument(document)).toThrow(
+      'ImportRunEventResponseDto',
+    )
+  })
+
+  it('rejects a non-string import-run SSE wire schema', () => {
+    const document = structuredClone(validOpenApiDocument)
+    document.paths[
+      '/v1/admin/import-runs/{runId}/events'
+    ].get.responses[200].content['text/event-stream'].schema = {
+      $ref: '#/components/schemas/ImportRunEventResponseDto',
+    }
+
+    expect(() => validateOpenApiDocument(document)).toThrow(
+      'GET /v1/admin/import-runs/{runId}/events text/event-stream',
+    )
   })
 
   it('writes a snapshot accepted by the project formatter', async () => {

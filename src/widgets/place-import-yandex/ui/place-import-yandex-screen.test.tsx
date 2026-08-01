@@ -3,8 +3,8 @@ import {
   usePlaceImportEvents,
   usePlaceImportOperationQuery,
 } from '@/entities/place-import/model/place-import-hooks'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,8 +28,8 @@ vi.mock('@/features/place/import-yandex/ui/place-import-start-form', () => ({
 }))
 
 const completedOperation = (
-  outcome: PlaceImportOperation['outcome'],
-): PlaceImportOperation => ({
+  outcome: PlaceImportOperationResponseDto['outcome'],
+): PlaceImportOperationResponseDto => ({
   attempt: 1,
   captchaExpiresAt: null,
   category: null,
@@ -49,7 +49,9 @@ const completedOperation = (
   version: 4,
 })
 
-const queuedOperation = (id = 'operation-active'): PlaceImportOperation => ({
+const queuedOperation = (
+  id = 'operation-active',
+): PlaceImportOperationResponseDto => ({
   ...completedOperation(null),
   id,
   outcome: null,
@@ -99,7 +101,9 @@ function RecoveredOperationRoute() {
   )
 }
 
-const renderCompleted = (outcome: PlaceImportOperation['outcome']) => {
+const renderCompleted = (
+  outcome: PlaceImportOperationResponseDto['outcome'],
+) => {
   vi.mocked(usePlaceImportOperationQuery).mockReturnValue({
     data: completedOperation(outcome),
     isError: false,
@@ -172,11 +176,7 @@ describe('PlaceImportYandexScreen', () => {
 
   it('renders the start form when active lookup returns 404', () => {
     mockActiveQuery({
-      error: new ApiClientError({
-        kind: 'not-found',
-        message: 'No active import',
-        status: 404,
-      }),
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
       isError: true,
     })
 
@@ -189,18 +189,15 @@ describe('PlaceImportYandexScreen', () => {
 
   it('renders the API error state when active lookup fails with a non-404 error', () => {
     mockActiveQuery({
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Service unavailable',
-        status: 503,
-      }),
+      error: createApiProblemError('DEPENDENCY_UNAVAILABLE', 503),
       isError: true,
     })
 
     renderBaseRoute()
 
     expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
-    expect(screen.getByText('Service unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Сервис временно недоступен.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).toBeNull()
   })
 
   it('keeps an explicit operation route on snapshot plus realtime flow', () => {

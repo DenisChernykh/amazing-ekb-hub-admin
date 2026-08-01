@@ -1,4 +1,7 @@
-import type { PlaceStatus, PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDto,
+  AdminPlaceSummaryResponseDtoStatus,
+} from '@/shared/api'
 import {
   createSelector,
   createSlice,
@@ -9,7 +12,7 @@ import {
  * Минимальный снимок места, который bulk moderation хранит локально.
  */
 export type BulkModerationSelectedPlace = Pick<
-  PlaceSummary,
+  AdminPlaceSummaryResponseDto,
   'id' | 'status' | 'title'
 >
 
@@ -17,10 +20,7 @@ export type BulkModerationSelectedPlace = Pick<
  * Статус одного элемента в локальной очереди bulk moderation.
  */
 export type BulkModerationQueueItemStatus =
-  | 'queued'
-  | 'pending'
-  | 'succeeded'
-  | 'failed'
+  'queued' | 'pending' | 'succeeded' | 'failed'
 
 /**
  * Режим текущей локальной операции bulk moderation.
@@ -41,8 +41,8 @@ export type BulkModerationQueueItem = Pick<
 > & {
   errorMessage: string | null
   operationStatus: BulkModerationQueueItemStatus
-  previousStatus: PlaceStatus
-  targetStatus: PlaceStatus
+  previousStatus: AdminPlaceSummaryResponseDtoStatus
+  targetStatus: AdminPlaceSummaryResponseDtoStatus
 }
 
 /**
@@ -53,7 +53,7 @@ export type BulkModerationQueueItem = Pick<
 export type BulkModerationState = {
   operationKind: BulkModerationOperationKind | null
   operationStatus: BulkModerationOperationStatus
-  operationTargetStatus: PlaceStatus | null
+  operationTargetStatus: AdminPlaceSummaryResponseDtoStatus | null
   queueById: Record<string, BulkModerationQueueItem>
   queueOrder: string[]
   selectedById: Record<string, BulkModerationSelectedPlace>
@@ -109,7 +109,7 @@ const removeSelectedPlace = (state: BulkModerationState, placeId: string) => {
 
 const createQueueItem = (
   place: BulkModerationSelectedPlace,
-  targetStatus: PlaceStatus,
+  targetStatus: AdminPlaceSummaryResponseDtoStatus,
 ): BulkModerationQueueItem => ({
   errorMessage: null,
   id: place.id,
@@ -123,7 +123,7 @@ const setQueueItems = (
   state: BulkModerationState,
   items: BulkModerationQueueItem[],
   operationKind: BulkModerationOperationKind,
-  operationTargetStatus: PlaceStatus | null,
+  operationTargetStatus: AdminPlaceSummaryResponseDtoStatus | null,
 ) => {
   state.operationKind = operationKind
   state.operationStatus = items.length > 0 ? 'running' : 'idle'
@@ -217,7 +217,9 @@ const bulkModerationSlice = createSlice({
     },
     startBulkOperation(
       state,
-      action: PayloadAction<{ targetStatus: PlaceStatus }>,
+      action: PayloadAction<{
+        targetStatus: AdminPlaceSummaryResponseDtoStatus
+      }>,
     ) {
       const items = state.selectedOrder.map((id) =>
         createQueueItem(state.selectedById[id], action.payload.targetStatus),

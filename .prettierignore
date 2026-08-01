@@ -2,5 +2,4 @@ dist
 coverage
 node_modules
 .playwright-cli
-src/shared/api/generated
-src/shared/api/generated-zod
+.superpowers/sdd

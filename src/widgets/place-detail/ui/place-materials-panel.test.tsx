@@ -4,9 +4,12 @@ import { CreateMaterialDrawer } from '@/features/material/create/ui/create-mater
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PublicMaterial } from '@/shared/api/generated/model'
-import type { MaterialListResponse } from '@/shared/api/generated/operation'
+import type {
+  ApiClientError,
+  MaterialListResponseDto,
+  MaterialResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -34,7 +37,7 @@ vi.mock('@/features/material/edit/ui/edit-material-drawer', () => ({
       open,
       placeId,
     }: {
-      material: PublicMaterial
+      material: MaterialResponseDto
       open: boolean
       placeId: string
     }) =>
@@ -65,8 +68,8 @@ vi.mock('@/features/place/pinned-material/ui/pinned-material-panel', () => ({
       pinnedMaterial,
       placeId,
     }: {
-      materials: PublicMaterial[]
-      pinnedMaterial: PublicMaterial | null
+      materials: MaterialResponseDto[]
+      pinnedMaterial: MaterialResponseDto | null
       placeId: string
     }) => (
       <div>
@@ -117,9 +120,10 @@ const materialsResponse = {
       title: 'Обзор комплекса',
       type: 'post',
       redirectUrl: '/v1/materials/material-1/go',
+      url: 'https://t.me/amazing_ekb/1',
     },
   ],
-} as unknown as MaterialListResponse
+} satisfies MaterialListResponseDto
 
 const pinnedMaterial = materialsResponse.items[0] ?? null
 
@@ -368,11 +372,7 @@ describe('PlaceMaterialsPanel', () => {
         callbacks?: { onError?: (error: ApiClientError) => void },
       ) => {
         callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Hide unavailable',
-            status: 500,
-          }),
+          createApiProblemError('PLACE_MATERIAL_LINK_NOT_FOUND', 404),
         )
       },
     } as unknown as ReturnType<typeof useHidePlaceMaterialLinkMutation>)
@@ -391,9 +391,11 @@ describe('PlaceMaterialsPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Скрыть связь' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Hide unavailable',
+      'Связь материала с местом не найдена.',
     )
-    expect(messageError).toHaveBeenCalledWith('Hide unavailable')
+    expect(messageError).toHaveBeenCalledWith(
+      'Связь материала с местом не найдена.',
+    )
     expect(
       screen.getByRole('button', { name: 'Скрыть связь' }),
     ).not.toBeDisabled()
@@ -420,11 +422,7 @@ describe('PlaceMaterialsPanel', () => {
   it('renders normalized API error message', () => {
     mockedUsePlaceMaterialsListQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Materials unavailable',
-        status: 500,
-      }),
+      error: createApiProblemError('MATERIAL_PLACE_NOT_FOUND', 404),
       isError: true,
       isFetching: false,
       isPending: false,
@@ -434,7 +432,8 @@ describe('PlaceMaterialsPanel', () => {
       <PlaceMaterialsPanel pinnedMaterial={pinnedMaterial} placeId="place-1" />,
     )
 
-    expect(screen.getByText('Materials unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Материал места не найден.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
     expect(
       screen.getByText('pinned selector place-1:Обзор комплекса:0'),
     ).toBeInTheDocument()

@@ -1,6 +1,6 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { FormProvider } from 'react-hook-form'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -49,11 +49,7 @@ describe('PlaceFormFields', () => {
   it('surfaces category lookup failures next to the disabled category field', () => {
     mockedUsePlaceCategoriesQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Не удалось загрузить категории',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isFetching: false,
       isPending: false,
@@ -62,8 +58,9 @@ describe('PlaceFormFields', () => {
     render(<PlaceFormFieldsHarness />)
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Не удалось загрузить категории',
+      'Не удалось выполнить запрос.',
     )
+    expect(screen.getByRole('alert')).not.toHaveTextContent('Raw backend title')
     expect(screen.getByRole('combobox', { name: 'Категория' })).toBeDisabled()
   })
 

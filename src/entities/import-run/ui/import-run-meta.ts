@@ -1,4 +1,4 @@
-import type { ImportRunStatus } from '@/shared/api/generated/model'
+import type { ImportRunResponseDtoStatus } from '@/shared/api'
 
 /**
  * UI-метаданные import run для тегов и таблиц.
@@ -18,7 +18,7 @@ export type ImportRunCounts = {
   updatedCount: number
 }
 
-const importRunStatusMeta: Record<ImportRunStatus, ImportRunMeta> = {
+const importRunStatusMeta: Record<ImportRunResponseDtoStatus, ImportRunMeta> = {
   completed: {
     color: 'green',
     label: 'Готово',
@@ -40,7 +40,7 @@ const importRunStatusMeta: Record<ImportRunStatus, ImportRunMeta> = {
 /**
  * Возвращает локализованные UI-метаданные статуса import run.
  */
-export function getImportRunStatusMeta(status: ImportRunStatus) {
+export function getImportRunStatusMeta(status: ImportRunResponseDtoStatus) {
   return importRunStatusMeta[status]
 }
 

@@ -6,14 +6,17 @@ import {
 import { getActiveImportRunForSource } from '@/entities/import-run/model/import-run-cache'
 import { ImportTelegramSourceButton } from '@/features/content-source/import/ui/import-telegram-source-button'
 import { ContentSourceStatusActions } from '@/features/content-source/status/ui/content-source-status-actions'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import { isSafeHttpUrl } from '@/shared/lib/url/safe-url'
 import { EditOutlined } from '@ant-design/icons'
 import type { TableColumnsType } from 'antd'
 import { Button, Flex, Tag, Typography } from 'antd'
 import styles from './content-sources-screen.module.css'
 
-const getSourceIdentityItems = (contentSource: ContentSource) => {
+const getSourceIdentityItems = (contentSource: ContentSourceResponseDto) => {
   return [
     contentSource.externalId && `external: ${contentSource.externalId}`,
     contentSource.handle && `handle: ${contentSource.handle}`,
@@ -28,16 +31,16 @@ export function getContentSourcesTableColumns({
   importRuns,
   onEdit,
 }: {
-  importRuns: ImportRun[]
-  onEdit: (contentSource: ContentSource) => void
-}): TableColumnsType<ContentSource> {
+  importRuns: ImportRunResponseDto[]
+  onEdit: (contentSource: ContentSourceResponseDto) => void
+}): TableColumnsType<ContentSourceResponseDto> {
   return [
     {
       dataIndex: 'displayName',
       key: 'displayName',
       render: (
-        displayName: ContentSource['displayName'],
-        contentSource: ContentSource,
+        displayName: ContentSourceResponseDto['displayName'],
+        contentSource: ContentSourceResponseDto,
       ) => {
         const platformMeta = getContentSourcePlatformMeta(
           contentSource.platform,
@@ -68,7 +71,7 @@ export function getContentSourcesTableColumns({
     },
     {
       key: 'identity',
-      render: (_value: unknown, contentSource: ContentSource) => {
+      render: (_value: unknown, contentSource: ContentSourceResponseDto) => {
         const identityItems = getSourceIdentityItems(contentSource)
 
         return (
@@ -90,14 +93,14 @@ export function getContentSourcesTableColumns({
     {
       dataIndex: 'lastImportedAt',
       key: 'lastImportedAt',
-      render: (value: ContentSource['lastImportedAt']) =>
+      render: (value: ContentSourceResponseDto['lastImportedAt']) =>
         formatContentSourceDateTime(value),
       title: 'Последний импорт',
     },
     {
       dataIndex: 'status',
       key: 'status',
-      render: (status: ContentSource['status']) => {
+      render: (status: ContentSourceResponseDto['status']) => {
         const meta = getContentSourceStatusMeta(status)
 
         return <Tag color={meta.color}>{meta.label}</Tag>
@@ -106,7 +109,7 @@ export function getContentSourcesTableColumns({
     },
     {
       key: 'actions',
-      render: (_value: unknown, contentSource: ContentSource) => (
+      render: (_value: unknown, contentSource: ContentSourceResponseDto) => (
         <Flex gap={8} vertical>
           <Button
             icon={<EditOutlined aria-hidden="true" />}

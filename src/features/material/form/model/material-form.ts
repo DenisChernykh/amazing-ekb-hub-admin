@@ -1,11 +1,11 @@
 import { normalizeMaterialUrl } from '@/entities/material/model/material-url'
 import type {
-  CreateMaterialRequest,
-  Material,
-  MaterialType,
-  Platform,
-  UpdateMaterialRequest,
-} from '@/shared/api/generated/model'
+  CreateMaterialDto,
+  MaterialResponseDto,
+  MaterialResponseDtoPlatform,
+  MaterialResponseDtoType,
+  UpdateMaterialDto,
+} from '@/shared/api'
 import dayjs, { type Dayjs } from 'dayjs'
 import type { MaterialFormValues } from './material-form-schema'
 
@@ -13,10 +13,10 @@ export type { MaterialFormValues } from './material-form-schema'
 
 type NormalizedMaterialFormValues = {
   durationSec: number | null
-  platform: Platform | null
+  platform: MaterialResponseDtoPlatform | null
   publishedAt: string | null
   title: string
-  type: MaterialType | null
+  type: MaterialResponseDtoType | null
   url: string
 }
 
@@ -31,7 +31,7 @@ export type MaterialFormChangedField = {
 /**
  * Материал для edit-flow: read-модели списков могут не содержать исходный URL.
  */
-export type EditableMaterial = Omit<Material, 'url'> & {
+export type EditableMaterial = Omit<MaterialResponseDto, 'url'> & {
   url?: string
 }
 
@@ -59,7 +59,7 @@ const materialFormFieldKeys: Array<keyof NormalizedMaterialFormValues> = [
  * @returns `true` только для видеоформатов, где backend ожидает duration.
  */
 export function isMaterialDurationEnabled(
-  type: MaterialType | null | undefined,
+  type: MaterialResponseDtoType | null | undefined,
 ) {
   return type === 'reel' || type === 'video'
 }
@@ -125,10 +125,10 @@ export function getMaterialFormInitialValues(
  */
 export function toCreateMaterialRequest(
   values: MaterialFormValues,
-): CreateMaterialRequest {
+): CreateMaterialDto {
   const normalizedValues = normalizeMaterialFormValues(values)
   const type = getRequiredValue(normalizedValues.type, 'type')
-  const request: CreateMaterialRequest = {
+  const request: CreateMaterialDto = {
     platform: getRequiredValue(normalizedValues.platform, 'platform'),
     publishedAt: getRequiredValue(normalizedValues.publishedAt, 'publishedAt'),
     title: normalizedValues.title,
@@ -151,10 +151,10 @@ export function toCreateMaterialRequest(
 export function toUpdateMaterialRequest(
   values: MaterialFormValues,
   initialValues: MaterialFormValues,
-): UpdateMaterialRequest {
+): UpdateMaterialDto {
   const normalizedValues = normalizeMaterialFormValues(values)
   const normalizedInitialValues = normalizeMaterialFormValues(initialValues)
-  const request: UpdateMaterialRequest = {}
+  const request: UpdateMaterialDto = {}
   const isDurationEnabled = isMaterialDurationEnabled(normalizedValues.type)
   const wasDurationEnabled = isMaterialDurationEnabled(
     normalizedInitialValues.type,

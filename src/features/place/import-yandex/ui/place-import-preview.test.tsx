@@ -1,10 +1,10 @@
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { PlaceImportPreview } from './place-import-preview'
 
-const preview: PlaceImportOperation = {
+const preview: PlaceImportOperationResponseDto = {
   attempt: 1,
   captchaExpiresAt: null,
   category: {

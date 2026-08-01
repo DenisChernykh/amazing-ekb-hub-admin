@@ -1,11 +1,11 @@
 import { isActiveImportRunStatus } from '@/entities/import-run/model/import-run-cache'
 import { useImportRunEvents } from '@/entities/import-run/model/import-run-events'
-import type { ImportRun } from '@/shared/api/generated/model'
+import type { ImportRunResponseDto } from '@/shared/api'
 
 const ImportRunEventsSubscription = ({
   importRun,
 }: {
-  importRun: ImportRun
+  importRun: ImportRunResponseDto
 }) => {
   useImportRunEvents(importRun.id, {
     sourceId: importRun.sourceId,
@@ -22,7 +22,7 @@ const ImportRunEventsSubscription = ({
 export function ImportRunEventsSubscriptions({
   importRuns,
 }: {
-  importRuns: ImportRun[]
+  importRuns: ImportRunResponseDto[]
 }) {
   return importRuns
     .filter((importRun) => isActiveImportRunStatus(importRun.status))

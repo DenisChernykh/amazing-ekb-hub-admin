@@ -1,8 +1,8 @@
 import type {
-  AdminPlaceCategory,
-  CreatePlaceCategoryRequest,
-  UpdatePlaceCategoryRequest,
-} from '@/shared/api/generated/model'
+  CreatePlaceCategoryDto,
+  PlaceCategoryResponseDto,
+  UpdatePlaceCategoryDto,
+} from '@/shared/api'
 import type { CategoryFormValues } from './category-form-schema'
 
 export type { CategoryFormValues } from './category-form-schema'
@@ -55,7 +55,7 @@ const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
  * Возвращает начальные значения формы из категории места.
  */
 export function getCategoryFormInitialValues(
-  category: AdminPlaceCategory,
+  category: PlaceCategoryResponseDto,
 ): CategoryFormValues {
   return {
     slug: category.slug,
@@ -68,9 +68,9 @@ export function getCategoryFormInitialValues(
  */
 export function toCreateCategoryRequest(
   values: CategoryFormValues,
-): CreatePlaceCategoryRequest {
+): CreatePlaceCategoryDto {
   const normalizedValues = normalizeCategoryFormValues(values)
-  const request: CreatePlaceCategoryRequest = {
+  const request: CreatePlaceCategoryDto = {
     title: normalizedValues.title,
   }
 
@@ -87,10 +87,10 @@ export function toCreateCategoryRequest(
 export function toUpdateCategoryRequest(
   values: CategoryFormValues,
   initialValues: CategoryFormValues,
-): UpdatePlaceCategoryRequest {
+): UpdatePlaceCategoryDto {
   const normalizedValues = normalizeCategoryFormValues(values)
   const normalizedInitialValues = normalizeCategoryFormValues(initialValues)
-  const request: UpdatePlaceCategoryRequest = {}
+  const request: UpdatePlaceCategoryDto = {}
 
   if (normalizedValues.title !== normalizedInitialValues.title) {
     request.title = normalizedValues.title

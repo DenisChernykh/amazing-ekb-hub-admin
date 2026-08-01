@@ -1,6 +1,6 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail } from '@/shared/api/generated/model'
+import type { PlaceDetailResponseDto } from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -48,7 +48,7 @@ vi.mock('./place-materials-panel', () => ({
     pinnedMaterial,
     placeId,
   }: {
-    pinnedMaterial: PlaceDetail['pinnedMaterial']
+    pinnedMaterial: PlaceDetailResponseDto['pinnedMaterial']
     placeId: string
   }) => (
     <div>
@@ -59,7 +59,7 @@ vi.mock('./place-materials-panel', () => ({
 
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
-const hiddenPlace: PlaceDetail = {
+const hiddenPlace: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: {
     coverImageUrl: null,
@@ -141,7 +141,7 @@ describe('PlaceDetailScreen', () => {
   })
 
   it('remounts cover upload panel when place changes', () => {
-    const nextPlace: PlaceDetail = {
+    const nextPlace: PlaceDetailResponseDto = {
       ...hiddenPlace,
       coverImageUrl: '/places/place-3/photo',
       id: 'place-3',
@@ -226,11 +226,7 @@ describe('PlaceDetailScreen', () => {
   it('renders forbidden state for permission errors', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'permission',
-        message: 'Forbidden',
-        status: 403,
-      }),
+      error: createApiProblemError('AUTHORIZATION_DENIED', 403),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useAdminPlaceDetailQuery>)
@@ -243,11 +239,7 @@ describe('PlaceDetailScreen', () => {
   it('renders not-found state for missing places', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'not-found',
-        message: 'Place not found',
-        status: 404,
-      }),
+      error: createApiProblemError('PLACE_NOT_FOUND', 404),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useAdminPlaceDetailQuery>)
@@ -264,11 +256,7 @@ describe('PlaceDetailScreen', () => {
   it('renders generic screen error for server failures', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Place unavailable',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useAdminPlaceDetailQuery>)
@@ -276,6 +264,7 @@ describe('PlaceDetailScreen', () => {
     renderPlaceDetailScreen()
 
     expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
-    expect(screen.getByText('Place unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Не удалось выполнить запрос.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).toBeNull()
   })
 })

@@ -9,6 +9,9 @@ import { resolvePairedBackendSource } from './openapi-source.mjs'
 
 const requiredOperations = [
   ['/v1/auth/login', 'post', 'authLogin'],
+  ['/v1/auth/csrf', 'get', 'authGetCsrfToken'],
+  ['/v1/auth/me', 'get', 'authGetMe'],
+  ['/v1/auth/logout', 'post', 'authLogout'],
   ['/v1/admin/categories', 'post', 'adminCategoriesCreate'],
   ['/v1/admin/categories/{categoryId}', 'patch', 'adminCategoriesUpdate'],
   ['/v1/admin/content-sources', 'post', 'adminContentSourcesCreate'],
@@ -23,6 +26,25 @@ const requiredOperations = [
   ['/v1/admin/places/{placeId}/materials', 'post', 'adminPlaceMaterialsCreate'],
   ['/v1/admin/place-imports/yandex-maps', 'post', 'adminPlaceImportsStart'],
 ]
+
+const requiredProblemCodes = [
+  'AUTHENTICATION_REQUIRED',
+  'AUTHORIZATION_DENIED',
+  'NOT_FOUND',
+  'VALIDATION_FAILED',
+  'DEPENDENCY_UNAVAILABLE',
+  'INTERNAL_ERROR',
+]
+
+const placeSummarySchemaNames = [
+  'AdminPlaceSummaryResponseDto',
+  'PlaceDetailResponseDto',
+  'PlaceSummaryResponseDto',
+  'PublicPlaceSummaryResponseDto',
+]
+
+const placeSummaryCategoryRef =
+  '#/components/schemas/PlaceSummaryCategoryResponseDto'
 
 const readWorktreeList = () => {
   try {
@@ -67,6 +89,45 @@ export function validateOpenApiDocument(value) {
         `OpenAPI document has an unexpected operation ID for ${method.toUpperCase()} ${path}`,
       )
     }
+  }
+
+  const problemCodes =
+    value.components?.schemas?.ProblemResponseDto?.properties?.code?.enum
+
+  for (const problemCode of requiredProblemCodes) {
+    if (!Array.isArray(problemCodes) || !problemCodes.includes(problemCode)) {
+      throw new Error(
+        `OpenAPI document is missing ProblemResponseDto code ${problemCode}`,
+      )
+    }
+  }
+
+  const schemas = value.components?.schemas
+
+  for (const schemaName of placeSummarySchemaNames) {
+    const categoryRef = schemas?.[schemaName]?.properties?.category?.$ref
+
+    if (categoryRef !== placeSummaryCategoryRef) {
+      throw new Error(
+        `OpenAPI document has an unexpected ${schemaName}.category ref`,
+      )
+    }
+  }
+
+  if (schemas?.ImportRunEventResponseDto !== undefined) {
+    throw new Error(
+      'OpenAPI document still contains obsolete ImportRunEventResponseDto',
+    )
+  }
+
+  const importRunEventStreamSchema =
+    value.paths['/v1/admin/import-runs/{runId}/events']?.get?.responses?.[200]
+      ?.content?.['text/event-stream']?.schema
+
+  if (importRunEventStreamSchema?.type !== 'string') {
+    throw new Error(
+      'OpenAPI document has an unexpected GET /v1/admin/import-runs/{runId}/events text/event-stream schema',
+    )
   }
 
   return value

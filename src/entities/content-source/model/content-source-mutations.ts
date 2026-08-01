@@ -4,22 +4,22 @@ import {
   syncImportRunQueryCache,
 } from '@/entities/import-run/model/import-run-cache'
 import { invalidateMaterialLibraryQueries } from '@/entities/material/model/material-mutations'
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import { getApiErrorStatus } from '@/shared/api/client/api-error'
-import {
-  createContentSource,
-  getListContentSourcesQueryKey,
-  importTelegramChannel,
-  updateContentSource,
-  updateContentSourceStatus,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  ContentSource,
-  ContentSourceStatus,
-  CreateContentSourceRequest,
-  ImportRun,
-  UpdateContentSourceRequest,
-} from '@/shared/api/generated/model'
+  ContentSourceResponseDto,
+  ContentSourceResponseDtoStatus,
+  CreateContentSourceDto,
+  ImportRunResponseDto,
+  UpdateContentSourceDto,
+} from '@/shared/api'
+import {
+  adminContentSourcesCreate,
+  adminContentSourcesUpdate,
+  adminContentSourcesUpdateStatus,
+  adminTelegramImportsEnqueue,
+  getAdminContentSourcesListQueryKey,
+  isProblemCode,
+  type ApiClientError,
+} from '@/shared/api'
 import type { QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -28,7 +28,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
  */
 export type CreateContentSourceMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (contentSource: ContentSource) => Promise<void> | void
+  onSuccess?: (contentSource: ContentSourceResponseDto) => Promise<void> | void
 }
 
 /**
@@ -36,7 +36,7 @@ export type CreateContentSourceMutationOptions = {
  */
 export type UpdateContentSourceMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (contentSource: ContentSource) => Promise<void> | void
+  onSuccess?: (contentSource: ContentSourceResponseDto) => Promise<void> | void
 }
 
 /**
@@ -44,7 +44,7 @@ export type UpdateContentSourceMutationOptions = {
  */
 export type UpdateContentSourceStatusMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (contentSource: ContentSource) => Promise<void> | void
+  onSuccess?: (contentSource: ContentSourceResponseDto) => Promise<void> | void
 }
 
 /**
@@ -52,14 +52,14 @@ export type UpdateContentSourceStatusMutationOptions = {
  */
 export type ImportTelegramSourceMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (importRun: ImportRun) => Promise<void> | void
+  onSuccess?: (importRun: ImportRunResponseDto) => Promise<void> | void
 }
 
 /**
  * Переменные редактирования content source через entity bridge.
  */
 export type UpdateContentSourceMutationVariables = {
-  data: UpdateContentSourceRequest
+  data: UpdateContentSourceDto
   sourceId: string
 }
 
@@ -68,7 +68,7 @@ export type UpdateContentSourceMutationVariables = {
  */
 export type UpdateContentSourceStatusMutationVariables = {
   sourceId: string
-  status: ContentSourceStatus
+  status: ContentSourceResponseDtoStatus
 }
 
 /**
@@ -83,7 +83,7 @@ export type ImportTelegramSourceMutationVariables = {
  */
 export const invalidateContentSourceQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListContentSourcesQueryKey(),
+    queryKey: getAdminContentSourcesListQueryKey(),
   })
 }
 
@@ -101,18 +101,20 @@ export function useCreateContentSourceMutation(
 ) {
   const queryClient = useQueryClient()
 
-  return useMutation<ContentSource, ApiClientError, CreateContentSourceRequest>(
-    {
-      mutationFn: (data) => createContentSource(data),
-      onError: (error) => {
-        options?.onError?.(error)
-      },
-      onSuccess: async (contentSource) => {
-        await invalidateContentSourceQueries(queryClient)
-        await options?.onSuccess?.(contentSource)
-      },
+  return useMutation<
+    ContentSourceResponseDto,
+    ApiClientError,
+    CreateContentSourceDto
+  >({
+    mutationFn: (data) => adminContentSourcesCreate(data),
+    onError: (error) => {
+      options?.onError?.(error)
     },
-  )
+    onSuccess: async (contentSource) => {
+      await invalidateContentSourceQueries(queryClient)
+      await options?.onSuccess?.(contentSource)
+    },
+  })
 }
 
 /**
@@ -126,11 +128,12 @@ export function useUpdateContentSourceMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    ContentSource,
+    ContentSourceResponseDto,
     ApiClientError,
     UpdateContentSourceMutationVariables
   >({
-    mutationFn: ({ data, sourceId }) => updateContentSource({ sourceId }, data),
+    mutationFn: ({ data, sourceId }) =>
+      adminContentSourcesUpdate({ sourceId }, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -155,12 +158,12 @@ export function useUpdateContentSourceStatusMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    ContentSource,
+    ContentSourceResponseDto,
     ApiClientError,
     UpdateContentSourceStatusMutationVariables
   >({
     mutationFn: ({ sourceId, status }) =>
-      updateContentSourceStatus({ sourceId }, { status }),
+      adminContentSourcesUpdateStatus({ sourceId }, { status }),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -174,7 +177,7 @@ export function useUpdateContentSourceStatusMutation(
 /**
  * Запускает durable one-click Telegram import для active Telegram source.
  *
- * @remarks После успеха сразу синхронизирует returned `ImportRun` в cache,
+ * @remarks После успеха сразу синхронизирует returned `ImportRunResponseDto` в cache,
  * затем инвалидирует sources, import runs и material library. `409` не считается
  * фатальным состоянием UX: backend сообщает, что активный import уже существует.
  */
@@ -184,13 +187,13 @@ export function useImportTelegramSourceMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    ImportRun,
+    ImportRunResponseDto,
     ApiClientError,
     ImportTelegramSourceMutationVariables
   >({
-    mutationFn: ({ sourceId }) => importTelegramChannel({ sourceId }),
+    mutationFn: ({ sourceId }) => adminTelegramImportsEnqueue({ sourceId }),
     onError: async (error) => {
-      if (getApiErrorStatus(error) === 409) {
+      if (isProblemCode(error, 'ACTIVE_IMPORT_EXISTS')) {
         await invalidateImportRunQueries(queryClient)
       }
 

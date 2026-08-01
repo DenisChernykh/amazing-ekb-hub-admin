@@ -1,5 +1,5 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
-import type { AdminPlaceCategoryListResponse } from '@/shared/api/generated/operation'
+import type { PlaceCategoryListResponseDto } from '@/shared/api'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -13,7 +13,7 @@ import { CategoriesHeader } from './categories-header'
 import styles from './categories-screen.module.css'
 import { CategoriesTable } from './categories-table'
 
-const emptyCategoriesResponse: AdminPlaceCategoryListResponse = {
+const emptyCategoriesResponse: PlaceCategoryListResponseDto = {
   items: [],
 }
 
@@ -31,7 +31,7 @@ export function CategoriesScreen() {
   const categoriesQuery = usePlaceCategoriesQuery()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<
-    AdminPlaceCategoryListResponse['items'][number] | null
+    PlaceCategoryListResponseDto['items'][number] | null
   >(null)
   const data = categoriesQuery.data ?? emptyCategoriesResponse
   const style: CategoriesScreenVariables = {

@@ -1,9 +1,8 @@
-import { useCurrentUser } from '@/entities/session/model/current-user'
-import { RoleTag } from '@/entities/session/ui/role-tag'
+import { RoleTag, useCurrentSession } from '@/entities/session'
 import { LogoutButton } from '@/features/auth/logout/ui/logout-button'
 import { Flex, Layout, Menu, Space, Typography, theme } from 'antd'
-import type { CSSProperties } from 'react'
-import { Link, Outlet, useLocation } from 'react-router'
+import type { CSSProperties, ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
 import {
   adminNavigationItems,
   getSelectedNavigationKey,
@@ -18,14 +17,18 @@ type AdminShellVariables = CSSProperties & {
   '--admin-shell-surface': string
 }
 
+type AdminShellProps = {
+  children: ReactNode
+}
+
 /**
- * Общий protected shell админки с sidebar, header, нейтральным session summary и content outlet.
+ * Общий protected shell админки с навигацией, role tags и переданным контентом.
  *
- * @remarks Требует `RequireAuth`, который предоставляет текущего пользователя через session context.
+ * @remarks Читает suspense session query внутри защищённой ветки router.
  */
-export function AdminShell() {
+export function AdminShell({ children }: AdminShellProps) {
   const location = useLocation()
-  const user = useCurrentUser()
+  const { data: user } = useCurrentSession()
   const { token } = theme.useToken()
   const style: AdminShellVariables = {
     '--admin-shell-bg': token.colorBgLayout,
@@ -64,20 +67,19 @@ export function AdminShell() {
         <Header className={styles.header}>
           <Flex align="center" gap={16} justify="space-between" wrap>
             <Typography.Title className={styles.brandTitle} level={3}>
-              Админка
+              Администратор
             </Typography.Title>
 
             <Space wrap>
-              <RoleTag role={user.role} />
-              <Typography.Text strong>Администратор</Typography.Text>
+              {user.roleKeys.map((roleKey) => (
+                <RoleTag key={roleKey} roleKey={roleKey} />
+              ))}
               <LogoutButton />
             </Space>
           </Flex>
         </Header>
 
-        <Content className={styles.content}>
-          <Outlet />
-        </Content>
+        <Content className={styles.content}>{children}</Content>
       </Layout>
     </Layout>
   )

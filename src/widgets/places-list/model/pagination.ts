@@ -1,5 +1,5 @@
 import { getPlaceStatusFromValue } from '@/entities/place/model/place-status'
-import type { PlaceStatus } from '@/shared/api/generated/model'
+import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
 import { parsePositiveInteger } from '@/shared/lib/number/parse-positive-integer'
 
 /**
@@ -25,7 +25,7 @@ export type PlacesListPaginationState = {
  *
  * @remarks `null` означает отсутствие query param и backend-режим all statuses.
  */
-export type PlacesListStatusFilter = PlaceStatus | null
+export type PlacesListStatusFilter = AdminPlaceSummaryResponseDtoStatus | null
 
 const setDefaultAwareParam = (
   params: URLSearchParams,

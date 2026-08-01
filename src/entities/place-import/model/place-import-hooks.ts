@@ -1,14 +1,12 @@
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import {
-  normalizeApiError,
+  adminPlaceImportsGet,
+  adminPlaceImportsGetActive,
+  adminPlaceImportsGetEvents,
+  getAdminPlaceImportsGetQueryKey,
+  getApiErrorPresentation,
   type ApiClientError,
-} from '@/shared/api/client/api-error'
-import {
-  getActivePlaceImport,
-  getGetPlaceImportOperationQueryKey,
-  getPlaceImportOperation,
-  readPlaceImportEvents,
-} from '@/shared/api/generated/admin/admin'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+} from '@/shared/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import {
@@ -27,18 +25,18 @@ export const PLACE_IMPORT_POLL_INTERVAL_MS = 5_000
 
 /** Загружает operation snapshot для reload/resume route. */
 export function usePlaceImportOperationQuery(operationId: string) {
-  return useQuery<PlaceImportOperation, ApiClientError>({
+  return useQuery<PlaceImportOperationResponseDto, ApiClientError>({
     enabled: Boolean(operationId),
     queryFn: ({ signal }) =>
-      getPlaceImportOperation({ operationId }, undefined, signal),
-    queryKey: getGetPlaceImportOperationQueryKey({ operationId }),
+      adminPlaceImportsGet({ operationId }, undefined, signal),
+    queryKey: getAdminPlaceImportsGetQueryKey({ operationId }),
   })
 }
 
 /** Однократно ищет активную operation для одного входа на стартовый route импорта. */
 export function useActivePlaceImportQuery(routeEntryKey: string) {
-  return useQuery<PlaceImportOperation, ApiClientError>({
-    queryFn: () => getActivePlaceImport(),
+  return useQuery<PlaceImportOperationResponseDto, ApiClientError>({
+    queryFn: () => adminPlaceImportsGetActive(),
     queryKey: ['/admin/place-imports/active', routeEntryKey],
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -60,7 +58,7 @@ export type PlaceImportEventsState = {
  * закрывает оба канала при unmount, смене operation и terminal snapshot.
  */
 export function usePlaceImportEvents(
-  operation: PlaceImportOperation | undefined,
+  operation: PlaceImportOperationResponseDto | undefined,
 ): PlaceImportEventsState {
   const queryClient = useQueryClient()
   const [fallbackOperationId, setFallbackOperationId] = useState<string | null>(
@@ -91,9 +89,10 @@ export function usePlaceImportEvents(
     }
 
     let subscription: PlaceImportEventsSubscription | null = null
-    const cachedOperation = queryClient.getQueryData<PlaceImportOperation>(
-      getGetPlaceImportOperationQueryKey({ operationId }),
-    )
+    const cachedOperation =
+      queryClient.getQueryData<PlaceImportOperationResponseDto>(
+        getAdminPlaceImportsGetQueryKey({ operationId }),
+      )
     const enableFallback = () => {
       subscription?.close()
       setFallbackOperationId(operationId)
@@ -134,9 +133,10 @@ export function usePlaceImportEvents(
     if (!operationId || !isPollingFallback) return
 
     let isDisposed = false
-    const cachedOperation = queryClient.getQueryData<PlaceImportOperation>(
-      getGetPlaceImportOperationQueryKey({ operationId }),
-    )
+    const cachedOperation =
+      queryClient.getQueryData<PlaceImportOperationResponseDto>(
+        getAdminPlaceImportsGetQueryKey({ operationId }),
+      )
     let lastVersion = cachedOperation?.version ?? 0
     let isRequestInFlight = false
     let activeRequestController: AbortController | null = null
@@ -147,7 +147,7 @@ export function usePlaceImportEvents(
       const requestController = new AbortController()
       activeRequestController = requestController
       try {
-        const response = await readPlaceImportEvents(
+        const response = await adminPlaceImportsGetEvents(
           { operationId },
           { afterVersion: lastVersion },
           undefined,
@@ -164,7 +164,7 @@ export function usePlaceImportEvents(
       } catch (error) {
         if (!isDisposed) {
           setPollingError({
-            message: normalizeApiError(error).message,
+            message: getApiErrorPresentation(error).message,
             operationId,
           })
         }

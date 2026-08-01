@@ -1,5 +1,5 @@
 import { CategoryStatusTag } from '@/entities/category/ui/category-status-tag'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { Alert, Descriptions, Flex, Typography } from 'antd'
 import { Link } from 'react-router'
 
@@ -13,7 +13,7 @@ const categoryResolutionLabel = {
 export function PlaceImportPreview({
   operation,
 }: {
-  operation: PlaceImportOperation
+  operation: PlaceImportOperationResponseDto
 }) {
   const category = operation.category
 

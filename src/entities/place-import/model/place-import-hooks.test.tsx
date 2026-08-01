@@ -1,16 +1,16 @@
-import { getActivePlaceImport } from '@/shared/api/generated/admin/admin'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
+import { adminPlaceImportsGetActive } from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useActivePlaceImportQuery } from './place-import-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getActivePlaceImport: vi.fn(),
+vi.mock('@/shared/api', () => ({
+  adminPlaceImportsGetActive: vi.fn(),
 }))
 
-const operation: PlaceImportOperation = {
+const operation: PlaceImportOperationResponseDto = {
   attempt: 1,
   captchaExpiresAt: null,
   category: null,
@@ -39,12 +39,12 @@ const createWrapper = (queryClient: QueryClient) =>
 
 describe('useActivePlaceImportQuery', () => {
   beforeEach(() => {
-    vi.mocked(getActivePlaceImport).mockReset()
+    vi.mocked(adminPlaceImportsGetActive).mockReset()
   })
 
   it('does not duplicate one route-entry lookup after a remount', async () => {
     const queryClient = new QueryClient()
-    vi.mocked(getActivePlaceImport).mockResolvedValue(operation)
+    vi.mocked(adminPlaceImportsGetActive).mockResolvedValue(operation)
     const wrapper = createWrapper(queryClient)
 
     const firstRender = renderHook(
@@ -66,12 +66,12 @@ describe('useActivePlaceImportQuery', () => {
       expect(secondRender.result.current.isSuccess).toBe(true),
     )
 
-    expect(getActivePlaceImport).toHaveBeenCalledTimes(1)
+    expect(adminPlaceImportsGetActive).toHaveBeenCalledTimes(1)
   })
 
   it('performs a fresh lookup for the next start-route entry', async () => {
     const queryClient = new QueryClient()
-    vi.mocked(getActivePlaceImport).mockResolvedValue(operation)
+    vi.mocked(adminPlaceImportsGetActive).mockResolvedValue(operation)
     const wrapper = createWrapper(queryClient)
 
     const firstRender = renderHook(
@@ -93,12 +93,12 @@ describe('useActivePlaceImportQuery', () => {
       expect(secondRender.result.current.isSuccess).toBe(true),
     )
 
-    expect(getActivePlaceImport).toHaveBeenCalledTimes(2)
+    expect(adminPlaceImportsGetActive).toHaveBeenCalledTimes(2)
   })
 
   it('deduplicates an in-flight route-entry lookup across dev remounts', async () => {
     const queryClient = new QueryClient()
-    vi.mocked(getActivePlaceImport).mockResolvedValue(operation)
+    vi.mocked(adminPlaceImportsGetActive).mockResolvedValue(operation)
     const wrapper = createWrapper(queryClient)
 
     const firstRender = renderHook(
@@ -119,6 +119,6 @@ describe('useActivePlaceImportQuery', () => {
       expect(secondRender.result.current.isSuccess).toBe(true),
     )
 
-    expect(getActivePlaceImport).toHaveBeenCalledTimes(1)
+    expect(adminPlaceImportsGetActive).toHaveBeenCalledTimes(1)
   })
 })

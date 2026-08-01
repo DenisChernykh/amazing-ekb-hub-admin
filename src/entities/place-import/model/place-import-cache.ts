@@ -1,12 +1,12 @@
-import {
-  getGetPlaceImportOperationQueryKey,
-  getListAdminPlaceCategoriesQueryKey,
-  getListAdminPlacesQueryKey,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  PlaceImportOperation,
-  PlaceImportStatus,
-} from '@/shared/api/generated/model'
+  PlaceImportOperationResponseDto,
+  PlaceImportOperationResponseDtoStatus,
+} from '@/shared/api'
+import {
+  getAdminCategoriesListQueryKey,
+  getAdminPlaceImportsGetQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
 import type { QueryClient } from '@tanstack/react-query'
 
 /** Terminal statuses после которых realtime-каналы операции больше не нужны. */
@@ -15,25 +15,26 @@ export const PLACE_IMPORT_TERMINAL_STATUSES = [
   'failed',
   'expired',
   'cancelled',
-] as const satisfies readonly PlaceImportStatus[]
+] as const satisfies readonly PlaceImportOperationResponseDtoStatus[]
 
-const terminalStatusSet: ReadonlySet<PlaceImportStatus> = new Set(
-  PLACE_IMPORT_TERMINAL_STATUSES,
-)
+const terminalStatusSet: ReadonlySet<PlaceImportOperationResponseDtoStatus> =
+  new Set(PLACE_IMPORT_TERMINAL_STATUSES)
 
 /** Проверяет, завершилась ли операция импорта без дальнейших server transitions. */
-export function isTerminalPlaceImportStatus(status: PlaceImportStatus) {
+export function isTerminalPlaceImportStatus(
+  status: PlaceImportOperationResponseDtoStatus,
+) {
   return terminalStatusSet.has(status)
 }
 
 /** Записывает authoritative snapshot операции в React Query cache. */
 export function syncPlaceImportOperationCache(
   queryClient: QueryClient,
-  operation: PlaceImportOperation,
+  operation: PlaceImportOperationResponseDto,
 ) {
   queryClient.setQueryData(
-    getGetPlaceImportOperationQueryKey({ operationId: operation.id }),
-    (current: PlaceImportOperation | undefined) =>
+    getAdminPlaceImportsGetQueryKey({ operationId: operation.id }),
+    (current: PlaceImportOperationResponseDto | undefined) =>
       current && current.version > operation.version ? current : operation,
   )
 }
@@ -41,9 +42,9 @@ export function syncPlaceImportOperationCache(
 /** Инвалидирует места и категории после terminal успешного импорта. */
 export function invalidatePlaceImportResultQueries(queryClient: QueryClient) {
   return Promise.all([
-    queryClient.invalidateQueries({ queryKey: getListAdminPlacesQueryKey() }),
+    queryClient.invalidateQueries({ queryKey: getAdminPlacesListQueryKey() }),
     queryClient.invalidateQueries({
-      queryKey: getListAdminPlaceCategoriesQueryKey(),
+      queryKey: getAdminCategoriesListQueryKey(),
     }),
   ])
 }

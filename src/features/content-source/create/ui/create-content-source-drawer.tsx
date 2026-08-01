@@ -6,8 +6,8 @@ import {
 import { createContentSourceFormSchema } from '@/features/content-source/form/model/content-source-form-schema'
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { ContentSource } from '@/shared/api/generated/model'
+import { getCreateContentSourceError } from '@/features/content-source/model/content-source-errors'
+import type { ContentSourceResponseDto } from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -27,7 +27,7 @@ const contentSourceCreateDefaultValues: ContentSourceFormValues = {
  */
 export type CreateContentSourceDrawerProps = {
   onClose: () => void
-  onCreated?: (contentSource: ContentSource) => void
+  onCreated?: (contentSource: ContentSourceResponseDto) => void
   open: boolean
 }
 
@@ -51,9 +51,9 @@ export function CreateContentSourceDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const createSourceMutation = useCreateContentSourceMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const errorMessage = getCreateContentSourceError(error)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (contentSource) => {
       setErrorMessages([])

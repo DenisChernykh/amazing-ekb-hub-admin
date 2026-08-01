@@ -3,11 +3,12 @@ import {
   formatImportRunCounts,
   getImportRunStatusMeta,
 } from '@/entities/import-run/ui/import-run-meta'
-import {
-  getApiErrorStatus,
-  normalizeApiError,
-} from '@/shared/api/client/api-error'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
+import { getImportTelegramSourceError } from '@/features/content-source/model/content-source-errors'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
+import { isProblemCode } from '@/shared/api'
 import { DownloadOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex } from 'antd'
 import { useState } from 'react'
@@ -19,12 +20,9 @@ import { useState } from 'react'
  * блокирует повторный запуск после refresh, пока backend run остается активным.
  */
 export type ImportTelegramSourceButtonProps = {
-  activeImportRun?: ImportRun | null
-  contentSource: ContentSource
+  activeImportRun?: ImportRunResponseDto | null
+  contentSource: ContentSourceResponseDto
 }
-
-const IMPORT_ALREADY_ACTIVE_MESSAGE =
-  'Импорт уже выполняется. Обновляем статус.'
 
 /**
  * Рендерит one-click запуск Telegram import для active Telegram source.
@@ -59,17 +57,17 @@ export function ImportTelegramSourceButton({
       { sourceId: contentSource.id },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
+          const errorMessage = getImportTelegramSourceError(error)
 
-          if (getApiErrorStatus(apiError) === 409) {
-            setInfoMessage(IMPORT_ALREADY_ACTIVE_MESSAGE)
-            void message.info(IMPORT_ALREADY_ACTIVE_MESSAGE)
+          if (isProblemCode(error, 'ACTIVE_IMPORT_EXISTS')) {
+            setInfoMessage(errorMessage)
+            void message.info(errorMessage)
 
             return
           }
 
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)

@@ -1,24 +1,24 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import {
-  clearPinnedMaterial,
-  createPlace,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminPlaceCategoriesQueryKey,
-  getListAdminPlacesQueryKey,
-  setPinnedMaterial,
-  updatePlace,
-  updatePlaceStatus,
-  uploadPlaceCoverPhoto,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  CreatePlaceRequest,
-  PlaceDetail,
-  PlacePhotoUploadRequest,
-  PlaceSummary,
-  SetPinnedMaterialRequest,
-  UpdatePlaceRequest,
-  UpdatePlaceStatusRequest,
-} from '@/shared/api/generated/model'
+  AdminPlacesUploadPhotoBody,
+  ApiClientError,
+  CreatePlaceDto,
+  PlaceDetailResponseDto,
+  PlaceSummaryResponseDto,
+  SetPinnedMaterialDto,
+  UpdatePlaceDto,
+  UpdatePlaceStatusDto,
+} from '@/shared/api'
+import {
+  adminPlacesClearPinnedMaterial,
+  adminPlacesCreate,
+  adminPlacesSetPinnedMaterial,
+  adminPlacesUpdate,
+  adminPlacesUpdateStatus,
+  adminPlacesUploadPhoto,
+  getAdminCategoriesListQueryKey,
+  getAdminPlacesGetQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
 import type { QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -27,7 +27,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
  */
 export type CreatePlaceMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (place: PlaceSummary) => Promise<void> | void
+  onSuccess?: (place: PlaceSummaryResponseDto) => Promise<void> | void
 }
 
 /**
@@ -35,7 +35,7 @@ export type CreatePlaceMutationOptions = {
  */
 export type UpdatePlaceStatusMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (place: PlaceSummary) => Promise<void> | void
+  onSuccess?: (place: PlaceSummaryResponseDto) => Promise<void> | void
 }
 
 /**
@@ -43,7 +43,7 @@ export type UpdatePlaceStatusMutationOptions = {
  */
 export type UpdatePlaceMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (place: PlaceSummary) => Promise<void> | void
+  onSuccess?: (place: PlaceSummaryResponseDto) => Promise<void> | void
 }
 
 /**
@@ -51,7 +51,7 @@ export type UpdatePlaceMutationOptions = {
  */
 export type UploadPlaceCoverPhotoMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (place: PlaceSummary) => Promise<void> | void
+  onSuccess?: (place: PlaceSummaryResponseDto) => Promise<void> | void
 }
 
 /**
@@ -59,7 +59,7 @@ export type UploadPlaceCoverPhotoMutationOptions = {
  */
 export type SetPinnedMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (place: PlaceDetail) => Promise<void> | void
+  onSuccess?: (place: PlaceDetailResponseDto) => Promise<void> | void
 }
 
 /**
@@ -67,7 +67,7 @@ export type SetPinnedMaterialMutationOptions = {
  */
 export type ClearPinnedMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (place: PlaceDetail) => Promise<void> | void
+  onSuccess?: (place: PlaceDetailResponseDto) => Promise<void> | void
 }
 
 /**
@@ -75,7 +75,7 @@ export type ClearPinnedMaterialMutationOptions = {
  */
 export const invalidatePlacesListQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListAdminPlacesQueryKey(),
+    queryKey: getAdminPlacesListQueryKey(),
   })
 }
 
@@ -87,14 +87,14 @@ export const invalidateAdminPlaceDetailQuery = (
   placeId: string,
 ) => {
   return queryClient.invalidateQueries({
-    queryKey: getGetAdminPlaceDetailQueryKey({ placeId }),
+    queryKey: getAdminPlacesGetQueryKey({ placeId }),
   })
 }
 
 /** Инвалидирует категории после публикации места, активирующей draft category. */
 export const invalidatePlaceCategoryQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListAdminPlaceCategoriesQueryKey(),
+    queryKey: getAdminCategoriesListQueryKey(),
   })
 }
 
@@ -107,11 +107,11 @@ export function useCreatePlaceMutation(options?: CreatePlaceMutationOptions) {
   const queryClient = useQueryClient()
 
   return useMutation<
-    PlaceSummary,
+    PlaceSummaryResponseDto,
     ApiClientError,
-    { data: CreatePlaceRequest }
+    { data: CreatePlaceDto }
   >({
-    mutationFn: ({ data }) => createPlace(data),
+    mutationFn: ({ data }) => adminPlacesCreate(data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -133,14 +133,15 @@ export function useUpdatePlaceStatusMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    PlaceSummary,
+    PlaceSummaryResponseDto,
     ApiClientError,
     {
-      data: UpdatePlaceStatusRequest
+      data: UpdatePlaceStatusDto
       pathParams: { placeId: string }
     }
   >({
-    mutationFn: ({ data, pathParams }) => updatePlaceStatus(pathParams, data),
+    mutationFn: ({ data, pathParams }) =>
+      adminPlacesUpdateStatus(pathParams, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -169,14 +170,14 @@ export function useUpdatePlaceMutation(options?: UpdatePlaceMutationOptions) {
   const queryClient = useQueryClient()
 
   return useMutation<
-    PlaceSummary,
+    PlaceSummaryResponseDto,
     ApiClientError,
     {
-      data: UpdatePlaceRequest
+      data: UpdatePlaceDto
       pathParams: { placeId: string }
     }
   >({
-    mutationFn: ({ data, pathParams }) => updatePlace(pathParams, data),
+    mutationFn: ({ data, pathParams }) => adminPlacesUpdate(pathParams, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -204,15 +205,15 @@ export function useUploadPlaceCoverPhotoMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    PlaceSummary,
+    PlaceSummaryResponseDto,
     ApiClientError,
     {
-      data: PlacePhotoUploadRequest
+      data: AdminPlacesUploadPhotoBody
       pathParams: { placeId: string }
     }
   >({
     mutationFn: ({ data, pathParams }) =>
-      uploadPlaceCoverPhoto(pathParams, data),
+      adminPlacesUploadPhoto(pathParams, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -241,14 +242,15 @@ export function useSetPinnedMaterialMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    PlaceDetail,
+    PlaceDetailResponseDto,
     ApiClientError,
     {
-      data: SetPinnedMaterialRequest
+      data: SetPinnedMaterialDto
       pathParams: { placeId: string }
     }
   >({
-    mutationFn: ({ data, pathParams }) => setPinnedMaterial(pathParams, data),
+    mutationFn: ({ data, pathParams }) =>
+      adminPlacesSetPinnedMaterial(pathParams, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -274,13 +276,13 @@ export function useClearPinnedMaterialMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    PlaceDetail,
+    PlaceDetailResponseDto,
     ApiClientError,
     {
       pathParams: { placeId: string }
     }
   >({
-    mutationFn: ({ pathParams }) => clearPinnedMaterial(pathParams),
+    mutationFn: ({ pathParams }) => adminPlacesClearPinnedMaterial(pathParams),
     onError: (error) => {
       options?.onError?.(error)
     },

@@ -1,5 +1,5 @@
 import { useCreatePlaceMaterialMutation } from '@/entities/material/model/material-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -258,14 +258,7 @@ describe('CreateMaterialDrawer', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'publishedAt must be date',
-                messages: ['publishedAt must be date'],
-                status: 400,
-              }),
-            )
+            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 422))
           },
         }) as unknown as ReturnType<typeof useCreatePlaceMaterialMutation>,
     )
@@ -290,8 +283,9 @@ describe('CreateMaterialDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }))
 
     expect(
-      await screen.findByText('publishedAt must be date'),
+      await screen.findByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Новый материал' })).toBeVisible()
   })
 

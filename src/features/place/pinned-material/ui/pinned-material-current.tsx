@@ -3,11 +3,11 @@ import {
   getMaterialTypeMeta,
   getPublicMaterialTitleText,
 } from '@/entities/material/ui/material-meta'
-import type { PublicMaterial } from '@/shared/api/generated/model'
+import type { PinnedMaterialResponseDto } from '@/shared/api'
 import { Flex, Space, Tag, Typography } from 'antd'
 
 type PinnedMaterialCurrentProps = {
-  pinnedMaterial: PublicMaterial | null
+  pinnedMaterial: PinnedMaterialResponseDto | null
 }
 
 /**

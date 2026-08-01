@@ -1,25 +1,20 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { buildApiUrl, getApiBaseUrl } from './api-base-url'
+import { describe, expect, it } from 'vitest'
+import { buildApiUrl, joinApiUrl } from './api-base-url'
 
 describe('api base url helpers', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs()
+  it('preserves the versioned path for the same-origin API root', () => {
+    expect(buildApiUrl('/v1/auth/me')).toBe('/v1/auth/me')
   })
 
-  it('keeps the shared default API base url', () => {
-    vi.stubEnv('VITE_API_BASE_URL', undefined)
-
-    expect(getApiBaseUrl()).toBe('/v1')
-    expect(buildApiUrl('/admin/import-runs/run-1/events')).toBe(
-      '/v1/admin/import-runs/run-1/events',
+  it('joins a versioned path with an absolute API origin', () => {
+    expect(joinApiUrl('https://api.example.test', '/v1/auth/me')).toBe(
+      'https://api.example.test/v1/auth/me',
     )
   })
 
-  it('builds URLs from a configured absolute API base url', () => {
-    vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.test/v1/')
-
-    expect(buildApiUrl('admin/import-runs/run-1/events')).toBe(
-      'https://api.example.test/v1/admin/import-runs/run-1/events',
+  it('rejects an endpoint path without a leading slash', () => {
+    expect(() => joinApiUrl('/', 'v1/auth/me')).toThrow(
+      'API path must start with /',
     )
   })
 })

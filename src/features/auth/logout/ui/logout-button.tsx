@@ -1,35 +1,36 @@
-import { useLogoutSession } from '@/entities/session/model/session-hooks'
-import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { useLogout } from '@/features/auth/logout/model/use-logout'
+import { isProblemCode } from '@/shared/api'
 import { LogoutOutlined } from '@ant-design/icons'
-import { App as AntdApp, Button } from 'antd'
-import { useNavigate } from 'react-router'
+import { Alert, Button, Space } from 'antd'
 
 /**
- * Кнопка выхода, которая вызывает session logout и возвращает пользователя на login.
+ * Кнопка выхода с безопасным feedback для повторяемой ошибки.
  *
- * @remarks После успешного logout очищает browser draft выбора bulk moderation перед навигацией на `/login`.
+ * @remarks `useLogout` сам обрабатывает успех и истёкшую сессию. Для остальных
+ * ошибок компонент не показывает backend copy и оставляет кнопку для retry.
  */
 export function LogoutButton() {
-  const navigate = useNavigate()
-  const { message } = AntdApp.useApp()
-  const logoutMutation = useLogoutSession({
-    onError: (error) => {
-      void message.error(normalizeApiError(error).message)
-    },
-    onSuccess: () => {
-      clearBulkModerationDraftSelection()
-      navigate('/login', { replace: true })
-    },
-  })
+  const logout = useLogout()
+  const visibleFailure =
+    logout.error !== null &&
+    !isProblemCode(logout.error, 'AUTHENTICATION_REQUIRED')
 
   return (
-    <Button
-      icon={<LogoutOutlined aria-hidden="true" />}
-      loading={logoutMutation.isPending}
-      onClick={() => logoutMutation.mutate()}
-    >
-      Выйти
-    </Button>
+    <Space align="end" direction="vertical" size="small">
+      <Button
+        icon={<LogoutOutlined aria-hidden="true" />}
+        loading={logout.isPending}
+        onClick={() => logout.mutate()}
+      >
+        Выйти
+      </Button>
+      {visibleFailure && (
+        <Alert
+          message="Не удалось выйти. Повторите попытку."
+          showIcon
+          type="error"
+        />
+      )}
+    </Space>
   )
 }

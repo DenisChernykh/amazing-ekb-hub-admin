@@ -4,14 +4,14 @@ import {
   selectBulkModerationIsRunning,
   selectBulkModerationSelectedIds,
 } from '@/features/place/bulk-moderation/model/bulk-moderation-slice'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type { AdminPlaceSummaryResponseDto } from '@/shared/api'
 import type { TableProps } from 'antd'
 
 /**
  * Params для row selection списка мест.
  */
 export type UsePlacesListRowSelectionParams = {
-  visiblePlaces: PlaceSummary[]
+  visiblePlaces: AdminPlaceSummaryResponseDto[]
 }
 
 /**
@@ -19,7 +19,7 @@ export type UsePlacesListRowSelectionParams = {
  */
 export function usePlacesListRowSelection({
   visiblePlaces,
-}: UsePlacesListRowSelectionParams): TableProps<PlaceSummary>['rowSelection'] {
+}: UsePlacesListRowSelectionParams): TableProps<AdminPlaceSummaryResponseDto>['rowSelection'] {
   const dispatch = useAppDispatch()
   const selectedPlaceIds = useAppSelector(selectBulkModerationSelectedIds)
   const isBulkModerationRunning = useAppSelector(selectBulkModerationIsRunning)

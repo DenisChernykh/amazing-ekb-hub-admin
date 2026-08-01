@@ -1,16 +1,20 @@
-import { ApiClientError } from '@/shared/api/client/api-error'
+import type {
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+  PlaceSummaryResponseDto,
+} from '@/shared/api'
 import {
-  clearPinnedMaterial,
-  createPlace,
-  getGetAdminPlaceDetailQueryKey,
-  getListAdminPlaceCategoriesQueryKey,
-  getListAdminPlacesQueryKey,
-  setPinnedMaterial,
-  updatePlace,
-  updatePlaceStatus,
-  uploadPlaceCoverPhoto,
-} from '@/shared/api/generated/admin/admin'
-import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
+  adminPlacesClearPinnedMaterial,
+  adminPlacesCreate,
+  adminPlacesSetPinnedMaterial,
+  adminPlacesUpdate,
+  adminPlacesUpdateStatus,
+  adminPlacesUploadPhoto,
+  getAdminCategoriesListQueryKey,
+  getAdminPlacesGetQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -24,18 +28,23 @@ import {
   useUploadPlaceCoverPhotoMutation,
 } from './place-mutations'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  clearPinnedMaterial: vi.fn(),
-  createPlace: vi.fn(),
-  getGetAdminPlaceDetailQueryKey: vi.fn(({ placeId }) => [
-    `/admin/places/${placeId}`,
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: 'http://api.test' },
+}))
+
+vi.mock('@/shared/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/api')>()),
+  adminPlacesClearPinnedMaterial: vi.fn(),
+  adminPlacesCreate: vi.fn(),
+  getAdminPlacesGetQueryKey: vi.fn(({ placeId }) => [
+    `/v1/admin/places/${placeId}`,
   ]),
-  getListAdminPlaceCategoriesQueryKey: vi.fn(() => ['/admin/categories']),
-  getListAdminPlacesQueryKey: vi.fn(() => ['/admin/places']),
-  setPinnedMaterial: vi.fn(),
-  updatePlace: vi.fn(),
-  updatePlaceStatus: vi.fn(),
-  uploadPlaceCoverPhoto: vi.fn(),
+  getAdminCategoriesListQueryKey: vi.fn(() => ['/v1/admin/categories']),
+  getAdminPlacesListQueryKey: vi.fn(() => ['/v1/admin/places']),
+  adminPlacesSetPinnedMaterial: vi.fn(),
+  adminPlacesUpdate: vi.fn(),
+  adminPlacesUpdateStatus: vi.fn(),
+  adminPlacesUploadPhoto: vi.fn(),
   useClearPinnedMaterial: vi.fn(),
   useCreatePlace: vi.fn(),
   useSetPinnedMaterial: vi.fn(),
@@ -44,12 +53,12 @@ vi.mock('@/shared/api/generated/admin/admin', () => ({
   useUploadPlaceCoverPhoto: vi.fn(),
 }))
 
-const mockedClearPinnedMaterial = vi.mocked(clearPinnedMaterial)
-const mockedCreatePlace = vi.mocked(createPlace)
-const mockedSetPinnedMaterial = vi.mocked(setPinnedMaterial)
-const mockedUpdatePlace = vi.mocked(updatePlace)
-const mockedUpdatePlaceStatus = vi.mocked(updatePlaceStatus)
-const mockedUploadPlaceCoverPhoto = vi.mocked(uploadPlaceCoverPhoto)
+const mockedClearPinnedMaterial = vi.mocked(adminPlacesClearPinnedMaterial)
+const mockedCreatePlace = vi.mocked(adminPlacesCreate)
+const mockedSetPinnedMaterial = vi.mocked(adminPlacesSetPinnedMaterial)
+const mockedUpdatePlace = vi.mocked(adminPlacesUpdate)
+const mockedUpdatePlaceStatus = vi.mocked(adminPlacesUpdateStatus)
+const mockedUploadPlaceCoverPhoto = vi.mocked(adminPlacesUploadPhoto)
 
 const createWrapper = (queryClient: QueryClient) => {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -61,19 +70,25 @@ const createWrapper = (queryClient: QueryClient) => {
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
 const cafeCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_cafe',
   slug: 'cafe',
   title: 'Кафе',
-}
+} satisfies PlaceCategoryResponseDto
 
-const placeSummary: PlaceSummary = {
+const placeSummary: PlaceSummaryResponseDto = {
   category: spaCategory,
   coverImageUrl: null,
   id: 'place-1',
@@ -84,7 +99,7 @@ const placeSummary: PlaceSummary = {
   title: 'Тихий SPA',
 }
 
-const placeDetail: PlaceDetail = {
+const placeDetail: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {
@@ -110,18 +125,18 @@ describe('place mutations', () => {
     mockedUpdatePlace.mockReset()
     mockedUpdatePlaceStatus.mockReset()
     mockedUploadPlaceCoverPhoto.mockReset()
-    vi.mocked(getGetAdminPlaceDetailQueryKey).mockImplementation(
-      ({ placeId }) => [`/admin/places/${placeId}`],
-    )
-    vi.mocked(getListAdminPlacesQueryKey).mockReturnValue(['/admin/places'])
-    vi.mocked(getListAdminPlaceCategoriesQueryKey).mockReturnValue([
-      '/admin/categories',
+    vi.mocked(getAdminPlacesGetQueryKey).mockImplementation(({ placeId }) => [
+      `/v1/admin/places/${placeId}`,
+    ])
+    vi.mocked(getAdminPlacesListQueryKey).mockReturnValue(['/v1/admin/places'])
+    vi.mocked(getAdminCategoriesListQueryKey).mockReturnValue([
+      '/v1/admin/categories',
     ])
   })
 
   it('creates place through generated fetcher and invalidates places list queries', async () => {
     const queryClient = new QueryClient()
-    const queryKey = ['/admin/places', { page: 1, pageSize: 10 }]
+    const queryKey = ['/v1/admin/places', { page: 1, pageSize: 10 }]
     const onSuccess = vi.fn()
     queryClient.setQueryData(queryKey, { items: [], page: 1, pageSize: 10 })
     mockedCreatePlace.mockResolvedValue(placeSummary)
@@ -153,11 +168,7 @@ describe('place mutations', () => {
 
   it('passes create place errors to callback', async () => {
     const queryClient = new QueryClient()
-    const apiError = new ApiClientError({
-      kind: 'server',
-      message: 'Create unavailable',
-      status: 500,
-    })
+    const apiError = createApiProblemError('INTERNAL_ERROR', 500)
     const onError = vi.fn()
     mockedCreatePlace.mockRejectedValue(apiError)
 
@@ -178,10 +189,10 @@ describe('place mutations', () => {
 
   it('updates place status and invalidates places list plus detail queries', async () => {
     const queryClient = new QueryClient()
-    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
-    const detailQueryKey = ['/admin/places/place-2']
-    const categoryQueryKey = ['/admin/categories']
-    const updatedPlace: PlaceSummary = {
+    const listQueryKey = ['/v1/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/v1/admin/places/place-2']
+    const categoryQueryKey = ['/v1/admin/categories']
+    const updatedPlace: PlaceSummaryResponseDto = {
       ...placeSummary,
       id: 'place-2',
       status: 'active',
@@ -224,9 +235,9 @@ describe('place mutations', () => {
 
   it('updates place fields and invalidates places list plus detail queries', async () => {
     const queryClient = new QueryClient()
-    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
-    const detailQueryKey = ['/admin/places/place-3']
-    const updatedPlace: PlaceSummary = {
+    const listQueryKey = ['/v1/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/v1/admin/places/place-3']
+    const updatedPlace: PlaceSummaryResponseDto = {
       ...placeSummary,
       category: cafeCategory,
       id: 'place-3',
@@ -263,10 +274,10 @@ describe('place mutations', () => {
 
   it('uploads cover photo and invalidates places list plus detail queries', async () => {
     const queryClient = new QueryClient()
-    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
-    const detailQueryKey = ['/admin/places/place-4']
+    const listQueryKey = ['/v1/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/v1/admin/places/place-4']
     const file = new File(['cover'], 'cover.png', { type: 'image/png' })
-    const updatedPlace: PlaceSummary = {
+    const updatedPlace: PlaceSummaryResponseDto = {
       ...placeSummary,
       coverImageUrl: '/places/place-4/photo',
       id: 'place-4',
@@ -303,9 +314,9 @@ describe('place mutations', () => {
 
   it('sets pinned material and invalidates only admin detail query', async () => {
     const queryClient = new QueryClient()
-    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
-    const detailQueryKey = ['/admin/places/place-5']
-    const updatedPlace: PlaceDetail = {
+    const listQueryKey = ['/v1/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/v1/admin/places/place-5']
+    const updatedPlace: PlaceDetailResponseDto = {
       ...placeDetail,
       id: 'place-5',
       pinnedMaterial: {
@@ -353,9 +364,9 @@ describe('place mutations', () => {
 
   it('clears pinned material and invalidates only admin detail query', async () => {
     const queryClient = new QueryClient()
-    const listQueryKey = ['/admin/places', { page: 1, pageSize: 10 }]
-    const detailQueryKey = ['/admin/places/place-6']
-    const updatedPlace: PlaceDetail = {
+    const listQueryKey = ['/v1/admin/places', { page: 1, pageSize: 10 }]
+    const detailQueryKey = ['/v1/admin/places/place-6']
+    const updatedPlace: PlaceDetailResponseDto = {
       ...placeDetail,
       id: 'place-6',
       pinnedMaterial: null,

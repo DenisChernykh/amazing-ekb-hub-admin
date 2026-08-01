@@ -1,16 +1,16 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import {
-  createPlaceCategory,
-  deletePlaceCategory,
-  getListAdminPlaceCategoriesQueryKey,
-  getListAdminPlacesQueryKey,
-  updatePlaceCategory,
-} from '@/shared/api/generated/admin/admin'
 import type {
-  AdminPlaceCategory,
-  CreatePlaceCategoryRequest,
-  UpdatePlaceCategoryRequest,
-} from '@/shared/api/generated/model'
+  ApiClientError,
+  CreatePlaceCategoryDto,
+  PlaceCategoryResponseDto,
+  UpdatePlaceCategoryDto,
+} from '@/shared/api'
+import {
+  adminCategoriesCreate,
+  adminCategoriesDelete,
+  adminCategoriesUpdate,
+  getAdminCategoriesListQueryKey,
+  getAdminPlacesListQueryKey,
+} from '@/shared/api'
 import type { Query, QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -19,7 +19,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
  */
 export type CreateCategoryMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (category: AdminPlaceCategory) => Promise<void> | void
+  onSuccess?: (category: PlaceCategoryResponseDto) => Promise<void> | void
 }
 
 /**
@@ -27,7 +27,7 @@ export type CreateCategoryMutationOptions = {
  */
 export type UpdateCategoryMutationOptions = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (category: AdminPlaceCategory) => Promise<void> | void
+  onSuccess?: (category: PlaceCategoryResponseDto) => Promise<void> | void
 }
 
 /**
@@ -43,7 +43,7 @@ export type DeleteCategoryMutationOptions = {
  */
 export type UpdateCategoryMutationVariables = {
   categoryId: string
-  data: UpdatePlaceCategoryRequest
+  data: UpdatePlaceCategoryDto
 }
 
 /**
@@ -58,20 +58,20 @@ export type DeleteCategoryMutationVariables = {
  */
 export const invalidateCategoryQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListAdminPlaceCategoriesQueryKey(),
+    queryKey: getAdminCategoriesListQueryKey(),
   })
 }
 
 const invalidatePlacesListQueries = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
-    queryKey: getListAdminPlacesQueryKey(),
+    queryKey: getAdminPlacesListQueryKey(),
   })
 }
 
 // Category title/color are embedded into place details, whose generated keys are `/admin/places/{placeId}`.
 const isAdminPlaceDetailQuery = (query: Query) => {
   const [rootKey] = query.queryKey
-  const [placesListRootKey] = getListAdminPlacesQueryKey()
+  const [placesListRootKey] = getAdminPlacesListQueryKey()
 
   return (
     typeof rootKey === 'string' &&
@@ -97,11 +97,11 @@ export function useCreateCategoryMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    AdminPlaceCategory,
+    PlaceCategoryResponseDto,
     ApiClientError,
-    CreatePlaceCategoryRequest
+    CreatePlaceCategoryDto
   >({
-    mutationFn: (data) => createPlaceCategory(data),
+    mutationFn: (data) => adminCategoriesCreate(data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -124,12 +124,12 @@ export function useUpdateCategoryMutation(
   const queryClient = useQueryClient()
 
   return useMutation<
-    AdminPlaceCategory,
+    PlaceCategoryResponseDto,
     ApiClientError,
     UpdateCategoryMutationVariables
   >({
     mutationFn: ({ categoryId, data }) =>
-      updatePlaceCategory({ categoryId }, data),
+      adminCategoriesUpdate({ categoryId }, data),
     onError: (error) => {
       options?.onError?.(error)
     },
@@ -155,7 +155,7 @@ export function useDeleteCategoryMutation(
   const queryClient = useQueryClient()
 
   return useMutation<void, ApiClientError, DeleteCategoryMutationVariables>({
-    mutationFn: ({ categoryId }) => deletePlaceCategory({ categoryId }),
+    mutationFn: ({ categoryId }) => adminCategoriesDelete({ categoryId }),
     onError: (error) => {
       options?.onError?.(error)
     },

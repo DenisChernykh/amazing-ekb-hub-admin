@@ -1,5 +1,5 @@
 import { useCaptchaViewer } from '@/features/place/import-yandex/model/use-captcha-viewer'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { PlaceImportCaptchaPanel } from './place-import-captcha-panel'
@@ -8,7 +8,7 @@ vi.mock('@/features/place/import-yandex/model/use-captcha-viewer', () => ({
   useCaptchaViewer: vi.fn(),
 }))
 
-const operation: PlaceImportOperation = {
+const operation: PlaceImportOperationResponseDto = {
   attempt: 1,
   captchaExpiresAt: '2026-07-22T11:00:00.000Z',
   category: null,

@@ -3,10 +3,10 @@ import {
   MATERIAL_PLATFORM_VALUES,
 } from '@/entities/material/ui/material-meta'
 import type {
-  MaterialAdminStatus,
-  Platform,
-} from '@/shared/api/generated/model'
-import type { ListAdminMaterialLibraryParams } from '@/shared/api/generated/operation/listAdminMaterialLibraryParams'
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  AdminMaterialsListParams,
+  AdminMaterialsListPlatform,
+} from '@/shared/api'
 import { parsePositiveInteger } from '@/shared/lib/number/parse-positive-integer'
 import { isOneOf } from '@/shared/lib/type/is-one-of'
 
@@ -31,9 +31,9 @@ export const MATERIAL_LIBRARY_MAX_PAGE_SIZE = 100
  * @remarks `null` означает отсутствие соответствующего query param и backend-режим без фильтра.
  */
 export type MaterialLibraryFiltersState = {
-  adminStatus: MaterialAdminStatus | null
+  adminStatus: AdminMaterialLibraryResponseDtoAdminStatus | null
   linked: boolean | null
-  platform: Platform | null
+  platform: AdminMaterialsListPlatform | null
 }
 
 /**
@@ -46,13 +46,13 @@ export type MaterialLibraryPaginationState = {
 
 const getMaterialLibraryPlatformFromValue = (
   value: string | number | null,
-): Platform | null => {
+): AdminMaterialsListPlatform | null => {
   return isOneOf(MATERIAL_PLATFORM_VALUES, value) ? value : null
 }
 
 const getMaterialLibraryAdminStatusFromValue = (
   value: string | number | null,
-): MaterialAdminStatus | null => {
+): AdminMaterialLibraryResponseDtoAdminStatus | null => {
   return isOneOf(MATERIAL_ADMIN_STATUS_VALUES, value) ? value : null
 }
 
@@ -112,7 +112,7 @@ export const getMaterialLibraryPaginationFromSearch = (
 export const getMaterialLibraryQueryParams = (
   filters: MaterialLibraryFiltersState,
   pagination: MaterialLibraryPaginationState,
-): ListAdminMaterialLibraryParams => ({
+): AdminMaterialsListParams => ({
   ...(filters.adminStatus ? { adminStatus: filters.adminStatus } : {}),
   ...(filters.linked !== null ? { linked: filters.linked } : {}),
   page: pagination.page,

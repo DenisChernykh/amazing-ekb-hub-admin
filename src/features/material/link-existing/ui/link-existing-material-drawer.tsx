@@ -1,7 +1,8 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
+import { getLinkExistingMaterialError } from '@/features/material/model/material-errors'
+import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
+import { getApiErrorPresentation } from '@/shared/api'
 import { Alert, App as AntdApp, Drawer, Empty, Flex, Typography } from 'antd'
 import { useState } from 'react'
 import { LinkExistingMaterialTable } from './link-existing-material-table'
@@ -51,7 +52,7 @@ export function LinkExistingMaterialDrawer({
     onClose()
   }
 
-  const handleLink = (material: AdminMaterialLibraryItem) => {
+  const handleLink = (material: AdminMaterialLibraryResponseDto) => {
     setErrorMessage(null)
     linkMaterialMutation.mutate(
       {
@@ -60,9 +61,9 @@ export function LinkExistingMaterialDrawer({
       },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          const errorMessage = getLinkExistingMaterialError(error)
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)
@@ -96,7 +97,7 @@ export function LinkExistingMaterialDrawer({
         ) : materialsQuery.isError ? (
           <Alert
             showIcon
-            title={normalizeApiError(materialsQuery.error).message}
+            title={getApiErrorPresentation(materialsQuery.error).message}
             type="error"
           />
         ) : linkableMaterials.length === 0 ? (

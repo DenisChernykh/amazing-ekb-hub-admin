@@ -1,6 +1,6 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail } from '@/shared/api/generated/model'
+import type { PlaceDetailResponseDto } from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import {
@@ -46,7 +46,7 @@ function NavigationProbe({ to }: { to: To }) {
 
 const mockedUseAdminPlaceDetailQuery = vi.mocked(useAdminPlaceDetailQuery)
 
-const place: PlaceDetail = {
+const place: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: {
     coverImageUrl: null,
@@ -194,11 +194,7 @@ describe('PlaceEditScreen', () => {
   it('renders forbidden state for permission errors', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'permission',
-        message: 'Forbidden',
-        status: 403,
-      }),
+      error: createApiProblemError('AUTHORIZATION_DENIED', 403),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useAdminPlaceDetailQuery>)
@@ -211,11 +207,7 @@ describe('PlaceEditScreen', () => {
   it('renders not-found state for missing places', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'not-found',
-        message: 'Place not found',
-        status: 404,
-      }),
+      error: createApiProblemError('PLACE_NOT_FOUND', 404),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useAdminPlaceDetailQuery>)
@@ -232,11 +224,7 @@ describe('PlaceEditScreen', () => {
   it('renders generic screen error for server failures', () => {
     mockedUseAdminPlaceDetailQuery.mockReturnValue({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Place unavailable',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isPending: false,
     } as ReturnType<typeof useAdminPlaceDetailQuery>)
@@ -244,6 +232,7 @@ describe('PlaceEditScreen', () => {
     renderPlaceEditScreen()
 
     expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
-    expect(screen.getByText('Place unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Не удалось выполнить запрос.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).toBeNull()
   })
 })

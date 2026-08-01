@@ -1,4 +1,8 @@
-import type { PlaceCategory, PlaceStatus } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDtoStatus,
+  PlaceCategoryResponseDto,
+  PlaceSummaryCategoryResponseDto,
+} from '@/shared/api'
 import type { TagProps } from 'antd'
 
 /**
@@ -18,12 +22,14 @@ const statusMeta = {
     color: 'default',
     label: 'Скрыто',
   },
-} satisfies Record<PlaceStatus, PlaceMeta>
+} satisfies Record<AdminPlaceSummaryResponseDtoStatus, PlaceMeta>
 
 /**
- * Возвращает UI-метаданные для серверной категории места.
+ * Возвращает UI-метаданные для полной или summary-категории места.
  */
-export const getPlaceCategoryMeta = (category: PlaceCategory) =>
+export const getPlaceCategoryMeta = (
+  category: PlaceCategoryResponseDto | PlaceSummaryCategoryResponseDto,
+) =>
   ({
     color: 'default',
     label: category.title,
@@ -32,12 +38,16 @@ export const getPlaceCategoryMeta = (category: PlaceCategory) =>
 /**
  * Возвращает локализованные UI-метаданные для backend-статуса места.
  */
-export const getPlaceStatusMeta = (status: PlaceStatus) => statusMeta[status]
+export const getPlaceStatusMeta = (
+  status: AdminPlaceSummaryResponseDtoStatus,
+) => statusMeta[status]
 
 /**
  * Возвращает категории мест в формате options для Ant Design controls.
  */
-export const getPlaceCategoryOptions = (categories: readonly PlaceCategory[]) =>
+export const getPlaceCategoryOptions = (
+  categories: readonly PlaceCategoryResponseDto[],
+) =>
   categories.map((category) => ({
     label: getPlaceCategoryMeta(category).label,
     value: category.id,

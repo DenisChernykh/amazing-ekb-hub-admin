@@ -1,6 +1,6 @@
 import { useAdminPlaceDetailQuery } from '@/entities/place/model/place-hooks'
 import { EditPlaceForm } from '@/features/place/edit/ui/edit-place-form'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type { PlaceSummaryResponseDto } from '@/shared/api'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -36,7 +36,9 @@ export function PlaceEditScreen({ placeId }: PlaceEditScreenProps) {
     )
   })
 
-  const navigateToDetail = (updatedPlace: Pick<PlaceSummary, 'id'>) => {
+  const navigateToDetail = (
+    updatedPlace: Pick<PlaceSummaryResponseDto, 'id'>,
+  ) => {
     allowNavigationRef.current = true
     setHasUnsavedChanges(false)
     navigate(`/places/${updatedPlace.id}`)

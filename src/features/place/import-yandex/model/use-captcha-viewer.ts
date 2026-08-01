@@ -2,7 +2,8 @@ import {
   useCreatePlaceImportViewerAccessMutation,
   useRevokePlaceImportViewerAccessMutation,
 } from '@/entities/place-import/model/place-import-mutations'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { getCaptchaViewerError } from '@/features/place/model/place-errors'
+import { getApiErrorPresentation } from '@/shared/api'
 import { useEffect, useRef, useState } from 'react'
 
 /** Состояние popup-доступа к CAPTCHA viewer. */
@@ -29,7 +30,7 @@ export function useCaptchaViewer(operationId: string): CaptchaViewerState {
     onError: (error) => {
       popupRef.current?.close()
       popupRef.current = null
-      setErrorMessage(normalizeApiError(error).message)
+      setErrorMessage(getCaptchaViewerError(error))
     },
     onSuccess: (access) => {
       setExpiresAt(access.expiresAt)
@@ -46,7 +47,7 @@ export function useCaptchaViewer(operationId: string): CaptchaViewerState {
   })
   const revokeAccess = useRevokePlaceImportViewerAccessMutation({
     onError: (error) => {
-      setErrorMessage(normalizeApiError(error).message)
+      setErrorMessage(getApiErrorPresentation(error).message)
     },
     onSuccess: () => {
       popupRef.current?.close()

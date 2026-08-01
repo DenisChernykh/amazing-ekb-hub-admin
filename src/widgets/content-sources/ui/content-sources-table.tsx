@@ -1,4 +1,7 @@
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
+import type {
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import { ScreenEmptyState } from '@/shared/ui/screen-state/screen-state'
 import { Table } from 'antd'
 import type { ContentSourceFiltersState } from '../model/content-source-filters'
@@ -9,11 +12,11 @@ import { getContentSourcesTableColumns } from './content-sources-table-columns'
  * Props таблицы content sources.
  */
 export type ContentSourcesTableProps = {
-  contentSources: ContentSource[]
+  contentSources: ContentSourceResponseDto[]
   filters: ContentSourceFiltersState
-  importRuns: ImportRun[]
+  importRuns: ImportRunResponseDto[]
   isFetching: boolean
-  onEdit: (contentSource: ContentSource) => void
+  onEdit: (contentSource: ContentSourceResponseDto) => void
   onResetFilters: () => void
 }
 
@@ -24,7 +27,7 @@ const hasActiveFilters = (filters: ContentSourceFiltersState) => {
 /**
  * Рендерит content sources с идентификаторами, статусом и action-кнопками.
  *
- * @remarks Передает active `ImportRun` в Telegram import action, чтобы кнопка
+ * @remarks Передает active `ImportRunResponseDto` в Telegram import action, чтобы кнопка
  * блокировалась от durable backend state после refresh.
  */
 export function ContentSourcesTable({

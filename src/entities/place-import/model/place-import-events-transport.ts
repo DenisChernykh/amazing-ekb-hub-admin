@@ -1,4 +1,4 @@
-import { buildApiUrl } from '@/shared/api/client/api-base-url'
+import { buildApiUrl } from '@/shared/api'
 
 /** Именованное событие backend stream операции импорта места. */
 export const PLACE_IMPORT_UPDATED_EVENT = 'place-import.updated'
@@ -23,7 +23,7 @@ export function subscribeToPlaceImportEvents(
   const search = new URLSearchParams({ afterVersion: String(afterVersion) })
   const eventSource = new EventSource(
     buildApiUrl(
-      `/admin/place-imports/${encodeURIComponent(operationId)}/events/stream?${search.toString()}`,
+      `/v1/admin/place-imports/${encodeURIComponent(operationId)}/events/stream?${search.toString()}`,
     ),
     { withCredentials: true },
   )

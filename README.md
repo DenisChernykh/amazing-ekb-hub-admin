@@ -21,9 +21,13 @@ pnpm install
 pnpm run dev
 ```
 
-API base URL по умолчанию: `/v1`.
+`VITE_API_BASE_URL=/` по умолчанию означает same-origin корень API, а не
+`/v1`. Versioned endpoint paths, включая `/v1/auth/me`, принадлежат вызовам
+клиента. Для локальной разработки Vite proxy пересылает именно `/v1` в backend.
 
-Для локальной разработки Vite proxy отправляет `/v1` в backend.
+Для внешнего backend задайте `VITE_API_BASE_URL` абсолютным HTTP(S) origin без
+пути, query и fragment, например `https://api.example.test`. Не добавляйте
+`/v1` к этой переменной.
 
 ## Scripts
 
@@ -38,13 +42,22 @@ pnpm run api:sync
 pnpm run api:generate
 pnpm run api:update
 pnpm run api:check
+pnpm run check
 ```
 
-Validation-схемы синхронизируются из сгенерированного code-first OpenAPI
-artifact соседнего локального backend checkout:
-`../backend-codex/docs/api/openapi.json`. Из временного admin worktree путь
-вычисляется относительно primary admin worktree. Пока backend-ветка находится
-в отдельном worktree, её artifact можно передать явно:
+`pnpm run check` — полный локальный aggregate gate: он проверяет актуальность
+контрактов, форматирование, строгий lint, типы, тесты и production build.
+`pnpm run api:check` сначала повторно генерирует оба API output, затем отклоняет
+staged, unstaged и untracked изменения snapshot, generated TypeScript и
+generated Zod.
+
+## API Source of Truth
+
+Оба generated outputs — TypeScript client и Zod schemas — строятся из локального
+snapshot `openapi/openapi.json`. `pnpm run api:update` сначала находит парный
+backend artifact `docs/api/openapi.json` относительно основного admin checkout,
+затем валидирует и сохраняет snapshot, после чего запускает Orval. Если backend
+работает в отдельном worktree, источник можно передать явно:
 
 ```bash
 OPENAPI_SPEC_SOURCE=/absolute/path/to/backend-worktree/docs/api/openapi.json \
@@ -52,10 +65,15 @@ OPENAPI_SPEC_SOURCE=/absolute/path/to/backend-worktree/docs/api/openapi.json \
 ```
 
 Сам artifact собирается в backend командой `pnpm run openapi:generate`; admin
-только валидирует, сохраняет локальный snapshot в `openapi/openapi.json` и
-запускает Orval для generated Zod. Существующий runtime API client продолжает
-генерироваться из `openapi.yaml`; его миграция на новый backend-контракт не
-входит в RHF/Zod-рефакторинг.
+только валидирует его, сохраняет `openapi/openapi.json` и запускает Orval.
+Generated files никогда не редактируются вручную. Рукописный код импортирует
+курируемый контракт только через `@/shared/api`, а не из generated directory.
+
+## Tests
+
+MSW включён глобально для тестов и владеет HTTP boundary. Product handlers не
+заданы по умолчанию: каждый тест объявляет только нужный ему handler, а
+необработанный запрос завершает тест ошибкой.
 
 ## Documentation
 
@@ -63,4 +81,5 @@ OPENAPI_SPEC_SOURCE=/absolute/path/to/backend-worktree/docs/api/openapi.json \
 - [React Guidelines](docs/architecture/react-guidelines.md): conditional rendering и политика `useEffect`.
 - [Helper Registry](docs/architecture/helper-registry.md): реестр helper'ов перед добавлением новых.
 - [TSDoc Guidelines](docs/architecture/tsdoc-guidelines.md): правила документирования exported API.
+- [API/Auth/Router Foundation](docs/architecture/api-auth-router-foundation.md): source of truth, session и transport happy path.
 - [Agent Rules](AGENTS.md): рабочие правила для Codex/агента в этом репозитории.

@@ -3,7 +3,7 @@ import { PlaceCategoryTag } from '@/entities/place/ui/place-category-tag'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
 import { PlaceCoverUploadPanel } from '@/features/place/cover/ui/place-cover-upload-panel'
 import { PlaceStatusPanel } from '@/features/place/status/ui/place-status-panel'
-import type { PlaceDetail } from '@/shared/api/generated/model'
+import type { PlaceDetailResponseDto } from '@/shared/api'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -14,7 +14,7 @@ import { Button, Card, Descriptions, Flex, Space, Tag, Typography } from 'antd'
 import { Link } from 'react-router'
 import { PlaceMaterialsPanel } from './place-materials-panel'
 
-const formatCounters = (place: PlaceDetail) => [
+const formatCounters = (place: PlaceDetailResponseDto) => [
   `telegram: ${place.counters.telegram}`,
   `dzen: ${place.counters.dzen}`,
   `instagram: ${place.counters.instagram}`,

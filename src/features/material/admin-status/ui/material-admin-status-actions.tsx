@@ -1,16 +1,19 @@
 import { useUpdateMaterialAdminStatusMutation } from '@/entities/material/model/material-mutations'
 import { getMaterialAdminStatusMeta } from '@/entities/material/ui/material-meta'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { getMaterialAdminStatusError } from '@/features/material/model/material-errors'
 import type {
-  AdminMaterialLibraryItem,
-  MaterialAdminStatus,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  AdminMaterialLibraryResponseDtoAdminStatus,
+} from '@/shared/api'
 import { CheckOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex, Space } from 'antd'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-type ReviewableMaterialAdminStatus = Exclude<MaterialAdminStatus, 'pending'>
+type ReviewableMaterialAdminStatus = Exclude<
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  'pending'
+>
 
 type MaterialAdminStatusAction = {
   icon: ReactNode
@@ -41,7 +44,7 @@ const statusActions: MaterialAdminStatusAction[] = [
 ]
 
 type MaterialAdminStatusActionsProps = {
-  material: AdminMaterialLibraryItem
+  material: AdminMaterialLibraryResponseDto
 }
 
 /**
@@ -65,9 +68,9 @@ export function MaterialAdminStatusActions({
       },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          const errorMessage = getMaterialAdminStatusError(error)
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)

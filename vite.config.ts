@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
+        // `VITE_API_BASE_URL=/` leaves generated `/v1` endpoints for this proxy.
         '/v1': {
           target: apiProxyTarget,
           changeOrigin: true,

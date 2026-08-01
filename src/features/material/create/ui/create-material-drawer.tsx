@@ -6,8 +6,8 @@ import {
 import { createMaterialFormSchema } from '@/features/material/form/model/material-form-schema'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { Material } from '@/shared/api/generated/model'
+import { getCreateMaterialError } from '@/features/material/model/material-errors'
+import type { MaterialResponseDto } from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -27,7 +27,7 @@ const createMaterialFormDefaultValues: MaterialFormValues = {
  */
 export type CreateMaterialDrawerProps = {
   onClose: () => void
-  onCreated?: (material: Material) => void
+  onCreated?: (material: MaterialResponseDto) => void
   open: boolean
   placeId: string
 }
@@ -54,9 +54,9 @@ export function CreateMaterialDrawer({
   const { isDirty } = form.formState
   const createMaterialMutation = useCreatePlaceMaterialMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const errorMessage = getCreateMaterialError(error)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (material) => {
       setErrorMessages([])

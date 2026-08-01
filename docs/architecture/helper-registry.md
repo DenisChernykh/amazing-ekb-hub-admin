@@ -17,18 +17,60 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `readOpenApiSource`          | `scripts/api/sync-openapi.mjs`   | exported   | Reads an explicitly configured local/file/HTTP source without changing the default local-first contract. |
 | `syncOpenApi`                | `scripts/api/sync-openapi.mjs`   | exported   | Validates and writes the local OpenAPI JSON snapshot in the project Prettier format.                     |
 
-## Shared API Client
+## Shared API Client and Error Contracts
 
-| Helper              | Location                                 | Visibility | Contract                                                                                                                       |
-| ------------------- | ---------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `normalizeApiError` | `src/shared/api/client/api-error.ts`     | exported   | Converts Axios, network, and unknown errors to `ApiClientError`.                                                               |
-| `isApiClientError`  | `src/shared/api/client/api-error.ts`     | exported   | Narrows unknown errors to `ApiClientError`.                                                                                    |
-| `getApiErrorStatus` | `src/shared/api/client/api-error.ts`     | exported   | Reads HTTP status from a normalized API error.                                                                                 |
-| `getApiBaseUrl`     | `src/shared/api/client/api-base-url.ts`  | exported   | Returns the shared backend API base URL for Axios and browser APIs such as `EventSource`.                                      |
-| `buildApiUrl`       | `src/shared/api/client/api-base-url.ts`  | exported   | Builds backend API URLs from the shared base URL and a relative path.                                                          |
-| `apiMutator`        | `src/shared/api/client/orval-mutator.ts` | exported   | Orval custom mutator that sends generated requests through the shared Axios client.                                            |
-| `shouldSkipRefresh` | `src/shared/api/client/api-client.ts`    | private    | Detects auth endpoints that must not trigger refresh retry. Promote only if another transport needs the same auth-loop rule.   |
-| `requestRefresh`    | `src/shared/api/client/api-client.ts`    | private    | Shares one in-flight refresh request between concurrent 401 responses. Keep transport-local unless another API client appears. |
+| Helper                                | Location                                                | Visibility         | Contract                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `normalizeApiError`                   | `src/shared/api/client/api-errors.ts`                   | exported           | Accepts only validated Problem Details HTTP errors and maps network or invalid responses to the strict client error union.  |
+| `ApiProblemError`                     | `src/shared/api/client/api-errors.ts`                   | exported           | Carries a validated Problem Details document, stable backend code, request ID, and parsed retry delay.                      |
+| `ApiNetworkError`                     | `src/shared/api/client/api-errors.ts`                   | exported           | Represents an API transport failure without an HTTP response.                                                               |
+| `ApiProtocolError`                    | `src/shared/api/client/api-errors.ts`                   | exported           | Represents an HTTP failure whose body does not satisfy the Problem Details contract.                                        |
+| `parseHttpDate`                       | `src/shared/api/client/api-errors.ts`                   | private            | Strictly parses all three RFC 9110 HTTP-date forms, including RFC850 two-digit-year semantics.                              |
+| `isProblemCode`                       | `src/shared/api/client/api-errors.ts`                   | exported           | Narrows a normalized Problem Details error by its stable backend code.                                                      |
+| `getApiErrorPresentation`             | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Maps unknown errors to safe local UI copy, retry metadata, and an optional server-side request identifier.                  |
+| `ApiProblemMessages`                  | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Defines a partial caller-owned mapping from stable Problem Details codes to safe localized copy.                            |
+| `getApiErrorMessage`                  | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Resolves caller-owned domain copy for known problem codes and otherwise uses the shared safe presentation fallback.         |
+| `getApiBaseUrl`                       | `src/shared/api/client/api-base-url.ts`                 | exported           | Returns the shared API root/origin for Axios and browser APIs such as `EventSource`.                                        |
+| `joinApiUrl`                          | `src/shared/api/client/api-base-url.ts`                 | exported           | Joins the validated API root/origin with a caller-owned versioned endpoint path.                                            |
+| `buildApiUrl`                         | `src/shared/api/client/api-base-url.ts`                 | exported           | Builds backend API URLs from the shared origin and a caller-owned versioned endpoint path.                                  |
+| `parsePublicEnv`                      | `src/shared/config/env.ts`                              | exported           | Validates that the public API setting is same-origin `/` or an absolute HTTP(S) origin without path/query/hash/credentials. |
+| `peekCsrfToken`                       | `src/shared/api/client/csrf-token.ts`                   | exported           | Reads the current in-memory CSRF token without issuing a request.                                                           |
+| `setCsrfToken`                        | `src/shared/api/client/csrf-token.ts`                   | exported           | Replaces the in-memory CSRF token and invalidates older in-flight fetch generations.                                        |
+| `clearCsrfToken`                      | `src/shared/api/client/csrf-token.ts`                   | exported           | Clears the in-memory CSRF token and prevents late pre-logout fetches from restoring it.                                     |
+| `getOrFetchCsrfToken`                 | `src/shared/api/client/csrf-token.ts`                   | transport-internal | Returns the cached CSRF token or shares one generation-safe fetch across concurrent callers.                                |
+| `isLoginRequest`                      | `src/shared/api/client/axios-client.ts`                 | private            | Exempts only the exact versioned login path from CSRF fetching.                                                             |
+| `fetchCsrfToken`                      | `src/shared/api/client/axios-client.ts`                 | private            | Fetches the session-bound CSRF token with credentials and validates its response shape.                                     |
+| `API_AXIOS_INSTANCE`                  | `src/shared/api/client/axios-client.ts`                 | exported           | Sends credentialed API requests, preserves multipart bodies, and adds generation-safe CSRF headers to unsafe methods.       |
+| `acceptsOperationalHealthUnavailable` | `src/shared/api/client/orval-mutator.ts`                | private            | Allows JSON `503` data only for exact operational health GET paths.                                                         |
+| `getResponseMediaType`                | `src/shared/api/client/orval-mutator.ts`                | private            | Normalizes an Axios response Content-Type to its lowercase media type.                                                      |
+| `apiMutator`                          | `src/shared/api/client/orval-mutator.ts`                | exported           | Merges Orval request options, accepts operational JSON `503` responses, and normalizes other failures.                      |
+
+## Feature and Widget Error Presentation
+
+| Helper                          | Location                                                     | Visibility | Contract                                                                                     |
+| ------------------------------- | ------------------------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------- |
+| `getCreateCategoryError`        | `src/features/category/model/category-errors.ts`             | exported   | Maps create-category problem codes to safe scenario-owned copy.                              |
+| `getEditCategoryError`          | `src/features/category/model/category-errors.ts`             | exported   | Maps edit-category problem codes to safe scenario-owned copy.                                |
+| `getDeleteCategoryError`        | `src/features/category/model/category-errors.ts`             | exported   | Maps delete-category problem codes to safe scenario-owned copy.                              |
+| `getCreateContentSourceError`   | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps create-source problem codes to safe scenario-owned copy.                                |
+| `getEditContentSourceError`     | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps edit-source problem codes to safe scenario-owned copy.                                  |
+| `getContentSourceStatusError`   | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps source-status problem codes to safe scenario-owned copy.                                |
+| `getImportTelegramSourceError`  | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps Telegram-import problem codes to safe scenario-owned copy, including active-run notice. |
+| `getCreateMaterialError`        | `src/features/material/model/material-errors.ts`             | exported   | Maps create-material problem codes to safe scenario-owned copy.                              |
+| `getEditMaterialError`          | `src/features/material/model/material-errors.ts`             | exported   | Maps edit-material problem codes to safe scenario-owned copy.                                |
+| `getMaterialAdminStatusError`   | `src/features/material/model/material-errors.ts`             | exported   | Maps material moderation problem codes to safe scenario-owned copy.                          |
+| `getLinkExistingMaterialError`  | `src/features/material/model/material-errors.ts`             | exported   | Maps material-link problem codes to safe scenario-owned copy.                                |
+| `getCreatePlaceError`           | `src/features/place/model/place-errors.ts`                   | exported   | Maps create-place problem codes to safe scenario-owned copy.                                 |
+| `getEditPlaceError`             | `src/features/place/model/place-errors.ts`                   | exported   | Maps edit-place problem codes to safe scenario-owned copy.                                   |
+| `getPlaceStatusError`           | `src/features/place/model/place-errors.ts`                   | exported   | Maps place-status problem codes to safe scenario-owned copy.                                 |
+| `getPlaceCoverUploadApiError`   | `src/features/place/model/place-errors.ts`                   | exported   | Maps place cover upload problem codes to safe scenario-owned copy.                           |
+| `getSetPinnedMaterialError`     | `src/features/place/model/place-errors.ts`                   | exported   | Maps pinned-material assignment problem codes to safe scenario-owned copy.                   |
+| `getClearPinnedMaterialError`   | `src/features/place/model/place-errors.ts`                   | exported   | Maps pinned-material clearing problem codes to safe scenario-owned copy.                     |
+| `getPlaceImportStartError`      | `src/features/place/model/place-errors.ts`                   | exported   | Maps place-import start problem codes to safe scenario-owned copy.                           |
+| `getPlaceImportActionError`     | `src/features/place/model/place-errors.ts`                   | exported   | Maps place-import confirm/cancel problem codes to safe scenario-owned copy.                  |
+| `getCaptchaViewerError`         | `src/features/place/model/place-errors.ts`                   | exported   | Maps CAPTCHA viewer problem codes to safe scenario-owned copy.                               |
+| `getHidePlaceMaterialLinkError` | `src/widgets/place-detail/model/place-materials-errors.ts`   | exported   | Maps place-material unlink problem codes to safe widget-owned copy.                          |
+| `getPlaceMaterialsQueryError`   | `src/widgets/place-detail/model/place-materials-errors.ts`   | exported   | Maps place-material query problem codes to safe widget-owned copy.                           |
 
 ## Shared Number Helpers
 
@@ -69,6 +111,12 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `getHttpUrlValidationError` | `src/shared/lib/url/safe-url.ts` | exported   | Returns the shared local validation message for unsafe `http/https` URLs. |
 | `normalizeHttpUrl`          | `src/shared/lib/url/safe-url.ts` | exported   | Trims safe `http/https` URLs and throws before unsafe API payloads.       |
 
+## Shared Route Helpers
+
+| Helper             | Location                         | Visibility | Contract                                                                                                         |
+| ------------------ | -------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| `sanitizeReturnTo` | `src/shared/routes/return-to.ts` | exported   | Accepts a safe same-app post-login path and falls back to `/` for external, protocol-relative, or login targets. |
+
 ## Shared UI
 
 | Helper                    | Location                                                     | Visibility | Contract                                                                              |
@@ -83,24 +131,40 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## App State
 
-| Helper           | Location                 | Visibility | Contract                                                           |
-| ---------------- | ------------------------ | ---------- | ------------------------------------------------------------------ |
-| `createAppStore` | `src/app/store.ts`       | exported   | Creates an isolated Redux store instance for app runtime or tests. |
-| `store`          | `src/app/store.ts`       | exported   | Runtime Redux store used by `AppProviders`.                        |
-| `useAppDispatch` | `src/app/store-hooks.ts` | exported   | Typed Redux dispatch hook for app-level state changes.             |
-| `useAppSelector` | `src/app/store-hooks.ts` | exported   | Typed Redux selector hook for reading app-level state.             |
+| Helper                 | Location                  | Visibility | Contract                                                                                                               |
+| ---------------------- | ------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `shouldRetryQuery`     | `src/app/query-client.ts` | exported   | Retries network and server-side Problem Details query failures at most twice.                                          |
+| `createAppQueryClient` | `src/app/query-client.ts` | exported   | Creates an isolated QueryClient whose global cache callbacks forward non-local authentication loss to app composition. |
+| `createAppRuntime`     | `src/app/app-runtime.ts`  | exported   | Composes QueryClient and Data Router with one cleanup/redirect path for product query and mutation session loss.       |
+| `queryClient`          | `src/app/runtime.ts`      | exported   | Runtime QueryClient shared by app providers and route/session composition.                                             |
+| `createAppStore`       | `src/app/store.ts`        | exported   | Creates an isolated Redux store instance for app runtime or tests.                                                     |
+| `store`                | `src/app/store.ts`        | exported   | Runtime Redux store used by `AppProviders`.                                                                            |
+| `useAppDispatch`       | `src/app/store-hooks.ts`  | exported   | Typed Redux dispatch hook for app-level state changes.                                                                 |
+| `useAppSelector`       | `src/app/store-hooks.ts`  | exported   | Typed Redux selector hook for reading app-level state.                                                                 |
+
+## App Router
+
+| Helper                              | Location                                     | Visibility | Contract                                                                                                                        |
+| ----------------------------------- | -------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `createRequireSessionLoader`        | `src/app/router/loaders.ts`                  | exported   | Requires a fresh session, redirects only `AUTHENTICATION_REQUIRED`, and preserves abort/non-auth errors for the route boundary. |
+| `createRedirectAuthenticatedLoader` | `src/app/router/loaders.ts`                  | exported   | Keeps anonymous users on login and redirects authenticated users only to a sanitized app-local `returnTo`.                      |
+| `getRouteErrorPresentation`         | `src/app/router/route-error-presentation.ts` | exported   | Maps route failures to safe API copy with page-specific authorization text, retry metadata, and optional request diagnostics.   |
+| `RouteError`                        | `src/app/router/route-error.tsx`             | exported   | Renders the Ant Design Data Router error element and exposes retry only for failures classified as retryable.                   |
+| `ProtectedLayout`                   | `src/app/router/protected-layout.tsx`        | exported   | Composes the protected route outlet inside the presentation-only admin shell after the parent loader succeeds.                  |
+| `protectedRouteChildren`            | `src/app/router/index.tsx`                   | exported   | Defines the relative dashboard/admin child route set nested below the protected root route.                                     |
+| `createAppRoutes`                   | `src/app/router/index.tsx`                   | exported   | Creates runtime/test Data Router routes whose loaders perform fresh abort-safe session checks and auth-loss cleanup.            |
+| `router`                            | `src/app/runtime.ts`                         | exported   | Runtime browser Data Router built from the shared route factory and application Query Client.                                   |
 
 ## Session Entity
 
-| Helper                      | Location                                      | Visibility | Contract                                                            |
-| --------------------------- | --------------------------------------------- | ---------- | ------------------------------------------------------------------- |
-| `getCurrentSessionQueryKey` | `src/entities/session/api/session-api.ts`     | exported   | Returns the React Query key for the current backend session.        |
-| `invalidateCurrentSession`  | `src/entities/session/api/session-api.ts`     | exported   | Invalidates the current session query after login or refresh.       |
-| `removeCurrentSession`      | `src/entities/session/api/session-api.ts`     | exported   | Removes the current session query after logout.                     |
-| `useCurrentSessionQuery`    | `src/entities/session/model/session-hooks.ts` | exported   | Loads the current backend session with auth-guard retry disabled.   |
-| `useLoginSession`           | `src/entities/session/model/session-hooks.ts` | exported   | Logs in through auth API and invalidates the current session query. |
-| `useLogoutSession`          | `src/entities/session/model/session-hooks.ts` | exported   | Logs out through auth API and removes the current session query.    |
-| `getRoleMeta`               | `src/entities/session/ui/role-meta.ts`        | exported   | Maps backend `Role` to localized Ant Design tag metadata.           |
+| Helper                       | Location                                      | Visibility | Contract                                                                                       |
+| ---------------------------- | --------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `currentSessionQueryKey`     | `src/entities/session/api/session.ts`         | exported   | Reuses the generated `authGetMe` React Query key.                                              |
+| `currentSessionQueryOptions` | `src/entities/session/api/session.ts`         | exported   | Reuses the generated `authGetMe` query options.                                                |
+| `useCurrentSession`          | `src/entities/session/api/session.ts`         | exported   | Reads the protected current-session DTO through a suspense query and forwards its AbortSignal. |
+| `refreshCurrentSession`      | `src/entities/session/model/session-cache.ts` | exported   | Invalidates and immediately fetches the current backend session.                               |
+| `clearCurrentSession`        | `src/entities/session/model/session-cache.ts` | exported   | Removes only the current-session query and in-memory CSRF token.                               |
+| `getRoleMeta`                | `src/entities/session/ui/role-meta.ts`        | exported   | Maps any backend role key to localized or neutral Ant Design tag metadata.                     |
 
 ## Category Entity
 
@@ -231,7 +295,6 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useActivePlaceImportQuery`                | `src/entities/place-import/model/place-import-hooks.ts`               | exported   | Runs the one-shot active-operation recovery lookup for the Yandex place-import start route.                 |
 | `usePlaceImportOperationQuery`             | `src/entities/place-import/model/place-import-hooks.ts`               | exported   | Loads the durable operation snapshot used to resume an import route after reload.                           |
 | `usePlaceImportEvents`                     | `src/entities/place-import/model/place-import-hooks.ts`               | exported   | Syncs an active operation over SSE and falls back to non-overlapping journal polling until terminal status. |
-| `getActivePlaceImportConflictOperationId`  | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Extracts the recoverable operation id from structured active-import 409 conflict errors.                    |
 | `useStartPlaceImportMutation`              | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Starts one Yandex Maps place import and seeds the operation cache.                                          |
 | `useConfirmPlaceImportMutation`            | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Confirms immutable preview and invalidates the admin places list.                                           |
 | `useCancelPlaceImportMutation`             | `src/entities/place-import/model/place-import-mutations.ts`           | exported   | Durably cancels an operation and syncs its terminal snapshot.                                               |
@@ -249,11 +312,14 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Auth UI
 
-| Helper            | Location                                             | Visibility | Contract                                                                                                                                         |
-| ----------------- | ---------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `loginFormSchema` | `src/features/auth/login/model/login-form-schema.ts` | exported   | Composes the generated login email contract with exact Russian required and email messages for the RHF login form.                               |
-| `LoginFormValues` | `src/features/auth/login/model/login-form-schema.ts` | exported   | Defines input values accepted by the RHF login form before Zod parsing.                                                                          |
-| `getRedirectPath` | `src/widgets/auth-login/ui/auth-login-screen.tsx`    | private    | Converts React Router login state into a safe post-login redirect path. Promote to an auth routing helper if another login-like screen needs it. |
+| Helper                     | Location                                             | Visibility | Contract                                                                                                                  |
+| -------------------------- | ---------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `loginFormSchema`          | `src/features/auth/login/model/login-form-schema.ts` | exported   | Composes the generated login email contract with exact Russian required and email messages for the RHF login form.        |
+| `LoginFormValues`          | `src/features/auth/login/model/login-form-schema.ts` | exported   | Defines input values accepted by the RHF login form before Zod parsing.                                                   |
+| `mapLoginValidationErrors` | `src/features/auth/login/model/login-errors.ts`      | exported   | Maps only `/email` and `/password` validation pointers and ignores all other backend field details.                       |
+| `getLoginFormError`        | `src/features/auth/login/model/login-errors.ts`      | exported   | Converts auth, rate-limit, dependency, network, protocol, and unknown failures to safe login copy.                        |
+| `useLogin`                 | `src/features/auth/login/model/use-login.ts`         | exported   | Logs in, stores response CSRF, clears the feature-owned bulk draft, and replaces the route with sanitized `returnTo`.     |
+| `useLogout`                | `src/features/auth/logout/model/use-logout.ts`       | exported   | Clears session/CSRF/draft and redirects only after success or `AUTHENTICATION_REQUIRED`; preserves state on other errors. |
 
 ## Places List Widget
 
@@ -448,13 +514,3 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `ImportRunEventsSubscriptions`      | `src/widgets/content-sources/ui/import-run-events-subscriptions.tsx` | exported   | Mounts active import-run SSE subscriptions without visible UI.                                                               |
 | `ImportRunsTable`                   | `src/widgets/content-sources/ui/import-runs-table.tsx`               | exported   | Renders read-only latest import run diagnostics and source display names.                                                    |
 | `ContentSourcesScreen`              | `src/widgets/content-sources/ui/content-sources-screen.tsx`          | exported   | Renders content source management, URL-driven filters, source actions, latest import runs, and active-run SSE subscriptions. |
-
-## API Error Internals
-
-| Helper            | Location                             | Visibility | Contract                                                                        |
-| ----------------- | ------------------------------------ | ---------- | ------------------------------------------------------------------------------- |
-| `isRecord`        | `src/shared/api/client/api-error.ts` | private    | Narrows unknown values to object records before reading NestJS error fields.    |
-| `toNestErrorBody` | `src/shared/api/client/api-error.ts` | private    | Treats object-like response data as a possible NestJS error body.               |
-| `getMessages`     | `src/shared/api/client/api-error.ts` | private    | Converts NestJS `message: string \| string[]` into a non-empty UI message list. |
-| `getErrorTitle`   | `src/shared/api/client/api-error.ts` | private    | Reads the NestJS `error` title when present.                                    |
-| `classifyStatus`  | `src/shared/api/client/api-error.ts` | private    | Maps HTTP statuses to `ApiErrorKind`.                                           |

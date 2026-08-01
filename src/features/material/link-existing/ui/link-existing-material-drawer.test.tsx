@@ -1,10 +1,11 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
-  AdminMaterialLibraryItem,
-  Material,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  ApiClientError,
+  MaterialResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -44,7 +45,7 @@ const mockedUseLinkPlaceMaterialMutation = vi.mocked(
   useLinkPlaceMaterialMutation,
 )
 
-const libraryMaterial: AdminMaterialLibraryItem = {
+const libraryMaterial: AdminMaterialLibraryResponseDto = {
   adminStatus: 'approved',
   durationSec: null,
   excerpt: 'Пост из Telegram-канала Amazing EKB',
@@ -68,18 +69,19 @@ const libraryMaterial: AdminMaterialLibraryItem = {
   url: 'https://t.me/amazing_ekb/321',
 }
 
-const linkedMaterial: Material = {
+const linkedMaterial: MaterialResponseDto = {
   durationSec: null,
   id: 'material-1',
   placeId: 'place-1',
   platform: 'telegram',
   publishedAt: '2026-03-20T10:30:00+05:00',
+  redirectUrl: null,
   title: 'Пост из Telegram-канала Amazing EKB',
   type: 'post',
   url: 'https://t.me/amazing_ekb/321',
 }
 
-const unsafeMaterial: AdminMaterialLibraryItem = {
+const unsafeMaterial: AdminMaterialLibraryResponseDto = {
   ...libraryMaterial,
   excerpt: 'Материал с unsafe ссылками',
   id: 'unsafe-material',
@@ -93,7 +95,7 @@ const unsafeMaterial: AdminMaterialLibraryItem = {
   url: 'javascript://example.com/%0Aalert(1)',
 }
 
-const hiddenPlaceLinkMaterial: AdminMaterialLibraryItem = {
+const hiddenPlaceLinkMaterial: AdminMaterialLibraryResponseDto = {
   ...libraryMaterial,
   excerpt: 'Скрытая связь для текущего места',
   id: 'hidden-material',
@@ -102,7 +104,7 @@ const hiddenPlaceLinkMaterial: AdminMaterialLibraryItem = {
   url: 'https://t.me/amazing_ekb/322',
 }
 
-const activePlaceLinkMaterial: AdminMaterialLibraryItem = {
+const activePlaceLinkMaterial: AdminMaterialLibraryResponseDto = {
   ...libraryMaterial,
   excerpt: 'Активная связь для текущего места',
   id: 'active-material',
@@ -129,7 +131,7 @@ const renderDrawer = (props: { onClose?: () => void; open?: boolean } = {}) => {
 
 type LinkMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: Material) => void
+  onSuccess?: (material: MaterialResponseDto) => void
 }
 
 type LinkMutationVariables = {
@@ -244,11 +246,7 @@ describe('LinkExistingMaterialDrawer', () => {
         callbacks?: LinkMutationCallbacks,
       ) => {
         callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Link unavailable',
-            status: 500,
-          }),
+          createApiProblemError('MATERIAL_PLACE_NOT_FOUND', 404),
         )
       },
     } as unknown as ReturnType<typeof useLinkPlaceMaterialMutation>)
@@ -258,9 +256,9 @@ describe('LinkExistingMaterialDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Связать' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Link unavailable',
+      'Материал места не найден.',
     )
-    expect(messageError).toHaveBeenCalledWith('Link unavailable')
+    expect(messageError).toHaveBeenCalledWith('Материал места не найден.')
     expect(onClose).not.toHaveBeenCalled()
   })
 
@@ -334,11 +332,7 @@ describe('LinkExistingMaterialDrawer', () => {
 
     mockedUseMaterialLibraryQuery.mockReturnValueOnce({
       data: undefined,
-      error: new ApiClientError({
-        kind: 'server',
-        message: 'Library unavailable',
-        status: 500,
-      }),
+      error: createApiProblemError('INTERNAL_ERROR', 500),
       isError: true,
       isFetching: false,
       isPending: false,
@@ -349,7 +343,8 @@ describe('LinkExistingMaterialDrawer', () => {
       </AntdApp>,
     )
 
-    expect(screen.getByText('Library unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Не удалось выполнить запрос.')).toBeInTheDocument()
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
 
     mockedUseMaterialLibraryQuery.mockReturnValueOnce({
       data: { items: [] },

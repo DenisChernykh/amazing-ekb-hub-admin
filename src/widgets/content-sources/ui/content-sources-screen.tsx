@@ -1,6 +1,6 @@
 import { useContentSourcesQuery } from '@/entities/content-source/model/content-source-hooks'
 import { useImportRunsQuery } from '@/entities/import-run/model/import-run-hooks'
-import type { ContentSource } from '@/shared/api/generated/model'
+import type { ContentSourceResponseDto } from '@/shared/api'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -60,7 +60,8 @@ export function ContentSourcesScreen() {
   })
   const importRunsQuery = useImportRunsQuery()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [editingSource, setEditingSource] = useState<ContentSource | null>(null)
+  const [editingSource, setEditingSource] =
+    useState<ContentSourceResponseDto | null>(null)
   const contentSourceData =
     contentSourcesQuery.data ?? emptyContentSourceResponse
   const sourceLookupData = hasFilters

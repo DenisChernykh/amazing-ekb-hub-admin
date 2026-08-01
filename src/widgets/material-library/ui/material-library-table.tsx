@@ -7,7 +7,7 @@ import {
 } from '@/entities/material/ui/material-library-cells'
 import { formatMaterialPublishedDate } from '@/entities/material/ui/material-meta'
 import { MaterialAdminStatusActions } from '@/features/material/admin-status/ui/material-admin-status-actions'
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
+import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
 import { Table } from 'antd'
 import type { ReactNode } from 'react'
 import styles from './material-library-inbox.module.css'
@@ -17,8 +17,8 @@ const columns = [
     dataIndex: 'source',
     key: 'source',
     render: (
-      _value: AdminMaterialLibraryItem['source'],
-      material: AdminMaterialLibraryItem,
+      _value: AdminMaterialLibraryResponseDto['source'],
+      material: AdminMaterialLibraryResponseDto,
     ) => (
       <MaterialLibrarySourceCell
         className={styles.sourceCell}
@@ -35,7 +35,7 @@ const columns = [
   },
   {
     key: 'preview',
-    render: (_value: unknown, material: AdminMaterialLibraryItem) => (
+    render: (_value: unknown, material: AdminMaterialLibraryResponseDto) => (
       <MaterialLibraryPreviewCell
         className={styles.previewCell}
         linkMode="action"
@@ -49,15 +49,15 @@ const columns = [
     dataIndex: 'mediaKind',
     key: 'mediaKind',
     render: (
-      _mediaKind: AdminMaterialLibraryItem['mediaKind'],
-      material: AdminMaterialLibraryItem,
+      _mediaKind: AdminMaterialLibraryResponseDto['mediaKind'],
+      material: AdminMaterialLibraryResponseDto,
     ) => <MaterialLibraryMediaCell material={material} />,
     title: 'Медиа',
   },
   {
     dataIndex: 'linked',
     key: 'linked',
-    render: (linked: AdminMaterialLibraryItem['linked']) => (
+    render: (linked: AdminMaterialLibraryResponseDto['linked']) => (
       <MaterialLibraryLinkedTag linked={linked} />
     ),
     title: 'Связь',
@@ -65,14 +65,14 @@ const columns = [
   {
     dataIndex: 'adminStatus',
     key: 'adminStatus',
-    render: (status: AdminMaterialLibraryItem['adminStatus']) => (
+    render: (status: AdminMaterialLibraryResponseDto['adminStatus']) => (
       <MaterialLibraryAdminStatusTag status={status} />
     ),
     title: 'Статус',
   },
   {
     key: 'actions',
-    render: (_value: unknown, material: AdminMaterialLibraryItem) => (
+    render: (_value: unknown, material: AdminMaterialLibraryResponseDto) => (
       <MaterialAdminStatusActions material={material} />
     ),
     title: 'Действия',
@@ -89,7 +89,7 @@ export function MaterialLibraryTable({
 }: {
   emptyText: ReactNode
   isFetching: boolean
-  materials: AdminMaterialLibraryItem[]
+  materials: AdminMaterialLibraryResponseDto[]
 }) {
   return (
     <div className={styles.tableWrap}>

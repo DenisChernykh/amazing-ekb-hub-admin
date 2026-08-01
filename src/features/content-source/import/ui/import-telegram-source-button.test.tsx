@@ -1,6 +1,10 @@
 import { useImportTelegramSourceMutation } from '@/entities/content-source/model/content-source-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { ContentSource, ImportRun } from '@/shared/api/generated/model'
+import type {
+  ApiClientError,
+  ContentSourceResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -39,14 +43,14 @@ const mockedUseImportTelegramSourceMutation = vi.mocked(
 
 type ImportMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (importRun: ImportRun) => void
+  onSuccess?: (importRun: ImportRunResponseDto) => void
 }
 
 type ImportMutationVariables = {
   sourceId: string
 }
 
-const contentSource: ContentSource = {
+const contentSource: ContentSourceResponseDto = {
   channelId: null,
   createdAt: '2026-06-15T10:00:00.000Z',
   displayName: 'Amazing EKB Telegram',
@@ -131,11 +135,7 @@ describe('ImportTelegramSourceButton', () => {
         callbacks?: ImportMutationCallbacks,
       ) => {
         callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Import unavailable',
-            status: 500,
-          }),
+          createApiProblemError('TELEGRAM_IMPORT_UNAVAILABLE', 503),
         )
       },
     } as unknown as ReturnType<typeof useImportTelegramSourceMutation>)
@@ -145,9 +145,12 @@ describe('ImportTelegramSourceButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Запустить импорт' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Import unavailable',
+      'Импорт Telegram временно недоступен.',
     )
-    expect(messageError).toHaveBeenCalledWith('Import unavailable')
+    expect(messageError).toHaveBeenCalledWith(
+      'Импорт Telegram временно недоступен.',
+    )
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
   })
 
   it('disables import action while pending', () => {
@@ -207,13 +210,7 @@ describe('ImportTelegramSourceButton', () => {
         _variables: ImportMutationVariables,
         callbacks?: ImportMutationCallbacks,
       ) => {
-        callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'conflict',
-            message: 'Import already running',
-            status: 409,
-          }),
-        )
+        callbacks?.onError?.(createApiProblemError('ACTIVE_IMPORT_EXISTS', 409))
       },
     } as unknown as ReturnType<typeof useImportTelegramSourceMutation>)
 

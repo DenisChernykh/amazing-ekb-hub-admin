@@ -1,6 +1,9 @@
 import { useUploadPlaceCoverPhotoMutation } from '@/entities/place/model/place-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceSummary } from '@/shared/api/generated/model'
+import type {
+  AdminPlaceSummaryResponseDto,
+  PlaceCategoryResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -71,14 +74,18 @@ const mockedUseUploadPlaceCoverPhotoMutation = vi.mocked(
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const updatedPlace: PlaceSummary = {
+const updatedPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
   coverImageUrl: '/places/place-2/photo',
+  mapsUrl: null,
   id: 'place-2',
   slug: 'spa-with-cover',
   status: 'active',
@@ -232,14 +239,7 @@ describe('PlaceCoverUploadPanel', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'photo must be an image',
-                messages: ['photo must be an image'],
-                status: 400,
-              }),
-            )
+            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 422))
           },
         }) as unknown as ReturnType<typeof useUploadPlaceCoverPhotoMutation>,
     )
@@ -254,9 +254,10 @@ describe('PlaceCoverUploadPanel', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('photo must be an image'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
-    expect(messageError).toHaveBeenCalledWith('photo must be an image')
+    expect(messageError).toHaveBeenCalledWith('Не удалось выполнить запрос.')
+    expect(within(alert).queryByText('Raw backend detail')).toBeNull()
     expect(screen.getByRole('button', { name: 'Загрузить' })).not.toBeDisabled()
   })
 })

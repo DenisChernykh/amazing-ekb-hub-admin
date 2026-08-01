@@ -1,5 +1,5 @@
 import { AppProviders } from '@/app/providers'
-import { router } from '@/app/router'
+import { router } from '@/app/runtime'
 import { RouterProvider } from 'react-router'
 
 /**

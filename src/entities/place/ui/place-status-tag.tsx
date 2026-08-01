@@ -1,9 +1,9 @@
-import type { PlaceStatus } from '@/shared/api/generated/model'
+import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
 import { Tag } from 'antd'
 import { getPlaceStatusMeta } from './place-meta'
 
 type PlaceStatusTagProps = {
-  status: PlaceStatus
+  status: AdminPlaceSummaryResponseDtoStatus
 }
 
 /**

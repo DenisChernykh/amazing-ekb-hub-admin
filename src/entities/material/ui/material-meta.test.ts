@@ -1,4 +1,4 @@
-import type { AdminMaterialLibraryItem } from '@/shared/api/generated/model'
+import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
 import { describe, expect, it } from 'vitest'
 import {
   formatMaterialDuration,
@@ -17,7 +17,7 @@ import {
   getSafeMaterialHref,
 } from './material-meta'
 
-const libraryMaterial: AdminMaterialLibraryItem = {
+const libraryMaterial: AdminMaterialLibraryResponseDto = {
   adminStatus: 'approved',
   durationSec: null,
   excerpt: 'Короткий preview',

@@ -1,9 +1,10 @@
 import { useUpdateMaterialAdminStatusMutation } from '@/entities/material/model/material-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
 import type {
-  AdminMaterialLibraryItem,
-  MaterialAdminStatus,
-} from '@/shared/api/generated/model'
+  AdminMaterialLibraryResponseDto,
+  AdminMaterialLibraryResponseDtoAdminStatus,
+  ApiClientError,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
 import type { ReactNode } from 'react'
@@ -38,7 +39,7 @@ const mockedUseUpdateMaterialAdminStatusMutation = vi.mocked(
   useUpdateMaterialAdminStatusMutation,
 )
 
-const material: AdminMaterialLibraryItem = {
+const material: AdminMaterialLibraryResponseDto = {
   adminStatus: 'pending',
   durationSec: null,
   excerpt: 'Пост из Telegram',
@@ -72,11 +73,11 @@ const renderActions = (value = material) => {
 
 type StatusMutationCallbacks = {
   onError?: (error: ApiClientError) => void
-  onSuccess?: (material: AdminMaterialLibraryItem) => void
+  onSuccess?: (material: AdminMaterialLibraryResponseDto) => void
 }
 
 type StatusMutationVariables = {
-  adminStatus: MaterialAdminStatus
+  adminStatus: AdminMaterialLibraryResponseDtoAdminStatus
   materialId: string
 }
 
@@ -134,13 +135,7 @@ describe('MaterialAdminStatusActions', () => {
         _variables: StatusMutationVariables,
         callbacks?: StatusMutationCallbacks,
       ) => {
-        callbacks?.onError?.(
-          new ApiClientError({
-            kind: 'server',
-            message: 'Status unavailable',
-            status: 500,
-          }),
-        )
+        callbacks?.onError?.(createApiProblemError('MATERIAL_NOT_FOUND', 404))
       },
     } as unknown as ReturnType<typeof useUpdateMaterialAdminStatusMutation>)
 
@@ -149,9 +144,10 @@ describe('MaterialAdminStatusActions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Отклонить' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Status unavailable',
+      'Материал не найден.',
     )
-    expect(messageError).toHaveBeenCalledWith('Status unavailable')
+    expect(messageError).toHaveBeenCalledWith('Материал не найден.')
+    expect(screen.queryByText('Raw backend title')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Отклонить' })).not.toBeDisabled()
   })
 

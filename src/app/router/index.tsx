@@ -1,3 +1,5 @@
+import { clearCurrentSession, currentSessionQueryKey } from '@/entities/session'
+import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { CategoriesPage } from '@/pages/categories/ui/categories-page'
 import { ContentSourcesPage } from '@/pages/content-sources/ui/content-sources-page'
 import { DashboardPage } from '@/pages/dashboard/ui/dashboard-page'
@@ -9,52 +11,76 @@ import { PlaceEditPage } from '@/pages/place-edit/ui/place-edit-page'
 import { PlaceImportYandexPage } from '@/pages/place-import-yandex/ui/place-import-yandex-page'
 import { PlacesCreatePage } from '@/pages/places-create/ui/places-create-page'
 import { PlacesPage } from '@/pages/places/ui/places-page'
-import { AdminShell } from '@/widgets/admin-shell/ui/admin-shell'
-import { createBrowserRouter, type RouteObject } from 'react-router'
-import { RequireAuth } from './require-auth'
+import { authGetMe } from '@/shared/api'
+import type { QueryClient } from '@tanstack/react-query'
+import type { RouteObject } from 'react-router'
+import {
+  createRedirectAuthenticatedLoader,
+  createRequireSessionLoader,
+} from './loaders'
+import { ProtectedLayout } from './protected-layout'
+import { RouteError } from './route-error'
 
 /**
- * Дочерние protected routes, которые рендерятся внутри общего admin shell.
+ * Загружает session напрямую из backend и записывает только актуальный ответ.
+ *
+ * @remarks Не использует React Query freshness: каждый route loader выполняет
+ * новый `authGetMe`. Проверка `signal.aborted` до записи не даёт завершившемуся
+ * после отмены запросу восстановить устаревшую сессию.
+ */
+async function loadSession(client: QueryClient, signal: AbortSignal) {
+  const session = await authGetMe(undefined, signal)
+
+  if (signal.aborted) {
+    throw new DOMException('The session request was aborted', 'AbortError')
+  }
+
+  client.setQueryData(currentSessionQueryKey(), session)
+  return session
+}
+
+/**
+ * Относительные дочерние protected routes внутри общего admin shell.
  */
 export const protectedRouteChildren = [
   {
-    path: '/',
+    index: true,
     element: <DashboardPage />,
   },
   {
-    path: '/places',
+    path: 'places',
     element: <PlacesPage />,
   },
   {
-    path: '/categories',
+    path: 'categories',
     element: <CategoriesPage />,
   },
   {
-    path: '/materials',
+    path: 'materials',
     element: <MaterialsPage />,
   },
   {
-    path: '/content-sources',
+    path: 'content-sources',
     element: <ContentSourcesPage />,
   },
   {
-    path: '/places/:placeId',
+    path: 'places/:placeId',
     element: <PlaceDetailPage />,
   },
   {
-    path: '/places/:placeId/edit',
+    path: 'places/:placeId/edit',
     element: <PlaceEditPage />,
   },
   {
-    path: '/places/new',
+    path: 'places/new',
     element: <PlacesCreatePage />,
   },
   {
-    path: '/places/import/yandex',
+    path: 'places/import/yandex',
     element: <PlaceImportYandexPage />,
   },
   {
-    path: '/places/import/yandex/:operationId',
+    path: 'places/import/yandex/:operationId',
     element: <PlaceImportYandexPage />,
   },
   {
@@ -64,20 +90,36 @@ export const protectedRouteChildren = [
 ] satisfies RouteObject[]
 
 /**
- * Browser router админки с публичным login и защищенным корневым маршрутом.
+ * Создаёт route tree админки для runtime browser router или memory-router теста.
+ *
+ * @remarks Protected и login loaders всегда проверяют свежую backend-сессию.
+ * Только потеря аутентификации очищает session/CSRF cache и feature-owned bulk
+ * moderation draft.
+ *
+ * @returns React Router route objects с общими error elements.
  */
-export const router = createBrowserRouter([
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    element: <RequireAuth />,
-    children: [
-      {
-        element: <AdminShell />,
-        children: protectedRouteChildren,
-      },
-    ],
-  },
-])
+export function createAppRoutes(client: QueryClient): RouteObject[] {
+  const sessionDependencies = {
+    load: (signal: AbortSignal) => loadSession(client, signal),
+    clear: () => {
+      clearCurrentSession(client)
+      clearBulkModerationDraftSelection()
+    },
+  }
+
+  return [
+    {
+      path: '/',
+      loader: createRequireSessionLoader(sessionDependencies),
+      element: <ProtectedLayout />,
+      errorElement: <RouteError />,
+      children: protectedRouteChildren,
+    },
+    {
+      path: '/login',
+      loader: createRedirectAuthenticatedLoader(sessionDependencies),
+      element: <LoginPage />,
+      errorElement: <RouteError />,
+    },
+  ]
+}

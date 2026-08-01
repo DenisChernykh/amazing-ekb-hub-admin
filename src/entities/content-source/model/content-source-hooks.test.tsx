@@ -1,29 +1,29 @@
+import type { ContentSourceListResponseDto } from '@/shared/api'
 import {
-  getListContentSourcesQueryKey,
-  listContentSources,
-} from '@/shared/api/generated/admin/admin'
-import type { ContentSourceListResponse } from '@/shared/api/generated/operation'
+  adminContentSourcesList,
+  getAdminContentSourcesListQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useContentSourcesQuery } from './content-source-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getListContentSourcesQueryKey: vi.fn((params) => [
-    '/admin/content-sources',
+vi.mock('@/shared/api', () => ({
+  getAdminContentSourcesListQueryKey: vi.fn((params) => [
+    '/v1/admin/content-sources',
     ...(params ? [params] : []),
   ]),
-  listContentSources: vi.fn(),
+  adminContentSourcesList: vi.fn(),
   useListContentSources: vi.fn(() => ({
     data: undefined,
     isPending: true,
   })),
 }))
 
-const mockedListContentSources = vi.mocked(listContentSources)
+const mockedListContentSources = vi.mocked(adminContentSourcesList)
 
-const contentSourceListResponse: ContentSourceListResponse = {
+const contentSourceListResponse: ContentSourceListResponseDto = {
   items: [],
 }
 
@@ -47,7 +47,7 @@ const createQueryClient = () =>
 describe('content source hooks', () => {
   beforeEach(() => {
     mockedListContentSources.mockReset()
-    vi.mocked(getListContentSourcesQueryKey).mockClear()
+    vi.mocked(getAdminContentSourcesListQueryKey).mockClear()
   })
 
   it('loads content sources through generated fetcher and query key', async () => {
@@ -64,7 +64,7 @@ describe('content source hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getListContentSourcesQueryKey).toHaveBeenCalledWith(params)
+    expect(getAdminContentSourcesListQueryKey).toHaveBeenCalledWith(params)
     expect(mockedListContentSources).toHaveBeenCalledWith(
       params,
       undefined,

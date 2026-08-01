@@ -1,6 +1,6 @@
 import { useUpdateContentSourceStatusMutation } from '@/entities/content-source/model/content-source-mutations'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { ContentSource } from '@/shared/api/generated/model'
+import { getContentSourceStatusError } from '@/features/content-source/model/content-source-errors'
+import type { ContentSourceResponseDto } from '@/shared/api'
 import { CheckOutlined, StopOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex } from 'antd'
 import { useState } from 'react'
@@ -9,7 +9,7 @@ import { useState } from 'react'
  * Props actions переключения статуса content source.
  */
 export type ContentSourceStatusActionsProps = {
-  contentSource: ContentSource
+  contentSource: ContentSourceResponseDto
 }
 
 /**
@@ -37,9 +37,9 @@ export function ContentSourceStatusActions({
       },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
-          setErrorMessage(apiError.message)
-          void message.error(apiError.message)
+          const errorMessage = getContentSourceStatusError(error)
+          setErrorMessage(errorMessage)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setErrorMessage(null)

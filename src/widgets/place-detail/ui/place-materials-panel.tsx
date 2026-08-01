@@ -4,10 +4,16 @@ import { CreateMaterialDrawer } from '@/features/material/create/ui/create-mater
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PublicMaterial } from '@/shared/api/generated/model'
+import type {
+  MaterialResponseDto,
+  PinnedMaterialResponseDto,
+} from '@/shared/api'
 import { Alert, App as AntdApp, Button, Card, Space } from 'antd'
 import { useState } from 'react'
+import {
+  getHidePlaceMaterialLinkError,
+  getPlaceMaterialsQueryError,
+} from '../model/place-materials-errors'
 import {
   PlaceMaterialsTable,
   type PlaceMaterialHideLinkError,
@@ -17,7 +23,7 @@ import {
  * Props панели материалов места на admin detail screen.
  */
 export type PlaceMaterialsPanelProps = {
-  pinnedMaterial: PublicMaterial | null
+  pinnedMaterial: PinnedMaterialResponseDto | null
   placeId: string
 }
 
@@ -34,9 +40,8 @@ export function PlaceMaterialsPanel({
   const materialsQuery = usePlaceMaterialsListQuery(placeId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isLinkExistingOpen, setIsLinkExistingOpen] = useState(false)
-  const [editingMaterial, setEditingMaterial] = useState<PublicMaterial | null>(
-    null,
-  )
+  const [editingMaterial, setEditingMaterial] =
+    useState<MaterialResponseDto | null>(null)
   const [hideLinkError, setHideLinkError] =
     useState<PlaceMaterialHideLinkError | null>(null)
   const hideLinkMutation = useHidePlaceMaterialLinkMutation()
@@ -60,7 +65,7 @@ export function PlaceMaterialsPanel({
     </Space>
   )
 
-  const handleHideLink = (material: PublicMaterial) => {
+  const handleHideLink = (material: MaterialResponseDto) => {
     setHideLinkError(null)
     hideLinkMutation.mutate(
       {
@@ -69,12 +74,12 @@ export function PlaceMaterialsPanel({
       },
       {
         onError: (error) => {
-          const apiError = normalizeApiError(error)
+          const errorMessage = getHidePlaceMaterialLinkError(error)
           setHideLinkError({
             materialId: material.id,
-            message: apiError.message,
+            message: errorMessage,
           })
-          void message.error(apiError.message)
+          void message.error(errorMessage)
         },
         onSuccess: () => {
           setHideLinkError(null)
@@ -90,7 +95,7 @@ export function PlaceMaterialsPanel({
   const materialsContent = materialsQuery.isError ? (
     <Alert
       showIcon
-      title={normalizeApiError(materialsQuery.error).message}
+      title={getPlaceMaterialsQueryError(materialsQuery.error)}
       type="error"
     />
   ) : (

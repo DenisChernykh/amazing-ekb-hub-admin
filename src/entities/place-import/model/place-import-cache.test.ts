@@ -1,12 +1,12 @@
-import { getGetPlaceImportOperationQueryKey } from '@/shared/api/generated/admin/admin'
-import type { PlaceImportOperation } from '@/shared/api/generated/model'
+import type { PlaceImportOperationResponseDto } from '@/shared/api'
+import { getAdminPlaceImportsGetQueryKey } from '@/shared/api'
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 import { syncPlaceImportOperationCache } from './place-import-cache'
 
 const operation = (
-  overrides: Partial<PlaceImportOperation>,
-): PlaceImportOperation => ({
+  overrides: Partial<PlaceImportOperationResponseDto>,
+): PlaceImportOperationResponseDto => ({
   attempt: 1,
   captchaExpiresAt: null,
   category: null,
@@ -37,7 +37,7 @@ describe('syncPlaceImportOperationCache', () => {
       version: 5,
     })
     const delayedParsing = operation({ status: 'parsing', version: 4 })
-    const queryKey = getGetPlaceImportOperationQueryKey({
+    const queryKey = getAdminPlaceImportsGetQueryKey({
       operationId: completed.id,
     })
     queryClient.setQueryData(queryKey, completed)

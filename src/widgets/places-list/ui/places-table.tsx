@@ -1,13 +1,15 @@
-import type { PlaceListResponse } from '@/shared/api/generated/model'
+import type { AdminPlaceListResponseDto } from '@/shared/api'
 import { Table, type TableProps } from 'antd'
 import type { ReactNode } from 'react'
 import { placesTableColumns } from './places-table-columns'
 
 type PlacesTableProps = {
-  data: PlaceListResponse
+  data: AdminPlaceListResponseDto
   emptyText?: ReactNode
   loading: boolean
-  rowSelection?: TableProps<PlaceListResponse['items'][number]>['rowSelection']
+  rowSelection?: TableProps<
+    AdminPlaceListResponseDto['items'][number]
+  >['rowSelection']
 }
 
 /**

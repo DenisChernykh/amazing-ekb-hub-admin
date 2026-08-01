@@ -1,29 +1,26 @@
-import {
-  getListAdminMaterialLibraryQueryKey,
-  listAdminMaterialLibrary,
-} from '@/shared/api/generated/admin/admin'
-import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation'
+import type { AdminMaterialLibraryListResponseDto } from '@/shared/api'
+import { adminMaterialsList, getAdminMaterialsListQueryKey } from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useMaterialLibraryQuery } from './material-library-hooks'
 
-vi.mock('@/shared/api/generated/admin/admin', () => ({
-  getListAdminMaterialLibraryQueryKey: vi.fn((params) => [
-    '/admin/materials',
+vi.mock('@/shared/api', () => ({
+  getAdminMaterialsListQueryKey: vi.fn((params) => [
+    '/v1/admin/materials',
     ...(params ? [params] : []),
   ]),
-  listAdminMaterialLibrary: vi.fn(),
+  adminMaterialsList: vi.fn(),
   useListAdminMaterialLibrary: vi.fn(() => ({
     data: undefined,
     isPending: true,
   })),
 }))
 
-const mockedListAdminMaterialLibrary = vi.mocked(listAdminMaterialLibrary)
+const mockedListAdminMaterialLibrary = vi.mocked(adminMaterialsList)
 
-const materialLibraryResponse: AdminMaterialLibraryListResponse = {
+const materialLibraryResponse: AdminMaterialLibraryListResponseDto = {
   items: [],
   page: 1,
   pageSize: 20,
@@ -50,7 +47,7 @@ const createQueryClient = () =>
 describe('material library hooks', () => {
   beforeEach(() => {
     mockedListAdminMaterialLibrary.mockReset()
-    vi.mocked(getListAdminMaterialLibraryQueryKey).mockClear()
+    vi.mocked(getAdminMaterialsListQueryKey).mockClear()
   })
 
   it('loads admin material library through generated fetcher and query key', async () => {
@@ -68,7 +65,7 @@ describe('material library hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(getListAdminMaterialLibraryQueryKey).toHaveBeenCalledWith(params)
+    expect(getAdminMaterialsListQueryKey).toHaveBeenCalledWith(params)
     expect(mockedListAdminMaterialLibrary).toHaveBeenCalledWith(
       params,
       undefined,

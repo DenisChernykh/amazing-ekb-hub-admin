@@ -2,8 +2,12 @@ import {
   useClearPinnedMaterialMutation,
   useSetPinnedMaterialMutation,
 } from '@/entities/place/model/place-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail, PublicMaterial } from '@/shared/api/generated/model'
+import type {
+  MaterialResponseDto,
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -79,12 +83,15 @@ const mockedUseClearPinnedMaterialMutation = vi.mocked(
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const materials: PublicMaterial[] = [
+const materials: MaterialResponseDto[] = [
   {
     durationSec: null,
     id: 'material-1',
@@ -94,6 +101,7 @@ const materials: PublicMaterial[] = [
     title: 'Обзор комплекса',
     type: 'post',
     redirectUrl: '/v1/materials/material-1/go',
+    url: 'https://t.me/amazing_ekb/1',
   },
   {
     durationSec: 90,
@@ -104,16 +112,17 @@ const materials: PublicMaterial[] = [
     title: 'С чего начать',
     type: 'video',
     redirectUrl: '/v1/materials/material-2/go',
+    url: 'https://dzen.ru/video/watch/2',
   },
 ]
 
-const untitledMaterial: PublicMaterial = {
+const untitledMaterial: MaterialResponseDto = {
   ...materials[0],
   id: 'material-untitled',
   title: null,
 }
 
-const updatedPlace: PlaceDetail = {
+const updatedPlace: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {
@@ -139,7 +148,7 @@ const renderPinnedMaterialPanel = ({
 }: {
   isClearPending?: boolean
   isPending?: boolean
-  pinnedMaterial?: PublicMaterial | null
+  pinnedMaterial?: MaterialResponseDto | null
   placeId?: string
 } = {}) => {
   const clearMutate = vi.fn()
@@ -404,12 +413,7 @@ describe('PinnedMaterialPanel', () => {
           isPending: false,
           mutate: () => {
             options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'Pinned material must belong to the same place',
-                messages: ['Pinned material must belong to the same place'],
-                status: 400,
-              }),
+              createApiProblemError('PINNED_MATERIAL_NOT_LINKED', 400),
             )
           },
         }) as unknown as ReturnType<typeof useSetPinnedMaterialMutation>,
@@ -433,10 +437,10 @@ describe('PinnedMaterialPanel', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('Pinned material must belong to the same place'),
+      within(alert).getByText('Материал не связан с этим местом.'),
     ).toBeInTheDocument()
     expect(messageError).toHaveBeenCalledWith(
-      'Pinned material must belong to the same place',
+      'Материал не связан с этим местом.',
     )
   })
 
@@ -450,14 +454,7 @@ describe('PinnedMaterialPanel', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'server',
-                message: 'Place is not available',
-                messages: ['Place is not available'],
-                status: 500,
-              }),
-            )
+            options?.onError?.(createApiProblemError('INTERNAL_ERROR', 500))
           },
         }) as unknown as ReturnType<typeof useClearPinnedMaterialMutation>,
     )
@@ -477,11 +474,11 @@ describe('PinnedMaterialPanel', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('Place is not available'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
     expect(
       within(alert).getByText('Не удалось снять закрепление'),
     ).toBeInTheDocument()
-    expect(messageError).toHaveBeenCalledWith('Place is not available')
+    expect(messageError).toHaveBeenCalledWith('Не удалось выполнить запрос.')
   })
 })

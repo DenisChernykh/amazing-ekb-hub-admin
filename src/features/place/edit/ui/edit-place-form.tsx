@@ -8,8 +8,11 @@ import {
 import { editPlaceFormSchema } from '@/features/place/form/model/place-form-schema'
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PlaceDetail, PlaceSummary } from '@/shared/api/generated/model'
+import { getEditPlaceError } from '@/features/place/model/place-errors'
+import type {
+  PlaceDetailResponseDto,
+  PlaceSummaryResponseDto,
+} from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useEffect, useState } from 'react'
@@ -21,8 +24,8 @@ import { FormProvider, useWatch } from 'react-hook-form'
 export type EditPlaceFormProps = {
   onCancel: () => void
   onDirtyChange?: (isDirty: boolean) => void
-  onUpdated: (place: PlaceSummary) => void
-  place: PlaceDetail
+  onUpdated: (place: PlaceSummaryResponseDto) => void
+  place: PlaceDetailResponseDto
 }
 
 /**
@@ -60,9 +63,9 @@ export function EditPlaceForm({
 
   const updatePlaceMutation = useUpdatePlaceMutation({
     onError: (error) => {
-      const apiError = normalizeApiError(error)
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      const errorMessage = getEditPlaceError(error)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     },
     onSuccess: (updatedPlace) => {
       setErrorMessages([])

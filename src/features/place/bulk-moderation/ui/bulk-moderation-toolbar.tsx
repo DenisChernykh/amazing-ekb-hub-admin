@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/store-hooks'
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
-import { normalizeApiError } from '@/shared/api/client/api-error'
-import type { PlaceStatus } from '@/shared/api/generated/model'
+import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
+import { getApiErrorPresentation } from '@/shared/api'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button, Flex, Typography } from 'antd'
 import {
@@ -16,7 +16,7 @@ import {
 import { BulkModerationProgressDrawer } from './bulk-moderation-progress-drawer'
 
 type BulkModerationTask = Pick<BulkModerationSelectedPlace, 'id' | 'title'> & {
-  targetStatus: PlaceStatus
+  targetStatus: AdminPlaceSummaryResponseDtoStatus
 }
 
 /**
@@ -50,7 +50,7 @@ export function BulkModerationToolbar() {
         failedCount += 1
         dispatch(
           bulkModerationActions.markItemFailed({
-            errorMessage: normalizeApiError(error).message,
+            errorMessage: getApiErrorPresentation(error).message,
             placeId: task.id,
           }),
         )
@@ -67,7 +67,7 @@ export function BulkModerationToolbar() {
     void message.success('Массовая модерация завершена')
   }
 
-  const handleStart = (targetStatus: PlaceStatus) => {
+  const handleStart = (targetStatus: AdminPlaceSummaryResponseDtoStatus) => {
     if (selectedPlaces.length === 0) {
       return
     }

@@ -1,7 +1,10 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { useUpdatePlaceMutation } from '@/entities/place/model/place-mutations'
-import { ApiClientError } from '@/shared/api/client/api-error'
-import type { PlaceDetail } from '@/shared/api/generated/model'
+import type {
+  PlaceCategoryResponseDto,
+  PlaceDetailResponseDto,
+} from '@/shared/api'
+import { createApiProblemError } from '@/test/api-problem'
 import {
   fireEvent,
   render,
@@ -111,12 +114,15 @@ const mockedUsePlaceCategoriesQuery = vi.mocked(usePlaceCategoriesQuery)
 
 const spaCategory = {
   coverImageUrl: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  status: 'active',
+  updatedAt: '2026-01-01T00:00:00.000Z',
   id: 'category_spa',
   slug: 'spa',
   title: 'SPA',
-}
+} satisfies PlaceCategoryResponseDto
 
-const place: PlaceDetail = {
+const place: PlaceDetailResponseDto = {
   mapsUrl: null,
   category: spaCategory,
   counters: {
@@ -330,17 +336,7 @@ describe('EditPlaceForm', () => {
         ({
           isPending: false,
           mutate: () => {
-            options?.onError?.(
-              new ApiClientError({
-                kind: 'validation',
-                message: 'title must be a string',
-                messages: [
-                  'title must be a string',
-                  'categoryId must be valid',
-                ],
-                status: 400,
-              }),
-            )
+            options?.onError?.(createApiProblemError('VALIDATION_FAILED', 422))
           },
         }) as unknown as ReturnType<typeof useUpdatePlaceMutation>,
     )
@@ -355,11 +351,9 @@ describe('EditPlaceForm', () => {
     const alert = await screen.findByRole('alert')
 
     expect(
-      within(alert).getByText('title must be a string'),
+      within(alert).getByText('Не удалось выполнить запрос.'),
     ).toBeInTheDocument()
-    expect(
-      within(alert).getByText('categoryId must be valid'),
-    ).toBeInTheDocument()
+    expect(within(alert).queryByText('Raw backend detail')).toBeNull()
   })
 
   it('shows pending state on save action', () => {

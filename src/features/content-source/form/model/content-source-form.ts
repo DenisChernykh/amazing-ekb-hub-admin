@@ -1,9 +1,9 @@
 import type {
-  ContentSource,
-  ContentSourcePlatform,
-  CreateContentSourceRequest,
-  UpdateContentSourceRequest,
-} from '@/shared/api/generated/model'
+  ContentSourceResponseDto,
+  ContentSourceResponseDtoPlatform,
+  CreateContentSourceDto,
+  UpdateContentSourceDto,
+} from '@/shared/api'
 import { normalizeHttpUrl } from '@/shared/lib/url/safe-url'
 import type { ContentSourceFormValues } from './content-source-form-schema'
 
@@ -14,7 +14,7 @@ type NormalizedContentSourceFormValues = {
   displayName: string
   externalId: string | null
   handle: string | null
-  platform: ContentSourcePlatform | null
+  platform: ContentSourceResponseDtoPlatform | null
   url: string
 }
 
@@ -66,11 +66,11 @@ const getRequiredValue = <T>(value: T | null, fieldName: string): T => {
 
 const assignOptionalCreateField = <
   TKey extends keyof Pick<
-    CreateContentSourceRequest,
+    CreateContentSourceDto,
     'channelId' | 'externalId' | 'handle'
   >,
 >(
-  request: CreateContentSourceRequest,
+  request: CreateContentSourceDto,
   key: TKey,
   value: string | null,
 ) => {
@@ -83,7 +83,7 @@ const assignOptionalCreateField = <
  * Возвращает начальные значения формы из content source.
  */
 export function getContentSourceFormInitialValues(
-  contentSource: ContentSource,
+  contentSource: ContentSourceResponseDto,
 ): ContentSourceFormValues {
   return {
     channelId: contentSource.channelId ?? '',
@@ -100,9 +100,9 @@ export function getContentSourceFormInitialValues(
  */
 export function toCreateContentSourceRequest(
   values: ContentSourceFormValues,
-): CreateContentSourceRequest {
+): CreateContentSourceDto {
   const normalizedValues = normalizeContentSourceFormValues(values)
-  const request: CreateContentSourceRequest = {
+  const request: CreateContentSourceDto = {
     displayName: normalizedValues.displayName,
     platform: getRequiredValue(normalizedValues.platform, 'platform'),
     url: normalizeHttpUrl(values.url),
@@ -123,11 +123,11 @@ export function toCreateContentSourceRequest(
 export function toUpdateContentSourceRequest(
   values: ContentSourceFormValues,
   initialValues: ContentSourceFormValues,
-): UpdateContentSourceRequest {
+): UpdateContentSourceDto {
   const normalizedValues = normalizeContentSourceFormValues(values)
   const normalizedInitialValues =
     normalizeContentSourceFormValues(initialValues)
-  const request: UpdateContentSourceRequest = {}
+  const request: UpdateContentSourceDto = {}
 
   if (normalizedValues.displayName !== normalizedInitialValues.displayName) {
     request.displayName = normalizedValues.displayName

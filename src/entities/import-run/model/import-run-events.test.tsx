@@ -1,10 +1,12 @@
+import type {
+  ImportRunListResponseDto,
+  ImportRunResponseDto,
+} from '@/shared/api'
 import {
-  getListAdminMaterialLibraryQueryKey,
-  getListContentSourcesQueryKey,
-  getListImportRunsQueryKey,
-} from '@/shared/api/generated/admin/admin'
-import type { ImportRun } from '@/shared/api/generated/model'
-import type { ImportRunListResponse } from '@/shared/api/generated/operation'
+  getAdminContentSourcesListQueryKey,
+  getAdminImportRunsListQueryKey,
+  getAdminMaterialsListQueryKey,
+} from '@/shared/api'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -13,6 +15,10 @@ import {
   IMPORT_RUN_EVENTS_FALLBACK_REFETCH_INTERVAL_MS,
   useImportRunEvents,
 } from './import-run-events'
+
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: '/' },
+}))
 
 type EventSourceInitWithCredentials = EventSourceInit & {
   withCredentials?: boolean
@@ -54,7 +60,9 @@ class EventSourceMock {
   }
 }
 
-const makeRun = (overrides: Partial<ImportRun>): ImportRun => ({
+const makeRun = (
+  overrides: Partial<ImportRunResponseDto>,
+): ImportRunResponseDto => ({
   createdAt: '2026-06-24T08:00:00.000Z',
   createdCount: 0,
   errorMessage: null,
@@ -81,14 +89,12 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('useImportRunEvents', () => {
   beforeEach(() => {
     EventSourceMock.instances = []
-    vi.stubEnv('VITE_API_BASE_URL', '/v1')
     vi.stubGlobal('EventSource', EventSourceMock)
     vi.useFakeTimers()
   })
 
   afterEach(() => {
     vi.useRealTimers()
-    vi.unstubAllEnvs()
     vi.unstubAllGlobals()
   })
 
@@ -118,14 +124,16 @@ describe('useImportRunEvents', () => {
       status: 'completed',
     })
 
-    queryClient.setQueryData<ImportRunListResponse>(
-      getListImportRunsQueryKey(),
+    queryClient.setQueryData<ImportRunListResponseDto>(
+      getAdminImportRunsListQueryKey(),
       {
         items: [queuedRun],
       },
     )
-    queryClient.setQueryData(getListContentSourcesQueryKey(), { items: [] })
-    queryClient.setQueryData(getListAdminMaterialLibraryQueryKey(), {
+    queryClient.setQueryData(getAdminContentSourcesListQueryKey(), {
+      items: [],
+    })
+    queryClient.setQueryData(getAdminMaterialsListQueryKey(), {
       items: [],
     })
 
@@ -142,19 +150,19 @@ describe('useImportRunEvents', () => {
     })
 
     expect(
-      queryClient.getQueryData<ImportRunListResponse>(
-        getListImportRunsQueryKey(),
+      queryClient.getQueryData<ImportRunListResponseDto>(
+        getAdminImportRunsListQueryKey(),
       )?.items,
     ).toEqual([completedRun])
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListContentSourcesQueryKey(),
+        queryKey: getAdminContentSourcesListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
     expect(
       queryClient.getQueryCache().find({
-        queryKey: getListAdminMaterialLibraryQueryKey(),
+        queryKey: getAdminMaterialsListQueryKey(),
       })?.state.isInvalidated,
     ).toBe(true)
   })
@@ -173,7 +181,7 @@ describe('useImportRunEvents', () => {
 
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getListImportRunsQueryKey(),
+      queryKey: getAdminImportRunsListQueryKey(),
     })
 
     act(() => {
@@ -197,7 +205,7 @@ describe('useImportRunEvents', () => {
 
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getListImportRunsQueryKey(),
+      queryKey: getAdminImportRunsListQueryKey(),
     })
   })
 
@@ -218,7 +226,7 @@ describe('useImportRunEvents', () => {
 
     expect(EventSourceMock.instances[0]?.close).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getListImportRunsQueryKey(),
+      queryKey: getAdminImportRunsListQueryKey(),
     })
   })
 
@@ -233,7 +241,7 @@ describe('useImportRunEvents', () => {
 
     expect(EventSourceMock.instances).toHaveLength(0)
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: getListImportRunsQueryKey(),
+      queryKey: getAdminImportRunsListQueryKey(),
     })
   })
 })

@@ -1,10 +1,9 @@
-import type { ApiClientError } from '@/shared/api/client/api-error'
-import {
-  getListAdminMaterialLibraryQueryKey,
-  listAdminMaterialLibrary,
-} from '@/shared/api/generated/admin/admin'
-import type { AdminMaterialLibraryListResponse } from '@/shared/api/generated/operation/adminMaterialLibraryListResponse'
-import type { ListAdminMaterialLibraryParams } from '@/shared/api/generated/operation/listAdminMaterialLibraryParams'
+import type {
+  AdminMaterialLibraryListResponseDto,
+  AdminMaterialsListParams,
+  ApiClientError,
+} from '@/shared/api'
+import { adminMaterialsList, getAdminMaterialsListQueryKey } from '@/shared/api'
 import { useQuery } from '@tanstack/react-query'
 
 type MaterialLibraryQueryOptions = {
@@ -18,13 +17,12 @@ type MaterialLibraryQueryOptions = {
  * только `enabled` для ленивых drawer-сценариев.
  */
 export function useMaterialLibraryQuery(
-  params?: ListAdminMaterialLibraryParams,
+  params?: AdminMaterialsListParams,
   options?: MaterialLibraryQueryOptions,
 ) {
-  return useQuery<AdminMaterialLibraryListResponse, ApiClientError>({
+  return useQuery<AdminMaterialLibraryListResponseDto, ApiClientError>({
     enabled: options?.enabled,
-    queryFn: ({ signal }) =>
-      listAdminMaterialLibrary(params, undefined, signal),
-    queryKey: getListAdminMaterialLibraryQueryKey(params),
+    queryFn: ({ signal }) => adminMaterialsList(params, undefined, signal),
+    queryKey: getAdminMaterialsListQueryKey(params),
   })
 }

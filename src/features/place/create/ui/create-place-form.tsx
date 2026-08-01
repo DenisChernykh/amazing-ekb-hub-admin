@@ -10,7 +10,7 @@ import {
 import { createPlaceFormSchema } from '@/features/place/form/model/place-form-schema'
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
-import { normalizeApiError } from '@/shared/api/client/api-error'
+import { getCreatePlaceError } from '@/features/place/model/place-errors'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -87,19 +87,19 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
 
       onCreated(createdPlace.id)
     } catch (error) {
-      const apiError = normalizeApiError(error)
+      const errorMessage = getCreatePlaceError(error)
 
       if (createdPlaceId) {
         setPartialSuccess({
-          messages: apiError.messages,
+          messages: [errorMessage],
           placeId: createdPlaceId,
         })
-        void message.error(apiError.message)
+        void message.error(errorMessage)
         return
       }
 
-      setErrorMessages(apiError.messages)
-      void message.error(apiError.message)
+      setErrorMessages([errorMessage])
+      void message.error(errorMessage)
     }
   }
 
