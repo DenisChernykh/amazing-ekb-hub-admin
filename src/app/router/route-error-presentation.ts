@@ -1,8 +1,8 @@
-import { isProblemCode } from '@/shared/api/client/api-errors'
 import {
   getApiErrorPresentation,
+  isProblemCode,
   type ApiErrorPresentation,
-} from '@/shared/api/presentation/api-error-presentation'
+} from '@/shared/api'
 
 /**
  * Преобразует route error в безопасное представление для общего error element.

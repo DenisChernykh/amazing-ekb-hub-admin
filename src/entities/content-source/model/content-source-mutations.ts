@@ -17,11 +17,9 @@ import {
   adminContentSourcesUpdateStatus,
   adminTelegramImportsEnqueue,
   getAdminContentSourcesListQueryKey,
-} from '@/shared/api'
-import {
   isProblemCode,
   type ApiClientError,
-} from '@/shared/api/client/api-errors'
+} from '@/shared/api'
 import type { QueryClient } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 

@@ -4,11 +4,11 @@
 
 ## Источники
 
-- Backend: `../backend`.
-- Backend OpenAPI: `../backend/docs/api/specification.yaml`.
-- Backend MVP spec: `../backend/docs/MVP_SPEC.md`.
-- Backend module map: `../backend/docs/architecture/module-map.md`.
-- Backend controllers: `../backend/src/modules/**/presentation/http/*controller.ts`.
+- Backend: `../backend-codex`.
+- Backend OpenAPI: `../backend-codex/docs/api/openapi.json`.
+- Backend MVP spec: `../backend-codex/docs/MVP_SPEC.md`.
+- Backend module map: `../backend-codex/docs/architecture/module-map.md`.
+- Backend controllers: `../backend-codex/src/modules/**/presentation/http/*controller.ts`.
 - Public frontend: `../frontend`.
 - Admin SPA: текущий репозиторий `admin-codex`.
 
@@ -18,12 +18,12 @@ Backend уже предоставляет четыре группы API.
 
 ### Auth
 
-| API                  | Возможность                                                                | Auth        | Текущий UI coverage                                                                              |
-| -------------------- | -------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
-| `POST /auth/login`   | Вход по email/password, установка HttpOnly cookies, ответ `AuthMeResponse` | public      | Есть в admin SPA, есть в public frontend login                                                   |
-| `POST /auth/refresh` | Обновление access/refresh cookies без body                                 | public      | Есть в admin transport; public frontend может быть устаревшим относительно cookie-only контракта |
-| `POST /auth/logout`  | Отзыв refresh token и очистка cookies                                      | public      | Есть в admin SPA, есть в public frontend session layer                                           |
-| `GET /auth/me`       | Профиль текущего пользователя                                              | cookie auth | Есть в admin route guard, есть в public frontend session layer                                   |
+| API                    | Возможность                                                        | Auth        | Текущий UI coverage                                                        |
+| ---------------------- | ------------------------------------------------------------------ | ----------- | -------------------------------------------------------------------------- |
+| `POST /v1/auth/login`  | Вход по email/password, установка HttpOnly cookies и CSRF response | public      | Есть в foundation branch admin SPA, есть в public frontend login           |
+| `POST /v1/auth/logout` | Отзыв server session и очистка cookies                             | cookie auth | Есть в foundation branch admin SPA, есть в public frontend session layer   |
+| `GET /v1/auth/me`      | Профиль текущего пользователя                                      | cookie auth | Есть в Data Router guard foundation branch и public frontend session layer |
+| `GET /v1/auth/csrf`    | CSRF token для unsafe browser requests                             | cookie auth | Есть в foundation branch Axios transport                                   |
 
 Auth-контракт backend сейчас cookie-only: токены передаются через HttpOnly cookies, не через frontend-readable storage.
 
@@ -106,12 +106,12 @@ Backend уже закрывает обязательные admin-функции 
 - generated API + Orval;
 - TanStack entity hooks keep the FSD UI boundary while using generated Orval fetchers/query keys directly; done in merged admin PR [#59](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/59), closing admin issue [#46](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/46);
 - Unsafe hand-written production type assertions are removed from the material-library/content-source admin slice via shared runtime guards, typed key iteration, and a static regression test; done in merged admin PR [#60](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/60), closing admin issue [#42](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/42);
-- cookie-only Axios transport with `withCredentials`;
-- refresh-once на `401`;
-- NestJS-only error normalization;
-- login page через AntD Form;
-- protected route через `GET /auth/me`;
-- logout button;
+- foundation alignment в branch `refactor/react-starter-foundation`, не в
+  merged `main`: cookie-only Axios transport с `withCredentials`, CSRF для
+  unsafe requests, runtime-validated `application/problem+json`, Data Router
+  loaders, global Query/Mutation auth-loss cleanup и MSW HTTP boundary;
+- login page через AntD Form, protected route через `GET /v1/auth/me` и logout
+  button входят в этот branch foundation;
 - продуктовый dashboard welcome screen без технических session-полей в admin `main` через merged admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35), deployed in [admin deploy #26433216231](https://github.com/DenisChernykh/amazing-ekb-hub-admin/actions/runs/26433216231), закрывший [admin issue #30](https://github.com/DenisChernykh/amazing-ekb-hub-admin/issues/30);
 - admin shell с sidebar/header/navigation; header больше не показывает реальный email аккаунта в admin `main` через merged admin PR [#35](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/35);
 - read-only route `/places` со списком мест через `GET /admin/places`, включая `hidden`;
@@ -141,6 +141,8 @@ Backend уже закрывает обязательные admin-функции 
 - экран или виджет проверки health/readiness;
 - field-level mapping для validation errors, если backend позже отдаст структурированные поля;
 - smoke/runtime сценарий с реальным backend после login/logout.
+
+Foundation branch использует backend contract из [backend issue #157](https://github.com/DenisChernykh/amazing-ekb-hub-backend/issues/157), исправленный в [backend PR #160](https://github.com/DenisChernykh/amazing-ekb-hub-backend/pull/160). Это source/contract evidence, а не runtime evidence: полный login → protected route → unsafe mutation → logout smoke с реальным backend остаётся явной невыполненной проверкой до отдельного запуска.
 
 ## Feature Gap Matrix
 
@@ -206,7 +208,8 @@ Backend уже закрывает обязательные admin-функции 
 
 - Добавить upload control для JPEG/PNG/WebP до 5 MB.
 - Показывать preview текущего `coverImageUrl`.
-- Обрабатывать `400` validation array как form/global error.
+- Обрабатывать `VALIDATION_FAILED / 422` с обязательным `errors[]` как
+  form/global error.
 
 ### Phase 4: Materials Management
 

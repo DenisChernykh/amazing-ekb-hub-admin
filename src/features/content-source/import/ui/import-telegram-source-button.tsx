@@ -3,12 +3,12 @@ import {
   formatImportRunCounts,
   getImportRunStatusMeta,
 } from '@/entities/import-run/ui/import-run-meta'
+import { getImportTelegramSourceError } from '@/features/content-source/model/content-source-errors'
 import type {
   ContentSourceResponseDto,
   ImportRunResponseDto,
 } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { isProblemCode } from '@/shared/api'
 import { DownloadOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex } from 'antd'
 import { useState } from 'react'
@@ -23,9 +23,6 @@ export type ImportTelegramSourceButtonProps = {
   activeImportRun?: ImportRunResponseDto | null
   contentSource: ContentSourceResponseDto
 }
-
-const IMPORT_ALREADY_ACTIVE_MESSAGE =
-  'Импорт уже выполняется. Обновляем статус.'
 
 /**
  * Рендерит one-click запуск Telegram import для active Telegram source.
@@ -60,24 +57,15 @@ export function ImportTelegramSourceButton({
       { sourceId: contentSource.id },
       {
         onError: (error) => {
+          const errorMessage = getImportTelegramSourceError(error)
+
           if (isProblemCode(error, 'ACTIVE_IMPORT_EXISTS')) {
-            setInfoMessage(IMPORT_ALREADY_ACTIVE_MESSAGE)
-            void message.info(IMPORT_ALREADY_ACTIVE_MESSAGE)
+            setInfoMessage(errorMessage)
+            void message.info(errorMessage)
 
             return
           }
 
-          const presentation = getApiErrorPresentation(error)
-          const errorMessage = isProblemCode(
-            error,
-            'TELEGRAM_IMPORT_SOURCE_INVALID',
-          )
-            ? 'Источник не подходит для импорта Telegram.'
-            : isProblemCode(error, 'TELEGRAM_IMPORT_UNAVAILABLE')
-              ? 'Импорт Telegram временно недоступен.'
-              : isProblemCode(error, 'CONTENT_SOURCE_NOT_FOUND')
-                ? 'Источник не найден.'
-                : presentation.message
           setErrorMessage(errorMessage)
           void message.error(errorMessage)
         },

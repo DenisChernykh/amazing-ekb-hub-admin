@@ -8,12 +8,11 @@ import {
 import { editPlaceFormSchema } from '@/features/place/form/model/place-form-schema'
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
+import { getEditPlaceError } from '@/features/place/model/place-errors'
 import type {
   PlaceDetailResponseDto,
   PlaceSummaryResponseDto,
 } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useEffect, useState } from 'react'
@@ -64,11 +63,7 @@ export function EditPlaceForm({
 
   const updatePlaceMutation = useUpdatePlaceMutation({
     onError: (error) => {
-      const errorMessage = isProblemCode(error, 'PLACE_SLUG_CONFLICT')
-        ? 'Место с таким ярлыком уже существует.'
-        : isProblemCode(error, 'PLACE_NOT_FOUND')
-          ? 'Место не найдено.'
-          : getApiErrorPresentation(error).message
+      const errorMessage = getEditPlaceError(error)
       setErrorMessages([errorMessage])
       void message.error(errorMessage)
     },

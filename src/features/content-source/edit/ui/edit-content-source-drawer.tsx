@@ -9,9 +9,8 @@ import { editContentSourceFormSchema } from '@/features/content-source/form/mode
 import { ContentSourceFormChangedFields } from '@/features/content-source/form/ui/content-source-form-changed-fields'
 import { ContentSourceFormErrorAlert } from '@/features/content-source/form/ui/content-source-form-error-alert'
 import { ContentSourceFormFields } from '@/features/content-source/form/ui/content-source-form-fields'
+import { getEditContentSourceError } from '@/features/content-source/model/content-source-errors'
 import type { ContentSourceResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
@@ -55,15 +54,7 @@ export function EditContentSourceDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const updateSourceMutation = useUpdateContentSourceMutation({
     onError: (error) => {
-      const presentation = getApiErrorPresentation(error)
-      const errorMessage = isProblemCode(
-        error,
-        'CONTENT_SOURCE_IDENTITY_LOCKED',
-      )
-        ? 'Идентификаторы источника нельзя изменить после создания.'
-        : isProblemCode(error, 'CONTENT_SOURCE_NOT_FOUND')
-          ? 'Источник не найден.'
-          : presentation.message
+      const errorMessage = getEditContentSourceError(error)
       setErrorMessages([errorMessage])
       void message.error(errorMessage)
     },

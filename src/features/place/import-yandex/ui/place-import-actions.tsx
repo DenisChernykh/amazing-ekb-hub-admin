@@ -2,9 +2,8 @@ import {
   useCancelPlaceImportMutation,
   useConfirmPlaceImportMutation,
 } from '@/entities/place-import/model/place-import-mutations'
+import { getPlaceImportActionError } from '@/features/place/model/place-errors'
 import type { PlaceImportOperationResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { Alert, App as AntdApp, Button, Flex, Modal } from 'antd'
 import { useState } from 'react'
 
@@ -20,14 +19,7 @@ export function PlaceImportActions({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const handleError = (error: unknown) => {
-    const nextErrorMessage = isProblemCode(
-      error,
-      'PLACE_IMPORT_PREVIEW_EXPIRED',
-    )
-      ? 'Срок действия preview истёк. Запустите импорт заново.'
-      : isProblemCode(error, 'PLACE_IMPORT_PREVIEW_NOT_READY')
-        ? 'Preview ещё не готов. Дождитесь завершения обработки.'
-        : getApiErrorPresentation(error).message
+    const nextErrorMessage = getPlaceImportActionError(error)
     setErrorMessage(nextErrorMessage)
     void message.error(nextErrorMessage)
   }

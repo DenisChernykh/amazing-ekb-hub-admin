@@ -1,9 +1,9 @@
 import type {
   AdminMaterialLibraryListResponseDto,
   AdminMaterialsListParams,
+  ApiClientError,
 } from '@/shared/api'
 import { adminMaterialsList, getAdminMaterialsListQueryKey } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { useQuery } from '@tanstack/react-query'
 
 type MaterialLibraryQueryOptions = {

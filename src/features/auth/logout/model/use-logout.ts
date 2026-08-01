@@ -11,7 +11,8 @@ import { authLogout, isProblemCode } from '@/shared/api'
  * @remarks Требует Router context и `QueryClientProvider`. Успех и
  * `AUTHENTICATION_REQUIRED` очищают session/CSRF cache, feature-owned bulk draft
  * и заменяют маршрут на `/login`. Остальные ошибки сохраняют все локальные
- * данные и текущий маршрут для повторной попытки.
+ * данные и текущий маршрут для повторной попытки. Mutation помечена как
+ * locally handled, чтобы global cache callback не дублировал logout cleanup.
  *
  * @returns React Query mutation для выполнения logout-запроса.
  */
@@ -26,6 +27,7 @@ export function useLogout() {
   }
 
   return useMutation({
+    meta: { authenticationErrorHandling: 'local' },
     mutationFn: () => authLogout(),
     onError: (error) => {
       if (isProblemCode(error, 'AUTHENTICATION_REQUIRED')) {

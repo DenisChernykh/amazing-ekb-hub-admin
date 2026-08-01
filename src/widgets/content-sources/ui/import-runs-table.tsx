@@ -4,10 +4,10 @@ import {
   getImportRunStatusMeta,
 } from '@/entities/import-run/ui/import-run-meta'
 import type {
+  ApiClientError,
   ContentSourceResponseDto,
   ImportRunResponseDto,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
 import {
   ScreenApiErrorState,
   ScreenEmptyState,

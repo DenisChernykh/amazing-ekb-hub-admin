@@ -1,19 +1,20 @@
-# `useZodForm` Candidate for `react-starter`
+# `useZodForm` Starter Alignment
 
 ## Status
 
-Proposal for a separate starter task. This admin branch does not modify
-`react-starter`.
+Adopted alignment in this admin branch: `useZodForm` matches the pinned
+`react-starter` contract without changing the AntD form policy of this project.
 
 ## Proven Contract
 
-- `useZodForm<TSchema>(schema, options)` preserves `z.input<TSchema>` for RHF
+- `useZodForm<TSchema>(schema, options?)` preserves `z.input<TSchema>` for RHF
   controls.
 - Successful submit handlers receive `z.output<TSchema>`.
 - The caller owns `defaultValues`, `mode`, `reValidateMode`, reset and server
   errors.
 - Generated OpenAPI Zod fields can be composed into feature schemas without
   editing generated files.
+- `z` is imported type-only, so the hook does not add a runtime Zod import.
 
 ## Evidence from Admin Flows
 
@@ -28,16 +29,15 @@ Proposal for a separate starter task. This admin branch does not modify
 
 ## Starter Boundary
 
-- Propose only `useZodForm`.
-- Do not propose `RhfFormItem`: it is AntD-specific while `react-starter` uses
-  a different UI foundation.
-- Configure `z.config(ru())` in the starter's application and test entrypoints
-  as a separate explicit decision.
+- `useZodForm` is the reusable alignment point.
+- `RhfFormItem` remains intentionally AntD-specific: it is not a starter
+  candidate because `react-starter` has a different UI foundation.
+- `z.config(ru())` remains an application/test-entrypoint decision rather than
+  a responsibility of the hook.
 
 ## Adoption Checks
 
-- Verify current RHF, Zod and resolver versions in the starter.
-- Add focused hook tests for transformed output and generated-schema
-  composition.
-- Keep generated OpenAPI schemas transport-owned.
-- Do not couple the hook to validation mode or server error mapping.
+- The admin test proves transformed output both with caller options and with no
+  options.
+- Generated OpenAPI schemas remain transport-owned.
+- The hook does not choose validation mode or map server errors.

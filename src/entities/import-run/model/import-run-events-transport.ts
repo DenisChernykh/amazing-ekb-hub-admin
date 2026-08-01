@@ -1,4 +1,4 @@
-import { buildApiUrl } from '@/shared/api/client/api-base-url'
+import { buildApiUrl } from '@/shared/api'
 
 /**
  * Имя успешного SSE-события обновления import run.

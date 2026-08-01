@@ -20,10 +20,13 @@ export type {
   ProblemDocumentLike,
 } from './client/api-errors'
 export {
+  getApiErrorMessage,
   getApiErrorPresentation,
   type ApiErrorPresentation,
+  type ApiProblemMessages,
 } from './presentation/api-error-presentation'
 
+export { buildApiUrl, getApiBaseUrl, joinApiUrl } from './client/api-base-url'
 export {
   clearCsrfToken,
   peekCsrfToken,

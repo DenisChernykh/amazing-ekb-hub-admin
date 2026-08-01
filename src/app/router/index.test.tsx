@@ -25,6 +25,10 @@ import {
 } from '@/shared/api'
 import { server } from '@/test/msw/server'
 
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: 'http://api.test' },
+}))
+
 vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router')>()
 

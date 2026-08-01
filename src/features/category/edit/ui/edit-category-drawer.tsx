@@ -9,9 +9,8 @@ import { editCategoryFormSchema } from '@/features/category/form/model/category-
 import { CategoryFormChangedFields } from '@/features/category/form/ui/category-form-changed-fields'
 import { CategoryFormErrorAlert } from '@/features/category/form/ui/category-form-error-alert'
 import { CategoryFormFields } from '@/features/category/form/ui/category-form-fields'
+import { getEditCategoryError } from '@/features/category/model/category-errors'
 import type { PlaceCategoryResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Drawer, Form } from 'antd'
 import { useState } from 'react'
@@ -55,12 +54,7 @@ export function EditCategoryDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const updateCategoryMutation = useUpdateCategoryMutation({
     onError: (error) => {
-      const presentation = getApiErrorPresentation(error)
-      const errorMessage = isProblemCode(error, 'CATEGORY_SLUG_CONFLICT')
-        ? 'Категория с таким ярлыком уже существует.'
-        : isProblemCode(error, 'CATEGORY_NOT_FOUND')
-          ? 'Категория не найдена.'
-          : presentation.message
+      const errorMessage = getEditCategoryError(error)
       setErrorMessages([errorMessage])
       void message.error(errorMessage)
     },

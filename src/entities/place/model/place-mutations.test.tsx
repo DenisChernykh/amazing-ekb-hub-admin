@@ -28,7 +28,12 @@ import {
   useUploadPlaceCoverPhotoMutation,
 } from './place-mutations'
 
-vi.mock('@/shared/api', () => ({
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: 'http://api.test' },
+}))
+
+vi.mock('@/shared/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/api')>()),
   adminPlacesClearPinnedMaterial: vi.fn(),
   adminPlacesCreate: vi.fn(),
   getAdminPlacesGetQueryKey: vi.fn(({ placeId }) => [

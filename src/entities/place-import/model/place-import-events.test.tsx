@@ -1,11 +1,11 @@
 import type { PlaceImportOperationResponseDto } from '@/shared/api'
 import {
   adminPlaceImportsGetEvents,
+  ApiNetworkError,
   getAdminCategoriesListQueryKey,
   getAdminPlaceImportsGetQueryKey,
   getAdminPlacesListQueryKey,
 } from '@/shared/api'
-import { ApiNetworkError } from '@/shared/api/client/api-errors'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -14,6 +14,10 @@ import {
   PLACE_IMPORT_POLL_INTERVAL_MS,
   usePlaceImportEvents,
 } from './place-import-hooks'
+
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: '/' },
+}))
 
 vi.mock('@/shared/api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/api')>()),
@@ -88,14 +92,12 @@ describe('usePlaceImportEvents', () => {
   beforeEach(() => {
     EventSourceMock.instances = []
     vi.mocked(adminPlaceImportsGetEvents).mockReset()
-    vi.stubEnv('VITE_API_BASE_URL', '/v1')
     vi.stubGlobal('EventSource', EventSourceMock)
     vi.useFakeTimers()
   })
 
   afterEach(() => {
     vi.useRealTimers()
-    vi.unstubAllEnvs()
     vi.unstubAllGlobals()
   })
 

@@ -1,10 +1,11 @@
-import {
-  ApiNetworkError,
-  ApiProtocolError,
-} from '@/shared/api/client/api-errors'
+import { ApiNetworkError, ApiProtocolError } from '@/shared/api'
 import { createApiProblemError } from '@/test/api-problem'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { getRouteErrorPresentation } from './route-error-presentation'
+
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: '/' },
+}))
 
 describe('getRouteErrorPresentation', () => {
   it('uses route-specific safe copy for authorization denial', () => {

@@ -1,7 +1,6 @@
 import { useUpdateContentSourceStatusMutation } from '@/entities/content-source/model/content-source-mutations'
+import { getContentSourceStatusError } from '@/features/content-source/model/content-source-errors'
 import type { ContentSourceResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { CheckOutlined, StopOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex } from 'antd'
 import { useState } from 'react'
@@ -38,10 +37,7 @@ export function ContentSourceStatusActions({
       },
       {
         onError: (error) => {
-          const presentation = getApiErrorPresentation(error)
-          const errorMessage = isProblemCode(error, 'CONTENT_SOURCE_NOT_FOUND')
-            ? 'Источник не найден.'
-            : presentation.message
+          const errorMessage = getContentSourceStatusError(error)
           setErrorMessage(errorMessage)
           void message.error(errorMessage)
         },

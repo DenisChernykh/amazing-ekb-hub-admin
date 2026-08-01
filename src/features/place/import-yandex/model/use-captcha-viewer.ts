@@ -2,8 +2,8 @@ import {
   useCreatePlaceImportViewerAccessMutation,
   useRevokePlaceImportViewerAccessMutation,
 } from '@/entities/place-import/model/place-import-mutations'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { getCaptchaViewerError } from '@/features/place/model/place-errors'
+import { getApiErrorPresentation } from '@/shared/api'
 import { useEffect, useRef, useState } from 'react'
 
 /** Состояние popup-доступа к CAPTCHA viewer. */
@@ -30,11 +30,7 @@ export function useCaptchaViewer(operationId: string): CaptchaViewerState {
     onError: (error) => {
       popupRef.current?.close()
       popupRef.current = null
-      setErrorMessage(
-        isProblemCode(error, 'PLACE_IMPORT_VIEWER_UNAVAILABLE')
-          ? 'Просмотр CAPTCHA временно недоступен.'
-          : getApiErrorPresentation(error).message,
-      )
+      setErrorMessage(getCaptchaViewerError(error))
     },
     onSuccess: (access) => {
       setExpiresAt(access.expiresAt)

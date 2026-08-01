@@ -13,8 +13,7 @@ import { PlacesCreatePage } from '@/pages/places-create/ui/places-create-page'
 import { PlacesPage } from '@/pages/places/ui/places-page'
 import { authGetMe } from '@/shared/api'
 import type { QueryClient } from '@tanstack/react-query'
-import { createBrowserRouter, type RouteObject } from 'react-router'
-import { queryClient } from '../query-client'
+import type { RouteObject } from 'react-router'
 import {
   createRedirectAuthenticatedLoader,
   createRequireSessionLoader,
@@ -124,8 +123,3 @@ export function createAppRoutes(client: QueryClient): RouteObject[] {
     },
   ]
 }
-
-/**
- * Browser Data Router runtime админки.
- */
-export const router = createBrowserRouter(createAppRoutes(queryClient))

@@ -10,8 +10,7 @@ import {
 import { createPlaceFormSchema } from '@/features/place/form/model/place-form-schema'
 import { PlaceFormErrorAlert } from '@/features/place/form/ui/place-form-error-alert'
 import { PlaceFormFields } from '@/features/place/form/ui/place-form-fields'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { getCreatePlaceError } from '@/features/place/model/place-errors'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -88,9 +87,7 @@ export function CreatePlaceForm({ onCancel, onCreated }: CreatePlaceFormProps) {
 
       onCreated(createdPlace.id)
     } catch (error) {
-      const errorMessage = isProblemCode(error, 'PLACE_SLUG_CONFLICT')
-        ? 'Место с таким ярлыком уже существует.'
-        : getApiErrorPresentation(error).message
+      const errorMessage = getCreatePlaceError(error)
 
       if (createdPlaceId) {
         setPartialSuccess({

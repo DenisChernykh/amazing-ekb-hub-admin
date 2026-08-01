@@ -1,11 +1,10 @@
 import { useUpdateMaterialAdminStatusMutation } from '@/entities/material/model/material-mutations'
 import { getMaterialAdminStatusMeta } from '@/entities/material/ui/material-meta'
+import { getMaterialAdminStatusError } from '@/features/material/model/material-errors'
 import type {
   AdminMaterialLibraryResponseDto,
   AdminMaterialLibraryResponseDtoAdminStatus,
 } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { CheckOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 import { Alert, App as AntdApp, Button, Flex, Space } from 'antd'
 import type { ReactNode } from 'react'
@@ -69,10 +68,7 @@ export function MaterialAdminStatusActions({
       },
       {
         onError: (error) => {
-          const presentation = getApiErrorPresentation(error)
-          const errorMessage = isProblemCode(error, 'MATERIAL_NOT_FOUND')
-            ? 'Материал не найден.'
-            : presentation.message
+          const errorMessage = getMaterialAdminStatusError(error)
           setErrorMessage(errorMessage)
           void message.error(errorMessage)
         },

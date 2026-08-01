@@ -6,9 +6,8 @@ import {
 import { createCategoryFormSchema } from '@/features/category/form/model/category-form-schema'
 import { CategoryFormErrorAlert } from '@/features/category/form/ui/category-form-error-alert'
 import { CategoryFormFields } from '@/features/category/form/ui/category-form-fields'
+import { getCreateCategoryError } from '@/features/category/model/category-errors'
 import type { PlaceCategoryResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -48,10 +47,7 @@ export function CreateCategoryDrawer({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const createCategoryMutation = useCreateCategoryMutation({
     onError: (error) => {
-      const presentation = getApiErrorPresentation(error)
-      const errorMessage = isProblemCode(error, 'CATEGORY_SLUG_CONFLICT')
-        ? 'Категория с таким ярлыком уже существует.'
-        : presentation.message
+      const errorMessage = getCreateCategoryError(error)
       setErrorMessages([errorMessage])
       void message.error(errorMessage)
     },

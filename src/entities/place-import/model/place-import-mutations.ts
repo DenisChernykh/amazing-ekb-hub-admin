@@ -1,4 +1,5 @@
 import type {
+  ApiClientError,
   PlaceImportOperationResponseDto,
   PlaceImportViewerAccessResponseDto,
   StartPlaceImportDto,
@@ -10,7 +11,6 @@ import {
   adminPlaceImportsRevokeViewerAccess,
   adminPlaceImportsStart,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   invalidatePlaceImportResultQueries,

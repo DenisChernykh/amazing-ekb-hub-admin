@@ -1,5 +1,8 @@
-import { isProblemCode, type ProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import {
+  getApiErrorPresentation,
+  isProblemCode,
+  type ProblemCode,
+} from '@/shared/api'
 import { Space, Typography } from 'antd'
 import type { ReactNode } from 'react'
 import { ScreenResultState } from './screen-result-state'

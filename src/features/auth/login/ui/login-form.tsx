@@ -1,6 +1,7 @@
 import {
   getLoginFormError,
   mapLoginValidationErrors,
+  type LoginField,
 } from '@/features/auth/login/model/login-errors'
 import {
   loginFormSchema,
@@ -9,6 +10,7 @@ import {
 import { useLogin } from '@/features/auth/login/model/use-login'
 import { ApiProblemError } from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
+import { isOneOf } from '@/shared/lib/type/is-one-of'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { LockOutlined, MailOutlined } from '@ant-design/icons'
 import { Alert, Button, Input } from 'antd'
@@ -18,6 +20,8 @@ import { FormProvider } from 'react-hook-form'
 type LoginFormProps = {
   returnTo: string | null
 }
+
+const loginFields: readonly LoginField[] = ['email', 'password']
 
 /**
  * Ant Design форма входа с RHF/Zod validation и безопасными API-ошибками.
@@ -48,7 +52,11 @@ export function LoginForm({ returnTo }: LoginFormProps) {
         const fieldErrors = mapLoginValidationErrors(error.problem)
 
         for (const [field, message] of Object.entries(fieldErrors)) {
-          form.setError(field as keyof LoginFormValues, {
+          if (!isOneOf(loginFields, field)) {
+            continue
+          }
+
+          form.setError(field, {
             message,
             type: 'server',
           })

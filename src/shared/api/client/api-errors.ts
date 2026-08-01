@@ -1,7 +1,7 @@
-import { AuthGetCsrfToken401Response } from '@/shared/api/generated-zod/auth/auth.zod'
-import type { ProblemResponseDto } from '@/shared/api/generated/model'
 import axios from 'axios'
 import { z } from 'zod'
+import { AuthGetCsrfToken401Response } from '../generated-zod/auth/auth.zod'
+import type { ProblemResponseDto } from '../generated/model'
 
 const problemDocumentSchema = z
   .object({
@@ -23,11 +23,31 @@ const problemDocumentSchema = z
       .optional(),
   })
   .superRefine((problem, context) => {
-    if (problem.code === 'VALIDATION_FAILED' && problem.status !== 422) {
+    if (problem.code === 'VALIDATION_FAILED') {
+      if (problem.status !== 422) {
+        context.addIssue({
+          code: 'custom',
+          message: 'VALIDATION_FAILED requires status 422',
+          path: ['status'],
+        })
+      }
+
+      if (problem.errors === undefined) {
+        context.addIssue({
+          code: 'custom',
+          message: 'VALIDATION_FAILED requires errors',
+          path: ['errors'],
+        })
+      }
+
+      return
+    }
+
+    if (problem.status === 422) {
       context.addIssue({
         code: 'custom',
-        message: 'VALIDATION_FAILED requires status 422',
-        path: ['status'],
+        message: 'Status 422 requires VALIDATION_FAILED',
+        path: ['code'],
       })
     }
   })

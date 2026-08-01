@@ -1,4 +1,4 @@
-import { isProblemCode } from '@/shared/api/client/api-errors'
+import { isProblemCode } from '@/shared/api'
 import { sanitizeReturnTo } from '@/shared/routes'
 import { redirect, type LoaderFunctionArgs } from 'react-router'
 

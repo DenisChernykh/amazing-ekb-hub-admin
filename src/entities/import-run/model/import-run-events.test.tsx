@@ -16,6 +16,10 @@ import {
   useImportRunEvents,
 } from './import-run-events'
 
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: '/' },
+}))
+
 type EventSourceInitWithCredentials = EventSourceInit & {
   withCredentials?: boolean
 }
@@ -85,14 +89,12 @@ const createWrapper = (queryClient: QueryClient) => {
 describe('useImportRunEvents', () => {
   beforeEach(() => {
     EventSourceMock.instances = []
-    vi.stubEnv('VITE_API_BASE_URL', '/v1')
     vi.stubGlobal('EventSource', EventSourceMock)
     vi.useFakeTimers()
   })
 
   afterEach(() => {
     vi.useRealTimers()
-    vi.unstubAllEnvs()
     vi.unstubAllGlobals()
   })
 

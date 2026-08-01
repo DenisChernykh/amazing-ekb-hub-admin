@@ -1,6 +1,6 @@
 import { usePlaceCategoriesQuery } from '@/entities/category/model/category-hooks'
 import { getPlaceCategoryOptions } from '@/entities/place/ui/place-meta'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { getApiErrorPresentation } from '@/shared/api'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { Alert, Input, Select } from 'antd'
 import type { Control } from 'react-hook-form'

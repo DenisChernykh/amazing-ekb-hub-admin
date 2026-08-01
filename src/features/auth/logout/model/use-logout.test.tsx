@@ -1,10 +1,11 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createAppQueryClient } from '@/app/query-client'
 import { currentSessionQueryKey } from '@/entities/session'
 import {
   BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
@@ -42,11 +43,9 @@ function LogoutProbe() {
 }
 
 function renderLogoutProbe() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      mutations: { retry: false },
-      queries: { retry: false },
-    },
+  const onAuthenticationRequired = vi.fn()
+  const queryClient = createAppQueryClient({
+    onAuthenticationRequired,
   })
   queryClient.setQueryData(currentSessionQueryKey(), currentUser)
   const router = createMemoryRouter(
@@ -63,7 +62,7 @@ function renderLogoutProbe() {
     </QueryClientProvider>,
   )
 
-  return { queryClient, router }
+  return { onAuthenticationRequired, queryClient, router }
 }
 
 describe('useLogout', () => {
@@ -101,7 +100,8 @@ describe('useLogout', () => {
     saveBulkModerationDraftSelection([
       { id: 'place-1', status: 'active', title: 'Аквацентр' },
     ])
-    const { queryClient, router } = renderLogoutProbe()
+    const { onAuthenticationRequired, queryClient, router } =
+      renderLogoutProbe()
 
     await userEvent.click(screen.getByRole('button', { name: 'Logout probe' }))
 
@@ -114,5 +114,6 @@ describe('useLogout', () => {
       ),
     ).toBeNull()
     expect(router.state.location.pathname).toBe('/login')
+    expect(onAuthenticationRequired).not.toHaveBeenCalled()
   })
 })

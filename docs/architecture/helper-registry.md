@@ -17,14 +17,19 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `readOpenApiSource`          | `scripts/api/sync-openapi.mjs`   | exported   | Reads an explicitly configured local/file/HTTP source without changing the default local-first contract. |
 | `syncOpenApi`                | `scripts/api/sync-openapi.mjs`   | exported   | Validates and writes the local OpenAPI JSON snapshot in the project Prettier format.                     |
 
-## Shared API Client
+## Shared API Client and Error Contracts
 
 | Helper                                | Location                                                | Visibility         | Contract                                                                                                                    |
 | ------------------------------------- | ------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | `normalizeApiError`                   | `src/shared/api/client/api-errors.ts`                   | exported           | Accepts only validated Problem Details HTTP errors and maps network or invalid responses to the strict client error union.  |
+| `ApiProblemError`                     | `src/shared/api/client/api-errors.ts`                   | exported           | Carries a validated Problem Details document, stable backend code, request ID, and parsed retry delay.                      |
+| `ApiNetworkError`                     | `src/shared/api/client/api-errors.ts`                   | exported           | Represents an API transport failure without an HTTP response.                                                               |
+| `ApiProtocolError`                    | `src/shared/api/client/api-errors.ts`                   | exported           | Represents an HTTP failure whose body does not satisfy the Problem Details contract.                                        |
 | `parseHttpDate`                       | `src/shared/api/client/api-errors.ts`                   | private            | Strictly parses all three RFC 9110 HTTP-date forms, including RFC850 two-digit-year semantics.                              |
 | `isProblemCode`                       | `src/shared/api/client/api-errors.ts`                   | exported           | Narrows a normalized Problem Details error by its stable backend code.                                                      |
 | `getApiErrorPresentation`             | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Maps unknown errors to safe local UI copy, retry metadata, and an optional server-side request identifier.                  |
+| `ApiProblemMessages`                  | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Defines a partial caller-owned mapping from stable Problem Details codes to safe localized copy.                            |
+| `getApiErrorMessage`                  | `src/shared/api/presentation/api-error-presentation.ts` | exported           | Resolves caller-owned domain copy for known problem codes and otherwise uses the shared safe presentation fallback.         |
 | `getApiBaseUrl`                       | `src/shared/api/client/api-base-url.ts`                 | exported           | Returns the shared API root/origin for Axios and browser APIs such as `EventSource`.                                        |
 | `joinApiUrl`                          | `src/shared/api/client/api-base-url.ts`                 | exported           | Joins the validated API root/origin with a caller-owned versioned endpoint path.                                            |
 | `buildApiUrl`                         | `src/shared/api/client/api-base-url.ts`                 | exported           | Builds backend API URLs from the shared origin and a caller-owned versioned endpoint path.                                  |
@@ -39,6 +44,33 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `acceptsOperationalHealthUnavailable` | `src/shared/api/client/orval-mutator.ts`                | private            | Allows JSON `503` data only for exact operational health GET paths.                                                         |
 | `getResponseMediaType`                | `src/shared/api/client/orval-mutator.ts`                | private            | Normalizes an Axios response Content-Type to its lowercase media type.                                                      |
 | `apiMutator`                          | `src/shared/api/client/orval-mutator.ts`                | exported           | Merges Orval request options, accepts operational JSON `503` responses, and normalizes other failures.                      |
+
+## Feature and Widget Error Presentation
+
+| Helper                          | Location                                                     | Visibility | Contract                                                                                     |
+| ------------------------------- | ------------------------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------- |
+| `getCreateCategoryError`        | `src/features/category/model/category-errors.ts`             | exported   | Maps create-category problem codes to safe scenario-owned copy.                              |
+| `getEditCategoryError`          | `src/features/category/model/category-errors.ts`             | exported   | Maps edit-category problem codes to safe scenario-owned copy.                                |
+| `getDeleteCategoryError`        | `src/features/category/model/category-errors.ts`             | exported   | Maps delete-category problem codes to safe scenario-owned copy.                              |
+| `getCreateContentSourceError`   | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps create-source problem codes to safe scenario-owned copy.                                |
+| `getEditContentSourceError`     | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps edit-source problem codes to safe scenario-owned copy.                                  |
+| `getContentSourceStatusError`   | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps source-status problem codes to safe scenario-owned copy.                                |
+| `getImportTelegramSourceError`  | `src/features/content-source/model/content-source-errors.ts` | exported   | Maps Telegram-import problem codes to safe scenario-owned copy, including active-run notice. |
+| `getCreateMaterialError`        | `src/features/material/model/material-errors.ts`             | exported   | Maps create-material problem codes to safe scenario-owned copy.                              |
+| `getEditMaterialError`          | `src/features/material/model/material-errors.ts`             | exported   | Maps edit-material problem codes to safe scenario-owned copy.                                |
+| `getMaterialAdminStatusError`   | `src/features/material/model/material-errors.ts`             | exported   | Maps material moderation problem codes to safe scenario-owned copy.                          |
+| `getLinkExistingMaterialError`  | `src/features/material/model/material-errors.ts`             | exported   | Maps material-link problem codes to safe scenario-owned copy.                                |
+| `getCreatePlaceError`           | `src/features/place/model/place-errors.ts`                   | exported   | Maps create-place problem codes to safe scenario-owned copy.                                 |
+| `getEditPlaceError`             | `src/features/place/model/place-errors.ts`                   | exported   | Maps edit-place problem codes to safe scenario-owned copy.                                   |
+| `getPlaceStatusError`           | `src/features/place/model/place-errors.ts`                   | exported   | Maps place-status problem codes to safe scenario-owned copy.                                 |
+| `getPlaceCoverUploadApiError`   | `src/features/place/model/place-errors.ts`                   | exported   | Maps place cover upload problem codes to safe scenario-owned copy.                           |
+| `getSetPinnedMaterialError`     | `src/features/place/model/place-errors.ts`                   | exported   | Maps pinned-material assignment problem codes to safe scenario-owned copy.                   |
+| `getClearPinnedMaterialError`   | `src/features/place/model/place-errors.ts`                   | exported   | Maps pinned-material clearing problem codes to safe scenario-owned copy.                     |
+| `getPlaceImportStartError`      | `src/features/place/model/place-errors.ts`                   | exported   | Maps place-import start problem codes to safe scenario-owned copy.                           |
+| `getPlaceImportActionError`     | `src/features/place/model/place-errors.ts`                   | exported   | Maps place-import confirm/cancel problem codes to safe scenario-owned copy.                  |
+| `getCaptchaViewerError`         | `src/features/place/model/place-errors.ts`                   | exported   | Maps CAPTCHA viewer problem codes to safe scenario-owned copy.                               |
+| `getHidePlaceMaterialLinkError` | `src/widgets/place-detail/model/place-materials-errors.ts`   | exported   | Maps place-material unlink problem codes to safe widget-owned copy.                          |
+| `getPlaceMaterialsQueryError`   | `src/widgets/place-detail/model/place-materials-errors.ts`   | exported   | Maps place-material query problem codes to safe widget-owned copy.                           |
 
 ## Shared Number Helpers
 
@@ -99,13 +131,16 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## App State
 
-| Helper             | Location                  | Visibility | Contract                                                                      |
-| ------------------ | ------------------------- | ---------- | ----------------------------------------------------------------------------- |
-| `shouldRetryQuery` | `src/app/query-client.ts` | exported   | Retries network and server-side Problem Details query failures at most twice. |
-| `createAppStore`   | `src/app/store.ts`        | exported   | Creates an isolated Redux store instance for app runtime or tests.            |
-| `store`            | `src/app/store.ts`        | exported   | Runtime Redux store used by `AppProviders`.                                   |
-| `useAppDispatch`   | `src/app/store-hooks.ts`  | exported   | Typed Redux dispatch hook for app-level state changes.                        |
-| `useAppSelector`   | `src/app/store-hooks.ts`  | exported   | Typed Redux selector hook for reading app-level state.                        |
+| Helper                 | Location                  | Visibility | Contract                                                                                                               |
+| ---------------------- | ------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `shouldRetryQuery`     | `src/app/query-client.ts` | exported   | Retries network and server-side Problem Details query failures at most twice.                                          |
+| `createAppQueryClient` | `src/app/query-client.ts` | exported   | Creates an isolated QueryClient whose global cache callbacks forward non-local authentication loss to app composition. |
+| `createAppRuntime`     | `src/app/app-runtime.ts`  | exported   | Composes QueryClient and Data Router with one cleanup/redirect path for product query and mutation session loss.       |
+| `queryClient`          | `src/app/runtime.ts`      | exported   | Runtime QueryClient shared by app providers and route/session composition.                                             |
+| `createAppStore`       | `src/app/store.ts`        | exported   | Creates an isolated Redux store instance for app runtime or tests.                                                     |
+| `store`                | `src/app/store.ts`        | exported   | Runtime Redux store used by `AppProviders`.                                                                            |
+| `useAppDispatch`       | `src/app/store-hooks.ts`  | exported   | Typed Redux dispatch hook for app-level state changes.                                                                 |
+| `useAppSelector`       | `src/app/store-hooks.ts`  | exported   | Typed Redux selector hook for reading app-level state.                                                                 |
 
 ## App Router
 
@@ -118,7 +153,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `ProtectedLayout`                   | `src/app/router/protected-layout.tsx`        | exported   | Composes the protected route outlet inside the presentation-only admin shell after the parent loader succeeds.                  |
 | `protectedRouteChildren`            | `src/app/router/index.tsx`                   | exported   | Defines the relative dashboard/admin child route set nested below the protected root route.                                     |
 | `createAppRoutes`                   | `src/app/router/index.tsx`                   | exported   | Creates runtime/test Data Router routes whose loaders perform fresh abort-safe session checks and auth-loss cleanup.            |
-| `router`                            | `src/app/router/index.tsx`                   | exported   | Runtime browser Data Router built from the shared route factory and application Query Client.                                   |
+| `router`                            | `src/app/runtime.ts`                         | exported   | Runtime browser Data Router built from the shared route factory and application Query Client.                                   |
 
 ## Session Entity
 

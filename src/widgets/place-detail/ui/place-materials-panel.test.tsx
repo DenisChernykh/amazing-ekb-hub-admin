@@ -4,8 +4,11 @@ import { CreateMaterialDrawer } from '@/features/material/create/ui/create-mater
 import { EditMaterialDrawer } from '@/features/material/edit/ui/edit-material-drawer'
 import { LinkExistingMaterialDrawer } from '@/features/material/link-existing/ui/link-existing-material-drawer'
 import { PinnedMaterialPanel } from '@/features/place/pinned-material/ui/pinned-material-panel'
-import type { MaterialListResponseDto, MaterialResponseDto } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
+import type {
+  ApiClientError,
+  MaterialListResponseDto,
+  MaterialResponseDto,
+} from '@/shared/api'
 import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'

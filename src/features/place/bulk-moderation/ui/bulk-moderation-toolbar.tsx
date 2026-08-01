@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/store-hooks'
 import { useUpdatePlaceStatusMutation } from '@/entities/place/model/place-mutations'
 import type { AdminPlaceSummaryResponseDtoStatus } from '@/shared/api'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { getApiErrorPresentation } from '@/shared/api'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import { App as AntdApp, Button, Flex, Typography } from 'antd'
 import {

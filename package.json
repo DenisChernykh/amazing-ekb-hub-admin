@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
     "lint:strict": "eslint . --max-warnings=0",
     "format": "prettier . --write",
@@ -19,7 +19,8 @@
     "api:sync": "node ./scripts/api/sync-openapi.mjs",
     "api:generate": "orval --config orval.config.ts && prettier --write src/shared/api/generated src/shared/api/generated-zod",
     "api:update": "pnpm run api:sync && pnpm run api:generate",
-    "api:check": "pnpm run api:generate && git diff --exit-code -- openapi/openapi.json src/shared/api/generated src/shared/api/generated-zod",
+    "api:check": "pnpm run api:generate && node ./scripts/api/check-generated-drift.mjs",
+    "check": "pnpm run api:check && pnpm run format:check && pnpm run lint:strict && pnpm run typecheck && pnpm run test && pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview",

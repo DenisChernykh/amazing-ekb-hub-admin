@@ -4,9 +4,9 @@ import {
   adminPlaceImportsGetActive,
   adminPlaceImportsGetEvents,
   getAdminPlaceImportsGetQueryKey,
+  getApiErrorPresentation,
+  type ApiClientError,
 } from '@/shared/api'
-import { type ApiClientError } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import {

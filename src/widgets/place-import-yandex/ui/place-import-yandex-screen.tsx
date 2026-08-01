@@ -9,7 +9,7 @@ import { PlaceImportActions } from '@/features/place/import-yandex/ui/place-impo
 import { PlaceImportCaptchaPanel } from '@/features/place/import-yandex/ui/place-import-captcha-panel'
 import { PlaceImportPreview } from '@/features/place/import-yandex/ui/place-import-preview'
 import { PlaceImportStartForm } from '@/features/place/import-yandex/ui/place-import-start-form'
-import { isProblemCode } from '@/shared/api/client/api-errors'
+import { isProblemCode } from '@/shared/api'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,

@@ -23,7 +23,12 @@ import {
   useUpdateContentSourceStatusMutation,
 } from './content-source-mutations'
 
-vi.mock('@/shared/api', () => ({
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: 'http://api.test' },
+}))
+
+vi.mock('@/shared/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/api')>()),
   adminContentSourcesCreate: vi.fn(),
   getAdminMaterialsListQueryKey: vi.fn(() => ['/v1/admin/materials']),
   getAdminContentSourcesListQueryKey: vi.fn(() => [

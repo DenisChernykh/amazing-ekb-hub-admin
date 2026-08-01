@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import type { ReactNode } from 'react'
 import { Provider as ReduxProvider } from 'react-redux'
-import { queryClient } from './query-client'
+import { queryClient } from './runtime'
 import { store } from './store'
 
 dayjs.locale('ru')

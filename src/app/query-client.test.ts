@@ -2,10 +2,14 @@ import {
   ApiNetworkError,
   ApiProblemError,
   ApiProtocolError,
-} from '@/shared/api/client/api-errors'
-import { describe, expect, it } from 'vitest'
+} from '@/shared/api'
+import { describe, expect, it, vi } from 'vitest'
 
 import { shouldRetryQuery } from './query-client'
+
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: 'http://api.test' },
+}))
 
 function problemError(status: number) {
   return new ApiProblemError(

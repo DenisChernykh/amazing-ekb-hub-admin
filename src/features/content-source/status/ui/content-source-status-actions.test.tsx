@@ -1,9 +1,9 @@
 import { useUpdateContentSourceStatusMutation } from '@/entities/content-source/model/content-source-mutations'
 import type {
+  ApiClientError,
   ContentSourceResponseDto,
   ContentSourceResponseDtoStatus,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { App as AntdApp } from 'antd'

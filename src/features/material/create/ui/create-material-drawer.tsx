@@ -6,9 +6,8 @@ import {
 import { createMaterialFormSchema } from '@/features/material/form/model/material-form-schema'
 import { MaterialFormErrorAlert } from '@/features/material/form/ui/material-form-error-alert'
 import { MaterialFormFields } from '@/features/material/form/ui/material-form-fields'
+import { getCreateMaterialError } from '@/features/material/model/material-errors'
 import type { MaterialResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex, Form } from 'antd'
 import { useState } from 'react'
@@ -55,10 +54,7 @@ export function CreateMaterialDrawer({
   const { isDirty } = form.formState
   const createMaterialMutation = useCreatePlaceMaterialMutation({
     onError: (error) => {
-      const presentation = getApiErrorPresentation(error)
-      const errorMessage = isProblemCode(error, 'PLACE_NOT_FOUND')
-        ? 'Место не найдено.'
-        : presentation.message
+      const errorMessage = getCreateMaterialError(error)
       setErrorMessages([errorMessage])
       void message.error(errorMessage)
     },

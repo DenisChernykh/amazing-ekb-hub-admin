@@ -2,8 +2,8 @@ import { useUpdateMaterialAdminStatusMutation } from '@/entities/material/model/
 import type {
   AdminMaterialLibraryResponseDto,
   AdminMaterialLibraryResponseDtoAdminStatus,
+  ApiClientError,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'

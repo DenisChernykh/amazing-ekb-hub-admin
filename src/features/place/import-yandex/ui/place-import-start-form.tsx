@@ -3,8 +3,8 @@ import {
   placeImportStartSchema,
   type PlaceImportStartValues,
 } from '@/features/place/import-yandex/model/place-import-start-schema'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { getPlaceImportStartError } from '@/features/place/model/place-errors'
+import { isProblemCode } from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { RhfFormItem } from '@/shared/ui/form/rhf-form-item'
 import { ImportOutlined } from '@ant-design/icons'
@@ -35,13 +35,7 @@ export function PlaceImportStartForm({
         return
       }
 
-      setErrorMessage(
-        isProblemCode(error, 'PLACE_IMPORT_INPUT_INVALID')
-          ? 'Проверьте ссылку для импорта.'
-          : isProblemCode(error, 'PLACE_IMPORTS_UNAVAILABLE')
-            ? 'Сервис импорта временно недоступен.'
-            : getApiErrorPresentation(error).message,
-      )
+      setErrorMessage(getPlaceImportStartError(error))
     },
     onSuccess: (operation) => onStarted(operation.id),
   })

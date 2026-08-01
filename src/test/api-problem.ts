@@ -2,7 +2,7 @@ import {
   ApiProblemError,
   type ProblemCode,
   type ProblemDocumentLike,
-} from '@/shared/api/client/api-errors'
+} from '@/shared/api'
 
 /**
  * Создаёт Problem Details error для focused UI/model тестов.

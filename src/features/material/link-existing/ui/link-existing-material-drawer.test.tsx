@@ -2,9 +2,9 @@ import { useMaterialLibraryQuery } from '@/entities/material/model/material-libr
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
 import type {
   AdminMaterialLibraryResponseDto,
+  ApiClientError,
   MaterialResponseDto,
 } from '@/shared/api'
-import type { ApiClientError } from '@/shared/api/client/api-errors'
 import { createApiProblemError } from '@/test/api-problem'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App as AntdApp } from 'antd'

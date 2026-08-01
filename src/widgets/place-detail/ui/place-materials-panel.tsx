@@ -8,10 +8,12 @@ import type {
   MaterialResponseDto,
   PinnedMaterialResponseDto,
 } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { Alert, App as AntdApp, Button, Card, Space } from 'antd'
 import { useState } from 'react'
+import {
+  getHidePlaceMaterialLinkError,
+  getPlaceMaterialsQueryError,
+} from '../model/place-materials-errors'
 import {
   PlaceMaterialsTable,
   type PlaceMaterialHideLinkError,
@@ -72,15 +74,7 @@ export function PlaceMaterialsPanel({
       },
       {
         onError: (error) => {
-          const presentation = getApiErrorPresentation(error)
-          const errorMessage = isProblemCode(
-            error,
-            'PLACE_MATERIAL_LINK_NOT_FOUND',
-          )
-            ? 'Связь материала с местом не найдена.'
-            : isProblemCode(error, 'MATERIAL_PLACE_NOT_FOUND')
-              ? 'Материал места не найден.'
-              : presentation.message
+          const errorMessage = getHidePlaceMaterialLinkError(error)
           setHideLinkError({
             materialId: material.id,
             message: errorMessage,
@@ -101,11 +95,7 @@ export function PlaceMaterialsPanel({
   const materialsContent = materialsQuery.isError ? (
     <Alert
       showIcon
-      title={
-        isProblemCode(materialsQuery.error, 'MATERIAL_PLACE_NOT_FOUND')
-          ? 'Материал места не найден.'
-          : getApiErrorPresentation(materialsQuery.error).message
-      }
+      title={getPlaceMaterialsQueryError(materialsQuery.error)}
       type="error"
     />
   ) : (

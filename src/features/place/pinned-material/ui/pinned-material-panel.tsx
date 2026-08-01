@@ -7,12 +7,14 @@ import {
   useClearPinnedMaterialMutation,
   useSetPinnedMaterialMutation,
 } from '@/entities/place/model/place-mutations'
+import {
+  getClearPinnedMaterialError,
+  getSetPinnedMaterialError,
+} from '@/features/place/model/place-errors'
 import type {
   MaterialResponseDto,
   PinnedMaterialResponseDto,
 } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
 import { App as AntdApp, Card, Flex, Select } from 'antd'
 import { useState } from 'react'
 import { toSetPinnedMaterialRequest } from '../model/pinned-material'
@@ -59,13 +61,7 @@ export function PinnedMaterialPanel({
   const [errorMessages, setErrorMessages] = useState<string[]>([])
   const setPinnedMaterialMutation = useSetPinnedMaterialMutation({
     onError: (error) => {
-      const errorMessage = isProblemCode(error, 'PINNED_MATERIAL_NOT_FOUND')
-        ? 'Закрепленный материал не найден.'
-        : isProblemCode(error, 'PINNED_MATERIAL_NOT_LINKED')
-          ? 'Материал не связан с этим местом.'
-          : isProblemCode(error, 'PLACE_NOT_FOUND')
-            ? 'Место не найдено.'
-            : getApiErrorPresentation(error).message
+      const errorMessage = getSetPinnedMaterialError(error)
       setErrorTitle('Не удалось закрепить материал')
       setErrorMessages([errorMessage])
       void message.error(errorMessage)
@@ -82,11 +78,7 @@ export function PinnedMaterialPanel({
   })
   const clearPinnedMaterialMutation = useClearPinnedMaterialMutation({
     onError: (error) => {
-      const errorMessage = isProblemCode(error, 'PINNED_MATERIAL_NOT_FOUND')
-        ? 'Закрепленный материал не найден.'
-        : isProblemCode(error, 'PLACE_NOT_FOUND')
-          ? 'Место не найдено.'
-          : getApiErrorPresentation(error).message
+      const errorMessage = getClearPinnedMaterialError(error)
       setErrorTitle('Не удалось снять закрепление')
       setErrorMessages([errorMessage])
       void message.error(errorMessage)

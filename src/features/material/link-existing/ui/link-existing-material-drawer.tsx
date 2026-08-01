@@ -1,8 +1,8 @@
 import { useMaterialLibraryQuery } from '@/entities/material/model/material-library-hooks'
 import { useLinkPlaceMaterialMutation } from '@/entities/material/model/material-mutations'
+import { getLinkExistingMaterialError } from '@/features/material/model/material-errors'
 import type { AdminMaterialLibraryResponseDto } from '@/shared/api'
-import { isProblemCode } from '@/shared/api/client/api-errors'
-import { getApiErrorPresentation } from '@/shared/api/presentation/api-error-presentation'
+import { getApiErrorPresentation } from '@/shared/api'
 import { Alert, App as AntdApp, Drawer, Empty, Flex, Typography } from 'antd'
 import { useState } from 'react'
 import { LinkExistingMaterialTable } from './link-existing-material-table'
@@ -61,14 +61,7 @@ export function LinkExistingMaterialDrawer({
       },
       {
         onError: (error) => {
-          const presentation = getApiErrorPresentation(error)
-          const errorMessage = isProblemCode(error, 'MATERIAL_PLACE_NOT_FOUND')
-            ? 'Материал места не найден.'
-            : isProblemCode(error, 'MATERIAL_NOT_FOUND')
-              ? 'Материал не найден.'
-              : isProblemCode(error, 'PLACE_NOT_FOUND')
-                ? 'Место не найдено.'
-                : presentation.message
+          const errorMessage = getLinkExistingMaterialError(error)
           setErrorMessage(errorMessage)
           void message.error(errorMessage)
         },

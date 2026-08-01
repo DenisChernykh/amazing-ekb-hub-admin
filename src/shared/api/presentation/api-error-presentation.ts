@@ -2,7 +2,8 @@ import {
   ApiNetworkError,
   ApiProblemError,
   ApiProtocolError,
-} from '@/shared/api/client/api-errors'
+  type ProblemCode,
+} from '../client/api-errors'
 
 /** Безопасное локализованное представление API-ошибки для UI. */
 export type ApiErrorPresentation = {
@@ -10,6 +11,9 @@ export type ApiErrorPresentation = {
   requestId?: string
   retryable: boolean
 }
+
+/** Локализованные переопределения сообщений для известных Problem Details codes. */
+export type ApiProblemMessages = Readonly<Partial<Record<ProblemCode, string>>>
 
 /**
  * Преобразует typed API error в безопасное локализованное представление.
@@ -71,4 +75,27 @@ export function getApiErrorPresentation(error: unknown): ApiErrorPresentation {
     message: 'Произошла непредвиденная ошибка.',
     retryable: false,
   }
+}
+
+/**
+ * Возвращает caller-owned сообщение для известного problem code или общий безопасный fallback.
+ *
+ * @remarks Карта сообщений остается в feature/widget model, поэтому `shared/api`
+ * не получает знания о продуктовых сценариях и не показывает backend copy.
+ *
+ * @returns Локализованный текст, безопасный для пользовательского интерфейса.
+ */
+export function getApiErrorMessage(
+  error: unknown,
+  problemMessages: ApiProblemMessages,
+) {
+  if (error instanceof ApiProblemError) {
+    const domainMessage = problemMessages[error.code]
+
+    if (domainMessage !== undefined) {
+      return domainMessage
+    }
+  }
+
+  return getApiErrorPresentation(error).message
 }

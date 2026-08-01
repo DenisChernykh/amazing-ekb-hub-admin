@@ -5,9 +5,12 @@ import {
   ApiProblemError,
   ApiProtocolError,
   type ProblemCode,
-} from '@/shared/api/client/api-errors'
+} from '../client/api-errors'
 
-import { getApiErrorPresentation } from './api-error-presentation'
+import {
+  getApiErrorMessage,
+  getApiErrorPresentation,
+} from './api-error-presentation'
 
 function problemError(
   code: ProblemCode,
@@ -101,5 +104,23 @@ describe('getApiErrorPresentation', () => {
     expect(serialized).not.toContain('Raw backend title')
     expect(serialized).not.toContain('Raw backend detail')
     expect(serialized).not.toContain('Raw backend field detail')
+  })
+})
+
+describe('getApiErrorMessage', () => {
+  it('uses caller-owned copy for a supported domain problem code', () => {
+    expect(
+      getApiErrorMessage(problemError('CATEGORY_SLUG_CONFLICT', 409), {
+        CATEGORY_SLUG_CONFLICT: 'Категория с таким ярлыком уже существует.',
+      }),
+    ).toBe('Категория с таким ярлыком уже существует.')
+  })
+
+  it('uses the shared safe fallback for an unsupported problem code', () => {
+    expect(
+      getApiErrorMessage(problemError('INTERNAL_ERROR', 500), {
+        CATEGORY_SLUG_CONFLICT: 'Категория с таким ярлыком уже существует.',
+      }),
+    ).toBe('Не удалось выполнить запрос.')
   })
 })

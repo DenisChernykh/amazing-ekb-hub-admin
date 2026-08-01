@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App as AntdApp } from 'antd'
@@ -6,6 +6,7 @@ import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createAppQueryClient } from '@/app/query-client'
 import {
   BULK_MODERATION_DRAFT_SELECTION_STORAGE_KEY,
   saveBulkModerationDraftSelection,
@@ -33,12 +34,12 @@ function PlacesRouteProbe() {
   return <p>Places route: {location.search}</p>
 }
 
-function renderLogin(returnTo: string | null = '/places') {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      mutations: { retry: false },
-      queries: { retry: false },
-    },
+function renderLogin(
+  returnTo: string | null = '/places',
+  onAuthenticationRequired = vi.fn(),
+) {
+  const queryClient = createAppQueryClient({
+    onAuthenticationRequired,
   })
   const router = createMemoryRouter(
     [
@@ -62,7 +63,7 @@ function renderLogin(returnTo: string | null = '/places') {
     </AntdApp>,
   )
 
-  return router
+  return { onAuthenticationRequired, router }
 }
 
 async function fillValidCredentials() {
@@ -166,7 +167,7 @@ describe('LoginForm', () => {
         problem(401, 'AUTHENTICATION_REQUIRED'),
       ),
     )
-    renderLogin()
+    const { onAuthenticationRequired, router } = renderLogin()
     const user = await fillValidCredentials()
 
     await user.click(screen.getByRole('button', { name: 'Войти' }))
@@ -177,6 +178,8 @@ describe('LoginForm', () => {
     expect(
       screen.queryByText('Raw backend detail must stay hidden'),
     ).not.toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/login')
+    expect(onAuthenticationRequired).not.toHaveBeenCalled()
   })
 
   it('hands off CSRF, clears the draft, navigates, and does not fetch auth/me', async () => {
@@ -193,7 +196,7 @@ describe('LoginForm', () => {
     saveBulkModerationDraftSelection([
       { id: 'place-1', status: 'active', title: 'Аквацентр' },
     ])
-    const router = renderLogin('/places?status=hidden')
+    const { router } = renderLogin('/places?status=hidden')
     const user = await fillValidCredentials()
 
     await user.click(screen.getByRole('button', { name: 'Войти' }))

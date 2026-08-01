@@ -115,6 +115,74 @@ describe('normalizeApiError', () => {
     ).toBeInstanceOf(ApiProtocolError)
   })
 
+  it('rejects VALIDATION_FAILED without the required errors array', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          data: {
+            ...problem,
+            code: 'VALIDATION_FAILED',
+            errors: undefined,
+            status: 422,
+          },
+          status: 422,
+        }),
+      ),
+    ).toBeInstanceOf(ApiProtocolError)
+  })
+
+  it('rejects status 422 with a non-validation problem code', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          data: {
+            ...problem,
+            code: 'INTERNAL_ERROR',
+            errors: undefined,
+            status: 422,
+          },
+          status: 422,
+        }),
+      ),
+    ).toBeInstanceOf(ApiProtocolError)
+  })
+
+  it('accepts VALIDATION_FAILED at status 422 with an errors array', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          data: {
+            ...problem,
+            code: 'VALIDATION_FAILED',
+            status: 422,
+          },
+          status: 422,
+        }),
+      ),
+    ).toMatchObject({
+      code: 'VALIDATION_FAILED',
+      name: 'ApiProblemError',
+      status: 422,
+    })
+  })
+
+  it('accepts an ordinary problem document without validation errors', () => {
+    expect(
+      normalizeApiError(
+        createAxiosError({
+          data: {
+            ...problem,
+            errors: undefined,
+          },
+        }),
+      ),
+    ).toMatchObject({
+      code: 'INTERNAL_ERROR',
+      name: 'ApiProblemError',
+      status: 500,
+    })
+  })
+
   it('preserves code, status, and requestId from a valid Problem Details body', () => {
     expect(normalizeApiError(createAxiosError())).toMatchObject({
       code: 'INTERNAL_ERROR',

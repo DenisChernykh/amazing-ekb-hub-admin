@@ -4,10 +4,12 @@ import {
   subscribeToImportRunEvents,
 } from './import-run-events-transport'
 
-vi.mock('@/shared/api/client/api-base-url', async (importOriginal) => ({
-  ...(await importOriginal<
-    typeof import('@/shared/api/client/api-base-url')
-  >()),
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: '/' },
+}))
+
+vi.mock('@/shared/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/api')>()),
   buildApiUrl: vi.fn(),
 }))
 
@@ -48,7 +50,7 @@ describe('subscribeToImportRunEvents', () => {
   beforeEach(async () => {
     EventSourceMock.instances = []
     vi.stubGlobal('EventSource', EventSourceMock)
-    const { buildApiUrl } = await import('@/shared/api/client/api-base-url')
+    const { buildApiUrl } = await import('@/shared/api')
     vi.mocked(buildApiUrl).mockImplementation((path) =>
       joinTestApiUrl('/', path),
     )
@@ -72,7 +74,7 @@ describe('subscribeToImportRunEvents', () => {
   })
 
   it('opens an absolute-origin versioned stream', async () => {
-    const { buildApiUrl } = await import('@/shared/api/client/api-base-url')
+    const { buildApiUrl } = await import('@/shared/api')
     vi.mocked(buildApiUrl).mockImplementation((path) =>
       joinTestApiUrl('https://api.example.test', path),
     )

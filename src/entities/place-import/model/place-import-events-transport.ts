@@ -1,4 +1,4 @@
-import { buildApiUrl } from '@/shared/api/client/api-base-url'
+import { buildApiUrl } from '@/shared/api'
 
 /** Именованное событие backend stream операции импорта места. */
 export const PLACE_IMPORT_UPDATED_EVENT = 'place-import.updated'

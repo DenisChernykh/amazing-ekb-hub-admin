@@ -1,7 +1,4 @@
-import {
-  ApiNetworkError,
-  ApiProtocolError,
-} from '@/shared/api/client/api-errors'
+import { ApiNetworkError, ApiProtocolError } from '@/shared/api'
 import { createApiProblemError } from '@/test/api-problem'
 import type { LoaderFunctionArgs } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
@@ -9,6 +6,10 @@ import {
   createRedirectAuthenticatedLoader,
   createRequireSessionLoader,
 } from './loaders'
+
+vi.mock('@/shared/config', () => ({
+  publicEnv: { VITE_API_BASE_URL: '/' },
+}))
 
 const requestArgs = (
   url: string,
