@@ -1,3 +1,5 @@
+verifyDepsBeforeRun: error
+
 allowBuilds:
   esbuild: true
   msw: true
