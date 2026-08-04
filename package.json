@@ -13,6 +13,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
+    "lint:tsdoc": "eslint . --config eslint.tsdoc.config.js",
     "lint:strict": "eslint . --max-warnings=0",
     "format": "prettier . --write",
     "format:check": "prettier . --check",

@@ -35,6 +35,7 @@ pnpm run dev
 pnpm run dev
 pnpm run typecheck
 pnpm run lint:strict
+pnpm run lint:tsdoc # отдельная необязательная TSDoc-задача
 pnpm run test
 pnpm run format:check
 pnpm run build
@@ -46,7 +47,8 @@ pnpm run check
 ```
 
 `pnpm run check` — полный локальный aggregate gate: он проверяет актуальность
-контрактов, форматирование, строгий lint, типы, тесты и production build.
+контрактов, форматирование, строгий lint, типы, тесты и production build. TSDoc
+в него не входит.
 `pnpm run api:check` сначала повторно генерирует оба API output, затем отклоняет
 staged, unstaged и untracked изменения snapshot, generated TypeScript и
 generated Zod.
