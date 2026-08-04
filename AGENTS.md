@@ -40,18 +40,10 @@ This admin project is a real Amazing EKB Hub codebase used to practice a Vite SP
 
 ## TSDoc Rules
 
-1. The assistant must add or update TSDoc for every new or changed exported hand-written TypeScript/TSX API:
-   - `export function`;
-   - exported React components;
-   - exported hooks;
-   - `export type`;
-   - `export interface`;
-   - `export enum`;
-   - exported `const` values that are module API, helpers, config, mappings, or cache keys.
-2. Private helpers need TSDoc only when their contract, side effects, fallback behavior, or invariants are not obvious.
-3. Tests do not need TSDoc for `describe`, `it`, or `test`; test helper declarations should be documented when exported or non-obvious.
+1. Do not add or update TSDoc by default. It is a separate task that requires an explicit user request.
+2. For that task, use `docs/architecture/tsdoc-guidelines.md` and run `pnpm run lint:tsdoc`.
+3. Its findings are warnings and do not run as part of `pnpm run lint`, `pnpm run lint:strict`, or `pnpm run check`.
 4. Generated files must not be documented manually.
-5. Before finishing, check the changed exports against `docs/architecture/tsdoc-guidelines.md`.
 
 ## Task Completion Ritual
 

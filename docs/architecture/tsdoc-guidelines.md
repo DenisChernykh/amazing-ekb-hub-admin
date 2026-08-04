@@ -1,6 +1,7 @@
 # TSDoc Guidelines
 
-This document defines the TSDoc standard for `admin-codex`.
+This document defines an explicitly requested TSDoc task for `admin-codex`.
+Normal development does not require adding or updating TSDoc.
 
 ## Goal
 
@@ -8,9 +9,19 @@ This document defines the TSDoc standard for `admin-codex`.
 - Document side effects, provider requirements, fallback behavior, and cache/session invariants.
 - Keep comments useful and avoid restating obvious implementation details.
 
+Run the task separately with:
+
+```bash
+pnpm run lint:tsdoc
+```
+
+Its findings are warnings and it is not part of `pnpm run lint`,
+`pnpm run lint:strict`, or `pnpm run check`.
+
 ## Scope
 
-Write TSDoc for exported hand-written TypeScript/TSX APIs:
+When the TSDoc task is in scope, write TSDoc for exported hand-written
+TypeScript/TSX APIs:
 
 - `export function`;
 - exported React components;
