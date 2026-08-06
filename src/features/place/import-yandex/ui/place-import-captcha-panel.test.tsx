@@ -23,6 +23,7 @@ const operation: PlaceImportOperationResponseDto = {
   resultPlaceId: null,
   sourceUrl: 'https://yandex.ru/maps/org/spa/1',
   status: 'awaiting_captcha',
+  targetCollection: null,
   title: null,
   updatedAt: '2026-07-22T10:01:00.000Z',
   version: 2,

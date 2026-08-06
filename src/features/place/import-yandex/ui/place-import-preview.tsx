@@ -74,6 +74,9 @@ export function PlaceImportPreview({
             '—'
           )}
         </Descriptions.Item>
+        <Descriptions.Item label="Подборка">
+          {operation.targetCollection?.title ?? '—'}
+        </Descriptions.Item>
       </Descriptions>
     </Flex>
   )

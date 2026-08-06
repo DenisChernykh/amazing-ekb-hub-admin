@@ -1,3 +1,4 @@
+import { useCollectionDetailQuery } from '@/entities/collection/model/collection-hooks'
 import { isTerminalPlaceImportStatus } from '@/entities/place-import/model/place-import-cache'
 import {
   useActivePlaceImportQuery,
@@ -35,6 +36,12 @@ function PlaceImportYandexStartScreen() {
   const location = useLocation()
   const navigate = useNavigate()
   const activeQuery = useActivePlaceImportQuery(location.key)
+  const requestedTargetCollectionId = new URLSearchParams(location.search)
+    .get('collectionId')
+    ?.trim()
+  const targetCollectionQuery = useCollectionDetailQuery(
+    requestedTargetCollectionId ?? '',
+  )
 
   if (activeQuery.isPending) {
     return (
@@ -76,6 +83,8 @@ function PlaceImportYandexStartScreen() {
           onStarted={(startedOperationId) =>
             navigate(`/places/import/yandex/${startedOperationId}`)
           }
+          targetCollectionId={requestedTargetCollectionId}
+          targetCollectionTitle={targetCollectionQuery.data?.title}
         />
       </Card>
     </Flex>
@@ -116,6 +125,19 @@ function PlaceImportYandexOperationScreen({
     )
   }
 
+  if (
+    operation.status === 'completed' &&
+    operation.resultPlaceId &&
+    operation.targetCollection?.id
+  ) {
+    return (
+      <Navigate
+        replace
+        to={`/collections/${operation.targetCollection.id}?addedPlaceId=${encodeURIComponent(operation.resultPlaceId)}`}
+      />
+    )
+  }
+
   if (operation.status === 'completed' && operation.resultPlaceId) {
     return <Navigate replace to={`/places/${operation.resultPlaceId}`} />
   }
@@ -139,6 +161,15 @@ function PlaceImportYandexOperationScreen({
       <Typography.Text type="secondary">
         Операция: <Typography.Text code>{operation.id}</Typography.Text>
       </Typography.Text>
+
+      {operation.targetCollection && (
+        <Alert
+          description="Цель сохранена backend-операцией и не меняется при обновлении страницы или переподключении."
+          message={`Целевая подборка: ${operation.targetCollection.title}`}
+          showIcon
+          type="info"
+        />
+      )}
 
       {events.pollingErrorMessage && (
         <Alert

@@ -15,12 +15,16 @@ import { FormProvider } from 'react-hook-form'
 type PlaceImportStartFormProps = {
   onAlreadyActive?: () => void
   onStarted: (operationId: string) => void
+  targetCollectionId?: string
+  targetCollectionTitle?: string
 }
 
 /** Форма запуска импорта одной карточки Яндекс Карт. */
 export function PlaceImportStartForm({
   onAlreadyActive,
   onStarted,
+  targetCollectionId,
+  targetCollectionTitle,
 }: PlaceImportStartFormProps) {
   const form = useZodForm(placeImportStartSchema, {
     defaultValues: { url: '' },
@@ -42,12 +46,26 @@ export function PlaceImportStartForm({
 
   const handleSubmit = ({ url }: PlaceImportStartValues) => {
     setErrorMessage(null)
-    mutation.mutate({ url })
+    const normalizedTargetCollectionId = targetCollectionId?.trim()
+    mutation.mutate({
+      ...(normalizedTargetCollectionId
+        ? { targetCollectionId: normalizedTargetCollectionId }
+        : {}),
+      url,
+    })
   }
 
   return (
     <FormProvider {...form}>
       <form noValidate onSubmit={form.handleSubmit(handleSubmit)}>
+        {targetCollectionTitle && (
+          <Alert
+            description="Новая карточка будет добавлена в эту подборку только после подтверждения preview."
+            message={`Целевая подборка: ${targetCollectionTitle}`}
+            showIcon
+            type="info"
+          />
+        )}
         <Typography.Paragraph type="secondary">
           Вставьте ссылку на одну карточку организации. Backend проверит адрес,
           подготовит read-only preview и создаст место только после

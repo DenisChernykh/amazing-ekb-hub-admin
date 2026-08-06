@@ -25,6 +25,7 @@ const operation: PlaceImportOperationResponseDto = {
   resultPlaceId: null,
   sourceUrl: 'https://yandex.ru/maps/org/spa/1',
   status: 'queued',
+  targetCollection: null,
   title: null,
   updatedAt: '2026-07-22T10:00:00.000Z',
   version: 1,

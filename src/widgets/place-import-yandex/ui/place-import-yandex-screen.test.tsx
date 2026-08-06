@@ -19,6 +19,10 @@ vi.mock('@/entities/place-import/model/place-import-hooks', () => ({
   usePlaceImportOperationQuery: vi.fn(),
 }))
 
+vi.mock('@/entities/collection/model/collection-hooks', () => ({
+  useCollectionDetailQuery: vi.fn(() => ({ data: undefined })),
+}))
+
 vi.mock('@/features/place/import-yandex/ui/place-import-actions', () => ({
   PlaceImportActions: () => <div>Actions</div>,
 }))
@@ -44,6 +48,7 @@ const completedOperation = (
   resultPlaceId: 'place-result',
   sourceUrl: 'https://yandex.ru/maps/org/spa/1',
   status: 'completed',
+  targetCollection: null,
   title: 'SPA',
   updatedAt: '2026-07-22T10:02:00.000Z',
   version: 4,
@@ -122,6 +127,35 @@ const renderCompleted = (
           path="/places/import/yandex/:operationId"
         />
         <Route element={<div>Result place</div>} path="/places/:placeId" />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+const renderCompletedTargeted = () => {
+  vi.mocked(usePlaceImportOperationQuery).mockReturnValue({
+    data: {
+      ...completedOperation('created'),
+      targetCollection: { id: 'collection-1', slug: 'spa', title: 'SPA' },
+    },
+    isError: false,
+    isPending: false,
+  } as ReturnType<typeof usePlaceImportOperationQuery>)
+  vi.mocked(usePlaceImportEvents).mockReturnValue({
+    isPollingFallback: false,
+    pollingErrorMessage: null,
+  })
+  render(
+    <MemoryRouter initialEntries={['/places/import/yandex/operation-1']}>
+      <Routes>
+        <Route
+          element={<PlaceImportYandexScreen operationId="operation-1" />}
+          path="/places/import/yandex/:operationId"
+        />
+        <Route
+          element={<div>Collection result</div>}
+          path="/collections/:collectionId"
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -233,5 +267,10 @@ describe('PlaceImportYandexScreen', () => {
   it('navigates a strict external-identity duplicate to the existing place', () => {
     renderCompleted('already_exists')
     expect(screen.getByText('Result place')).toBeInTheDocument()
+  })
+
+  it('redirects targeted completion to durable collection and highlights result place', () => {
+    renderCompletedTargeted()
+    expect(screen.getByText('Collection result')).toBeInTheDocument()
   })
 })
