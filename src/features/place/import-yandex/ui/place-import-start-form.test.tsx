@@ -75,6 +75,34 @@ describe('PlaceImportStartForm', () => {
     })
   })
 
+  it('includes a validated targeted collection in the start payload', async () => {
+    const mutate = vi.fn()
+    vi.mocked(useStartPlaceImportMutation).mockReturnValue({
+      isPending: false,
+      mutate,
+    } as unknown as ReturnType<typeof useStartPlaceImportMutation>)
+
+    render(
+      <PlaceImportStartForm
+        onStarted={vi.fn()}
+        targetCollectionId="collection-1"
+        targetCollectionTitle="SPA"
+      />,
+    )
+    expect(screen.getByText('Целевая подборка: SPA')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Ссылка Яндекс Карт'), {
+      target: { value: 'https://yandex.ru/maps/org/spa/1' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Начать импорт' }))
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith({
+        targetCollectionId: 'collection-1',
+        url: 'https://yandex.ru/maps/org/spa/1',
+      })
+    })
+  })
+
   it('redirects to the existing active operation on structured 409 conflict', async () => {
     const onAlreadyActive = vi.fn()
     const onStarted = vi.fn()

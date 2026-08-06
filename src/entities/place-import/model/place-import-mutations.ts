@@ -52,7 +52,7 @@ export function useConfirmPlaceImportMutation(
     onError: options?.onError,
     onSuccess: async (operation) => {
       syncPlaceImportOperationCache(queryClient, operation)
-      await invalidatePlaceImportResultQueries(queryClient)
+      await invalidatePlaceImportResultQueries(queryClient, operation)
       await options?.onSuccess?.(operation)
     },
   })

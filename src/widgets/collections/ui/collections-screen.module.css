@@ -1,0 +1,7 @@
+.card {
+  width: 100%;
+}
+.orderPanel {
+  border-top: 1px solid var(--collections-border);
+  padding-top: 16px;
+}

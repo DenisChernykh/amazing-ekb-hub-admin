@@ -1,3 +1,4 @@
+import { useCollectionDetailQuery } from '@/entities/collection/model/collection-hooks'
 import {
   useActivePlaceImportQuery,
   usePlaceImportEvents,
@@ -19,12 +20,28 @@ vi.mock('@/entities/place-import/model/place-import-hooks', () => ({
   usePlaceImportOperationQuery: vi.fn(),
 }))
 
+vi.mock('@/entities/collection/model/collection-hooks', () => ({
+  useCollectionDetailQuery: vi.fn(),
+}))
+
 vi.mock('@/features/place/import-yandex/ui/place-import-actions', () => ({
   PlaceImportActions: () => <div>Actions</div>,
 }))
 
 vi.mock('@/features/place/import-yandex/ui/place-import-start-form', () => ({
-  PlaceImportStartForm: () => <button>Начать импорт</button>,
+  PlaceImportStartForm: ({
+    targetCollectionId,
+    targetCollectionTitle,
+  }: {
+    targetCollectionId?: string
+    targetCollectionTitle?: string
+  }) => (
+    <div>
+      <button>Начать импорт</button>
+      {targetCollectionId && <span>{targetCollectionId}</span>}
+      {targetCollectionTitle && <span>{targetCollectionTitle}</span>}
+    </div>
+  ),
 }))
 
 const completedOperation = (
@@ -44,6 +61,7 @@ const completedOperation = (
   resultPlaceId: 'place-result',
   sourceUrl: 'https://yandex.ru/maps/org/spa/1',
   status: 'completed',
+  targetCollection: null,
   title: 'SPA',
   updatedAt: '2026-07-22T10:02:00.000Z',
   version: 4,
@@ -73,9 +91,9 @@ const mockActiveQuery = (
   } as ReturnType<typeof useActivePlaceImportQuery>)
 }
 
-const renderBaseRoute = () => {
+const renderBaseRoute = (initialEntry = '/places/import/yandex') => {
   render(
-    <MemoryRouter initialEntries={['/places/import/yandex']}>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <Routes>
         <Route
           element={<PlaceImportYandexScreen />}
@@ -127,9 +145,45 @@ const renderCompleted = (
   )
 }
 
+const renderCompletedTargeted = () => {
+  vi.mocked(usePlaceImportOperationQuery).mockReturnValue({
+    data: {
+      ...completedOperation('created'),
+      targetCollection: { id: 'collection-1', slug: 'spa', title: 'SPA' },
+    },
+    isError: false,
+    isPending: false,
+  } as ReturnType<typeof usePlaceImportOperationQuery>)
+  vi.mocked(usePlaceImportEvents).mockReturnValue({
+    isPollingFallback: false,
+    pollingErrorMessage: null,
+  })
+  render(
+    <MemoryRouter initialEntries={['/places/import/yandex/operation-1']}>
+      <Routes>
+        <Route
+          element={<PlaceImportYandexScreen operationId="operation-1" />}
+          path="/places/import/yandex/:operationId"
+        />
+        <Route
+          element={<div>Collection result</div>}
+          path="/collections/:collectionId"
+        />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
 describe('PlaceImportYandexScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: false,
+    } as never)
     vi.mocked(usePlaceImportEvents).mockReturnValue({
       isPollingFallback: false,
       pollingErrorMessage: null,
@@ -187,6 +241,68 @@ describe('PlaceImportYandexScreen', () => {
     ).toBeInTheDocument()
   })
 
+  it('waits for the requested target collection before enabling targeted import', () => {
+    mockActiveQuery({
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
+      isError: true,
+    })
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isPending: true,
+      isSuccess: false,
+    } as never)
+
+    renderBaseRoute('/places/import/yandex?collectionId=collection-1')
+
+    expect(screen.getByText('Проверяем целевую подборку')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Начать импорт' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('passes a targeted collection only after its lookup succeeds', () => {
+    mockActiveQuery({
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
+      isError: true,
+    })
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: { id: 'collection-1', title: 'SPA' },
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+    } as never)
+
+    renderBaseRoute('/places/import/yandex?collectionId=collection-1')
+
+    expect(screen.getByRole('button', { name: 'Начать импорт' })).toBeEnabled()
+    expect(screen.getByText('collection-1')).toBeInTheDocument()
+    expect(screen.getByText('SPA')).toBeInTheDocument()
+  })
+
+  it('shows the target lookup error instead of starting an unverified import', () => {
+    mockActiveQuery({
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
+      isError: true,
+    })
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: undefined,
+      error: createApiProblemError('COLLECTION_NOT_FOUND', 404),
+      isError: true,
+      isPending: false,
+      isSuccess: false,
+    } as never)
+
+    renderBaseRoute('/places/import/yandex?collectionId=missing')
+
+    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Начать импорт' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('renders the API error state when active lookup fails with a non-404 error', () => {
     mockActiveQuery({
       error: createApiProblemError('DEPENDENCY_UNAVAILABLE', 503),
@@ -233,5 +349,10 @@ describe('PlaceImportYandexScreen', () => {
   it('navigates a strict external-identity duplicate to the existing place', () => {
     renderCompleted('already_exists')
     expect(screen.getByText('Result place')).toBeInTheDocument()
+  })
+
+  it('redirects targeted completion to durable collection and highlights result place', () => {
+    renderCompletedTargeted()
+    expect(screen.getByText('Collection result')).toBeInTheDocument()
   })
 })

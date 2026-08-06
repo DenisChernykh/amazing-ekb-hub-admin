@@ -10,6 +10,7 @@ import type { PlaceImportOperationErrorResponseDto } from './placeImportOperatio
 import type { PlaceImportOperationResponseDtoOutcome } from './placeImportOperationResponseDtoOutcome'
 import type { PlaceImportOperationResponseDtoStatus } from './placeImportOperationResponseDtoStatus'
 import type { PlaceImportPossibleDuplicateResponseDto } from './placeImportPossibleDuplicateResponseDto'
+import type { PlaceImportTargetResponseDto } from './placeImportTargetResponseDto'
 
 export type PlaceImportOperationResponseDto = {
   /** @minimum 0 */
@@ -36,6 +37,8 @@ export type PlaceImportOperationResponseDto = {
   resultPlaceId: string | null
   sourceUrl: string
   status: PlaceImportOperationResponseDtoStatus
+  /** @nullable */
+  targetCollection: PlaceImportTargetResponseDto | null
   /** @nullable */
   title: string | null
   updatedAt: string

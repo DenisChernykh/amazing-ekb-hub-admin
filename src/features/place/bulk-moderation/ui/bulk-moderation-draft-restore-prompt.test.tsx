@@ -28,6 +28,7 @@ const poolsCategory = {
 
 const activePlace: AdminPlaceSummaryResponseDto = {
   category: poolsCategory,
+  collections: [],
   coverImageUrl: null,
   mapsUrl: null,
   id: 'place-1',

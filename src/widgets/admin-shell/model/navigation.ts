@@ -1,5 +1,6 @@
 import {
   ApiOutlined,
+  AppstoreOutlined,
   DashboardOutlined,
   FileTextOutlined,
   TagsOutlined,
@@ -38,6 +39,12 @@ export const adminNavigationItems = [
     key: 'categories',
     label: 'Категории',
     path: '/categories',
+  },
+  {
+    icon: createElement(AppstoreOutlined),
+    key: 'collections',
+    label: 'Подборки',
+    path: '/collections',
   },
   {
     icon: createElement(FileTextOutlined),

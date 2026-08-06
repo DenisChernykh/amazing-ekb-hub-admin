@@ -24,10 +24,23 @@ const preview: PlaceImportOperationResponseDto = {
   resultPlaceId: null,
   sourceUrl: 'https://yandex.ru/maps/org/spa/1',
   status: 'preview_ready',
+  targetCollection: { id: 'collection-1', slug: 'spa', title: 'SPA' },
   title: 'Новый SPA',
   updatedAt: '2026-07-22T10:01:00.000Z',
   version: 3,
 }
+
+describe('targeted import preview', () => {
+  it('shows the durable target collection', () => {
+    render(
+      <MemoryRouter>
+        <PlaceImportPreview operation={preview} />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Подборка')).toBeInTheDocument()
+    expect(screen.getAllByText('SPA').length).toBeGreaterThanOrEqual(1)
+  })
+})
 
 describe('PlaceImportPreview', () => {
   it('shows immutable preview, draft category and semantic duplicate link', () => {

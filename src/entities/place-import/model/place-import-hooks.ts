@@ -110,7 +110,10 @@ export function usePlaceImportEvents(
             if (isTerminalPlaceImportStatus(response.operation.status)) {
               subscription?.close()
               if (response.operation.status === 'completed') {
-                void invalidatePlaceImportResultQueries(queryClient)
+                void invalidatePlaceImportResultQueries(
+                  queryClient,
+                  response.operation,
+                )
               }
             }
           } catch {
@@ -159,7 +162,10 @@ export function usePlaceImportEvents(
         lastVersion = Math.max(lastVersion, response.operation.version)
         syncPlaceImportOperationCache(queryClient, response.operation)
         if (response.operation.status === 'completed') {
-          await invalidatePlaceImportResultQueries(queryClient)
+          await invalidatePlaceImportResultQueries(
+            queryClient,
+            response.operation,
+          )
         }
       } catch (error) {
         if (!isDisposed) {

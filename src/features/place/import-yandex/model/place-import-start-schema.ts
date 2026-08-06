@@ -6,6 +6,7 @@ import { z } from 'zod'
  * Zod-схема URL для запуска импорта одной карточки Яндекс Карт.
  */
 export const placeImportStartSchema = z.strictObject({
+  targetCollectionId: z.string().trim().min(1).optional(),
   url: z
     .string()
     .trim()

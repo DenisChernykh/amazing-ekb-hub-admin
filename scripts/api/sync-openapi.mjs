@@ -25,6 +25,52 @@ const requiredOperations = [
   ['/v1/admin/places/{placeId}', 'patch', 'adminPlacesUpdate'],
   ['/v1/admin/places/{placeId}/materials', 'post', 'adminPlaceMaterialsCreate'],
   ['/v1/admin/place-imports/yandex-maps', 'post', 'adminPlaceImportsStart'],
+  ['/v1/admin/collections', 'get', 'adminCollectionsList'],
+  ['/v1/admin/collections', 'post', 'adminCollectionsCreate'],
+  ['/v1/admin/collections/{collectionId}', 'get', 'adminCollectionsGet'],
+  ['/v1/admin/collections/{collectionId}', 'patch', 'adminCollectionsUpdate'],
+  [
+    '/v1/admin/collections/{collectionId}/status',
+    'patch',
+    'adminCollectionsUpdateStatus',
+  ],
+  ['/v1/admin/collections/{collectionId}', 'delete', 'adminCollectionsDelete'],
+  [
+    '/v1/admin/collections/{collectionId}/photo',
+    'post',
+    'adminCollectionsUploadPhoto',
+  ],
+  [
+    '/v1/admin/collections/{collectionId}/photo',
+    'get',
+    'adminCollectionsGetPhoto',
+  ],
+  [
+    '/v1/admin/collections/{collectionId}/photo',
+    'delete',
+    'adminCollectionsRemovePhoto',
+  ],
+  [
+    '/v1/admin/collections/{collectionId}/places',
+    'post',
+    'adminCollectionsAddPlace',
+  ],
+  [
+    '/v1/admin/collections/{collectionId}/places/{placeId}',
+    'delete',
+    'adminCollectionsRemovePlace',
+  ],
+  ['/v1/admin/collections/order', 'put', 'adminCollectionsReorder'],
+  [
+    '/v1/admin/collections/{collectionId}/places/order',
+    'put',
+    'adminCollectionsReorderPlaces',
+  ],
+  [
+    '/v1/admin/places/{placeId}/collections',
+    'put',
+    'adminPlaceCollectionsReplace',
+  ],
 ]
 
 const requiredProblemCodes = [
@@ -34,6 +80,12 @@ const requiredProblemCodes = [
   'VALIDATION_FAILED',
   'DEPENDENCY_UNAVAILABLE',
   'INTERNAL_ERROR',
+  'COLLECTION_NOT_FOUND',
+  'COLLECTION_SLUG_CONFLICT',
+  'COLLECTION_PUBLISH_REQUIRES_ACTIVE_PLACE',
+  'COLLECTION_MEMBERSHIP_CONFLICT',
+  'COLLECTION_REORDER_CONFLICT',
+  'COLLECTION_HAS_ACTIVE_IMPORT',
 ]
 
 const placeSummarySchemaNames = [
@@ -112,6 +164,33 @@ export function validateOpenApiDocument(value) {
         `OpenAPI document has an unexpected ${schemaName}.category ref`,
       )
     }
+  }
+
+  const adminPlaceCollections =
+    schemas?.AdminPlaceSummaryResponseDto?.properties?.collections
+
+  if (
+    adminPlaceCollections?.type !== 'array' ||
+    adminPlaceCollections.items?.$ref !==
+      '#/components/schemas/AdminPlaceCollectionSummaryResponseDto'
+  ) {
+    throw new Error(
+      'OpenAPI document has an unexpected AdminPlaceSummaryResponseDto.collections schema',
+    )
+  }
+
+  const importTarget =
+    schemas?.PlaceImportOperationResponseDto?.properties?.targetCollection
+
+  if (
+    importTarget?.nullable !== true ||
+    importTarget.type !== 'object' ||
+    importTarget.allOf?.[0]?.$ref !==
+      '#/components/schemas/PlaceImportTargetResponseDto'
+  ) {
+    throw new Error(
+      'OpenAPI document has an unexpected PlaceImportOperationResponseDto.targetCollection schema',
+    )
   }
 
   if (schemas?.ImportRunEventResponseDto !== undefined) {

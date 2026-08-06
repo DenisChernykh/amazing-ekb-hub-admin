@@ -1,14 +1,20 @@
+import {
+  invalidateCollectionDetailQuery,
+  invalidateCollectionListQueries,
+} from '@/entities/collection/model/collection-cache'
 import type {
   AdminPlacesUploadPhotoBody,
   ApiClientError,
   CreatePlaceDto,
   PlaceDetailResponseDto,
   PlaceSummaryResponseDto,
+  ReplacePlaceCollectionsDto,
   SetPinnedMaterialDto,
   UpdatePlaceDto,
   UpdatePlaceStatusDto,
 } from '@/shared/api'
 import {
+  adminPlaceCollectionsReplace,
   adminPlacesClearPinnedMaterial,
   adminPlacesCreate,
   adminPlacesSetPinnedMaterial,
@@ -68,6 +74,12 @@ export type SetPinnedMaterialMutationOptions = {
 export type ClearPinnedMaterialMutationOptions = {
   onError?: (error: ApiClientError) => void
   onSuccess?: (place: PlaceDetailResponseDto) => Promise<void> | void
+}
+
+/** Callback-и для full-set назначения подборок месту. */
+export type ReplacePlaceCollectionsMutationOptions = {
+  onError?: (error: ApiClientError) => void
+  onSuccess?: () => Promise<void> | void
 }
 
 /**
@@ -292,6 +304,44 @@ export function useClearPinnedMaterialMutation(
         variables.pathParams.placeId,
       )
       await options?.onSuccess?.(place)
+    },
+  })
+}
+
+/** Сохраняет полный набор подборок места и инвалидирует все затронутые details. */
+export function useReplacePlaceCollectionsMutation(
+  options?: ReplacePlaceCollectionsMutationOptions,
+) {
+  const queryClient = useQueryClient()
+  return useMutation<
+    void,
+    ApiClientError,
+    {
+      data: ReplacePlaceCollectionsDto
+      pathParams: { placeId: string }
+      previousCollectionIds?: string[]
+    }
+  >({
+    mutationFn: ({ data, pathParams }) =>
+      adminPlaceCollectionsReplace(pathParams, data),
+    onError: options?.onError,
+    onSuccess: async (_, variables) => {
+      const ids = new Set([
+        ...(variables.previousCollectionIds ?? []),
+        ...variables.data.collectionIds,
+      ])
+      await Promise.all([
+        invalidatePlacesListQueries(queryClient),
+        invalidateAdminPlaceDetailQuery(
+          queryClient,
+          variables.pathParams.placeId,
+        ),
+        invalidateCollectionListQueries(queryClient),
+        ...Array.from(ids, (collectionId) =>
+          invalidateCollectionDetailQuery(queryClient, collectionId),
+        ),
+      ])
+      await options?.onSuccess?.()
     },
   })
 }

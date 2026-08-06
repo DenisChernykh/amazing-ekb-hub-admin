@@ -21,8 +21,16 @@ vi.mock('@/entities/place/model/place-hooks', () => ({
   usePlacesListQuery: vi.fn(),
 }))
 
+vi.mock('@/entities/collection', () => ({
+  useCollectionsQuery: vi.fn(() => ({ data: { items: [] } })),
+}))
+
 vi.mock('@/entities/place/model/place-mutations', () => ({
   useUpdatePlaceStatusMutation: vi.fn(),
+  useReplacePlaceCollectionsMutation: vi.fn(() => ({
+    isPending: false,
+    mutate: vi.fn(),
+  })),
 }))
 
 const mockedUsePlacesListQuery = vi.mocked(usePlacesListQuery)
@@ -38,6 +46,7 @@ const activePlace: AdminPlaceSummaryResponseDto = {
     slug: 'pools',
     title: 'Бассейны',
   },
+  collections: [],
   coverImageUrl: null,
   mapsUrl: null,
   id: 'place-1',
@@ -55,6 +64,7 @@ const hiddenPlace: AdminPlaceSummaryResponseDto = {
     slug: 'spa',
     title: 'SPA',
   },
+  collections: [],
   coverImageUrl: null,
   mapsUrl: null,
   id: 'place-2',

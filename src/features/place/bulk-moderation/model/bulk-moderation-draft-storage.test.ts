@@ -34,6 +34,7 @@ const spaCategory = {
 
 const activePlace: AdminPlaceSummaryResponseDto = {
   category: poolsCategory,
+  collections: [],
   coverImageUrl: null,
   mapsUrl: null,
   id: 'place-1',
@@ -46,6 +47,7 @@ const activePlace: AdminPlaceSummaryResponseDto = {
 
 const hiddenPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
+  collections: [],
   coverImageUrl: null,
   mapsUrl: null,
   id: 'place-2',

@@ -1,7 +1,10 @@
-import type { AdminPlaceListResponseDto } from '@/shared/api'
+import type {
+  AdminCollectionSummaryResponseDto,
+  AdminPlaceListResponseDto,
+} from '@/shared/api'
 import { Table, type TableProps } from 'antd'
 import type { ReactNode } from 'react'
-import { placesTableColumns } from './places-table-columns'
+import { getPlacesTableColumns } from './places-table-columns'
 
 type PlacesTableProps = {
   data: AdminPlaceListResponseDto
@@ -10,6 +13,7 @@ type PlacesTableProps = {
   rowSelection?: TableProps<
     AdminPlaceListResponseDto['items'][number]
   >['rowSelection']
+  collections?: AdminCollectionSummaryResponseDto[]
 }
 
 /**
@@ -20,10 +24,11 @@ export function PlacesTable({
   emptyText = 'Места не найдены',
   loading,
   rowSelection,
+  collections = [],
 }: PlacesTableProps) {
   return (
     <Table
-      columns={placesTableColumns}
+      columns={getPlacesTableColumns(collections)}
       dataSource={data.items}
       loading={loading}
       locale={{ emptyText }}

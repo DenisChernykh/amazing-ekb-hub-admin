@@ -62,6 +62,25 @@ export {
 } from './generated/admin-content-sources/admin-content-sources'
 
 export {
+  adminCollectionsAddPlace,
+  adminCollectionsCreate,
+  adminCollectionsDelete,
+  adminCollectionsGet,
+  adminCollectionsGetPhoto,
+  adminCollectionsList,
+  adminCollectionsRemovePhoto,
+  adminCollectionsRemovePlace,
+  adminCollectionsReorder,
+  adminCollectionsReorderPlaces,
+  adminCollectionsUpdate,
+  adminCollectionsUpdateStatus,
+  adminCollectionsUploadPhoto,
+  getAdminCollectionsGetPhotoQueryKey,
+  getAdminCollectionsGetQueryKey,
+  getAdminCollectionsListQueryKey,
+} from './generated/admin-collections/admin-collections'
+
+export {
   adminImportRunsList,
   adminImportRunsStreamEvents,
   getAdminImportRunsListQueryKey,
@@ -89,6 +108,7 @@ export {
 } from './generated/admin-place-imports/admin-place-imports'
 
 export {
+  adminPlaceCollectionsReplace,
   adminPlaceMaterialsCreate,
   adminPlaceMaterialsHide,
   adminPlaceMaterialsLink,
@@ -112,6 +132,14 @@ export {
   AdminCategoriesUpdateBody,
 } from './generated-zod/admin-categories/admin-categories.zod'
 export {
+  AdminCollectionsAddPlaceBody,
+  AdminCollectionsCreateBody,
+  AdminCollectionsReorderBody,
+  AdminCollectionsReorderPlacesBody,
+  AdminCollectionsUpdateBody,
+  AdminCollectionsUpdateStatusBody,
+} from './generated-zod/admin-collections/admin-collections.zod'
+export {
   AdminContentSourcesCreateBody,
   AdminContentSourcesUpdateBody,
 } from './generated-zod/admin-content-sources/admin-content-sources.zod'
@@ -130,6 +158,14 @@ export {
 export { AuthLoginBody as authLoginSchema } from './generated-zod/auth/auth.zod'
 
 export type {
+  AddCollectionPlaceDto,
+  AdminCollectionDetailResponseDto,
+  AdminCollectionDetailResponseDtoStatus,
+  AdminCollectionListResponseDto,
+  AdminCollectionPlaceResponseDto,
+  AdminCollectionSummaryResponseDto,
+  AdminCollectionSummaryResponseDtoStatus,
+  AdminCollectionsUploadPhotoBody,
   AdminContentSourcesListParams,
   AdminImportRunsListParams,
   AdminMaterialLibraryListResponseDto,
@@ -137,6 +173,7 @@ export type {
   AdminMaterialLibraryResponseDtoAdminStatus,
   AdminMaterialsListParams,
   AdminMaterialsListPlatform,
+  AdminPlaceCollectionSummaryResponseDto,
   AdminPlaceListResponseDto,
   AdminPlaceMaterialsListParams,
   AdminPlaceSummaryResponseDto,
@@ -147,6 +184,7 @@ export type {
   ContentSourceResponseDto,
   ContentSourceResponseDtoPlatform,
   ContentSourceResponseDtoStatus,
+  CreateCollectionDto,
   CreateContentSourceDto,
   CreateMaterialDto,
   CreatePlaceCategoryDto,
@@ -168,11 +206,17 @@ export type {
   PlaceImportEventsResponseDto,
   PlaceImportOperationResponseDto,
   PlaceImportOperationResponseDtoStatus,
+  PlaceImportTargetResponseDto,
   PlaceImportViewerAccessResponseDto,
   PlaceSummaryCategoryResponseDto,
   PlaceSummaryResponseDto,
+  ReorderCollectionPlacesDto,
+  ReorderCollectionsDto,
+  ReplacePlaceCollectionsDto,
   SetPinnedMaterialDto,
   StartPlaceImportDto,
+  UpdateCollectionDto,
+  UpdateCollectionStatusDto,
   UpdateContentSourceDto,
   UpdateMaterialDto,
   UpdatePlaceCategoryDto,
