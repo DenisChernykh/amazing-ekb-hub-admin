@@ -155,6 +155,8 @@ describe('application data routes', () => {
       '(index)',
       'places',
       'categories',
+      'collections',
+      'collections/:collectionId',
       'materials',
       'content-sources',
       'places/:placeId',

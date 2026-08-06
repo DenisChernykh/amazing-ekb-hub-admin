@@ -14,6 +14,12 @@ describe('getSelectedNavigationKey', () => {
     expect(getSelectedNavigationKey('/categories')).toBe('categories')
   })
 
+  it('selects collections navigation on collection detail routes', () => {
+    expect(getSelectedNavigationKey('/collections/collection-1')).toBe(
+      'collections',
+    )
+  })
+
   it('keeps places navigation selected on nested place routes', () => {
     expect(getSelectedNavigationKey('/places/place-1')).toBe('places')
   })

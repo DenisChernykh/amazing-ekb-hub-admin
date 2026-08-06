@@ -7,9 +7,13 @@ import type {
   UpdateCollectionStatusDto,
 } from '@/shared/api'
 import {
+  adminCollectionsAddPlace,
   adminCollectionsCreate,
   adminCollectionsDelete,
   adminCollectionsRemovePhoto,
+  adminCollectionsRemovePlace,
+  adminCollectionsReorder,
+  adminCollectionsReorderPlaces,
   adminCollectionsUpdate,
   adminCollectionsUpdateStatus,
   adminCollectionsUploadPhoto,
@@ -17,6 +21,8 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   invalidateCollectionListQueries,
+  invalidateCollectionMembershipQueries,
+  invalidateCollectionOrderQueries,
   invalidateCollectionQueries,
 } from './collection-cache'
 
@@ -131,6 +137,90 @@ export function useRemoveCollectionPhotoMutation(
     onError: options?.onError,
     onSuccess: async (_, variables) => {
       await invalidateCollectionQueries(queryClient, variables.collectionId)
+      await options?.onSuccess?.()
+    },
+  })
+}
+
+/** Сохраняет полный порядок подборок одним exact ID-list запросом. */
+export function useReorderCollectionsMutation(
+  options?: CollectionMutationOptions<void>,
+) {
+  const queryClient = useQueryClient()
+  return useMutation<void, ApiClientError, { collectionIds: string[] }>({
+    mutationFn: (data) => adminCollectionsReorder(data),
+    onError: options?.onError,
+    onSuccess: async () => {
+      await invalidateCollectionOrderQueries(queryClient)
+      await options?.onSuccess?.()
+    },
+  })
+}
+
+/** Идемпотентно добавляет существующее место в подборку. */
+export function useAddCollectionPlaceMutation(
+  options?: CollectionMutationOptions<void>,
+) {
+  const queryClient = useQueryClient()
+  return useMutation<
+    void,
+    ApiClientError,
+    { collectionId: string; placeId: string }
+  >({
+    mutationFn: ({ collectionId, placeId }) =>
+      adminCollectionsAddPlace({ collectionId }, { placeId }),
+    onError: options?.onError,
+    onSuccess: async (_, variables) => {
+      await invalidateCollectionMembershipQueries(
+        queryClient,
+        variables.collectionId,
+      )
+      await options?.onSuccess?.()
+    },
+  })
+}
+
+/** Убирает место из подборки без изменения его status/category. */
+export function useRemoveCollectionPlaceMutation(
+  options?: CollectionMutationOptions<void>,
+) {
+  const queryClient = useQueryClient()
+  return useMutation<
+    void,
+    ApiClientError,
+    { collectionId: string; placeId: string }
+  >({
+    mutationFn: ({ collectionId, placeId }) =>
+      adminCollectionsRemovePlace({ collectionId, placeId }),
+    onError: options?.onError,
+    onSuccess: async (_, variables) => {
+      await invalidateCollectionMembershipQueries(
+        queryClient,
+        variables.collectionId,
+      )
+      await options?.onSuccess?.()
+    },
+  })
+}
+
+/** Сохраняет полный exact-порядок мест внутри подборки. */
+export function useReorderCollectionPlacesMutation(
+  options?: CollectionMutationOptions<void>,
+) {
+  const queryClient = useQueryClient()
+  return useMutation<
+    void,
+    ApiClientError,
+    { collectionId: string; placeIds: string[] }
+  >({
+    mutationFn: ({ collectionId, placeIds }) =>
+      adminCollectionsReorderPlaces({ collectionId }, { placeIds }),
+    onError: options?.onError,
+    onSuccess: async (_, variables) => {
+      await invalidateCollectionMembershipQueries(
+        queryClient,
+        variables.collectionId,
+      )
       await options?.onSuccess?.()
     },
   })

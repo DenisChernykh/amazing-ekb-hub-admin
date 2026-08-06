@@ -10,9 +10,13 @@ export {
   useCollectionsQuery,
 } from './model/collection-hooks'
 export {
+  useAddCollectionPlaceMutation,
   useCreateCollectionMutation,
   useDeleteCollectionMutation,
   useRemoveCollectionPhotoMutation,
+  useRemoveCollectionPlaceMutation,
+  useReorderCollectionPlacesMutation,
+  useReorderCollectionsMutation,
   useUpdateCollectionMutation,
   useUpdateCollectionStatusMutation,
   useUploadCollectionPhotoMutation,

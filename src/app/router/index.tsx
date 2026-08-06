@@ -1,6 +1,8 @@
 import { clearCurrentSession, currentSessionQueryKey } from '@/entities/session'
 import { clearBulkModerationDraftSelection } from '@/features/place/bulk-moderation/model/bulk-moderation-draft-storage'
 import { CategoriesPage } from '@/pages/categories/ui/categories-page'
+import { CollectionDetailPage } from '@/pages/collection-detail/ui/collection-detail-page'
+import { CollectionsPage } from '@/pages/collections/ui/collections-page'
 import { ContentSourcesPage } from '@/pages/content-sources/ui/content-sources-page'
 import { DashboardPage } from '@/pages/dashboard/ui/dashboard-page'
 import { LoginPage } from '@/pages/login/ui/login-page'
@@ -54,6 +56,14 @@ export const protectedRouteChildren = [
   {
     path: 'categories',
     element: <CategoriesPage />,
+  },
+  {
+    path: 'collections',
+    element: <CollectionsPage />,
+  },
+  {
+    path: 'collections/:collectionId',
+    element: <CollectionDetailPage />,
   },
   {
     path: 'materials',
