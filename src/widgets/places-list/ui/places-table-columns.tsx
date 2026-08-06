@@ -1,14 +1,28 @@
 import { PlaceCategoryTag } from '@/entities/place/ui/place-category-tag'
 import { PlaceStatusTag } from '@/entities/place/ui/place-status-tag'
-import type { AdminPlaceSummaryResponseDto } from '@/shared/api'
+import { PlaceCollectionsAssignment } from '@/features/place/collections/ui/place-collections-assignment'
+import type {
+  AdminCollectionSummaryResponseDto,
+  AdminPlaceSummaryResponseDto,
+} from '@/shared/api'
 import { Space, Tag, Typography, type TableProps } from 'antd'
 import { Link } from 'react-router'
 
 /**
  * Колонки таблицы мест для read-only admin списка.
  */
-export const placesTableColumns: TableProps<AdminPlaceSummaryResponseDto>['columns'] =
-  [
+/** Создаёт колонки places table с entity-backed inline collections assignment. */
+export function getPlacesTableColumns(
+  collections: AdminCollectionSummaryResponseDto[] = [],
+): TableProps<AdminPlaceSummaryResponseDto>['columns'] {
+  return [
+    {
+      key: 'collections',
+      render: (_value, place) => (
+        <PlaceCollectionsAssignment collections={collections} place={place} />
+      ),
+      title: 'Подборки',
+    },
     {
       dataIndex: 'title',
       key: 'title',
@@ -48,3 +62,7 @@ export const placesTableColumns: TableProps<AdminPlaceSummaryResponseDto>['colum
       title: 'Теги',
     },
   ]
+}
+
+/** Backwards-compatible default columns for consumers without collection options. */
+export const placesTableColumns = getPlacesTableColumns()

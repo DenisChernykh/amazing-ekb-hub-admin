@@ -4,6 +4,7 @@ import type {
   PlaceSummaryResponseDto,
 } from '@/shared/api'
 import {
+  adminPlaceCollectionsReplace,
   adminPlacesClearPinnedMaterial,
   adminPlacesCreate,
   adminPlacesSetPinnedMaterial,
@@ -22,6 +23,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   useClearPinnedMaterialMutation,
   useCreatePlaceMutation,
+  useReplacePlaceCollectionsMutation,
   useSetPinnedMaterialMutation,
   useUpdatePlaceMutation,
   useUpdatePlaceStatusMutation,
@@ -35,6 +37,7 @@ vi.mock('@/shared/config', () => ({
 vi.mock('@/shared/api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/api')>()),
   adminPlacesClearPinnedMaterial: vi.fn(),
+  adminPlaceCollectionsReplace: vi.fn(),
   adminPlacesCreate: vi.fn(),
   getAdminPlacesGetQueryKey: vi.fn(({ placeId }) => [
     `/v1/admin/places/${placeId}`,
@@ -54,6 +57,7 @@ vi.mock('@/shared/api', async (importOriginal) => ({
 }))
 
 const mockedClearPinnedMaterial = vi.mocked(adminPlacesClearPinnedMaterial)
+const mockedReplacePlaceCollections = vi.mocked(adminPlaceCollectionsReplace)
 const mockedCreatePlace = vi.mocked(adminPlacesCreate)
 const mockedSetPinnedMaterial = vi.mocked(adminPlacesSetPinnedMaterial)
 const mockedUpdatePlace = vi.mocked(adminPlacesUpdate)
@@ -120,6 +124,7 @@ const placeDetail: PlaceDetailResponseDto = {
 describe('place mutations', () => {
   beforeEach(() => {
     mockedClearPinnedMaterial.mockReset()
+    mockedReplacePlaceCollections.mockReset()
     mockedCreatePlace.mockReset()
     mockedSetPinnedMaterial.mockReset()
     mockedUpdatePlace.mockReset()
@@ -164,6 +169,32 @@ describe('place mutations', () => {
       queryClient.getQueryCache().find({ queryKey })?.state.isInvalidated,
     ).toBe(true)
     expect(onSuccess).toHaveBeenCalledWith(placeSummary)
+  })
+
+  it('saves the full collection set and invalidates affected collection details', async () => {
+    const queryClient = new QueryClient()
+    const placeListKey = ['/v1/admin/places']
+    queryClient.setQueryData(placeListKey, { items: [] })
+    mockedReplacePlaceCollections.mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useReplacePlaceCollectionsMutation(), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await result.current.mutateAsync({
+      data: { collectionIds: ['collection-2'] },
+      pathParams: { placeId: 'place-1' },
+      previousCollectionIds: ['collection-1'],
+    })
+
+    expect(mockedReplacePlaceCollections).toHaveBeenCalledWith(
+      { placeId: 'place-1' },
+      { collectionIds: ['collection-2'] },
+    )
+    expect(
+      queryClient.getQueryCache().find({ queryKey: placeListKey })?.state
+        .isInvalidated,
+    ).toBe(true)
   })
 
   it('passes create place errors to callback', async () => {

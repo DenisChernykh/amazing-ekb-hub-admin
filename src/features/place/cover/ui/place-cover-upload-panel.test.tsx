@@ -84,6 +84,7 @@ const spaCategory = {
 
 const updatedPlace: AdminPlaceSummaryResponseDto = {
   category: spaCategory,
+  collections: [],
   coverImageUrl: '/places/place-2/photo',
   mapsUrl: null,
   id: 'place-2',

@@ -1,3 +1,4 @@
+import { useCollectionsQuery } from '@/entities/collection'
 import { usePlacesListQuery } from '@/entities/place/model/place-hooks'
 import { BulkModerationDraftRestorePrompt } from '@/features/place/bulk-moderation/ui/bulk-moderation-draft-restore-prompt'
 import { BulkModerationToolbar } from '@/features/place/bulk-moderation/ui/bulk-moderation-toolbar'
@@ -52,6 +53,7 @@ export function PlacesList() {
     ...pagination,
     ...(statusFilter ? { status: statusFilter } : {}),
   })
+  const collectionsQuery = useCollectionsQuery()
   const data = placesQuery.data ?? emptyPlacesResponse
   const style: PlacesListVariables = {
     '--places-list-border': token.colorBorderSecondary,
@@ -126,6 +128,7 @@ export function PlacesList() {
           emptyText={emptyText}
           loading={placesQuery.isPending}
           rowSelection={rowSelection}
+          collections={collectionsQuery.data?.items}
         />
 
         <Flex className={styles.footer} justify="end">
