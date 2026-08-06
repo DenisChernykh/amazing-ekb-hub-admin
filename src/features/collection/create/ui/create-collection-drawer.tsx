@@ -1,7 +1,7 @@
 import { useCreateCollectionMutation } from '@/entities/collection'
 import {
-  collectionFormSchema,
-  toCollectionRequest,
+  createCollectionFormSchema,
+  toCreateCollectionRequest,
   type CollectionFormValues,
 } from '@/features/collection/form/model/collection-form-schema'
 import { CollectionFormErrorAlert } from '@/features/collection/form/ui/collection-form-error-alert'
@@ -27,7 +27,7 @@ export function CreateCollectionDrawer({
   open,
 }: CreateCollectionDrawerProps) {
   const { message } = AntdApp.useApp()
-  const form = useZodForm(collectionFormSchema, {
+  const form = useZodForm(createCollectionFormSchema, {
     defaultValues: { description: '', slug: '', title: '' },
     mode: 'onChange',
   })
@@ -44,12 +44,16 @@ export function CreateCollectionDrawer({
   })
   const submit = (values: CollectionFormValues) => {
     setError(null)
-    mutation.mutate(toCollectionRequest(values))
+    mutation.mutate(toCreateCollectionRequest(values))
+  }
+  const requestClose = () => {
+    if (mutation.isPending) return
+    onClose()
   }
   return (
     <Drawer
       destroyOnHidden
-      onClose={onClose}
+      onClose={requestClose}
       open={open}
       title="Новая подборка"
       width={560}
@@ -62,7 +66,7 @@ export function CreateCollectionDrawer({
             disabled={mutation.isPending}
           />
           <Flex gap={8} justify="end">
-            <Button disabled={mutation.isPending} onClick={onClose}>
+            <Button disabled={mutation.isPending} onClick={requestClose}>
               Отмена
             </Button>
             <Button

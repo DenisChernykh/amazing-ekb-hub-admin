@@ -71,6 +71,28 @@ function PlaceImportYandexStartScreen() {
     )
   }
 
+  if (requestedTargetCollectionId && targetCollectionQuery.isPending) {
+    return (
+      <Flex gap={16} vertical>
+        <DocumentTitle title="Импорт из Яндекс Карт" />
+        <ScreenLoadingState title="Проверяем целевую подборку" />
+      </Flex>
+    )
+  }
+
+  if (requestedTargetCollectionId && targetCollectionQuery.isError) {
+    return (
+      <Flex gap={16} vertical>
+        <DocumentTitle title="Импорт из Яндекс Карт" />
+        <ScreenApiErrorState error={targetCollectionQuery.error} />
+      </Flex>
+    )
+  }
+
+  const targetCollection = requestedTargetCollectionId
+    ? targetCollectionQuery.data
+    : undefined
+
   return (
     <Flex gap={16} vertical>
       <DocumentTitle title="Импорт из Яндекс Карт" />
@@ -83,8 +105,8 @@ function PlaceImportYandexStartScreen() {
           onStarted={(startedOperationId) =>
             navigate(`/places/import/yandex/${startedOperationId}`)
           }
-          targetCollectionId={requestedTargetCollectionId}
-          targetCollectionTitle={targetCollectionQuery.data?.title}
+          targetCollectionId={targetCollection?.id}
+          targetCollectionTitle={targetCollection?.title}
         />
       </Card>
     </Flex>

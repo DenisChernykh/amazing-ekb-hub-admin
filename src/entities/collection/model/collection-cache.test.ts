@@ -9,6 +9,7 @@ import {
   invalidateCollectionDetailQuery,
   invalidateCollectionListQueries,
   invalidateCollectionMembershipQueries,
+  invalidateCollectionOrderQueries,
   invalidateCollectionQueries,
 } from './collection-cache'
 
@@ -50,6 +51,26 @@ describe('collection cache helpers', () => {
     })
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['/v1/admin/places'],
+    })
+  })
+
+  it('invalidates every reordered collection detail together with the list', async () => {
+    const queryClient = new QueryClient()
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries')
+
+    await invalidateCollectionOrderQueries(queryClient, [
+      'collection-1',
+      'collection-2',
+    ])
+
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['/v1/admin/collections'],
+    })
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['/v1/admin/collections/collection-1'],
+    })
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['/v1/admin/collections/collection-2'],
     })
   })
 

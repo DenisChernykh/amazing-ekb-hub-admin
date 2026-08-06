@@ -96,4 +96,37 @@ describe('EditCollectionDrawer', () => {
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeEnabled()
   })
+
+  it('preserves unsaved edits when the same collection refetches', async () => {
+    vi.mocked(useUpdateCollectionMutation).mockReturnValue({
+      isPending: false,
+      mutate: vi.fn(),
+    } as never)
+    const user = userEvent.setup()
+    const { rerender } = render(
+      <AntdApp>
+        <EditCollectionDrawer collection={collection} onClose={vi.fn()} />
+      </AntdApp>,
+    )
+    const title = screen.getByRole('textbox', { name: 'Название' })
+
+    await user.clear(title)
+    await user.type(title, 'Несохранённый черновик')
+    rerender(
+      <AntdApp>
+        <EditCollectionDrawer
+          collection={{
+            ...collection,
+            title: 'Значение после refetch',
+            updatedAt: '2026-08-02T00:00:00.000Z',
+          }}
+          onClose={vi.fn()}
+        />
+      </AntdApp>,
+    )
+
+    expect(screen.getByRole('textbox', { name: 'Название' })).toHaveValue(
+      'Несохранённый черновик',
+    )
+  })
 })

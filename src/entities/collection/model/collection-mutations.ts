@@ -150,8 +150,11 @@ export function useReorderCollectionsMutation(
   return useMutation<void, ApiClientError, { collectionIds: string[] }>({
     mutationFn: (data) => adminCollectionsReorder(data),
     onError: options?.onError,
-    onSuccess: async () => {
-      await invalidateCollectionOrderQueries(queryClient)
+    onSuccess: async (_, variables) => {
+      await invalidateCollectionOrderQueries(
+        queryClient,
+        variables.collectionIds,
+      )
       await options?.onSuccess?.()
     },
   })

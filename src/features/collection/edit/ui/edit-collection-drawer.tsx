@@ -1,7 +1,7 @@
 import { useUpdateCollectionMutation } from '@/entities/collection'
 import {
-  collectionFormSchema,
-  toCollectionRequest,
+  editCollectionFormSchema,
+  toUpdateCollectionRequest,
   type CollectionFormValues,
 } from '@/features/collection/form/model/collection-form-schema'
 import { CollectionFormErrorAlert } from '@/features/collection/form/ui/collection-form-error-alert'
@@ -10,7 +10,7 @@ import { getCollectionFormError } from '@/features/collection/model/collection-e
 import type { AdminCollectionSummaryResponseDto } from '@/shared/api'
 import { useZodForm } from '@/shared/lib/form/use-zod-form'
 import { App as AntdApp, Button, Drawer, Flex } from 'antd'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FormProvider } from 'react-hook-form'
 
 /** Props drawer редактирования коллекции. */
@@ -24,20 +24,43 @@ export function EditCollectionDrawer({
   collection,
   onClose,
 }: EditCollectionDrawerProps) {
+  return (
+    <Drawer
+      destroyOnHidden
+      onClose={onClose}
+      open={Boolean(collection)}
+      title="Редактировать подборку"
+      width={560}
+    >
+      {collection && (
+        <EditCollectionForm
+          collection={collection}
+          key={collection.id}
+          onClose={onClose}
+        />
+      )}
+    </Drawer>
+  )
+}
+
+/** Keyed form сохраняет draft при same-ID refetch и сбрасывается для новой ID. */
+function EditCollectionForm({
+  collection,
+  onClose,
+}: {
+  collection: AdminCollectionSummaryResponseDto
+  onClose: () => void
+}) {
   const { message } = AntdApp.useApp()
-  const form = useZodForm(collectionFormSchema, {
-    defaultValues: { description: '', slug: '', title: '' },
+  const form = useZodForm(editCollectionFormSchema, {
+    defaultValues: {
+      description: collection.description ?? '',
+      slug: collection.slug,
+      title: collection.title,
+    },
     mode: 'onChange',
   })
   const [error, setError] = useState<string | null>(null)
-  useEffect(() => {
-    if (collection)
-      form.reset({
-        description: collection.description ?? '',
-        slug: collection.slug,
-        title: collection.title,
-      })
-  }, [collection, form])
   const mutation = useUpdateCollectionMutation({
     onError: (apiError) => setError(getCollectionFormError(apiError)),
     onSuccess: () => {
@@ -47,43 +70,29 @@ export function EditCollectionDrawer({
     },
   })
   const submit = (values: CollectionFormValues) => {
-    if (collection) {
-      setError(null)
-      mutation.mutate({
-        collectionId: collection.id,
-        data: toCollectionRequest(values),
-      })
-    }
+    setError(null)
+    mutation.mutate({
+      collectionId: collection.id,
+      data: toUpdateCollectionRequest(values),
+    })
   }
   return (
-    <Drawer
-      destroyOnHidden
-      onClose={onClose}
-      open={Boolean(collection)}
-      title="Редактировать подборку"
-      width={560}
-    >
-      <FormProvider {...form}>
-        <form noValidate onSubmit={form.handleSubmit(submit)}>
-          {error && <CollectionFormErrorAlert messages={[error]} />}
-          <CollectionFormFields
-            control={form.control}
-            disabled={mutation.isPending}
-          />
-          <Flex gap={8} justify="end">
-            <Button disabled={mutation.isPending} onClick={onClose}>
-              Отмена
-            </Button>
-            <Button
-              htmlType="submit"
-              loading={mutation.isPending}
-              type="primary"
-            >
-              Сохранить
-            </Button>
-          </Flex>
-        </form>
-      </FormProvider>
-    </Drawer>
+    <FormProvider {...form}>
+      <form noValidate onSubmit={form.handleSubmit(submit)}>
+        {error && <CollectionFormErrorAlert messages={[error]} />}
+        <CollectionFormFields
+          control={form.control}
+          disabled={mutation.isPending}
+        />
+        <Flex gap={8} justify="end">
+          <Button disabled={mutation.isPending} onClick={onClose}>
+            Отмена
+          </Button>
+          <Button htmlType="submit" loading={mutation.isPending} type="primary">
+            Сохранить
+          </Button>
+        </Flex>
+      </form>
+    </FormProvider>
   )
 }

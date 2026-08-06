@@ -69,6 +69,33 @@ describe('CollectionOrderActions', () => {
     expect(mutation.mutate).not.toHaveBeenCalled()
   })
 
+  it('renders fresh collection metadata without resetting the draft order', () => {
+    makeMutation()
+    const { rerender } = render(
+      <CollectionOrderActions
+        collections={collections}
+        onOrderConfirmed={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Переместить B выше' }))
+    rerender(
+      <CollectionOrderActions
+        collections={collections.map((collection) =>
+          collection.id === 'collection-b'
+            ? { ...collection, title: 'Renamed B' }
+            : collection,
+        )}
+        onOrderConfirmed={vi.fn()}
+      />,
+    )
+
+    const labels = screen
+      .getAllByText(/^(A|C|Renamed B)$/)
+      .map((element) => element.textContent)
+    expect(labels).toEqual(['Renamed B', 'A', 'C'])
+  })
+
   it('confirms the submitted order and rolls a later failure back to it', () => {
     const { submittedCallbacks, mutate } = makeMutation()
     render(

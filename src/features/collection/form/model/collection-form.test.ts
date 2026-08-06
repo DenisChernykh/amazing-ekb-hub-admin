@@ -1,17 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import {
-  collectionFormSchema,
-  toCollectionRequest,
+  createCollectionFormSchema,
+  editCollectionFormSchema,
+  toCreateCollectionRequest,
+  toUpdateCollectionRequest,
 } from './collection-form-schema'
 
 describe('collection form schema', () => {
   it('requires trimmed title and limits description to backend maxLength', () => {
     expect(
-      collectionFormSchema.safeParse({ description: '', slug: '', title: '  ' })
-        .success,
+      createCollectionFormSchema.safeParse({
+        description: '',
+        slug: '',
+        title: '  ',
+      }).success,
     ).toBe(false)
     expect(
-      collectionFormSchema.safeParse({
+      createCollectionFormSchema.safeParse({
         description: 'x'.repeat(10_001),
         slug: '',
         title: 'SPA',
@@ -19,12 +24,33 @@ describe('collection form schema', () => {
     ).toBe(false)
   })
 
-  it('normalizes optional description and slug without inventing values', () => {
+  it('omits an empty optional slug only when creating a collection', () => {
     expect(
-      toCollectionRequest({ description: '  ', slug: '  ', title: ' SPA ' }),
+      toCreateCollectionRequest({
+        description: '  ',
+        slug: '  ',
+        title: ' SPA ',
+      }),
     ).toEqual({
       description: null,
       title: ' SPA ',
     })
+  })
+
+  it('rejects an empty edit slug and always sends a validated slug on update', () => {
+    expect(
+      editCollectionFormSchema.safeParse({
+        description: '',
+        slug: '  ',
+        title: 'SPA',
+      }).success,
+    ).toBe(false)
+    expect(
+      toUpdateCollectionRequest({
+        description: '  ',
+        slug: ' new-spa ',
+        title: 'SPA',
+      }),
+    ).toEqual({ description: null, slug: 'new-spa', title: 'SPA' })
   })
 })

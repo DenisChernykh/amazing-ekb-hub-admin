@@ -20,26 +20,39 @@ export function CollectionOrderActions({
   collections,
   onOrderConfirmed,
 }: CollectionOrderActionsProps) {
-  const [draft, setDraft] = useState(collections)
+  const initialOrder = collections.map(({ id }) => id)
+  const [draftIds, setDraftIds] = useState(initialOrder)
   const [draggedId, setDraggedId] = useState<string | null>(null)
-  const confirmed = useRef(collections)
-  const submitted = useRef(collections)
+  const confirmed = useRef(initialOrder)
+  const submitted = useRef(initialOrder)
+  const collectionById = new Map(
+    collections.map((collection) => [collection.id, collection]),
+  )
+  const draft = draftIds.flatMap((collectionId) => {
+    const collection = collectionById.get(collectionId)
+    return collection ? [collection] : []
+  })
   const mutation = useReorderCollectionsMutation({
     onError: (error) => {
-      setDraft(confirmed.current)
+      setDraftIds(confirmed.current)
       void message.error(getCollectionOrderError(error))
     },
     onSuccess: () => {
       confirmed.current = submitted.current
-      setDraft(submitted.current)
-      onOrderConfirmed(submitted.current)
+      setDraftIds(submitted.current)
+      onOrderConfirmed(
+        submitted.current.flatMap((collectionId) => {
+          const collection = collectionById.get(collectionId)
+          return collection ? [collection] : []
+        }),
+      )
     },
   })
-  const persist = (next: AdminCollectionSummaryResponseDto[]) => {
+  const persist = (next: string[]) => {
     if (mutation.isPending) return
     submitted.current = next
-    setDraft(next)
-    mutation.mutate({ collectionIds: next.map(({ id }) => id) })
+    setDraftIds(next)
+    mutation.mutate({ collectionIds: next })
   }
   return (
     <Flex vertical>
@@ -51,8 +64,8 @@ export function CollectionOrderActions({
           onDragOver={(event) => event.preventDefault()}
           onDrop={() => {
             if (!draggedId) return
-            const from = draft.findIndex(({ id }) => id === draggedId)
-            persist(moveCollection(draft, from, index))
+            const from = draftIds.findIndex((id) => id === draggedId)
+            persist(moveCollection(draftIds, from, index))
             setDraggedId(null)
           }}
         >
@@ -69,14 +82,14 @@ export function CollectionOrderActions({
             aria-label={`Переместить ${collection.title} выше`}
             disabled={mutation.isPending || index === 0}
             icon={<ArrowUpOutlined aria-hidden="true" />}
-            onClick={() => persist(moveCollection(draft, index, index - 1))}
+            onClick={() => persist(moveCollection(draftIds, index, index - 1))}
             size="small"
           />
           <Button
             aria-label={`Переместить ${collection.title} ниже`}
             disabled={mutation.isPending || index === draft.length - 1}
             icon={<ArrowDownOutlined aria-hidden="true" />}
-            onClick={() => persist(moveCollection(draft, index, index + 1))}
+            onClick={() => persist(moveCollection(draftIds, index, index + 1))}
             size="small"
           />
         </Flex>

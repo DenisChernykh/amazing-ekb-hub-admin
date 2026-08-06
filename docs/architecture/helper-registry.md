@@ -204,6 +204,17 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `CollectionStatusTag`                   | `src/entities/collection/ui/collection-status-tag.tsx`      | exported   | Renders localized Ant Design status metadata for draft and active collections.                           |
 | `moveCollection`                        | `src/features/collection/reorder/model/collection-order.ts` | exported   | Returns a new exact ordered array after moving one item without mutating the source array.               |
 
+## Collection Form Feature
+
+| Helper                       | Location                                                       | Visibility | Contract                                                                                         |
+| ---------------------------- | -------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `createCollectionFormSchema` | `src/features/collection/form/model/collection-form-schema.ts` | exported   | Validates create values with optional slug and backend-compatible title/description constraints. |
+| `editCollectionFormSchema`   | `src/features/collection/form/model/collection-form-schema.ts` | exported   | Validates edit values and requires the existing slug to remain explicit and non-empty.           |
+| `CollectionFormValues`       | `src/features/collection/form/model/collection-form-schema.ts` | exported   | Defines the shared title/slug/description input shape used by collection forms.                  |
+| `toCreateCollectionRequest`  | `src/features/collection/form/model/collection-form-schema.ts` | exported   | Normalizes optional create slug and nullable description into the create API payload.            |
+| `toUpdateCollectionRequest`  | `src/features/collection/form/model/collection-form-schema.ts` | exported   | Normalizes nullable description and preserves a validated explicit slug in update payloads.      |
+| `CollectionFormFields`       | `src/features/collection/form/ui/collection-form-fields.tsx`   | exported   | Renders the shared Ant Design title, slug, and description fields for create/edit forms.         |
+
 ## Place Entity
 
 | Helper                             | Location                                      | Visibility | Contract                                                                                        |

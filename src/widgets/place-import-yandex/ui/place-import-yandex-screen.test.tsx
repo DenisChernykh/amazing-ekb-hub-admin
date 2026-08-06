@@ -1,3 +1,4 @@
+import { useCollectionDetailQuery } from '@/entities/collection/model/collection-hooks'
 import {
   useActivePlaceImportQuery,
   usePlaceImportEvents,
@@ -20,7 +21,7 @@ vi.mock('@/entities/place-import/model/place-import-hooks', () => ({
 }))
 
 vi.mock('@/entities/collection/model/collection-hooks', () => ({
-  useCollectionDetailQuery: vi.fn(() => ({ data: undefined })),
+  useCollectionDetailQuery: vi.fn(),
 }))
 
 vi.mock('@/features/place/import-yandex/ui/place-import-actions', () => ({
@@ -28,7 +29,19 @@ vi.mock('@/features/place/import-yandex/ui/place-import-actions', () => ({
 }))
 
 vi.mock('@/features/place/import-yandex/ui/place-import-start-form', () => ({
-  PlaceImportStartForm: () => <button>Начать импорт</button>,
+  PlaceImportStartForm: ({
+    targetCollectionId,
+    targetCollectionTitle,
+  }: {
+    targetCollectionId?: string
+    targetCollectionTitle?: string
+  }) => (
+    <div>
+      <button>Начать импорт</button>
+      {targetCollectionId && <span>{targetCollectionId}</span>}
+      {targetCollectionTitle && <span>{targetCollectionTitle}</span>}
+    </div>
+  ),
 }))
 
 const completedOperation = (
@@ -78,9 +91,9 @@ const mockActiveQuery = (
   } as ReturnType<typeof useActivePlaceImportQuery>)
 }
 
-const renderBaseRoute = () => {
+const renderBaseRoute = (initialEntry = '/places/import/yandex') => {
   render(
-    <MemoryRouter initialEntries={['/places/import/yandex']}>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <Routes>
         <Route
           element={<PlaceImportYandexScreen />}
@@ -164,6 +177,13 @@ const renderCompletedTargeted = () => {
 describe('PlaceImportYandexScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: false,
+    } as never)
     vi.mocked(usePlaceImportEvents).mockReturnValue({
       isPollingFallback: false,
       pollingErrorMessage: null,
@@ -219,6 +239,68 @@ describe('PlaceImportYandexScreen', () => {
     expect(
       screen.getByRole('button', { name: 'Начать импорт' }),
     ).toBeInTheDocument()
+  })
+
+  it('waits for the requested target collection before enabling targeted import', () => {
+    mockActiveQuery({
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
+      isError: true,
+    })
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isPending: true,
+      isSuccess: false,
+    } as never)
+
+    renderBaseRoute('/places/import/yandex?collectionId=collection-1')
+
+    expect(screen.getByText('Проверяем целевую подборку')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Начать импорт' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('passes a targeted collection only after its lookup succeeds', () => {
+    mockActiveQuery({
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
+      isError: true,
+    })
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: { id: 'collection-1', title: 'SPA' },
+      error: null,
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+    } as never)
+
+    renderBaseRoute('/places/import/yandex?collectionId=collection-1')
+
+    expect(screen.getByRole('button', { name: 'Начать импорт' })).toBeEnabled()
+    expect(screen.getByText('collection-1')).toBeInTheDocument()
+    expect(screen.getByText('SPA')).toBeInTheDocument()
+  })
+
+  it('shows the target lookup error instead of starting an unverified import', () => {
+    mockActiveQuery({
+      error: createApiProblemError('PLACE_IMPORT_NOT_FOUND', 404),
+      isError: true,
+    })
+    vi.mocked(useCollectionDetailQuery).mockReturnValue({
+      data: undefined,
+      error: createApiProblemError('COLLECTION_NOT_FOUND', 404),
+      isError: true,
+      isPending: false,
+      isSuccess: false,
+    } as never)
+
+    renderBaseRoute('/places/import/yandex?collectionId=missing')
+
+    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Начать импорт' }),
+    ).not.toBeInTheDocument()
   })
 
   it('renders the API error state when active lookup fails with a non-404 error', () => {

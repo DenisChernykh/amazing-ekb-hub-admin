@@ -22,9 +22,17 @@ export function invalidateCollectionDetailQuery(
   })
 }
 
-/** Инвалидирует список и detail после изменения порядка самих подборок. */
-export function invalidateCollectionOrderQueries(queryClient: QueryClient) {
-  return invalidateCollectionListQueries(queryClient)
+/** Инвалидирует список и все затронутые details после глобального reorder. */
+export function invalidateCollectionOrderQueries(
+  queryClient: QueryClient,
+  collectionIds: string[],
+) {
+  return Promise.all([
+    invalidateCollectionListQueries(queryClient),
+    ...collectionIds.map((collectionId) =>
+      invalidateCollectionDetailQuery(queryClient, collectionId),
+    ),
+  ])
 }
 
 /** Инвалидирует все caches, зависящие от membership подборки. */
