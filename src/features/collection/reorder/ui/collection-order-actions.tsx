@@ -23,20 +23,21 @@ export function CollectionOrderActions({
   const [draft, setDraft] = useState(collections)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const confirmed = useRef(collections)
-  const pending = useRef(collections)
+  const submitted = useRef(collections)
   const mutation = useReorderCollectionsMutation({
     onError: (error) => {
       setDraft(confirmed.current)
       void message.error(getCollectionOrderError(error))
     },
     onSuccess: () => {
-      confirmed.current = pending.current
-      setDraft(pending.current)
-      onOrderConfirmed(pending.current)
+      confirmed.current = submitted.current
+      setDraft(submitted.current)
+      onOrderConfirmed(submitted.current)
     },
   })
   const persist = (next: AdminCollectionSummaryResponseDto[]) => {
-    pending.current = next
+    if (mutation.isPending) return
+    submitted.current = next
     setDraft(next)
     mutation.mutate({ collectionIds: next.map(({ id }) => id) })
   }

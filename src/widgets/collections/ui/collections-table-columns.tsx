@@ -5,7 +5,7 @@ import {
 import { DeleteCollectionButton } from '@/features/collection/delete/ui/delete-collection-button'
 import { CollectionStatusActions } from '@/features/collection/status/ui/collection-status-actions'
 import type { AdminCollectionSummaryResponseDto } from '@/shared/api'
-import { Button, Flex, Typography, type TableColumnsType } from 'antd'
+import { Button, Flex, Tag, Typography, type TableColumnsType } from 'antd'
 import { Link } from 'react-router'
 
 /** Создаёт read/write колонки таблицы коллекций. */
@@ -36,6 +36,16 @@ export function getCollectionsTableColumns({
       key: 'slug',
       render: (slug) => <Typography.Text code>{slug}</Typography.Text>,
       title: 'Ярлык',
+    },
+    {
+      dataIndex: 'coverImageUrl',
+      key: 'cover',
+      render: (coverImageUrl: string | null) => (
+        <Tag color={coverImageUrl ? 'success' : 'default'}>
+          {coverImageUrl ? 'Есть' : 'Нет'}
+        </Tag>
+      ),
+      title: 'Обложка',
     },
     {
       dataIndex: 'activePlaceCount',

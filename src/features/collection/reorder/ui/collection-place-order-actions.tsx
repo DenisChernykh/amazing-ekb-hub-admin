@@ -18,12 +18,15 @@ export function CollectionPlaceOrderActions({
 }) {
   const [draft, setDraft] = useState(places)
   const confirmed = useRef(places)
+  const submitted = useRef(places)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const move = (from: number, to: number) => {
-    if (from === to || to < 0 || to >= draft.length) return
+    if (mutation.isPending || from === to || to < 0 || to >= draft.length)
+      return
     const next = [...draft]
     const [item] = next.splice(from, 1)
     next.splice(to, 0, item)
+    submitted.current = next
     setDraft(next)
     mutation.mutate({
       collectionId,
@@ -36,7 +39,8 @@ export function CollectionPlaceOrderActions({
       void message.error('Не удалось сохранить порядок мест.')
     },
     onSuccess: () => {
-      confirmed.current = draft
+      confirmed.current = submitted.current
+      setDraft(submitted.current)
     },
   })
   return (

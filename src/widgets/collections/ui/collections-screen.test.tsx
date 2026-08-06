@@ -1,6 +1,7 @@
 import { useCollectionsQuery } from '@/entities/collection'
 import { render, screen } from '@testing-library/react'
 import { App as AntdApp } from 'antd'
+import { useState } from 'react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CollectionsScreen } from './collections-screen'
@@ -10,7 +11,7 @@ vi.mock('@/entities/collection', async (importOriginal) => ({
   useCollectionsQuery: vi.fn(),
 }))
 vi.mock('@/features/collection/reorder/ui/collection-order-actions', () => ({
-  CollectionOrderActions: () => <div>Reorder</div>,
+  CollectionOrderActions: StatefulOrderActions,
 }))
 vi.mock('@/features/collection/create/ui/create-collection-drawer', () => ({
   CreateCollectionDrawer: () => null,
@@ -24,6 +25,21 @@ vi.mock('@/features/collection/status/ui/collection-status-actions', () => ({
 vi.mock('@/features/collection/delete/ui/delete-collection-button', () => ({
   DeleteCollectionButton: () => <div>Delete</div>,
 }))
+
+function StatefulOrderActions({
+  collections,
+}: {
+  collections: Array<{ id: string; title: string }>
+}) {
+  const [initialCollections] = useState(collections)
+  return (
+    <div data-testid="reorder-state">
+      {initialCollections.map(({ id, title }) => (
+        <span key={id}>{title}</span>
+      ))}
+    </div>
+  )
+}
 
 describe('CollectionsScreen', () => {
   beforeEach(() => vi.mocked(useCollectionsQuery).mockReset())
@@ -62,6 +78,51 @@ describe('CollectionsScreen', () => {
       screen.getByRole('heading', { name: 'Подборки' }),
     ).toBeInTheDocument()
     expect(screen.getByText('Всего: 1')).toBeInTheDocument()
-    expect(screen.getByText('SPA')).toBeInTheDocument()
+    expect(screen.getAllByText('SPA').length).toBeGreaterThan(0)
+  })
+
+  it('remounts reorder state after the server collection set changes', () => {
+    const first = {
+      activePlaceCount: 1,
+      coverImageUrl: null,
+      createdAt: '2026-08-01',
+      description: null,
+      hiddenPlaceCount: 0,
+      id: 'collection-1',
+      position: 0,
+      slug: 'spa',
+      status: 'draft' as const,
+      title: 'SPA',
+      updatedAt: '2026-08-01',
+    }
+    const second = { ...first, id: 'collection-2', title: 'Weekend' }
+    let items = [first]
+    vi.mocked(useCollectionsQuery).mockImplementation(
+      () =>
+        ({
+          data: { items },
+          isError: false,
+          isFetching: false,
+          isPending: false,
+        }) as never,
+    )
+    const { rerender } = render(
+      <AntdApp>
+        <MemoryRouter>
+          <CollectionsScreen />
+        </MemoryRouter>
+      </AntdApp>,
+    )
+    items = [second]
+    rerender(
+      <AntdApp>
+        <MemoryRouter>
+          <CollectionsScreen />
+        </MemoryRouter>
+      </AntdApp>,
+    )
+
+    expect(screen.getByTestId('reorder-state')).toHaveTextContent('Weekend')
+    expect(screen.getByTestId('reorder-state')).not.toHaveTextContent('SPA')
   })
 })

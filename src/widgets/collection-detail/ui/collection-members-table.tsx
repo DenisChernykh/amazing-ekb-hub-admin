@@ -4,6 +4,7 @@ import { CollectionPlaceOrderActions } from '@/features/collection/reorder/ui/co
 import type { AdminCollectionDetailResponseDto } from '@/shared/api'
 import { Table, Typography } from 'antd'
 import { Link } from 'react-router'
+import styles from './collection-detail.module.css'
 
 /** Таблица membership с active/hidden rows и row-local unlink. */
 export function CollectionMembersTable({
@@ -18,7 +19,7 @@ export function CollectionMembersTable({
       dataSource={collection.places}
       pagination={false}
       rowClassName={(entry) =>
-        entry.place.id === addedPlaceId ? 'collection-place-highlight' : ''
+        entry.place.id === addedPlaceId ? styles.highlight : ''
       }
       rowKey={({ place }) => place.id}
       columns={[
@@ -65,6 +66,11 @@ export function CollectionMembersOrder({
       <Typography.Title level={5}>Порядок мест</Typography.Title>
       <CollectionPlaceOrderActions
         collectionId={collection.id}
+        key={
+          collection.places
+            .map(({ place, position }) => `${place.id}:${position}`)
+            .join('|') || 'empty'
+        }
         places={collection.places}
       />
     </>

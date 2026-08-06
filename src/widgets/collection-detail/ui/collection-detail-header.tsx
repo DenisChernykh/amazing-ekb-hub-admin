@@ -7,8 +7,10 @@ import { Link } from 'react-router'
 /** Header detail подборки with status and targeted Yandex launch. */
 export function CollectionDetailHeader({
   collection,
+  onEdit,
 }: {
   collection: AdminCollectionDetailResponseDto
+  onEdit: () => void
 }) {
   return (
     <Flex align="center" justify="space-between" wrap>
@@ -18,6 +20,7 @@ export function CollectionDetailHeader({
       </Flex>
       <Flex align="center" gap={8} wrap>
         <CollectionStatusTag status={collection.status} />
+        <Button onClick={onEdit}>Редактировать</Button>
         <CollectionStatusActions collection={collection} />
         <Button type="primary">
           <Link

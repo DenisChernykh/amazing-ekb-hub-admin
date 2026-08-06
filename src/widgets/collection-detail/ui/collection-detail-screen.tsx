@@ -1,5 +1,6 @@
 import { useCollectionDetailQuery } from '@/entities/collection'
 import { CollectionCoverPanel } from '@/features/collection/cover/ui/collection-cover-panel'
+import { EditCollectionDrawer } from '@/features/collection/edit/ui/edit-collection-drawer'
 import { DocumentTitle } from '@/shared/ui/document-title/document-title'
 import {
   ScreenApiErrorState,
@@ -7,6 +8,7 @@ import {
 } from '@/shared/ui/screen-state/screen-state'
 import { Alert, Card, Flex, theme, Typography } from 'antd'
 import type { CSSProperties } from 'react'
+import { useState } from 'react'
 import { CollectionDetailHeader } from './collection-detail-header'
 import styles from './collection-detail.module.css'
 import {
@@ -29,6 +31,7 @@ export function CollectionDetailScreen({
 }) {
   const { token } = theme.useToken()
   const query = useCollectionDetailQuery(collectionId)
+  const [editOpen, setEditOpen] = useState(false)
   const style: CollectionDetailScreenVariables = {
     '--collection-highlight': token.colorWarningBg,
   }
@@ -54,7 +57,10 @@ export function CollectionDetailScreen({
   return (
     <Flex gap={16} style={style} vertical>
       <DocumentTitle title={collection.title} />
-      <CollectionDetailHeader collection={collection} />
+      <CollectionDetailHeader
+        collection={collection}
+        onEdit={() => setEditOpen(true)}
+      />
       {collection.status === 'active' && collection.activePlaceCount === 0 && (
         <Alert
           className={styles.warning}
@@ -83,6 +89,10 @@ export function CollectionDetailScreen({
         />
         <CollectionMembersOrder collection={collection} />
       </Card>
+      <EditCollectionDrawer
+        collection={editOpen ? collection : null}
+        onClose={() => setEditOpen(false)}
+      />
     </Flex>
   )
 }

@@ -9,7 +9,7 @@ export function AddCollectionPlaceAction({
   onAdded,
 }: {
   collectionId: string
-  placeId: string
+  placeId?: string
   onAdded?: () => void
 }) {
   const { message } = AntdApp.useApp()
@@ -19,9 +19,11 @@ export function AddCollectionPlaceAction({
   })
   return (
     <Button
-      disabled={mutation.isPending}
+      disabled={mutation.isPending || !placeId}
       loading={mutation.isPending}
-      onClick={() => mutation.mutate({ collectionId, placeId })}
+      onClick={() => {
+        if (placeId) mutation.mutate({ collectionId, placeId })
+      }}
       size="small"
       type="primary"
     >

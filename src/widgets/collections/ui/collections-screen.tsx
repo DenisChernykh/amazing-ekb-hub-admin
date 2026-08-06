@@ -72,6 +72,10 @@ export function CollectionsScreen() {
       <Card className={styles.orderPanel} title="Порядок подборок">
         <CollectionOrderActions
           collections={data}
+          key={
+            data.map(({ id, position }) => `${id}:${position}`).join('|') ||
+            'empty'
+          }
           onOrderConfirmed={() => undefined}
         />
       </Card>
