@@ -19,7 +19,11 @@ export function getPlacesTableColumns(
     {
       key: 'collections',
       render: (_value, place) => (
-        <PlaceCollectionsAssignment collections={collections} place={place} />
+        <PlaceCollectionsAssignment
+          collections={collections}
+          key={`${place.id}:${place.collections.map(({ id }) => id).join(',')}`}
+          place={place}
+        />
       ),
       title: 'Подборки',
     },

@@ -15,6 +15,10 @@ import {
 } from './collection-members-table'
 import { CollectionPlacePickerWithAction } from './collection-place-picker'
 
+type CollectionDetailScreenVariables = CSSProperties & {
+  '--collection-highlight': string
+}
+
 /** Screen detail подборки с cover, membership, order и targeted import link. */
 export function CollectionDetailScreen({
   addedPlaceId,
@@ -25,9 +29,9 @@ export function CollectionDetailScreen({
 }) {
   const { token } = theme.useToken()
   const query = useCollectionDetailQuery(collectionId)
-  const style = {
+  const style: CollectionDetailScreenVariables = {
     '--collection-highlight': token.colorWarningBg,
-  } as CSSProperties
+  }
   if (query.isPending)
     return (
       <Flex gap={16} style={style} vertical>

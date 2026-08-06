@@ -1,4 +1,5 @@
 import { useReorderCollectionsMutation } from '@/entities/collection'
+import { moveCollection } from '@/features/collection/reorder/model/collection-order'
 import type { AdminCollectionSummaryResponseDto } from '@/shared/api'
 import {
   ArrowDownOutlined,
@@ -7,22 +8,6 @@ import {
 } from '@ant-design/icons'
 import { Button, Flex, message } from 'antd'
 import { useRef, useState } from 'react'
-
-/** Переставляет строку в exact ordered list. */
-export function moveCollection<T>(items: T[], from: number, to: number) {
-  if (
-    from === to ||
-    from < 0 ||
-    to < 0 ||
-    from >= items.length ||
-    to >= items.length
-  )
-    return items
-  const next = [...items]
-  const [item] = next.splice(from, 1)
-  next.splice(to, 0, item)
-  return next
-}
 
 /** Props глобального reorder сценария. */
 export type CollectionOrderActionsProps = {

@@ -24,7 +24,6 @@ export function CollectionPlaceOrderActions({
     const next = [...draft]
     const [item] = next.splice(from, 1)
     next.splice(to, 0, item)
-    confirmed.current = confirmed.current
     setDraft(next)
     mutation.mutate({
       collectionId,

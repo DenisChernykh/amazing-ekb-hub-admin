@@ -8,7 +8,7 @@ import type {
   AdminPlaceSummaryResponseDto,
 } from '@/shared/api'
 import { Button, Flex, Select, Typography } from 'antd'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 /** Inline full-set collection assignment with explicit Save and rollback. */
 export function PlaceCollectionsAssignment({
@@ -22,11 +22,6 @@ export function PlaceCollectionsAssignment({
   const [draftIds, setDraftIds] = useState(serverIds)
   const [savedIds, setSavedIds] = useState(serverIds)
   const [error, setError] = useState<string | null>(null)
-  useEffect(() => {
-    setDraftIds(serverIds)
-    setSavedIds(serverIds)
-    setError(null)
-  }, [place.id, place.collections])
   const mutation = useReplacePlaceCollectionsMutation({
     onError: (apiError) => {
       setDraftIds(savedIds)
