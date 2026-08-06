@@ -178,6 +178,32 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`         | exported   | Formats category datetime strings for compact admin tables without timezone day shifts. |
 | `CategoryStatusTag`         | `src/entities/category/ui/category-status-tag.tsx`  | exported   | Renders active/draft category status metadata.                                          |
 
+## Collection Entity
+
+| Helper                                  | Location                                                    | Visibility | Contract                                                                                                 |
+| --------------------------------------- | ----------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| `useCollectionsQuery`                   | `src/entities/collection/model/collection-hooks.ts`         | exported   | Loads all admin collections in the backend's canonical order.                                            |
+| `useCollectionDetailQuery`              | `src/entities/collection/model/collection-hooks.ts`         | exported   | Loads one admin collection detail with its ordered active/hidden memberships.                            |
+| `invalidateCollectionDetailQuery`       | `src/entities/collection/model/collection-cache.ts`         | exported   | Invalidates one keyed admin collection detail query.                                                     |
+| `invalidateCollectionListQueries`       | `src/entities/collection/model/collection-cache.ts`         | exported   | Invalidates the admin collection list query.                                                             |
+| `invalidateCollectionMembershipQueries` | `src/entities/collection/model/collection-cache.ts`         | exported   | Invalidates collection detail and dependent place-list queries after membership changes.                 |
+| `invalidateCollectionOrderQueries`      | `src/entities/collection/model/collection-cache.ts`         | exported   | Invalidates global collection order/list and affected detail queries after reorder.                      |
+| `invalidateCollectionQueries`           | `src/entities/collection/model/collection-cache.ts`         | exported   | Invalidates the collection list, one detail, and dependent membership caches after collection mutations. |
+| `useAddCollectionPlaceMutation`         | `src/entities/collection/model/collection-mutations.ts`     | exported   | Adds an existing place id idempotently without changing the place's own status or category.              |
+| `useCreateCollectionMutation`           | `src/entities/collection/model/collection-mutations.ts`     | exported   | Creates a draft collection and invalidates the admin collection list.                                    |
+| `useDeleteCollectionMutation`           | `src/entities/collection/model/collection-mutations.ts`     | exported   | Deletes a collection and invalidates its keyed detail and dependent list caches.                         |
+| `useRemoveCollectionPlaceMutation`      | `src/entities/collection/model/collection-mutations.ts`     | exported   | Removes one place membership without changing the place's own status or category.                        |
+| `useRemoveCollectionPhotoMutation`      | `src/entities/collection/model/collection-mutations.ts`     | exported   | Removes a collection cover photo and invalidates authoritative collection queries.                       |
+| `useReorderCollectionPlacesMutation`    | `src/entities/collection/model/collection-mutations.ts`     | exported   | Persists one full exact ordered place-id list for a collection.                                          |
+| `useReorderCollectionsMutation`         | `src/entities/collection/model/collection-mutations.ts`     | exported   | Persists one full exact ordered collection-id list.                                                      |
+| `useUpdateCollectionMutation`           | `src/entities/collection/model/collection-mutations.ts`     | exported   | Updates title, explicit slug, or nullable description and invalidates authoritative collection queries.  |
+| `useUpdateCollectionStatusMutation`     | `src/entities/collection/model/collection-mutations.ts`     | exported   | Publishes/unpublishes a collection through the backend status contract.                                  |
+| `useUploadCollectionPhotoMutation`      | `src/entities/collection/model/collection-mutations.ts`     | exported   | Uploads or replaces a collection cover photo through the multipart API.                                  |
+| `getCollectionDescription`              | `src/entities/collection/ui/collection-meta.ts`             | exported   | Returns a safe compact description fallback for collection list metadata.                                |
+| `getCollectionPlacesMeta`               | `src/entities/collection/ui/collection-meta.ts`             | exported   | Formats active and hidden place counts for collection list metadata.                                     |
+| `CollectionStatusTag`                   | `src/entities/collection/ui/collection-status-tag.tsx`      | exported   | Renders localized Ant Design status metadata for draft and active collections.                           |
+| `moveCollection`                        | `src/features/collection/reorder/model/collection-order.ts` | exported   | Returns a new exact ordered array after moving one item without mutating the source array.               |
+
 ## Place Entity
 
 | Helper                             | Location                                      | Visibility | Contract                                                                                        |
