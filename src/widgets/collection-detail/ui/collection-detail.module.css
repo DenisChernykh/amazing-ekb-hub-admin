@@ -1,0 +1,6 @@
+.highlight :global(.ant-table-cell) {
+  background: var(--collection-highlight);
+}
+.warning {
+  margin-bottom: 0;
+}
