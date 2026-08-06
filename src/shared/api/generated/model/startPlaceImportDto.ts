@@ -7,6 +7,8 @@
  */
 
 export type StartPlaceImportDto = {
+  /** @minLength 1 */
+  targetCollectionId?: string
   /**
    * @minLength 1
    * @maxLength 2048

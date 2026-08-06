@@ -7,6 +7,7 @@
  */
 
 export * from './adminCategoriesUploadPhotoBody'
+export * from './adminCollectionsUploadPhotoBody'
 export * from './adminContentSourcesListParams'
 export * from './adminImportRunsListParams'
 export * from './adminMaterialsListParams'
@@ -16,5 +17,6 @@ export * from './adminPlaceMaterialsListParams'
 export * from './adminPlacesListParams'
 export * from './adminPlacesUploadPhotoBody'
 export * from './adminTelegramImportsEnqueueParams'
+export * from './collectionsGetParams'
 export * from './placeMaterialsListParams'
 export * from './placesListParams'

@@ -5,11 +5,13 @@
  * Amazing EKB backend contract.
  * OpenAPI spec version: 1.0.0
  */
+import type { AdminPlaceCollectionSummaryResponseDto } from './adminPlaceCollectionSummaryResponseDto'
 import type { AdminPlaceSummaryResponseDtoStatus } from './adminPlaceSummaryResponseDtoStatus'
 import type { PlaceSummaryCategoryResponseDto } from './placeSummaryCategoryResponseDto'
 
 export type AdminPlaceSummaryResponseDto = {
   category: PlaceSummaryCategoryResponseDto
+  collections: AdminPlaceCollectionSummaryResponseDto[]
   /** @nullable */
   coverImageUrl: string | null
   id: string

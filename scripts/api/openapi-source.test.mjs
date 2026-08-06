@@ -20,6 +20,12 @@ const validOpenApiDocument = {
               'VALIDATION_FAILED',
               'DEPENDENCY_UNAVAILABLE',
               'INTERNAL_ERROR',
+              'COLLECTION_NOT_FOUND',
+              'COLLECTION_SLUG_CONFLICT',
+              'COLLECTION_PUBLISH_REQUIRES_ACTIVE_PLACE',
+              'COLLECTION_MEMBERSHIP_CONFLICT',
+              'COLLECTION_REORDER_CONFLICT',
+              'COLLECTION_HAS_ACTIVE_IMPORT',
             ],
           },
         },
@@ -36,6 +42,12 @@ const validOpenApiDocument = {
         properties: {
           category: {
             $ref: '#/components/schemas/PlaceSummaryCategoryResponseDto',
+          },
+          collections: {
+            items: {
+              $ref: '#/components/schemas/AdminPlaceCollectionSummaryResponseDto',
+            },
+            type: 'array',
           },
         },
       },
@@ -57,6 +69,32 @@ const validOpenApiDocument = {
         properties: {
           category: {
             $ref: '#/components/schemas/PlaceSummaryCategoryResponseDto',
+          },
+        },
+      },
+      AdminPlaceCollectionSummaryResponseDto: {
+        properties: {
+          id: { type: 'string' },
+          slug: { type: 'string' },
+          status: { enum: ['draft', 'active'], type: 'string' },
+          title: { type: 'string' },
+        },
+      },
+      PlaceImportTargetResponseDto: {
+        properties: {
+          id: { nullable: true, type: 'string' },
+          slug: { type: 'string' },
+          title: { type: 'string' },
+        },
+      },
+      PlaceImportOperationResponseDto: {
+        properties: {
+          targetCollection: {
+            allOf: [
+              { $ref: '#/components/schemas/PlaceImportTargetResponseDto' },
+            ],
+            nullable: true,
+            type: 'object',
           },
         },
       },
@@ -115,6 +153,38 @@ const validOpenApiDocument = {
     },
     '/v1/admin/place-imports/yandex-maps': {
       post: { operationId: 'adminPlaceImportsStart' },
+    },
+    '/v1/admin/collections': {
+      get: { operationId: 'adminCollectionsList' },
+      post: { operationId: 'adminCollectionsCreate' },
+    },
+    '/v1/admin/collections/{collectionId}': {
+      delete: { operationId: 'adminCollectionsDelete' },
+      get: { operationId: 'adminCollectionsGet' },
+      patch: { operationId: 'adminCollectionsUpdate' },
+    },
+    '/v1/admin/collections/{collectionId}/status': {
+      patch: { operationId: 'adminCollectionsUpdateStatus' },
+    },
+    '/v1/admin/collections/{collectionId}/photo': {
+      delete: { operationId: 'adminCollectionsRemovePhoto' },
+      get: { operationId: 'adminCollectionsGetPhoto' },
+      post: { operationId: 'adminCollectionsUploadPhoto' },
+    },
+    '/v1/admin/collections/{collectionId}/places': {
+      post: { operationId: 'adminCollectionsAddPlace' },
+    },
+    '/v1/admin/collections/{collectionId}/places/{placeId}': {
+      delete: { operationId: 'adminCollectionsRemovePlace' },
+    },
+    '/v1/admin/collections/order': {
+      put: { operationId: 'adminCollectionsReorder' },
+    },
+    '/v1/admin/collections/{collectionId}/places/order': {
+      put: { operationId: 'adminCollectionsReorderPlaces' },
+    },
+    '/v1/admin/places/{placeId}/collections': {
+      put: { operationId: 'adminPlaceCollectionsReplace' },
     },
   },
 }

@@ -4,6 +4,8 @@ import type {
 } from '@/shared/api'
 import {
   getAdminCategoriesListQueryKey,
+  getAdminCollectionsGetQueryKey,
+  getAdminCollectionsListQueryKey,
   getAdminPlaceImportsGetQueryKey,
   getAdminPlacesListQueryKey,
 } from '@/shared/api'
@@ -40,11 +42,27 @@ export function syncPlaceImportOperationCache(
 }
 
 /** Инвалидирует места и категории после terminal успешного импорта. */
-export function invalidatePlaceImportResultQueries(queryClient: QueryClient) {
-  return Promise.all([
+export function invalidatePlaceImportResultQueries(
+  queryClient: QueryClient,
+  operation?: PlaceImportOperationResponseDto,
+) {
+  const queries = [
     queryClient.invalidateQueries({ queryKey: getAdminPlacesListQueryKey() }),
     queryClient.invalidateQueries({
       queryKey: getAdminCategoriesListQueryKey(),
     }),
-  ])
+  ]
+  if (operation?.targetCollection?.id) {
+    queries.push(
+      queryClient.invalidateQueries({
+        queryKey: getAdminCollectionsListQueryKey(),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: getAdminCollectionsGetQueryKey({
+          collectionId: operation.targetCollection.id,
+        }),
+      }),
+    )
+  }
+  return Promise.all(queries)
 }

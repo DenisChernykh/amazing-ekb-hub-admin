@@ -22,6 +22,7 @@ import type {
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import type {
+  AdminPlaceCollectionsReplacePathParameters,
   AdminPlaceListResponseDto,
   AdminPlaceMaterialsCreatePathParameters,
   AdminPlaceMaterialsHidePathParameters,
@@ -44,6 +45,7 @@ import type {
   PlaceDetailResponseDto,
   PlaceSummaryResponseDto,
   ProblemResponseDto,
+  ReplacePlaceCollectionsDto,
   SetPinnedMaterialDto,
   UpdatePlaceDto,
   UpdatePlaceMaterialLinkDto,
@@ -585,6 +587,117 @@ export const useAdminPlacesUpdate = <
   TContext
 > => {
   return useMutation(getAdminPlacesUpdateMutationOptions(options), queryClient)
+}
+/**
+ * @summary Replaced all collections assigned to a place.
+ */
+export const adminPlaceCollectionsReplace = (
+  { placeId }: AdminPlaceCollectionsReplacePathParameters,
+  replacePlaceCollectionsDto: BodyType<ReplacePlaceCollectionsDto>,
+  options?: SecondParameter<typeof apiMutator>,
+  signal?: AbortSignal,
+) => {
+  return apiMutator<void>(
+    {
+      url: `/v1/admin/places/${encodeURIComponent(String(placeId))}/collections`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      data: replacePlaceCollectionsDto,
+      signal,
+    },
+    options,
+  )
+}
+
+export const getAdminPlaceCollectionsReplaceMutationOptions = <
+  TError = ErrorType<ProblemResponseDto | ValidationProblemResponseDto>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminPlaceCollectionsReplace>>,
+    TError,
+    {
+      pathParams: AdminPlaceCollectionsReplacePathParameters
+      data: BodyType<ReplacePlaceCollectionsDto>
+    },
+    TContext
+  >
+  request?: SecondParameter<typeof apiMutator>
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof adminPlaceCollectionsReplace>>,
+  TError,
+  {
+    pathParams: AdminPlaceCollectionsReplacePathParameters
+    data: BodyType<ReplacePlaceCollectionsDto>
+  },
+  TContext
+> => {
+  const mutationKey = ['adminPlaceCollectionsReplace']
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined }
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof adminPlaceCollectionsReplace>>,
+    {
+      pathParams: AdminPlaceCollectionsReplacePathParameters
+      data: BodyType<ReplacePlaceCollectionsDto>
+    }
+  > = (props) => {
+    const { pathParams, data } = props ?? {}
+
+    return adminPlaceCollectionsReplace(pathParams, data, requestOptions)
+  }
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export type AdminPlaceCollectionsReplaceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof adminPlaceCollectionsReplace>>
+>
+export type AdminPlaceCollectionsReplaceMutationBody =
+  BodyType<ReplacePlaceCollectionsDto>
+export type AdminPlaceCollectionsReplaceMutationError = ErrorType<
+  ProblemResponseDto | ValidationProblemResponseDto
+>
+
+/**
+ * @summary Replaced all collections assigned to a place.
+ */
+export const useAdminPlaceCollectionsReplace = <
+  TError = ErrorType<ProblemResponseDto | ValidationProblemResponseDto>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof adminPlaceCollectionsReplace>>,
+      TError,
+      {
+        pathParams: AdminPlaceCollectionsReplacePathParameters
+        data: BodyType<ReplacePlaceCollectionsDto>
+      },
+      TContext
+    >
+    request?: SecondParameter<typeof apiMutator>
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof adminPlaceCollectionsReplace>>,
+  TError,
+  {
+    pathParams: AdminPlaceCollectionsReplacePathParameters
+    data: BodyType<ReplacePlaceCollectionsDto>
+  },
+  TContext
+> => {
+  return useMutation(
+    getAdminPlaceCollectionsReplaceMutationOptions(options),
+    queryClient,
+  )
 }
 /**
  * @summary Administrative place material list.

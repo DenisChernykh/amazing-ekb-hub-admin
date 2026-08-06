@@ -17,5 +17,9 @@ export type AdminPlacesListParams = {
    * @maximum 100
    */
   pageSize?: number
+  /**
+   * @maxLength 100
+   */
+  search?: string
   status?: AdminPlacesListStatus
 }
