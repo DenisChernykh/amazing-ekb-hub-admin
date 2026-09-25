@@ -222,7 +222,7 @@ describe('ContentSourcesScreen', () => {
     ).not.toBeInTheDocument()
     expect(screen.getByText('Активен')).toBeInTheDocument()
     expect(screen.getByText('Отключен')).toBeInTheDocument()
-    expect(screen.getByText('2026-06-16 08:05')).toBeInTheDocument()
+    expect(screen.getByText('2026-06-16 13:05 ЕКБ')).toBeInTheDocument()
     expect(
       screen.getByText('status actions for source-telegram-1'),
     ).toBeInTheDocument()

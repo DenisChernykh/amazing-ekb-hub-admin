@@ -43,7 +43,7 @@ describe('content source meta helpers', () => {
 
   it('formats nullable source datetimes for compact table cells', () => {
     expect(formatContentSourceDateTime('2026-06-16T08:05:30.000Z')).toBe(
-      '2026-06-16 08:05',
+      '2026-06-16 13:05 ЕКБ',
     )
     expect(formatContentSourceDateTime(null)).toBe('—')
   })

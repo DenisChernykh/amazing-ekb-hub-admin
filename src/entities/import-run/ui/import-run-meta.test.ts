@@ -30,7 +30,7 @@ describe('import run meta helpers', () => {
 
   it('formats nullable import run datetimes', () => {
     expect(formatImportRunDateTime('2026-06-16T08:05:30.000Z')).toBe(
-      '2026-06-16 08:05',
+      '2026-06-16 13:05 ЕКБ',
     )
     expect(formatImportRunDateTime(null)).toBe('—')
   })

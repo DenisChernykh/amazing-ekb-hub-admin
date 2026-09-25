@@ -8,6 +8,12 @@ Before adding a helper, search this file and the referenced source file. Reuse t
 
 Do not move helpers to `shared` only because they are small. Move them when the behavior is repeated or expresses a shared contract.
 
+## Shared Date and Time
+
+| Helper                       | Location                                                    | Visibility | Contract                                                                                                                                                                              |
+| ---------------------------- | ----------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `formatEkaterinburgDateTime` | `src/shared/lib/date-time/format-ekaterinburg-date-time.ts` | exported   | Formats timestamp instants as `YYYY-MM-DD HH:mm ЕКБ` in Asia/Yekaterinburg; null/invalid values return `—`. Calendar-only material publication dates retain their existing formatter. |
+
 ## API Tooling
 
 | Helper                       | Location                         | Visibility | Contract                                                                                                 |
@@ -168,15 +174,15 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 
 ## Category Entity
 
-| Helper                      | Location                                            | Visibility | Contract                                                                                |
-| --------------------------- | --------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
-| `usePlaceCategoriesQuery`   | `src/entities/category/model/category-hooks.ts`     | exported   | Loads the admin place category list through the `/admin/categories` endpoint.           |
-| `useCreateCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Creates a place category and invalidates the admin category list cache.                 |
-| `useUpdateCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Updates a place category and invalidates category plus admin places list caches.        |
-| `useDeleteCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Deletes an unused place category and invalidates the admin category list cache.         |
-| `invalidateCategoryQueries` | `src/entities/category/model/category-mutations.ts` | exported   | Invalidates the admin category list cache after category mutations.                     |
-| `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`         | exported   | Formats category datetime strings for compact admin tables without timezone day shifts. |
-| `CategoryStatusTag`         | `src/entities/category/ui/category-status-tag.tsx`  | exported   | Renders active/draft category status metadata.                                          |
+| Helper                      | Location                                            | Visibility | Contract                                                                                          |
+| --------------------------- | --------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `usePlaceCategoriesQuery`   | `src/entities/category/model/category-hooks.ts`     | exported   | Loads the admin place category list through the `/admin/categories` endpoint.                     |
+| `useCreateCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Creates a place category and invalidates the admin category list cache.                           |
+| `useUpdateCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Updates a place category and invalidates category plus admin places list caches.                  |
+| `useDeleteCategoryMutation` | `src/entities/category/model/category-mutations.ts` | exported   | Deletes an unused place category and invalidates the admin category list cache.                   |
+| `invalidateCategoryQueries` | `src/entities/category/model/category-mutations.ts` | exported   | Invalidates the admin category list cache after category mutations.                               |
+| `formatCategoryDateTime`    | `src/entities/category/ui/category-meta.ts`         | exported   | Formats category timestamps in the fixed Asia/Yekaterinburg time zone with an explicit ЕКБ label. |
+| `CategoryStatusTag`         | `src/entities/category/ui/category-status-tag.tsx`  | exported   | Renders active/draft category status metadata.                                                    |
 
 ## Collection Entity
 
@@ -292,7 +298,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `getContentSourceStatusMeta`           | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend `ContentSourceStatus` to localized Ant Design tag metadata.                                         |
 | `getContentSourcePlatformOptions`      | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source platforms to localized Ant Design select options.                                    |
 | `getContentSourceStatusOptions`        | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Maps backend content source statuses to localized Ant Design select options.                                     |
-| `formatContentSourceDateTime`          | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Formats nullable source datetime values for compact admin tables.                                                |
+| `formatContentSourceDateTime`          | `src/entities/content-source/ui/content-source-meta.ts`         | exported   | Formats nullable source timestamps in the fixed Asia/Yekaterinburg time zone.                                    |
 
 ## Import Run Entity
 
@@ -318,7 +324,7 @@ Do not move helpers to `shared` only because they are small. Move them when the 
 | `useImportRunEvents`                             | `src/entities/import-run/model/import-run-events.ts`           | exported   | Subscribes to `GET /admin/import-runs/{runId}/events`, updates React Query caches, and falls back to refetches. |
 | `getImportRunStatusMeta`                         | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Maps backend `ImportRunStatus` to localized Ant Design tag metadata.                                            |
 | `formatImportRunCounts`                          | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats import run counters in a stable display order.                                                          |
-| `formatImportRunDateTime`                        | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats nullable import run datetime values for compact admin tables.                                           |
+| `formatImportRunDateTime`                        | `src/entities/import-run/ui/import-run-meta.ts`                | exported   | Formats nullable import run timestamps in the fixed Asia/Yekaterinburg time zone.                               |
 
 ## Place Import Entity and Feature
 
