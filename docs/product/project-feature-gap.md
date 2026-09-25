@@ -2,6 +2,13 @@
 
 Документ фиксирует, что уже умеет backend Amazing EKB Hub, что покрыто публичным frontend и текущей admin SPA, а каких продуктовых фич не хватает.
 
+## Stage Update — 2026-09-25
+
+- Operational timestamps for categories, content sources, and import runs now use `Asia/Yekaterinburg` and an explicit `ЕКБ` label, independent of the browser timezone. Done in `stage` via merged [admin PR #90](https://github.com/DenisChernykh/amazing-ekb-hub-admin/pull/90).
+- The previous `fix/admin-ekaterinburg-datetime` draft is superseded by this change. Material publication calendar dates and generated API contracts are unchanged.
+- Verification: full `pnpm run check` passed, including 144 test files / 721 tests, API drift checks, formatting, lint, typecheck, and build.
+- Release to `main` remains separate; this update records integration into `stage` only.
+
 ## Источники
 
 - Backend: `../backend-codex`.
