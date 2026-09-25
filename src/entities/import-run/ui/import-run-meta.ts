@@ -1,4 +1,5 @@
 import type { ImportRunResponseDtoStatus } from '@/shared/api'
+import { formatEkaterinburgDateTime } from '@/shared/lib/date-time/format-ekaterinburg-date-time'
 
 /**
  * UI-метаданные import run для тегов и таблиц.
@@ -56,15 +57,6 @@ export function formatImportRunCounts(counts: ImportRunCounts) {
   ].join(' · ')
 }
 
-/**
- * Форматирует nullable datetime import run без timezone-пересчета.
- *
- * @returns `—`, если значение отсутствует.
- */
 export function formatImportRunDateTime(value: string | null) {
-  if (value === null) {
-    return '—'
-  }
-
-  return value.slice(0, 16).replace('T', ' ')
+  return formatEkaterinburgDateTime(value)
 }

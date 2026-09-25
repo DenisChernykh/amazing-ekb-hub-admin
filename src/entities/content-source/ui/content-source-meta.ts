@@ -2,6 +2,7 @@ import type {
   ContentSourceResponseDtoPlatform,
   ContentSourceResponseDtoStatus,
 } from '@/shared/api'
+import { formatEkaterinburgDateTime } from '@/shared/lib/date-time/format-ekaterinburg-date-time'
 
 /**
  * UI-метаданные content source для тегов, фильтров и таблиц.
@@ -113,15 +114,6 @@ export function getContentSourceStatusOptions() {
   }))
 }
 
-/**
- * Форматирует nullable datetime content source без timezone-пересчета.
- *
- * @returns `—`, если значение отсутствует.
- */
 export function formatContentSourceDateTime(value: string | null) {
-  if (value === null) {
-    return '—'
-  }
-
-  return value.slice(0, 16).replace('T', ' ')
+  return formatEkaterinburgDateTime(value)
 }

@@ -1,6 +1,5 @@
-/**
- * Форматирует datetime категории без timezone-пересчета.
- */
+import { formatEkaterinburgDateTime } from '@/shared/lib/date-time/format-ekaterinburg-date-time'
+
 export function formatCategoryDateTime(value: string) {
-  return value.slice(0, 16).replace('T', ' ')
+  return formatEkaterinburgDateTime(value)
 }
