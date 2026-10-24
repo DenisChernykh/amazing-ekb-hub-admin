@@ -1,49 +1,38 @@
-# Amazing EKB Hub Admin
+# Amazing EKB Hub — административная панель
 
-Отдельная Vite SPA админка для Amazing EKB Hub.
+Отдельная React SPA для управления контентом каталога мест.
 
-## Stack
+## Возможности
 
-- React
-- TypeScript
-- Vite
-- Ant Design
-- React Router
-- TanStack Query
-- Axios
-- Orval
-- Vitest
+- Интерфейсы управления на Ant Design.
+- React Router, серверное состояние через TanStack Query.
+- Генерация API-клиента из OpenAPI и тестирование на Vitest.
 
-## Local Development
+## Инженерные акценты
 
-```bash
+- Разработка административных интерфейсов для прикладных процессов.
+- Отделение пользовательского интерфейса от API-транспорта и моделей.
+- Типизированные интеграции и повторно используемые формы и состояния.
+
+## Стек
+
+React, TypeScript, TanStack Query, React Router, Redux Toolkit, Vite, Vitest.
+
+## Навигация по коду
+
+- [src/](src/) — исходный код.
+- [docs/](docs/) — архитектура и документация.
+
+## Разработка
+
+Инструменты: pnpm.
+
+```sh
 pnpm install
-pnpm run dev
+pnpm dev
+pnpm test
+pnpm build
+pnpm lint
 ```
 
-API base URL по умолчанию: `/v1`.
-
-Для локальной разработки Vite proxy отправляет `/v1` в backend.
-
-## Scripts
-
-```bash
-pnpm run dev
-pnpm run typecheck
-pnpm run lint:strict
-pnpm run test
-pnpm run format:check
-pnpm run build
-pnpm run api:sync
-pnpm run api:generate
-pnpm run api:update
-pnpm run api:check
-```
-
-## Documentation
-
-- [Project Feature Gap](docs/product/project-feature-gap.md): что умеет backend, что покрыто public frontend/admin SPA, каких фич не хватает.
-- [React Guidelines](docs/architecture/react-guidelines.md): conditional rendering и политика `useEffect`.
-- [Helper Registry](docs/architecture/helper-registry.md): реестр helper'ов перед добавлением новых.
-- [TSDoc Guidelines](docs/architecture/tsdoc-guidelines.md): правила документирования exported API.
-- [Agent Rules](AGENTS.md): рабочие правила для Codex/агента в этом репозитории.
+Параметры окружения перечислены в [.env.example](.env.example). Локальные значения задаются вне Git.
